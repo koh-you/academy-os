@@ -1,0 +1,76 @@
+pair_id: BT-005
+p_file: creation-05.tex
+q_file: anchor-05.tex
+p_grade: A
+q_grade: B
+p_answer:
+  - "4x - 3y = 0"
+  - "3x + 4y - 25 = 0"
+q_answer:
+  - "x - 4y + 2 = 0"
+  - "4x + y + 8 = 0"
+p_calculation_cleanliness: rational
+q_calculation_cleanliness: irrational_intermediate
+winner: P
+confidence: 0.72
+reasoning: |
+  ## 실측
+
+  ### P (creation-05): 외부점 (3,4) · 원 x^2+y^2=5
+  - 원 중심 O(0,0), 반지름 r=sqrt(5)
+  - |OP| = sqrt(9+16) = 5 (Pythagorean triple 3-4-5)
+  - 접선 길이 = sqrt(25-5) = 2*sqrt(5)
+  - 이등분선 1 (내각): OP 직선, 기울기 4/3 → 4x - 3y = 0
+  - 이등분선 2 (외각): OP에 수직, P 지남, 기울기 -3/4 → 3x + 4y - 25 = 0
+  - 모든 중간값·최종값 정수·유리
+
+  ### Q (anchor-05): 외부점 (-2,0) · 원 (x-2)^2+(y-1)^2=4
+  - 원 중심 C(2,1), 반지름 r=2
+  - |CP| = sqrt(16+1) = sqrt(17) (무리수 중간값)
+  - 접선 길이 = sqrt(17-4) = sqrt(13)
+  - 이등분선 1 (내각): CP 직선, 기울기 1/4 → x - 4y + 2 = 0
+  - 이등분선 2 (외각): CP에 수직, P 지남, 기울기 -4 → 4x + y + 8 = 0
+  - 최종 이등분선 계수는 정수이나 중간 |CP| = sqrt(17)
+
+  ## 3층 모델 평가 (schema.md v3.2)
+
+  ### 1층 M (노동량)
+  - P: Ms=3 (외부점-중심 방향·수직 방향·두 방정식) · Mk=1 (정수·유리 완결) · Ma=1 (구체 수치) · Mt=1 (내·외각 이등분선 두 개 모두 요구) → M_total=6
+  - Q: Ms=3 (동일 절차) · Mk=2 (sqrt(17) 중간 등장 · 이등분선 최종은 유리) · Ma=1 (구체 수치) · Mt=1 → M_total=7
+
+  ### 2층 I (통찰)
+  - P: I-RT (기하 접선-반지름 수직 ↔ 대수 기울기) 깊이 2 · I-EQV (두 접선 각의 이등분선 = 중심-외부점 직선 + 수직 직선) 깊이 2 → insight_count=2, depth_score = 2*2 + 2 = 6
+  - Q: I-RT 깊이 2 · I-EQV 깊이 2 · (미세) 원 평행이동 대응 → insight_count=2, depth_score = 6
+  - 통찰 축 동등 (Q가 평행이동 문맥 미세 우위이나 깊이 3 아님)
+
+  ### 3층 X (친숙도)
+  - CM2-GM: Xu = 0
+  - base_star: 두 문항 모두 depth_score = 6 → base ★ 4
+  - effective ★ 4
+
+  ## 좌표·계수 자연스러움
+
+  - **P 우위 근거**:
+    - 원점 중심 원 x^2+y^2=5 (CM2-GM 표준 첫 접근형)
+    - Pythagorean triple (3,4,5)로 |OP|=5 정수 → 접선 길이 2*sqrt(5) 깔끔
+    - 이등분선 계수 (4,-3,0)·(3,4,-25) 모두 정수·최소공배수 정리 자연
+    - 학생 계산 흐름: 정수 → 정수 → 정수 (무리수 중간 등장 0회)
+  - **Q 우위 근거** (부분):
+    - 원 중심 일반 위치 (2,1) → 평행이동 통찰 미세 유도
+    - 최종 이등분선 계수 (1,-4,2)·(4,1,8) 모두 정수
+  - **Q 단점**:
+    - |CP| = sqrt(17) 중간값 무리수 등장 (접선 길이 계산에도 sqrt(13))
+    - 학생이 무리수 중간 계산 부담 → CM2-GM 원 표준 첫 학습 흐름과 미세 어긋남
+    - sqrt(17), sqrt(13) 자체는 문제 풀이에 필수 아니나 접근 방식에 따라 자연 등장
+
+  ## Winner 판정: P
+
+  - **계산 청결도**: P 완전 유리 vs Q irrational_intermediate → P 우위
+  - **자연스러움**: P가 CM2-GM 표준 원점 중심 원 + Pythagorean triple 조합으로 학습 흐름 자연
+  - **통찰 축**: 동등 (Q가 평행이동 미세 우위이나 결정적 차이 아님)
+  - **grade**: P=A (좌표·계수 완전 청결·표준 접근), Q=B (계수 청결하나 중간 무리수)
+  - **confidence 0.72**: Q의 평행이동 통찰 미세 우위 인정 · P가 절대 우위 아님 · 계산 청결도 축이 결정적
+
+  ## 시사점
+  CFES Phase A-2 A2 (Pythagorean triple 계산 청결도) 축에서 P가 원점 중심 + (3,4,5) triple 활용으로
+  일반 위치 원 + 무리수 중간값 등장하는 Q보다 CM2-GM 원 단원 학습 자연스러움 우위.

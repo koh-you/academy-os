@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-01-F10
+source: bank/creation-archive/phase-a2/creations/creation-01.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-01-F10.tex
+flaw_type: F10
+flaw_name: 벤더 라벨 오해
+expected_verdict: LOSS
+ground_truth: flawed
+seed: false
+injection:
+  method: replace
+  find: "제1사분면 위 원 위의 점 $\\mathrm{P}$에 대하여 삼각형 $\\mathrm{ABP}$의 넓이가 자연수인 $\\mathrm{P}$의 개수를 구하시오."
+  replace: "선분 $\\mathrm{AB}$의 길이를 구하시오."
+note: "통찰(넓이 자연수 이산 조건) 제거 → 단순 현 길이 계산 · 난이도 하향"
+date: 2026-07-28

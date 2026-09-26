@@ -1,0 +1,156 @@
+{
+  "summary": {
+    "total_normalized": 2009,
+    "mapped": 1711,
+    "excluded": 293,
+    "unmapped": 5,
+    "success_rate": "85.2%",
+    "coverage_rate_including_excluded": "99.8%"
+  },
+  "unique_unmapped_typenames": [
+    {
+      "name": "기본 금액이 포함된 비용에 대한 문제",
+      "count": 1
+    },
+    {
+      "name": "물의 양에 대한 문제",
+      "count": 1
+    },
+    {
+      "name": "소금물의 농도에 대한 문제(2) 소금을 더 넣는 경우",
+      "count": 1
+    },
+    {
+      "name": "평면에 관련한 증명",
+      "count": 1
+    },
+    {
+      "name": "원가와 정가에 대한 문제",
+      "count": 1
+    }
+  ],
+  "unmapped_problems": [
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 51,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "기본 금액이 포함된 비용에 대한 문제",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "중등수학2(상)",
+          "page": 63,
+          "no": "19"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학2(상)",
+          "page": 58,
+          "no": "24"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.817,
+      "cohort_normalized_star": 4
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 60,
+      "column": "left",
+      "problem_no": "60",
+      "type_name_raw": "물의 양에 대한 문제",
+      "correct_rate": 0.35,
+      "similar_sources": [
+        {
+          "book": "EBS 중학 뉴런_실전책",
+          "subject": "중등수학2(상)",
+          "page": 59,
+          "no": "14"
+        },
+        {
+          "book": "완자 기출PICK",
+          "subject": "중등수학2(상)",
+          "page": 148,
+          "no": "725"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.662,
+      "cohort_normalized_star": 5
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 21,
+      "column": "right",
+      "problem_no": "42",
+      "type_name_raw": "소금물의 농도에 대한 문제(2) 소금을 더 넣는 경우",
+      "correct_rate": 0.68,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학1(상)",
+          "page": 167,
+          "no": "4"
+        },
+        {
+          "book": "RPM",
+          "subject": "중등수학1(상)",
+          "page": 176,
+          "no": "16"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.03,
+      "cohort_normalized_star": 3
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 22,
+      "column": "right",
+      "problem_no": "44",
+      "type_name_raw": "평면에 관련한 증명",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.087,
+      "cohort_normalized_star": 3
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 24,
+      "column": "right",
+      "problem_no": "48",
+      "type_name_raw": "원가와 정가에 대한 문제",
+      "correct_rate": 0.57,
+      "similar_sources": [
+        {
+          "book": "블랙라벨",
+          "subject": "중등수학1(상)",
+          "page": 84,
+          "no": "11"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학1(상)",
+          "page": 162,
+          "no": "6"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.677,
+      "cohort_normalized_star": 4
+    }
+  ]
+}

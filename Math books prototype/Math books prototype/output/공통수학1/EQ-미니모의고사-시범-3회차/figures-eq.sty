@@ -1,0 +1,161 @@
+% figures-eq.sty — CM1-EQ (방정식·부등식) 도형 결합 매크로 v1.0 (2026-06-27)
+% 단일 출처: bank/4점-패턴-카탈로그/03-패턴-카탈로그.md §"도형 결합 6패턴"
+% 마더텅 11회 #5 (원기둥)·14회 #5 (정사각형 겹침) 패턴 차용
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{figures-eq}[2026/06/27 EQ figure macros v1.0]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+
+% ────────── 색상 ──────────
+\definecolor{figfill}{HTML}{E8F2FA}
+\definecolor{figline}{HTML}{2C5282}
+\definecolor{fighighlight}{HTML}{DC4B5C}
+
+% ────────── 1. 원기둥 (마더텅 11회 #5 패턴) ──────────
+% \cylinderfig{반지름 r}{높이 h}
+\newcommand{\cylinderfig}[2]{%
+  \begin{tikzpicture}[scale=0.7]
+    \draw[fill=figfill, draw=figline] (0,0) ellipse (#1 cm and 0.3cm);
+    \draw[fill=figfill, draw=figline] (-#1,0) -- (-#1,#2) arc (180:360:#1 cm and 0.3cm) -- (#1,0) -- cycle;
+    \draw[fill=figfill, draw=figline] (0,#2) ellipse (#1 cm and 0.3cm);
+    \draw[<->] (0.2,0) -- node[right=1pt]{$r$} (#1+0.1,0);
+    \draw[<->] (#1+0.5,0) -- node[right]{$h$} (#1+0.5,#2);
+  \end{tikzpicture}%
+}
+
+% ────────── 2. 두 정사각형 겹침 (마더텅 14회 #5 패턴) ──────────
+% \twosquareoverlap{변 a}{변 b}{거리 EB}
+% v1.1 (2026-06-27): 인자 4→3 축소, AF 자동 계산, 좌표 정밀화
+% 가정: A·E·B·F가 수평 직선 위에 이 순서 배치, EFGH는 ABCD 우측 위로 겹침
+%       AB = a, EF = b, EB = #3 → AE = a - EB, AF = a - EB + b
+\newcommand{\twosquareoverlap}[3]{%
+  \begin{tikzpicture}[scale=0.95]
+    \pgfmathsetmacro{\xE}{#1 - #3}
+    \pgfmathsetmacro{\xF}{\xE + #2}
+    \pgfmathsetmacro{\AF}{\xF}
+    \pgfmathsetmacro{\overlap}{#1 - \xE}
+    % 큰 정사각형 ABCD (왼쪽, 채워진 상태)
+    \draw[fill=figfill!30, draw=figline] (0,0) rectangle (#1,#1);
+    \node[below left] at (0,0) {A};
+    \node[below=2pt] at (#1,0) {B};
+    \node[above right] at (#1,#1) {C};
+    \node[above left] at (0,#1) {D};
+    % 작은 정사각형 EFGH (오른쪽, 일부 겹침)
+    \draw[fill=figfill, draw=figline, fill opacity=0.6] (\xE,0) rectangle (\xF,#2);
+    \node[below=2pt] at (\xE,0) {E};
+    \node[below=2pt] at (\xF,0) {F};
+    \node[above right] at (\xF,#2) {G};
+    \node[above left] at (\xE,#2) {H};
+    % 겹치는 사각형 EBCI 강조 (가로 EB, 세로 a)
+    \draw[fill=fighighlight!25, draw=fighighlight, line width=0.8pt] (\xE,0) rectangle (#1,#1);
+    \node[above right=1pt and -1pt] at (#1,#2) {I};
+    % EB 라벨 (밑변에)
+    \draw[<->,>=stealth] (\xE+0.05,-0.5) -- (#1-0.05,-0.5);
+    \node[below=2pt] at ({(\xE+#1)/2},-0.5) {\scriptsize $#3$};
+    % AF 라벨 (전체 길이)
+    \draw[<->,>=stealth] (0,-1.4) -- (\xF,-1.4);
+    \node[below=2pt] at (\xF/2,-1.4) {\scriptsize $\overline{\mathrm{AF}}=\AF$};
+    % 변 길이 a, b 라벨
+    \node[left=2pt] at (0,#1/2) {\scriptsize $a$};
+    \node[right=2pt] at (\xF,#2/2) {\scriptsize $b$};
+  \end{tikzpicture}%
+}
+
+% ────────── 3. 좌표축 + 직선 (이차방정식 결합) ──────────
+% \axislinefig{기울기 m}{y절편 b}
+\newcommand{\axislinefig}[2]{%
+  \begin{tikzpicture}[scale=0.6]
+    \draw[->] (-3,0) -- (3.2,0) node[right]{$x$};
+    \draw[->] (0,-2) -- (0,3.2) node[above]{$y$};
+    \pgfmathsetmacro{\xmax}{2.5}
+    \pgfmathsetmacro{\xmin}{-2.5}
+    \pgfmathsetmacro{\ymax}{#1 * \xmax + #2}
+    \pgfmathsetmacro{\ymin}{#1 * \xmin + #2}
+    \draw[thick, figline] (\xmin,\ymin) -- (\xmax,\ymax) node[right]{\scriptsize $y = #1 x + #2$};
+  \end{tikzpicture}%
+}
+
+% ────────── 4. 좌표축 + 이차함수 (포물선) ──────────
+% \parabolafig{a}{꼭짓점x}{꼭짓점y}
+\newcommand{\parabolafig}[3]{%
+  \begin{tikzpicture}[scale=0.6]
+    \draw[->] (-3,0) -- (3.2,0) node[right]{$x$};
+    \draw[->] (0,-2) -- (0,3.5) node[above]{$y$};
+    \draw[thick, figline, domain=-2.5:2.5, samples=50]
+      plot (\x, {#1*(\x - #2)*(\x - #2) + #3});
+    \draw[fill=fighighlight] (#2,#3) circle (0.08);
+    \node[below right] at (#2,#3) {\scriptsize $(#2, #3)$};
+  \end{tikzpicture}%
+}
+
+% ────────── 5. 직각삼각형 + 내접원 ──────────
+% \righttrianglecircle{밑변}{높이}
+\newcommand{\righttrianglecircle}[2]{%
+  \begin{tikzpicture}[scale=0.7]
+    \draw[fill=figfill, draw=figline] (0,0) -- (#1,0) -- (0,#2) -- cycle;
+    \pgfmathsetmacro{\hyp}{sqrt(#1*#1 + #2*#2)}
+    \pgfmathsetmacro{\rr}{(#1 + #2 - \hyp)/2}
+    \draw[fill=fighighlight!20, draw=figline] (\rr,\rr) circle (\rr);
+    \node[below left] at (0,0) {A};
+    \node[below right] at (#1,0) {B};
+    \node[above left] at (0,#2) {C};
+  \end{tikzpicture}%
+}
+
+% ────────── 6. 수직선 + 부등식 해 영역 표시 ──────────
+% \intervalfig{왼쪽}{오른쪽}{닫힘:L=닫힘, O=열림}
+\newcommand{\intervalfig}[3]{%
+  \begin{tikzpicture}[scale=0.7]
+    \draw[->] (-3.5,0) -- (3.5,0);
+    \draw[thick, line width=2pt, fighighlight] (#1,0) -- (#2,0);
+    \ifthenelse{\equal{#3}{L}}{%
+      \draw[fill=fighighlight] (#1,0) circle (0.1);
+      \draw[fill=fighighlight] (#2,0) circle (0.1);
+    }{%
+      \draw[draw=fighighlight, fill=white] (#1,0) circle (0.1);
+      \draw[draw=fighighlight, fill=white] (#2,0) circle (0.1);
+    }
+    \node[below] at (#1,-0.15) {\scriptsize $#1$};
+    \node[below] at (#2,-0.15) {\scriptsize $#2$};
+  \end{tikzpicture}%
+}
+
+% ──────────────────────────────────────────────────────────────
+% 매개변수 분기 매크로 v1.0 (2026-06-27, 정교화 제안 4)
+% 단일 출처: bank/4점-패턴-카탈로그/03-패턴-카탈로그.md §"매개변수 분기"
+% 마더텅 12·13회 매개변수 4슬롯 패턴 표준화
+% ──────────────────────────────────────────────────────────────
+
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% 정의된 색상이 없으면 새로 정의
+\providecommand{\paramcasecolor}{vB-light}
+\providecommand{\paramcasebordercolor}{vB-rule}
+
+% \paramcase{기준 조건}{경우 1}{경우 2} — 2분기
+\newcommand{\paramcase}[3]{%
+  \par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=white, colframe=vB-rule,
+    boxrule=0.5pt, arc=2pt, left=8pt, right=8pt, top=4pt, bottom=4pt,
+    fontupper=\small]
+    \textbf{기준}: #1\par\smallskip
+    \textbullet\ \textit{경우 1}: #2\par
+    \textbullet\ \textit{경우 2}: #3
+  \end{tcolorbox}%
+}
+
+% \paramcasethree{기준}{경우 1}{경우 2}{경우 3} — 3분기
+\newcommand{\paramcasethree}[4]{%
+  \par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=white, colframe=vB-rule,
+    boxrule=0.5pt, arc=2pt, left=8pt, right=8pt, top=4pt, bottom=4pt,
+    fontupper=\small]
+    \textbf{기준}: #1\par\smallskip
+    \textbullet\ \textit{경우 1}: #2\par
+    \textbullet\ \textit{경우 2}: #3\par
+    \textbullet\ \textit{경우 3}: #4
+  \end{tcolorbox}%
+}

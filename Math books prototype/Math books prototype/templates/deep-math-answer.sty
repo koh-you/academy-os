@@ -1,0 +1,331 @@
+% deep-math-answer.sty — DeeP Math 교재 답지 공통 스타일
+% v1.0 (2026-07-19 세션 50 후반부 · 디자인 에이전트)
+% 목적: DeeP Math 시리즈 (정리편·유형편·연습편) 답지 전용 · 퍼플 톤 통일
+% 정리편 본편 (deep-math.sty)과 팔레트·매크로 톤 통일
+% 시험지 답지는 별개 (templates/style.sty · vB 블루 팔레트 유지)
+%
+% 마스터 지시 (2026-07-19):
+%   1. 답지 톤 = 퍼플 (본편·정리편과 일치)
+%   2. 섹션 시작 시각 구분 강화 (대형 dmsection 배너)
+%   3. shipout FG 세로 분할선 금지 · multicols columnseprule 방식
+%
+% 사용:
+%   \documentclass[10pt,fleqn]{article}   % fleqn: mathindent 지원
+%   \usepackage{deep-math-answer}
+%   \renewcommand{\dmexamname}{정리편 · 평면좌표}
+%   \begin{document}
+%   \dmanswersetup
+%   \dmanswerheader{평면좌표 정답 및 해설}
+%   \dmsection{확인 문제}
+%   \begin{dmquickgrid}
+%     \dmquick{1}{$a=1$} & \dmquick{2}{...} & ... \\
+%   \end{dmquickgrid}
+%   \begin{multicols}{2}
+%   \dmsoltitle{1}{등거리 조건에서 미지수 결정}
+%   \begin{dmanswerbox}정답: $a=1$\end{dmanswerbox}
+%   자연어 풀이...
+%   \end{multicols}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{deep-math-answer}[2026/07/19 v1.0 DeeP Math Answer Sheet]
+
+\RequirePackage{kotex}
+\RequirePackage[a4paper,top=22mm,bottom=22mm,left=22mm,right=22mm,headheight=22pt,headsep=6mm,footskip=12mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage{fancyhdr}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{setspace}
+\RequirePackage{graphicx}
+\RequirePackage{multicol}
+\RequirePackage{needspace}
+\graphicspath{{../../../logo/}{../../logo/}{./}}
+\usetikzlibrary{shapes,shapes.geometric,positioning,calc,decorations.pathmorphing,shadows.blur,fadings}
+
+% ══════════════════════════════════════════════════════════════
+% 색 팔레트 (deep-math.sty와 완전 동일 — 정리편·본편·답지 통일)
+% ══════════════════════════════════════════════════════════════
+\definecolor{dm-primary}{HTML}{4A1A5C}     % 짙은 퍼플. 배너·강조
+\definecolor{dm-secondary}{HTML}{8E44AD}   % 중간 퍼플. 서브
+\definecolor{dm-light}{HTML}{EBDEF0}       % 옅은 퍼플. 프레임·배경
+\definecolor{dm-accent}{HTML}{F5EEF8}      % 아주 옅은. 배경
+\definecolor{dm-ink}{HTML}{1A1A2E}         % 짙은 남색-검정. 본문
+\definecolor{dm-gold}{HTML}{B7791F}        % 골드. signature
+\definecolor{dm-goldlight}{HTML}{F9E7C2}   % 옅은 골드. 배지 배경
+\definecolor{dm-goldbg}{HTML}{FDF6E3}      % 아주 옅은 골드. answer 배경
+\definecolor{dm-rule}{HTML}{D2B4DE}        % 옅은 라벤더. 프레임 선
+\definecolor{dm-gray}{HTML}{6B6B6B}        % 회색
+\definecolor{dm-graybg}{HTML}{F4F4F4}      % 회색 배경
+\definecolor{dm-shadow}{HTML}{D4C5DA}      % 음영색
+\definecolor{dm-primarydark}{HTML}{2E0F3A} % 짙은 퍼플 gradient bottom
+\definecolor{dm-goldark}{HTML}{8A5A16}     % 짙은 골드 gradient bottom
+
+% ══════════════════════════════════════════════════════════════
+% 시리즈 메타 (답지 헤더·푸터 표시용)
+% ══════════════════════════════════════════════════════════════
+\providecommand{\dmseriesname}{Deep{:}it}
+\providecommand{\dmseriessub}{깊이와 통찰 \textperiodcentered\ 공통수학2}
+\providecommand{\dmexamname}{정답 및 해설}   % 헤더 중앙 · \renewcommand로 갱신
+
+% ══════════════════════════════════════════════════════════════
+% 헤더·푸터 (본편과 동일 톤 · 퍼플)
+% ══════════════════════════════════════════════════════════════
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{{\small\sffamily\bfseries\color{dm-primary}\dmseriesname\ 정답 및 해설}}
+\fancyhead[R]{{\small\sffamily\bfseries\color{dm-primary}\dmexamname}}
+\fancyfoot[L]{{\footnotesize\sffamily\color{dm-gray}\dmseriessub}}
+\fancyfoot[R]{{\small\sffamily\bfseries\color{dm-primary}\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{dm-rule}\leaders\hrule height \headrulewidth\hfill}}
+
+% 답지 첫 페이지 (dmanswerheader 뒤) 전용 스타일 — 헤더 없이 큰 배너만
+\fancypagestyle{dmanswertitle}{%
+  \fancyhf{}%
+  \fancyfoot[L]{{\footnotesize\sffamily\color{dm-gray}\dmseriessub}}%
+  \fancyfoot[R]{{\small\sffamily\bfseries\color{dm-primary}\thepage}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+\flushbottom
+\AtBeginDocument{\color{dm-ink}}
+
+% ══════════════════════════════════════════════════════════════
+% \dmanswerheader{제목} — 답지 상단 대형 타이틀 배너
+% ══════════════════════════════════════════════════════════════
+% deep-math.sty의 \dmchapter와 톤 통일 · 크기 확대
+% dm-primary 큰 배너 + 흰 텍스트 · 골드 accent bar · 로고 우측
+% 하단 이중 rule (골드 굵은 + 라벤더 얇은)
+\newcommand{\dmanswerheader}[1]{%
+  \thispagestyle{dmanswertitle}%
+  \par\noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-primary, colframe=dm-primary,
+    boxrule=0pt, arc=3mm,
+    left=8mm, right=8mm, top=6mm, bottom=6mm,
+    width=\linewidth,
+    drop fuzzy shadow=dm-shadow,
+    % v1.1 마스터 지시 (2026-07-19) : 좌측 골드 accent bar 삭제 (rounded box와 직사각 bar 불일치)
+  ]
+  {\sffamily\bfseries\Huge\color{white}#1}%
+  \end{tcolorbox}%
+  \par\vspace{2mm}%
+  \noindent\begin{tikzpicture}
+    \draw[dm-gold, line width=1.4pt] (0,0) -- (20mm,0);
+    \draw[dm-rule, line width=0.4pt] (20mm,0) -- (\linewidth,0);
+    \draw[dm-rule!60, line width=0.3pt] (0,-0.8mm) -- (\linewidth,-0.8mm);
+  \end{tikzpicture}%
+  \par\vspace{6mm}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% \dmsection{섹션명}[부제] — 섹션 헤더 (강화)
+% ══════════════════════════════════════════════════════════════
+% 마스터 지시 2 : 확인·Level·실전 페이지 시작 구분 강화
+% dmex 배너 대비 3~4배 시각 무게
+%   - 배너 높이 14mm (dmex 6mm 대비 2배 이상)
+%   - dm-primary flat bg · 좌측 골드 세로 bar 4mm
+%   - drop fuzzy shadow · 이중 하단 rule
+%   - vspace 15mm above (섹션 전환 명확)
+% 옵션 부제: [부제] 지정 시 dm-goldlight 텍스트로 우측 표시
+% v1.2 : 배너 슬림화 (상하 padding 1.6mm · large 폰트 · drop shadow subtle)
+% v1.3 (자동 clearpage) : 2026-07-19 마스터 롤백 지시로 폐기
+\newcommand{\dmsection}[2][]{%
+  \par\addvspace{12mm}\needspace{5\baselineskip}%
+  \noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-primary, colframe=dm-primary,
+    boxrule=0pt, arc=1.8mm,
+    left=6mm, right=6mm, top=1.6mm, bottom=1.6mm,
+    width=\linewidth,
+    drop shadow={shadow xshift=0.4mm, shadow yshift=-0.4mm, fill=dm-shadow, opacity=0.5},
+  ]
+  {\sffamily\bfseries\large\color{white}#2}%
+  \ifx\relax#1\relax\else
+    \hspace{6mm}{\sffamily\small\color{dm-goldlight}\textperiodcentered\ #1}%
+  \fi
+  \end{tcolorbox}%
+  \par\vspace{1.5mm}%
+  \noindent\begin{tikzpicture}
+    \draw[dm-gold, line width=0.8pt] (0,0) -- (24mm,0);
+    \draw[dm-rule, line width=0.3pt] (24mm,0) -- (\linewidth,0);
+  \end{tikzpicture}%
+  \par\vspace{4mm}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% dmquickgrid 환경 + \dmquick{번호}{답} — 빠른 정답표
+% ══════════════════════════════════════════════════════════════
+% deep-math 톤 : dm-primary 프레임 · dm-accent 배경 · 번호 dm-primary 굵게
+% arraystretch = \dmquickgridstretch (섹션별 오버라이드)
+%   - 5행 시:  1.35 (default)
+%   - 4행 시:  1.70
+%   - 3행 시:  2.25
+%   - 2행 시:  3.00
+%   - 1행 시:  3.50
+\newcommand{\dmquickgridstretch}{1.35}
+\newcommand{\dmquick}[2]{%
+  {\sffamily\bfseries\color{dm-primary} #1.}\,\,{\sffamily\color{dm-ink} #2}%
+}
+\newenvironment{dmquickgrid}[1][빠른 정답]{%
+  \par\noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-accent, colframe=dm-primary,
+    boxrule=0.8pt, arc=4pt,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={\hspace{1mm}#1}, fonttitle=\sffamily\bfseries,
+    coltitle=white, colbacktitle=dm-primary,
+    attach boxed title to top center={yshift=-3pt},
+    boxed title style={colback=dm-primary, sharp corners=downhill, boxrule=0pt,
+      left=10pt, right=10pt, top=2pt, bottom=2pt},
+    drop fuzzy shadow=dm-shadow,
+  ]
+    \renewcommand{\arraystretch}{\dmquickgridstretch}\sffamily\small
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+}{%
+    \end{tabular*}\par
+  \end{tcolorbox}\par\addvspace{20pt}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% \dmsoltitle{번호}{출제의도} — 풀이 헤더 (2-arg · 배점 없음)
+% ══════════════════════════════════════════════════════════════
+% 정리편·유형편은 배점 없음 → 2-arg
+% 좌측: dm-primary bold 번호 · 우측: [출제의도] gold label + 텍스트
+% 언더라인: dm-primary 1.2pt · 배점 없는 담백한 스타일
+%
+% 소문항 (1)(2)(3) 정렬을 위해 style.sty의 soltitleexam과 동일 구조 채택
+% \\ 재정의 로컬 begingroup · solprefixwd 자동 hspace
+\newdimen\dmsolprefixwd
+\newif\ifdmsoltitlefirst\dmsoltitlefirsttrue
+\newcounter{dmsolcount}\setcounter{dmsolcount}{0}
+
+\newcommand{\dmsoltitle}[2]{%
+  \par\leftskip=0pt%
+  \stepcounter{dmsolcount}%
+  \ifdmsoltitlefirst
+    \par\addvspace{6pt}%
+    \dmsoltitlefirstfalse
+  \else
+    \par\addvspace{16pt}%
+  \fi
+  \needspace{4\baselineskip}%
+  \settowidth{\dmsolprefixwd}{\sffamily\bfseries\large #1.\hspace{8pt}}%
+  \begingroup
+  \def\\{\hfil\break\hspace*{\dmsolprefixwd}\ignorespaces}%
+  \noindent{\sffamily\bfseries\large\color{dm-primary} #1.}\hspace{8pt}%
+  {\footnotesize\sffamily\bfseries\color{dm-gold}[출제의도]}\,%
+  {\footnotesize\sffamily\color{dm-ink} #2}%
+  \par
+  \endgroup
+  \nobreak\vspace{-2pt}\noindent%
+  \tikz{\draw[dm-primary, line width=1.0pt, line cap=butt] (0,0) -- (\linewidth,0);}%
+  \par\vspace{10pt}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% dmanswerbox 환경 — 정답 표시 박스
+% ══════════════════════════════════════════════════════════════
+% 좌측: dm-gold 세로 마커 (2mm × 4.5mm) · 텍스트: dm-primary bold
+% 시험지 답지 answerbox와 시각 무게 동일 · 색만 퍼플 톤 전환
+\newenvironment{dmanswerbox}{%
+  \par\noindent
+  \textcolor{dm-gold}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{dm-primary}%
+}{%
+  \par\vspace{5mm}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% dmcriticalpoint + \dmcplabel — Critical Point (통찰 라벨)
+% ══════════════════════════════════════════════════════════════
+% \dmcplabel{라벨}: 완성 문장 · dm-goldark 굵은 텍스트
+% dmcriticalpoint 환경: 좌측 dm-gold 세로 bar + 옅은 배경
+\newcommand{\dmcplabel}[1]{{\sffamily\bfseries\color{dm-goldark}#1}}
+
+\newenvironment{dmcriticalpoint}{%
+  \par\addvspace{6pt}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-goldbg, colframe=dm-gold,
+    boxrule=0pt, arc=2pt,
+    left=6mm, right=4mm, top=3mm, bottom=3mm,
+    width=\linewidth,
+    overlay={%
+      \fill[dm-gold] ([xshift=0mm]frame.north west) rectangle ([xshift=2.5mm]frame.south west);
+    }
+  ]
+  {\footnotesize\sffamily\bfseries\color{dm-gold}Critical Point}\par\vspace{2pt}%
+  \footnotesize\color{dm-ink}\ignorespaces
+}{%
+  \end{tcolorbox}\par\addvspace{4pt}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% \dmothersolution — "다른 풀이" 라벨 (본풀이 뒤 대안 풀이 부기)
+% ══════════════════════════════════════════════════════════════
+% 사용: 본풀이 문단 종료 후 \dmothersolution 뒤 대안 풀이 서술
+% - 소제목 "다른 풀이" (sans-serif · dm-primary · small)
+% - 뒤에 옅은 실선 (dm-rule 0.3pt · 5mm) · 본풀이와 시각적으로 구분
+% - 신발끈처럼 시중 광범위 사용이지만 정석 도구가 아닌 풀이를 부기할 때 사용
+\newcommand{\dmothersolution}{%
+  \par\addvspace{6pt}%
+  \noindent{\small\sffamily\bfseries\color{dm-primary}다른 풀이}\hspace{4pt}%
+  \textcolor{dm-rule}{\rule[0.9mm]{6mm}{0.3pt}}\hspace{4pt}%
+  \ignorespaces%
+}
+
+% ══════════════════════════════════════════════════════════════
+% \dmanswersetup — 답지 defaults 일괄 적용
+% ══════════════════════════════════════════════════════════════
+% \begin{document} 직후 한 번 호출
+%   1. raggedright + emergencystretch (좁은 컬럼 어절 stretch·mid-word break 방지)
+%   2. tfrac→dfrac alias (인라인 분수 큰 크기)
+%   3. Tier 1·4·5 가독성 defaults (linespread·parskip·mathindent)
+%   4. multicols 컬럼 간격 · columnseprule 옅은 라벤더
+\newcommand{\dmtfracdisplay}[2]{\dfrac{#1}{#2}}
+\newcommand{\dmanswersetup}{%
+  \raggedright%
+  \emergencystretch=6em%
+  \hfuzz=2pt%
+  \let\tfrac\dmtfracdisplay%
+  \let\frac\dfrac%
+  \linespread{1.20}\selectfont%
+  \setlength{\parskip}{8pt plus 3pt minus 2pt}%
+  \lineskiplimit=4pt%
+  \lineskip=6pt%
+  \thinmuskip=3mu plus 1mu%
+  \medmuskip=4.5mu plus 2mu minus 4mu%
+  \thickmuskip=5.5mu plus 5mu%
+  \setlength{\mathindent}{0pt}%
+  \setlength{\abovedisplayskip}{10pt}%
+  \setlength{\belowdisplayskip}{10pt}%
+  \setlength{\abovedisplayshortskip}{8pt}%
+  \setlength{\belowdisplayshortskip}{8pt}%
+  \setlength{\columnsep}{8mm}%
+  \setlength{\columnseprule}{0.4pt}%
+  \renewcommand{\columnseprulecolor}{\color{dm-rule}}%
+  \setlength{\multicolsep}{6pt plus 2pt minus 1pt}%
+}
+
+% ══════════════════════════════════════════════════════════════
+% 유틸 (본편과 동일)
+% ══════════════════════════════════════════════════════════════
+\providecommand{\dmstrong}[1]{{\color{dm-gold}\bfseries #1}}
+\providecommand{\dmemph}[1]{{\color{dm-primary}\bfseries #1}}
+
+% ── 문단·행간 defaults (답지용 · answersheetsetup에서 재설정) ─────
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+\linespread{1.35}
+
+\endinput

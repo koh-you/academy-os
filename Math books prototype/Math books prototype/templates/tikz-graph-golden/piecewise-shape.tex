@@ -1,0 +1,84 @@
+% 골든 · 두 식으로 정의된 함수 개형 (feedback_solution_graph_requirement 유형 3)
+% 확립 : 2026-07-22 세션 75 · FN L2-1 프로토타입 (이차식 부분 + 일차식 부분)
+% 원본 위치 : output/공통수학2/DeeP-Math-정리편/Deep Math Review Note 06-FN-함수-답지.tex §L2-1
+%
+% 목적 : 두 식으로 정의된 함수의 개형·경계점·정의역 조건·타깃 값(y=k) 만남을 시각화
+%   - 각 부분별로 별도 \draw (line width 0.5pt · 곡선/직선 통일)
+%   - 경계점 : closed (해당 식에 포함) = \filldraw 검정 0.8pt · open (미포함) = 흰색 채운 원 (2pt · 얇은 선)
+%   - 타깃 수평 직선 (y=k)  : 점선 dm-accent 0.4pt · 축 프레임 좌우 전체 채움
+%   - 해(교점) : 파생점 dm-accent 0.7pt · 좌표 라벨 옆 밀착
+%   - 부분별 라벨 : 각 식 끝단 밀착 · sloped 필요 시 사용
+%
+% 규약 준수 :
+%   - scale=1.0 통일 (feedback_figure_effective_rendering §37)
+%   - 실효 두께 : 축 0.7pt · 곡선/직선 0.5pt · 점선 0.4pt (목표 범위 통과)
+%   - 점 크기 : 주요 정점 0.8pt · 파생점 0.7pt · open endpoint 흰 채움 반경 1.6pt·선 0.5pt
+%   - 라벨 : 실선·점선 겹침 불허 (feedback_label_placement v2)
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 목표 [0.55, 0.85])
+  %   축 라벨 규정 (feedback_figure_authoring_protocol §3-B) :
+  %     `x` 라벨 : below (S) · 화살표 끝 (E · `right`) 금지
+  %     `y` 라벨 : left (W)  · 화살표 끝 (N · `above`) 금지
+  \draw[-stealth, black, line width=0.7pt] (-1, 0) -- (4, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1.8) -- (0, 3.8) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+  \node[font=\scriptsize, below] at (1, -0.02) {$1$};
+  \node[font=\scriptsize, below] at (3, -0.02) {$3$};
+
+  % ── 왼쪽 식 · y = 3x - 4 (x < 1) · 실효 0.5pt
+  %   x = 4/3 에서 x축 교점 → 여기까지는 좌표평면에서 안 보이므로 x ∈ [0, 1) 로 제한
+  \draw[black, line width=0.5pt] (0, -4) -- (1, -1);
+  % (0, -4) 좌표평면 밖이므로 axis 하단 잘림 · 축 범위 조정 or 다른 domain 선택 가능
+
+  % ── 오른쪽 식 · y = x² - 2x (x ≥ 1) · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=1:3.5, samples=60] plot (\x, {\x*\x - 2*\x});
+
+  % ── 경계점 (1, -1) · 두 식이 만남 · 오른쪽 식에 포함 · closed = 검정 0.8pt
+  \filldraw[black] (1, -1) circle (0.8pt);
+  % 만약 open endpoint (식에 미포함) 이면 대신 :
+  % \draw[black, line width=0.5pt, fill=white] (1, -1) circle (1.6pt);
+
+  % ── 타깃 수평선 y = 3 · 점선 dm-accent 0.4pt · 프레임 좌우 채움
+  \begin{scope}
+    \clip (-1, -1.8) rectangle (4, 3.8);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-1, 3) -- node[pos=0.05, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=3$}
+      (4, 3);
+  \end{scope}
+
+  % ── 해 (교점) (3, 3) · 파생점 dm-accent 0.7pt
+  \filldraw[dm-accent] (3, 3) circle (0.7pt);
+  \node[font=\tiny, anchor=south, dm-accent] at (3, 3.1) {$(3,\, 3)$};
+
+  % ── 식 라벨 · 각 식 끝단 옆 밀착
+  \node[font=\scriptsize, anchor=south east] at (0.05, -3.5) {$y=3x-4$};
+  \node[font=\scriptsize, anchor=south west] at (3.5, 3.5) {$y=x^{2}-2x$};
+\end{tikzpicture}
+\end{center}
+
+% === 사용 시 교체 대상 ===
+% 1. 각 식의 함수식·정의역 범위 · \draw domain / \draw 시작·끝 좌표
+% 2. 경계점 좌표 (두 식이 이어지는 x값 · 대응 y값)
+% 3. 경계 closed/open 처리 :
+%    - 식에 포함 (예: x ≥ 1) : \filldraw[black] ... circle (0.8pt);
+%    - 식에 미포함 (예: x < 1) : \draw[black, line width=0.5pt, fill=white] ... circle (1.6pt);
+% 4. 타깃 수평선 y=k (있는 경우) · clip 프레임 좌우 채움
+% 5. 해(교점) 좌표 · dm-accent 파생점
+% 6. 부분별 라벨 위치 · anchor 방향 (식 뻗음 방향의 여백)
+% 7. 축 범위 (\clip 및 x축·y축 range) · 눈금 라벨 (특징적 x값·y값)
+%
+% === 유지 대상 (규약 자동 준수) ===
+% - scale=1.0
+% - line width 값 (0.7pt · 0.5pt · 0.4pt)
+% - circle 반경 (0.8pt · 0.7pt · open endpoint 1.6pt)
+% - dash pattern (on 2pt off 1.5pt)
+% - 각 식 별도 \draw (단일 \draw로 두 식으로 정의된 함수 합쳐 그리기 금지)
+% - 경계점 closed/open 표기 규칙 (식 포함 여부에 따라)
+%
+% === 확장 유형 ===
+% - 폐구간 개형 (경계 두 개 모두 표시) : 왼쪽 · 오른쪽 두 경계에 closed circle · 최댓값·최솟값 라벨
+% - 부동점 (y=x 대칭선 있음) : y=x 점선 추가 · 각 식과의 교점 표시
+% - 부분별 역함수 : 원함수와 y=x 대칭인 역함수 개형 병기 (색·라벨 구분)
+% - 주기함수 반복 : 한 주기 부분 명시 · 이후 주기 반복은 회색 얇게 or 생략

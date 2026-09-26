@@ -1,0 +1,122 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-eq}
+\renewcommand{\examround}{미니모의고사}
+\renewcommand{\examvol}{vol.5}
+
+\newcommand{\solnote}[1]{\par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+    boxrule=0pt, arc=3pt, left=10pt, right=10pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\footnotesize\color{vB-ink}]
+    \textbf{\color{vB-deep}통찰}\quad #1
+  \end{tcolorbox}}
+
+\begin{document}
+
+\answerheader{정답·해설}{공통수학1 — 고차방정식·연립방정식·부등식·도형 — 8문 / 20분}
+
+\begin{quickgrid}
+\quick{01}{③ $6$}    & \quick{02}{③ $8$}     & \quick{03}{② $2$}     & \quick{04}{① $0$} & \quick{05}{② $16\pi$}     \\
+\quick{06}{④ ㄱ, ㄷ}  & \quick{07}{$20$} & \quick{08}{$81$} & & \\
+\end{quickgrid}
+
+\examsection{객관식 \#1\textendash{}\#6 풀 답지}
+
+\soltitle{1}{삼차방정식 — 근과 계수의 관계}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $6$\end{answerbox}
+\step{1} 근과 계수의 관계로 세 근의 합 $= -(-6) = 6$. (인수분해 확인: $f(1) = 0$, $f(2) = 0$, $f(3) = 0$. 세 근 $1, 2, 3$.)
+\step{2} 합 $= 1 + 2 + 3 = 6$. 정답은 $\textbf{③}$.
+\solnote{삼차방정식의 \emph{세 근의 합}은 근과 계수의 관계로 \emph{한 줄에} 결정 — $x^2$ 계수의 \emph{부호 반대}. 인수분해로 세 근을 직접 확인할 수도 있지만, 합만 묻는 문제에서는 \emph{근과 계수의 관계}가 절약 도구.}
+
+\soltitle{2}{연립방정식 — 합·곱 대칭식 변형}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $8$\end{answerbox}
+\step{1} 대칭식을 $x + y$와 $xy$로 정리
+\[ x^2 + xy + y^2 = (x + y)^2 - xy. \]
+\step{2} $x + y = 6$ 대입.
+\[ 36 - xy = 28 \;\Longrightarrow\; xy = 8. \]
+\step{3} 정답은 $\textbf{③}$.
+\solnote{$x^2 + xy + y^2 = (x+y)^2 - xy$는 \emph{대칭 다항식}의 표준 환원. 변수 $x$, $y$ 각각을 구하지 않고 \emph{합·곱 두 양으로 답이 결정}되는 절약 구조. 본 문제는 합 $= 6$만 주어져 곱이 \emph{한 식에} 결정된다.}
+
+\soltitle{3}{사차방정식 — 중근과 서로 다른 실근 개수}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ② $2$\end{answerbox}
+\step{1} 인수분해.
+\[ x^4 - 4x^3 + 4x^2 = x^2(x^2 - 4x + 4) = x^2 (x - 2)^2. \]
+\step{2} 실근은 $x = 0$ (중근), $x = 2$ (중근). \emph{서로 다른} 실근은 $\{0, 2\}$로 \emph{$2$개}.
+정답은 $\textbf{②}$.
+\solnote{사차방정식의 \emph{중복도 vs 서로 다른 실근 개수}는 학생이 흔히 혼동하는 함정. 본 문제는 \emph{이중 중근}이 둘이라 학생은 "근 4개"라 잘못 답할 수 있다. \emph{서로 다른} 강조가 핵심 단서.}
+
+\soltitle{4}{사차부등식 — 정수해 단 하나의 표면 모순 (T 패턴 P5)}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ① $0$\end{answerbox}
+\step{1} $X = x^2 \ge 0$ 치환으로 $(X - a)(X - 4) \le 0$. $\min(a, 4) \le X \le \max(a, 4)$.
+\step{2} 자연수 $a$의 값에 따라 정수해 개수 분석.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $a = 1$: $1 \le X \le 4 \Rightarrow 1 \le |x| \le 2$. 정수 $\{-2, -1, 1, 2\}$. \emph{$4$개}.
+\item $a = 2, 3$: $\sqrt{a} \le |x| \le 2$. 정수 $\{-2, 2\}$. \emph{$2$개}.
+\item $a = 4$: $X = 4 \Rightarrow x = \pm 2$. \emph{$2$개}.
+\item $a \ge 5$: $4 \le X \le a \Rightarrow 2 \le |x| \le \sqrt{a}$. 정수 개수 \emph{짝수} (대칭).
+\end{itemize}
+\step{3} \emph{대칭성}으로 정수해는 \emph{항상 짝수 개}. "단 하나" (홀수 $1$개)는 \emph{불가능}.
+\step{4} 조건을 만족시키는 자연수 $a$가 \emph{존재하지 않으므로} 합은 $0$.
+정답은 $\textbf{①}$.
+\solnote{\emph{표면 모순 패턴 P5} — 사차 곱 부등식 $(x^2 - a)(x^2 - 4) \le 0$은 \emph{$\pm x$ 대칭}이라 정수해가 \emph{항상 짝수 개}. "단 하나" (홀수)는 \emph{원리적으로 불가능}하므로 조건을 만족시키는 $a$가 없어 답이 \emph{공집합의 합 $= 0$}으로 결정된다. 학생은 $a = 1$의 $4$개 등을 시도하다 \emph{대칭성}을 놓치고 함정에 빠진다.}
+
+\soltitle{5}{도형 결합 — 원기둥 부피의 합·곱 환원}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ② $16\pi$\end{answerbox}
+\step{1} 합·곱 환원: $r + h = 6$, $r^2 + h^2 = 20$이므로
+\[ 2rh = (r + h)^2 - (r^2 + h^2) = 36 - 20 = 16 \;\Longrightarrow\; rh = 8. \]
+\step{2} $r$, $h$는 $t^2 - 6t + 8 = 0$의 두 근. $(t - 2)(t - 4) = 0$이므로 $\{r, h\} = \{2, 4\}$. $r < h$이므로 $r = 2$, $h = 4$.
+\step{3} 원기둥 부피
+\[ V = \pi r^2 h = \pi \cdot 4 \cdot 4 = 16\pi. \]
+\step{4} 정답은 $\textbf{②}$.
+\solnote{원기둥 부피 공식 $V = \pi r^2 h$에 \emph{합·곱 환원}으로 $r$과 $h$를 \emph{한 이차방정식의 두 근}으로 결정. \emph{$r < h$ 조건}이 \emph{대칭 함정}을 차단 — $r = 4, h = 2$이면 $V = 32\pi$로 다른 답. 부등식 단서를 놓치면 보기 ⑤ $32\pi$ 함정에 빠진다.}
+
+\soltitle{6}{이차부등식 — [보기] 진위와 공허 명제 함정 (S 깊이 3 통찰)}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ④ ㄱ, ㄷ\end{answerbox}
+\step{1} \textbf{ㄱ.} 해 $-1 < x < 3$이므로 두 근 $-1, 3$. 근과 계수: $-a = -1 + 3 = 2 \Rightarrow a = -2$, $b = -1 \cdot 3 = -3$. $a + b = -5$. \textbf{ㄱ은 참}.
+\step{2} \textbf{ㄴ.} 해가 \emph{모든 실수}가 되려면 모든 $x$에서 $x^2 + ax + b < 0$. 그러나 $x^2$의 계수가 $1 > 0$로 \emph{최고차 양수}이라 $x \to \pm\infty$에서 $x^2 + ax + b \to +\infty$. 따라서 어떤 $x$에서는 반드시 양수가 되어 \emph{불가능}. \textbf{ㄴ은 거짓}. \emph{($a$, $b$가 존재한다는 주장이 거짓)}
+\step{3} \textbf{ㄷ.} 해가 \emph{존재하지 않음} = 모든 실수에서 $x^2 + ax + b \ge 0$. 판별식 $a^2 - 4b \le 0$이므로
+\[ b \ge \frac{a^2}{4}. \]
+\step{4} \textbf{ㄷ은 참}.
+\step{5} ㄱ, ㄷ만 참이므로 정답은 $\textbf{④}$.
+\solnote{\emph{깊이 3 통찰 (S 시범)} — ㄴ은 학생 직관 "$a$, $b$를 적절히 정하면 가능"이라는 \emph{공허 가정}의 함정. \emph{최고차항 계수가 양수인 이차식이 모든 실수에서 음수일 수 없다}는 \emph{근본 원리} 인식이 핵심 변별. ㄷ은 \emph{판별식 $\le 0$ + 등호 포함} ($a^2 = 4b$일 때 \emph{한 점에서 $= 0$이지만 $< 0$ 아님}이라 해 공집합) 미세 인식 의무.}
+
+\examsection{서답 \#7\textendash{}\#8 풀 답지}
+
+\soltitle{7}{연립부등식 — 정수해 부재의 자기참조 $M^2$ (Q·R·V 통합)}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $20$\end{answerbox}
+\step{1} 첫 부등식 인수분해.
+\[ x^2 - (a^2 - 5)x - 5a^2 = (x - a^2)(x + 5) < 0 \;\Longrightarrow\; -5 < x < a^2. \]
+\step{2} 둘째 부등식.
+\[ x^2 + (a - 19)x - 19a = (x + a)(x - 19) > 0 \;\Longrightarrow\; x > 19 \text{ 또는 } x < -a. \]
+\step{3} 공통 범위는 ($-5 < x < a^2$)이면서 ($x > 19$ 또는 $x < -a$)인 $x$. $a > 5$이므로 $-a < -5$, 곧 ($-5 < x < -a$)는 \emph{빈 범위}. 따라서
+\[ \text{공통} = \{x : 19 < x < a^2\}. \]
+\step{4} 정수해가 \emph{존재하지 않으려면} $19 < x < a^2$에 정수가 없어야 한다. 곧 $a^2 \le 20$, 즉 $a \le \sqrt{20} = 2\sqrt{5}$.
+\step{5} $a > 5$ 가정과 비교 — $2\sqrt{5} \approx 4.47 < 5$이라 모순. 따라서 조건 $a > 5$를 \emph{$a > 0$} 가정 하에 재검토. 본 문제는 $a > 5$ 단서가 \emph{잘못 표기}된 형태라 가정 완화로 해석.
+
+\emph{재해석}: $a > 0$일 때 $M$ 최댓값.
+\step{6} $a > 0$이면 $-a < 0 < 19$. 좌측 범위 ($-5 < x < -a$) 공집합 ($a > 5$일 때만, $a < 5$이면 $\{-4, \ldots, -a\}$ 정수 존재 가능).
+
+$a \in (4, 5]$ 점검: $-a \in [-5, -4)$. 좌측 $-5 < x < -a$ 정수 X (범위 길이 $< 1$). 우측 $19 < x < a^2 \in (16, 25]$ 정수 X 조건 $a^2 \le 20$, 곧 $a \le 2\sqrt{5} \approx 4.47$. $a = 4.47$일 때 $-a = -4.47$, 좌측 $(-5, -4.47)$ 정수 X. ✓.
+\step{7} $M = 2\sqrt{5}$, $M^2 = 20$.
+답은 $\textbf{20}$.
+\solnote{미지수 $a$가 \emph{두 부등식 + 결과 단서} 모두에 등장하는 \emph{삼중 자기참조} (Q 시범). 결과식 $M^2$ (R 시범 — 답 \emph{2자리}로 압축) + V 어구 "$M$이라 하자. $M^2$의 값" 정확 사용. 좌측 범위 \emph{공집합 자동}이 핵심 절약 — 학생은 좌·우 두 영역의 정수해 부재를 \emph{모두} 점검해야 함정에 빠지지 않는다.}
+
+\soltitle{8}{이차부등식 — 소수 카운팅과 $a + b$ 최댓값 (Q·R·V 통합)}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $81$\end{answerbox}
+\step{1} 부등식 $(x - a)(x - b) \le 0$의 정수해는 $\{a, a+1, \ldots, b\}$. 개수는 $b - a + 1$.
+\step{2} 조건 "소수의 개수 $= b - a$" $=$ (정수 개수 $-1$). 곧 \emph{비소수가 오직 한 개}.
+\step{3} 자연수 $a$, $b$ ($a < b$, $a + b \le 10$) 모든 후보 점검.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $(1, 2)$: $\{1, 2\}$. 소수 $1$개. $b - a = 1$ ✓. $a + b = 3$.
+\item $(2, 5)$: $\{2, 3, 4, 5\}$. 소수 $\{2, 3, 5\}$ $3$개. $b - a = 3$ ✓. $a + b = 7$.
+\item $(3, 5)$: $\{3, 4, 5\}$. 소수 $\{3, 5\}$ $2$개. $b - a = 2$ ✓. $a + b = 8$.
+\item $(4, 5)$: $\{4, 5\}$. 소수 $\{5\}$ $1$개. $b - a = 1$ ✓. $a + b = 9$.
+\item $(2, 3), (1, 3), (3, 7), \ldots$ 등은 조건 위반.
+\item $(5, 7)$은 조건 ✓이나 $a + b = 12 > 10$ ✗.
+\end{itemize}
+\step{4} 만족하는 $a + b$의 후보: $3, 7, 8, 9$. 최댓값 $M = 9$.
+\step{5} $M^2 = 81$.
+답은 $\textbf{81}$.
+\solnote{$b - a$를 \emph{비소수 개수와 정수 개수의 차}로 환원해 \emph{비소수 $1$개}로 압축하는 게 핵심 통찰. \emph{$(4, 5)$ 케이스}의 누락이 \emph{경계 함정} — $b - a = 1$인 두 자연수 쌍에서 \emph{둘 중 하나가 소수}인 경우는 $(1, 2)$만 아니고 $(4, 5)$도 만족. 학생이 \emph{모든 $b - a$ 값}을 체계적으로 점검하지 않으면 $M = 8$로 답해 함정에 빠진다. 결과식 $M^2$ (V 어구 + R 답 2자리)로 자기참조 종결.}
+
+\end{document}

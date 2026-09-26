@@ -1,0 +1,588 @@
+%% 시안 B (블루) — "고쟁이 STEP 중심" + 블루 톤
+%% 변경: 오렌지 → 블루, 페이지당 유형 1~2개 제한, 유형 단위 multicols
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{style}[2026/06/11 Variant B (Blue): Gojaengi-Blue]
+
+\RequirePackage{kotex}
+\RequirePackage[paperwidth=188mm,paperheight=257mm,
+  inner=15mm,outer=13mm,top=18mm,bottom=20mm,
+  headheight=10mm,headsep=5mm,footskip=14mm]{geometry}
+\RequirePackage{multicol}
+\RequirePackage{amsmath,amssymb,mathtools}
+\RequirePackage{graphicx}
+\graphicspath{{sources/}{../../../logo/}}
+\RequirePackage{xcolor}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{enumitem}
+\RequirePackage{titlesec}
+\RequirePackage{fancyhdr}
+\RequirePackage{etoolbox}
+\RequirePackage{pifont}
+\RequirePackage{tikz}
+\RequirePackage{needspace}
+\RequirePackage{xparse}
+% ── 그림 매크로 라이브러리 (CB 단원 그림 — v3.1 그림시스템) ──
+% 위치: templates/figures/figures-cb.sty
+% 빌드 시 TEXINPUTS에 ../../../templates/figures/ 추가 필요
+\RequirePackage{figures-cb}
+
+% ── 인라인 수식 줄바꿈 방지 ──
+% 이항 연산자(+, -, ×, /)와 관계 연산자(=, <, >, ≤, ≥)에서 LaTeX이 줄바꿈하지 않도록
+% 페널티를 최대로 설정. 하나의 인라인 수식이 중간에서 끊기지 않음.
+\binoppenalty=10000
+\relpenalty=10000
+
+% ── 블루 팔레트 ──
+\definecolor{vB-ink}{HTML}{1A2333}        % 본문 글자
+\definecolor{vB-deep}{HTML}{1E4A8F}       % 딥 네이비 (큰 제목)
+\definecolor{vB-accent}{HTML}{3A78D8}     % 밝은 블루 (STEP 블록·유형 바·TIP 바)
+\definecolor{vB-rule}{HTML}{BDD0E5}       % 옅은 회청 (구분선)
+\definecolor{vB-light}{HTML}{E8EFF8}      % 옅은 블루 (TIP 배경)
+\definecolor{vB-dim}{HTML}{6B7A8E}        % 회청 (희미한 텍스트)
+\definecolor{vB-frame}{HTML}{8AA5C5}      % 옅은 청 (조건 박스 실선, 흐리게 v1.2)
+
+% ── 본문 여백 / 행간 ──
+\setlength{\columnsep}{7mm}
+\setlength{\columnseprule}{0pt}  % native 분할선 사용 안 함 — type 환경에서 TikZ로 일괄 그림
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt}
+\linespread{1.35}
+% multicols 환경 진입/종료 시 추가되는 수직 여백 — 기본 ~12pt 너무 큼
+\setlength{\multicolsep}{6pt plus 2pt minus 1pt}
+
+% ── 회차 표시 매크로 (각 회차의 .tex에서 \renewcommand로 갱신) ──
+\providecommand{\examround}{미니모의고사}
+\providecommand{\examvol}{vol.1}
+
+% ── 헤더/푸터 (수능 표준 풍 — 가운데 회차명, 외측 페이지 번호) ──
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{}
+\fancyhead[C]{\sffamily\large\bfseries\color{vB-ink}\examround}
+\fancyhead[R]{}
+\fancyfoot[L]{}
+\fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}
+\fancyfoot[R]{\raisebox{-2.5mm}{\includegraphics[height=9mm]{학원로고 (깊이와통찰).jpg}}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+
+% ── 첫 페이지(표지)용 footer만 표시 스타일 — 헤더는 examheader가 그림 ──
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-2.5mm}{\includegraphics[height=9mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+\titleformat{\section}{\sffamily\huge\bfseries\color{vB-deep}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{0pt}{12pt}
+
+% ── 난이도 점 ──
+\newcommand{\diffdot}[1]{%
+  \ifstrequal{#1}{h}{\color{vB-accent}\ding{108}\color{vB-rule}\ding{108}\ding{108}}{%
+  \ifstrequal{#1}{m}{\color{vB-accent}\ding{108}\ding{108}\color{vB-rule}\ding{108}}{%
+  \ifstrequal{#1}{s}{\color{vB-accent}\ding{108}\ding{108}\ding{108}}{}}}\color{vB-ink}}
+
+% ── 페이지당 유형 수 제어 ──
+% 페이지당 1 유형.
+\newcounter{maxtypeperpage}
+\setcounter{maxtypeperpage}{1}
+\newcounter{typesonpage}
+\setcounter{typesonpage}{0}
+
+% ── STEP 헤더 — 1단으로 띄움, multicols는 type 내부에서 ──
+\newenvironment{stepthree}{%
+  \par\noindent
+  \begin{tikzpicture}[baseline=0pt]
+    \fill[vB-accent] (0,0) rectangle (8mm,16mm);
+    \node[anchor=west,font=\sffamily\bfseries] at (10mm,12mm)
+      {\color{vB-deep}\Large STEP\,3};
+    \node[anchor=west,font=\sffamily] at (10mm,6mm)
+      {\color{vB-dim}\large 행복한 일등급 문제};
+  \end{tikzpicture}
+  \par\medskip
+  {\color{vB-rule}\rule{\linewidth}{0.6pt}}\par\medskip
+  \setcounter{typesonpage}{0}%
+}{%
+  % stepthree 종료 시 잔여 유형 페이지 정리
+}
+
+% ── 유형 헤더 + 풀폭 TIP ──
+% 시그니처: \begin{type}{유형번호}{유형이름}[TIP 텍스트(선택)]
+% multicols/페이지 분리는 \begin{pagepair}...\end{pagepair} 환경이 담당.
+\NewDocumentEnvironment{type}{m m +O{}}{%
+  \par\addvspace{14pt}%
+  \needspace{6\baselineskip}%
+  \noindent
+  \begin{minipage}{\linewidth}
+  \tikz[baseline=0pt]\fill[vB-accent] (0,-2pt) rectangle (3pt,18pt);\hspace{6pt}%
+  {\sffamily\small\color{vB-accent}\textbf{유형 #1}}\hspace{8pt}%
+  {\sffamily\bfseries\large\color{vB-deep} #2}
+  \end{minipage}
+  \par\vspace{2pt}%
+  {\color{vB-rule}\rule{\linewidth}{0.3pt}}\par\smallskip
+  \ifblank{#3}{}{%
+    \par\vspace{2pt}%
+    \begin{tipbox}
+      \sffamily\bfseries\color{vB-accent}TIP\quad\normalfont\color{vB-ink}#3
+    \end{tipbox}%
+    \par\vspace{-2pt}%
+  }%
+}{%
+}
+
+% ── 페이지 페어 — 2문제씩 묶어 한 페이지에 (좌1+우1) ──
+% v1.2 (2026-06-28): 페이지 번호 노드 제거 (fancyfoot이 이미 출력). 좌·우 분할선만 유지.
+% 분할선 + 2단 multicols + 자동 \clearpage.
+% pagepair: 4 minipage 2×2 grid (multicols 대신 수동 grid)
+% 본문 양식: \begin{pagepair}\probA{...}\probB{...}\probC{...}\probD{...}\end{pagepair}
+\newenvironment{pagepair}{%
+  \par\noindent%
+  \small
+}{%
+  \clearpage
+}
+% 4문 grid 배치 매크로 — 좌상, 우상, 좌하, 우하
+\newcommand{\probgridfour}[4]{%
+  \noindent
+  \begin{minipage}[t][\probboxheight][t]{0.49\linewidth}#1\end{minipage}\hfill
+  \begin{minipage}[t][\probboxheight][t]{0.49\linewidth}#2\end{minipage}
+  \par\vspace{4mm}
+  \noindent
+  \begin{minipage}[t][\probboxheight][t]{0.49\linewidth}#3\end{minipage}\hfill
+  \begin{minipage}[t][\probboxheight][t]{0.49\linewidth}#4\end{minipage}
+  \par
+}
+
+% ── TIP — 옅은 블루 배경 + 좌측 블루 바 ──
+\newtcolorbox{tipbox}{enhanced,breakable,
+  colback=vB-light,colframe=vB-accent,
+  boxrule=0pt,leftrule=2.5pt,rightrule=0pt,toprule=0pt,bottomrule=0pt,
+  arc=0pt,outer arc=0pt,left=10pt,right=8pt,top=4pt,bottom=3pt,fontupper=\small}
+\newcommand{\tip}[1]{\par\smallskip\begin{tipbox}
+  \sffamily\bfseries\color{vB-accent}TIP\quad\normalfont\color{vB-ink}#1
+\end{tipbox}\par\smallskip}
+
+% ── 제시 조건 박스 — (가)(나) 같은 문제 조건 묶음 ──
+% v1.3 (2026-06-28, 마스터 명시): 테두리 블랙 (배경 흰색 + 검은 실선).
+\newtcolorbox{condbox}{enhanced,breakable,
+  colback=white,colframe=black,
+  boxrule=0.6pt,arc=4pt,outer arc=4pt,
+  left=10pt,right=10pt,top=5pt,bottom=5pt,
+  fontupper=\small}
+\newenvironment{conditions}{%
+  \par\smallskip
+  \begin{condbox}
+  \setlength{\parskip}{2pt}%
+}{%
+  \end{condbox}
+  \par\smallskip
+}
+
+% ── 문제 — 수능 표준 풍 (큰 번호 inline + 본문 자연 흐름) ──
+% minipage로 감싸 한 문항이 한 컬럼 안에서 하나의 덩어리로 묶이게 함.
+% 둘째 인자 #2는 호환성을 위해 받기만 하고 사용하지 않음.
+% problem 환경: 고정 높이 minipage (페이지 안 4문 등간격 시작)
+\newlength{\probboxheight}
+\setlength{\probboxheight}{100mm}
+\newcounter{probnum}
+\newenvironment{problem}[2]{%
+  \par%
+  \setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t][\probboxheight][t]{\linewidth}%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{vB-ink}#1.}\hspace{4pt}\ignorespaces
+}{%
+  \vfill\null\end{minipage}\par%
+}
+
+% ── 보기 ──
+\newcounter{choicecnt}
+\newenvironment{choices}{\par\medskip\setcounter{choicecnt}{0}\noindent
+  \linespread{1.45}\selectfont}{\par\medskip}
+\newcommand{\circmark}{\ifcase\value{choicecnt}\or①\or②\or③\or④\or⑤\fi}
+\newcommand{\choice}[1]{\stepcounter{choicecnt}%
+  \mbox{\small\circmark\ #1}\hskip 0.8em plus 1fil minus 0.3em\relax}
+\newif\ifshowanswers\showanswersfalse
+\newcommand{\answer}[1]{\ifshowanswers{\small\color{vB-dim}[정답: #1]}\fi}
+
+% ── 긴 보기 환경: 5개 보기를 2-2-1 행으로 분배 ──
+% 사용: \begin{choicesii}{①본문}{②본문}{③본문}{④본문}{⑤본문}\end{choicesii}
+\newenvironment{choicesii}[5]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}p{0.49\linewidth}@{\hskip 0.02\linewidth}p{0.49\linewidth}@{}}
+    \mbox{\small ①\ #1} & \mbox{\small ②\ #2} \\[2pt]
+    \mbox{\small ③\ #3} & \mbox{\small ④\ #4} \\[2pt]
+    \mbox{\small ⑤\ #5} & \\
+  \end{tabular}%
+}{\par\medskip}
+
+% ── 출처 인용 매크로 (공개 기출용) ──
+\newcommand{\examcite}[1]{\quad{\footnotesize\sffamily\color{vB-dim}#1}}
+
+% ── [출제의도] 라벨 (답지 풀이 도입부 표시, 학평 표준 스타일 v2.6 §22.1) ──
+% 사용: \examintent{이차방정식의 근과 계수의 관계를 활용하여 문제 해결하기}
+% → 출력: [출제의도] 이차방정식의 근과 계수의 관계를 활용하여 문제 해결하기
+% 단일 인자: 단원명 + 동사 결합 문자열. 학평 동사 4단계 (계산/이해/문제 해결/추론) 의무.
+\newcommand{\examintent}[1]{%
+  \par\noindent
+  {\footnotesize\sffamily\bfseries\color{vB-deep}[출제의도]}\,%
+  {\footnotesize\sffamily\color{vB-ink}#1}%
+  \par\smallskip
+}
+
+% ── \solnote (통찰 박스) — RPM 비법노트 양식 표준 (v1.0, 2026-06-28 마스터 정책) ──
+% 사용: \solnote{한 문장 핵심 통찰. 공식 박스 또는 다른 풀이 안내.}
+% 단일 출처: bank/비표준-어구-사전.md §3.
+%
+% 🔴 금지 양식 (RED — 검출 시 즉시 정정):
+%   • 메타 코멘트: "학생이 ~ 놓치면 함정"
+%   • 내부 코드명: "(P-FG1)" "★ 5" "I-XU"
+%   • 압축 신조어: "대칭식 환원" "부호로 환원" "표준 마무리" "자동 제거"
+%   • 외래어: "케이스" "분기" "단서"
+%   • 본 시스템 신조어: "켤레허근" "미정 이차함수" "살아남는 케이스"
+%
+% ✅ 권장 양식:
+%   • 한 문장 RPM 비법노트형 공식 박스
+%   • 자연 한국어 풀이 통찰 (RPM 톤)
+%   • "다른 풀이:" 안내
+%
+% 모드:
+%   • \solnotemodestudent — 학생용 (출력)
+%   • \solnotemodeteacher — 교사용 (별도 PDF, 메타 가능)
+%   • \solnotemodenone    — 출력 안 함
+%
+% 기본은 student.
+\newif\ifsolnoteoutput \solnoteoutputtrue
+\newcommand{\solnotemodestudent}{\solnoteoutputtrue}
+\newcommand{\solnotemodeteacher}{\solnoteoutputtrue}
+\newcommand{\solnotemodenone}{\solnoteoutputfalse}
+
+% v1.2 (2026-06-28): 통찰 박스 위 여백 조정 (22pt → 14pt). 풀이가 페이지에 들어가도록.
+\newcommand{\solnote}[1]{%
+  \par\leftskip=0pt% reset from prior \step
+  \ifsolnoteoutput
+    \par\addvspace{14pt}\noindent
+    \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+      boxrule=0pt, arc=3pt, left=10pt, right=10pt, top=6pt, bottom=6pt,
+      fontupper=\sffamily\footnotesize\color{vB-ink}]
+      \textbf{\color{vB-deep}통찰}\quad #1
+    \end{tcolorbox}%
+    \par\addvspace{12pt}%
+  \fi
+}
+
+% ── 문항 번호 옆 출처 표기 (작게, 회청색, 이탤릭) ──
+% 사용: \textbf{[4번]}\probsource{2026 6월 고2 4번}\quad\pointbadge{3}
+% 문항 번호 바로 옆에 붙여 작은 회청색 텍스트로 출처를 표기.
+\newcommand{\probsource}[1]{\,{\footnotesize\sffamily\color{vB-dim}\textit{#1}}}
+
+% ═══════════════════════════════════════════════════════
+% 수택고 기말 — 시험지/답지 전용 매크로 (행렬 베이스 위에 추가)
+% ═══════════════════════════════════════════════════════
+
+% ── 답지 전용 톤 ──
+\definecolor{vB-answer}{HTML}{FFF8DC}
+\definecolor{vB-answer-rule}{HTML}{D4A017}
+
+% ── 시험지 상단 헤더 (수능 표준 풍 — 좌·우 박스 + 가운데 큰 제목) ──
+% 사용: \examheader{메인 제목}{부제}
+\newcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  \begin{tikzpicture}[remember picture]
+    \node[draw=vB-deep, fill=white, line width=0.8pt, rounded corners=4pt,
+          font=\sffamily\bfseries\color{vB-deep},
+          inner xsep=10pt, inner ysep=4pt, anchor=south west] (Lbox) at (0,0) {\,기말대비\,};
+    \node[font=\sffamily\Huge\bfseries\color{vB-ink}, anchor=base] at (\linewidth/2, 4pt) {\examround};
+    \node[draw=vB-deep, fill=white, line width=0.8pt, rounded corners=4pt,
+          font=\sffamily\bfseries\color{vB-deep},
+          inner xsep=10pt, inner ysep=4pt, anchor=south east] (Rbox) at (\linewidth,0) {\,\examvol\,};
+  \end{tikzpicture}%
+  \par\vspace{6pt}
+  \noindent{\color{vB-deep}\rule{\linewidth}{0.8pt}}\par
+  \vspace{6pt}
+  \noindent
+  {\sffamily\small\color{vB-dim} #1}\par\vspace{1pt}
+  {\sffamily\scriptsize\color{vB-dim} #2}\par\vspace{6pt}
+  {\sffamily\footnotesize\color{vB-ink}
+    학년·반·번호: \rule{42mm}{0.3pt}\hfill 이름: \rule{42mm}{0.3pt}}%
+  \par\addvspace{10pt}
+  \thispagestyle{examfooter}%
+}
+
+% ── 답지 상단 헤더 박스 (수능 표준 풍) ──
+% 둥근 모서리, 가운데 정렬, 부제 + 메인 타이틀 2단
+\newcommand{\answerheader}[2]{%
+  \thispagestyle{examfooter}%
+  \par\noindent
+  \begin{tikzpicture}[baseline=0pt]
+    \node[draw=vB-deep, fill=white, line width=0.8pt, rounded corners=4pt,
+          font=\sffamily\bfseries\color{vB-deep},
+          inner xsep=10pt, inner ysep=4pt, anchor=south west] (Lbox) at (0,0) {\,\examvol\,};
+  \end{tikzpicture}%
+  \par\vspace{6pt}
+  \begin{tcolorbox}[enhanced, colback=white, colframe=vB-answer-rule,
+    boxrule=1.1pt, arc=10pt, left=18pt, right=18pt, top=9pt, bottom=9pt,
+    halign=center]
+    {\sffamily\small\color{vB-dim} \examround}\par\vspace{3pt}
+    {\sffamily\LARGE\bfseries\color{vB-deep} #1}\par\vspace{2pt}
+    {\sffamily\footnotesize\color{vB-dim} #2}
+  \end{tcolorbox}\par\addvspace{10pt}
+}
+
+% ── 빠른 정답표 그리드 (수능 표준 풍) ──
+% 사용:
+%   \begin{quickgrid}
+%   \quick{1}{⑤ $...$} & \quick{2}{④ $...$} & \quick{3}{⑤ $6$} & \quick{4}{① $...$} & \quick{5}{④ $8$} \\
+%   \quick{6}{...} & ...
+%   \end{quickgrid}
+% 5칸 tabular* + 둥근 박스. arraystretch 1.4.
+\newcommand{\quick}[2]{\textbf{\sffamily\color{vB-ink} #1.}\,\,{\sffamily\color{vB-ink} #2}}
+\newenvironment{quickgrid}[1][빠른 정답표]{%
+  \par\noindent
+  \begin{tcolorbox}[enhanced, colback=white, colframe=vB-answer-rule,
+    boxrule=0.8pt, arc=6pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={■\,\,#1}, fonttitle=\sffamily\bfseries,
+    coltitle=white, colbacktitle=vB-answer-rule,
+    attach boxed title to top center={yshift=-3pt},
+    boxed title style={colback=vB-answer-rule, sharp corners=downhill, boxrule=0pt,
+      left=10pt, right=10pt, top=2pt, bottom=2pt}]
+    \renewcommand{\arraystretch}{1.35}\sffamily\small
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+}{%
+    \end{tabular*}\par
+  \end{tcolorbox}\par\addvspace{10pt}
+}
+
+% ── 풀이 간 큰 간격 플래그 (true=다음 soltitle 컴팩트, false=2cm) ──
+\newif\ifsoltitlefirst\soltitlefirsttrue
+
+% ── 시험 출처 라벨 (슬림 — 좌측 굵은 바 + 작은 글씨) ──
+% 사용: \examsection{2026 6월 고2 전국연합학력평가}
+\newcommand{\examsection}[1]{%
+  \par\addvspace{12pt}\needspace{4\baselineskip}%
+  \noindent\textcolor{vB-deep}{\rule[-3pt]{3pt}{14pt}}\,\,%
+  {\sffamily\bfseries\color{vB-deep}#1}%
+  \par\vspace{2pt}%
+  \noindent\textcolor{vB-rule}{\rule{\linewidth}{0.3pt}}%
+  \par\addvspace{4pt}%
+  \soltitlefirsttrue% examsection 직후 첫 soltitle은 컴팩트
+}
+
+% ── 배점 뱃지 — 점수에 따라 색이 달라짐 (5단 변별) ──
+%   2.5점 (★1 객관식·도입):  회색 테두리·회색 글자
+%   3점   (★1 단답·★2):      회색 테두리·회색 글자
+%   4점   (★3 객관·단답):    블루 테두리·블루 배경·블루 글자 (표준)
+%   5점   (★4 객관):         골드 테두리·골드 글자 굵게 (변별)
+%   5.5점 (★4 논술):         골드 테두리·옅은 골드 배경·골드 글자 굵게 (최고난도)
+\newcommand{\pointbadge}[1]{%
+  \ifstrequal{#1}{2}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.4pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {2점};%
+  }{}%
+  \ifstrequal{#1}{2.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.4pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {2.5점};%
+  }{}%
+  \ifstrequal{#1}{3}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.4pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3점};%
+  }{}%
+  \ifstrequal{#1}{3.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3.5점};%
+  }{}%
+  \ifstrequal{#1}{3.7}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3.7점};%
+  }{}%
+  \ifstrequal{#1}{3.9}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3.9점};%
+  }{}%
+  \ifstrequal{#1}{4}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4점};%
+  }{}%
+  \ifstrequal{#1}{4.1}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.1점};%
+  }{}%
+  \ifstrequal{#1}{4.3}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.3점};%
+  }{}%
+  \ifstrequal{#1}{4.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.5점};%
+  }{}%
+  \ifstrequal{#1}{4.6}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.6점};%
+  }{}%
+  \ifstrequal{#1}{4.7}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.7점};%
+  }{}%
+  \ifstrequal{#1}{4.8}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.8점};%
+  }{}%
+  \ifstrequal{#1}{5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-answer-rule, fill=white, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-answer-rule}] (b) {5점};%
+  }{}%
+  \ifstrequal{#1}{5.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-answer-rule, fill=vB-answer, line width=0.7pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-answer-rule}] (b) {5.5점};%
+  }{}%
+  % v3.4 상대 배점 정책 (2026-06-25 마스터 명시) — 변별 정점용 6·6.5·6.7·7점
+  \ifstrequal{#1}{6}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-answer-rule, fill=vB-answer, line width=0.8pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-answer-rule}] (b) {6점};%
+  }{}%
+  \ifstrequal{#1}{6.5}{%
+    \tikz[baseline=(b.base)]\node[draw=red!70!black, fill=vB-answer, line width=0.9pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!70!black}] (b) {6.5점};%
+  }{}%
+  \ifstrequal{#1}{6.7}{%
+    \tikz[baseline=(b.base)]\node[draw=red!75!black, fill=red!10, line width=0.9pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!75!black}] (b) {6.7점};%
+  }{}%
+  \ifstrequal{#1}{7}{%
+    \tikz[baseline=(b.base)]\node[draw=red!80!black, fill=red!15, line width=1.0pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!80!black}] (b) {7점};%
+  }{}%
+  \ifstrequal{#1}{8}{%
+    \tikz[baseline=(b.base)]\node[draw=red!85!black, fill=red!20, line width=1.2pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!85!black}] (b) {8점};%
+  }{}%
+}
+
+% ── 빈칸 (가)(나)(다) ──
+\newcommand{\blank}[1]{\,\fbox{\,#1\,}\,}
+
+% ── 한국 교과서식 기울어진 평행 기호 (∥ 대체) ──
+% \parallel 은 두 수직 막대, 한국 교과서는 기울어진 // 형태가 표준
+\newcommand{\para}{\mathbin{/\mskip-5mu/}}
+
+% ── (단, ...) 단서 조건 — 줄바꿈 방지 + 작은 글씨 ──
+\newcommand{\cond}[1]{\mbox{\small (단, #1)}}
+
+% ── 줄바꿈 방지 wrapper (한 단위 수식/조건을 한 줄에 묶음) ──
+\newcommand{\nob}[1]{\mbox{#1}}
+
+% ── 그림 import 매크로 (출처 PDF의 페이지에서 trim 크롭) ──
+% 사용: \examfig[width=0.95\linewidth]{path/to.pdf}{페이지번호}{trim L B R T (bp 단위)}
+% 예: \examfig{2026 6월 고2.pdf}{3}{0 350 0 200}
+\newcommand{\examfig}[4][width=0.95\linewidth]{%
+  \par\smallskip\centering
+  \includegraphics[#1, page=#3, trim=#4, clip]{#2}\par\smallskip\noindent\ignorespaces}
+
+% viewport 좌표(L B R T) 버전 — trim보다 PDF 절대좌표 지정이 직관적인 케이스용
+\newcommand{\examfigvp}[4][width=0.95\linewidth]{%
+  \par\smallskip\centering
+  \includegraphics[#1, page=#3, viewport=#4, clip]{#2}\par\smallskip\noindent\ignorespaces}
+
+% ── 그림 placeholder (출처 PDF 없을 때) ──
+\newcommand{\figureph}[2]{%
+  \par\smallskip\begin{center}
+  \fcolorbox{vB-rule}{white}{\parbox{0.85\linewidth}{\centering\sffamily\footnotesize\color{vB-dim}
+    [그림] #1\\\vspace{#2}}}\end{center}\par\smallskip\noindent\ignorespaces}
+
+% ═══════════════════════════════════════════════════════
+% 답지 매크로
+% ═══════════════════════════════════════════════════════
+
+% ── 정답 표기 — 박스·골드 좌측 바 모두 제거, 굵은 검정 텍스트만 ──
+% (마스터 지시 2026-07-01: 학생용 답지 정합 — 박스·황금색 일체 제거)
+% 2026-07-01 마스터 명시: 박스·골드 좌측 바는 제거, 정답 글씨 앞 *황금색 직사각형 마커* (세로로 긴 직사각형) 유지.
+\newenvironment{answerbox}{%
+  \par\noindent
+  \textcolor{vB-answer-rule}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{black}%
+}{%
+  \par\medskip%
+}
+
+% ── 풀이 단계 마커 — 둥근 네이비 박스 + 본문은 옆에서 흐름 + 줄바꿈 시 박스 옆 본문 시작 열에 정렬 ──
+% v1.2 (2026-06-28, 마스터 명시): \leftskip 방식으로 변경 — 한 \step 안에서 단락이 새로
+% 시작되어도(빈 줄에 의한 \par) 텍스트 시작 열에 정렬. 박스는 \llap으로 왼쪽 마진에 배치.
+% \soltitle·\solnote가 \leftskip=0pt로 reset.
+\newsavebox{\stepboxsave}
+\newcommand{\step}[1]{%
+  \par\leftskip=0pt%
+  \addvspace{10pt}\needspace{2\baselineskip}%
+  \sbox{\stepboxsave}{\tikz[baseline=-0.6ex]\node[fill=vB-deep, text=white, rounded corners=2.5pt,
+    inner xsep=6pt, inner ysep=2pt,
+    font=\sffamily\bfseries\footnotesize]{\,단계\,#1\,};}%
+  \leftskip=\dimexpr\wd\stepboxsave + 6pt\relax%
+  \noindent\llap{\usebox{\stepboxsave}\hspace*{6pt}}%
+  \ignorespaces
+}
+
+% ── 풀이 헤더 — 자연 흐름. 같은 examsection 내에서 풀이 사이 2cm 간격 ──
+% v2.0 (2026-06-28): 둘째 인자 = [출제의도] 라벨 (단원명+동사). 문항 번호 오른쪽에 출력.
+% v2.1 (2026-06-28, 마스터 명시):
+%   • 언더라인을 문항 번호와 붙임 (rule 직전 음수 vspace)
+%   • 정답(answerbox)과 언더라인 사이 여유간격 확대 (rule 직후 vspace 2pt → 12pt)
+%   • 점수 표기 [N점] 제거 (셋째 인자는 호환성 위해 받기만 함)
+% 사용: \soltitle{1}{삼차방정식 이해하기}{3}
+%        → 1. [출제의도] 삼차방정식 이해하기
+\newcounter{solcount}\setcounter{solcount}{0}
+\newcommand{\soltitle}[3]{%
+  \par\leftskip=0pt% reset from prior \step
+  \stepcounter{solcount}%
+  \ifsoltitlefirst
+    \par\addvspace{12pt}%
+    \soltitlefirstfalse
+  \else
+    \par\addvspace{1.5cm}%
+  \fi
+  \needspace{5\baselineskip}\noindent
+  {\sffamily\bfseries\large\color{vB-ink} #1.}\hspace{6pt}%
+  {\footnotesize\sffamily\bfseries\color{vB-deep}[출제의도]}\,%
+  {\footnotesize\sffamily\color{vB-ink} #2}%
+  \par\nobreak\vspace{-4pt}\noindent%
+  \tikz{\draw[vB-deep, line width=1pt, line cap=butt] (0,0) -- (\linewidth,0);}%
+  \par\vspace{12pt}
+}
+
+% ── 최종 정답 (우측 정렬, 박스 없음) ──
+% 사용: \finalans{⑤}{$\frac{4}{3}\pi$} (선택지/단답형 둘 다)
+\newcommand{\finalans}[2]{%
+  \par\vspace{4pt}\hfill%
+  \fbox{\sffamily\bfseries\color{vB-answer-rule}\,정답 #1\ifx&#2&\else\,#2\fi\,}%
+  \par\vspace{2pt}
+}
+
+% ── 답지용 정답표 columntype ──
+\RequirePackage{array}
+\newcolumntype{Y}[1]{>{\centering\arraybackslash}p{#1}}

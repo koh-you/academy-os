@@ -1,0 +1,309 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\renewcommand{\examround}{2학기 중간 예상}
+\renewcommand{\examvol}{vol.1}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-82.5mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+% ── 문항 스타일 재정의 (v5.1 재출제) ──
+\makeatletter
+% ── problem 환경 로컬 override (2026-07-11 v2): 자연 크기 minipage
+%   \probpair 매크로가 좌우 크기 자동 측정할 수 있도록 [t][H][t] → [t] 자연 크기
+\renewenvironment{problem}[2]{%
+  \par%
+  \setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\par\smallskip\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{\nobreak\hspace*{\fill}\textbf{[#1점]}\par}
+\renewenvironment{choices}{\par\vspace{5mm}\setcounter{choicecnt}{0}%
+  \noindent\hbox to \linewidth\bgroup\small\ignorespaces}{%
+  \egroup\par\medskip}
+\makeatother
+
+\begin{document}
+
+\examheader{}{공통수학2 \textperiodcentered\ 도형의 방정식 \textperiodcentered\ 집합 \textperiodcentered\ 17문 / 100점}
+
+\examsection{선택형 12문 (65점) \textperiodcentered\ 서술형 5문 (35점) \textperiodcentered\ 총 17문 100점}
+
+% ── 선택형 페이지 균등 분배 시스템 (2026-07-11 완성) ─────
+%   \probpair{좌 문항}{우 문항} 매크로가 자동으로:
+%     1. 좌우 문항 실제 크기 측정 (savebox)
+%     2. max(좌,우) + 20mm로 좌우 minipage 크기 통일
+%     3. 좌우 하단 baseline 정렬 (페이지 빈 공간 최소화)
+%   pagepair 안 \vfill이 상하 pagepair 사이 남는 공간을 자동 흡수
+%   각 문항 뒤 최소 20mm 여백 보장 (\probvpadding = 20mm, style.sty)
+
+% ── 페이지 1 (문제 1~4) ───────────────────────────────────
+\begin{pagepair}
+\vspace{4mm}
+\probpair{%
+\begin{problem}{1}{s}
+수직선 위의 두 점 $\mathrm{A}(-2)$, $\mathrm{B}(3)$에 대하여 수직선 위의 점 $\mathrm{P}$가 $\overline{\mathrm{AP}}+\overline{\mathrm{BP}} \le 8$을 만족시킬 때, 점 $\mathrm{P}$가 나타내는 도형의 길이는? \pts{5}
+\begin{choices}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\choice{$8$}
+\choice{$9$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{2}{s}
+좌표평면 위의 점 $\mathrm{A}(4,\,3)$을 한 꼭짓점으로 하는 정삼각형 $\mathrm{ABC}$의 무게중심의 좌표가 $(-2,\,-3)$일 때, 삼각형 $\mathrm{ABC}$의 둘레의 길이는? \pts{5}
+\begin{choices}
+\choice{$12\sqrt{6}$}
+\choice{$15\sqrt{6}$}
+\choice{$18\sqrt{6}$}
+\choice{$21\sqrt{6}$}
+\choice{$24\sqrt{6}$}
+\end{choices}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{3}{s}
+좌표평면에서 실수 $a$, $b$, $c$에 대하여 직선 $ax+by+c=0$의 기울기가 양수이고 $y$절편이 음수이다. 이때 직선 $bx-ay+c=0$이 지나지 않는 사분면은? \pts{5}
+\begin{choicesii}{제 $1$ 사분면}{제 $2$ 사분면}{제 $3$ 사분면}{제 $4$ 사분면}{없음}\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{4}{s}
+집합 $A=\{2n^{2}+1\mid n\text{은 } 3 \text{ 이하의 자연수}\}$의 각 원소를 $6$으로 나눈 나머지를 모두 모은 집합을 $B$라 하자. 집합 $B$의 모든 원소의 합은? \pts{5}
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+\clearpage
+
+% ── 페이지 2 (문제 5~8) — \probpair 자동 균등 분배 ──────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{5}{s}
+두 집합
+$$A=\{x\mid -2<x-a\le 0\},\quad B=\{x\mid x^{2}-11x+18<0\}$$
+에 대하여 $A\subset B$를 만족시키는 모든 자연수 $a$의 값의 합은? \pts{5}
+\begin{choices}
+\choice{$20$}
+\choice{$25$}
+\choice{$30$}
+\choice{$35$}
+\choice{$40$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{6}{s}
+자연수 전체의 집합의 부분집합으로 자연수 $k$에 대하여 $A_{k}=\{x\mid x \text{는 } k\text{의 배수}\}$라 하자.
+$$A_{m}\subset (A_{12}\cap A_{16}),\qquad (A_{24}\cup A_{60})\subset A_{n}$$
+을 만족시키는 두 자연수 $m$, $n$에 대하여 $m$의 최솟값과 $n$의 최댓값의 합은? \pts{5}
+\begin{choices}
+\choice{$48$}
+\choice{$54$}
+\choice{$60$}
+\choice{$66$}
+\choice{$72$}
+\end{choices}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{7}{s}
+원 $x^{2}+y^{2}-4x+2y+1=0$의 넓이와 네 직선 $x=0$, $x=6$, $y=1$, $y=5$로 둘러싸인 직사각형의 넓이를 모두 이등분하는 직선의 기울기는? \pts{5}
+\begin{choices}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{8}{s}
+세 점 $\mathrm{A}(1,\,1)$, $\mathrm{B}(3,\,-1)$, $\mathrm{C}(4,\,2)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$가 직선
+$$(k+1)x+(2-k)y-4k-1=0$$
+에 의해 두 도형으로 나누어질 때, 한쪽의 넓이가 다른 쪽의 넓이의 $2$배가 되도록 하는 모든 실수 $k$의 값의 합은? \pts{6}
+\begin{choices}
+\choice{$\dfrac{27}{10}$}
+\choice{$\dfrac{29}{10}$}
+\choice{$\dfrac{31}{10}$}
+\choice{$\dfrac{33}{10}$}
+\choice{$\dfrac{35}{10}$}
+\end{choices}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+\clearpage
+
+% ── 페이지 3 (문제 9~12) — \probpair 자동 균등 분배 ─────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{9}{s}
+두 점 $\mathrm{A}(-3,\,0)$, $\mathrm{B}(1,\,0)$을 지름의 양 끝점으로 하는 원 위의 점 $\mathrm{P}(x,\,y)$에 대하여 $y^{2}-2x$의 최댓값과 최솟값의 합은? \pts{6}
+\begin{choices}
+\choice{$1$}
+\choice{$3$}
+\choice{$5$}
+\choice{$7$}
+\choice{$9$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{10}{s}
+실수 $x$, $y$에 대한 다음 $\langle$보기$\rangle$ 의 명제 중 참인 것만을 있는 대로 고른 것은? \pts{6}
+\vspace{3mm}
+
+\begin{bogibox}
+ㄱ. $x<y<0$이면 $\dfrac{1}{x}>\dfrac{1}{y}$이다.\\[2pt]
+ㄴ. $x^{2}>y^{2}$이면 $x>y$이다.\\[2pt]
+ㄷ. $x^{2}+y^{2}=0$이면 $|x|+|y|=0$이다.\\[2pt]
+ㄹ. $x^{2}-5x+6=0$이면 $x=3$이다.\\[2pt]
+ㅁ. $xy=0$이면 $x=0$이고 $y=0$이다.
+\end{bogibox}
+\begin{choices}
+\choice{ㄱ, ㄴ}
+\choice{ㄱ, ㄷ}
+\choice{ㄴ, ㄷ}
+\choice{ㄴ, ㅁ}
+\choice{ㄷ, ㅁ}
+\end{choices}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{11}{s}
+$30$ 이하의 자연수 $k$에 대하여 두 집합
+$$A=\{x\mid x\text{는 } k\text{의 양의 약수}\},\qquad B=\{2,\ 5,\ 6\}$$
+이 다음 두 조건을 모두 만족시킨다.
+\begin{conditions}
+(가) $n(A\cap B)=2$ \\[3pt]
+(나) 집합 $A-B$의 모든 원소의 합이 홀수이다.
+\end{conditions}
+이때, 모든 $k$의 값의 합은? \pts{6}
+\begin{choices}
+\choice{$40$}
+\choice{$48$}
+\choice{$56$}
+\choice{$64$}
+\choice{$72$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{12}{s}
+좌표평면 위의 점 $\mathrm{P}(x,\,y)$를 다음 규칙에 따라 이동시킨다.
+\begin{conditions}
+(가) $y>x$이면 점 $\mathrm{P}$를 $x$축 방향으로 $+3$만큼 평행이동한다. \\[3pt]
+(나) $y<x$이면 점 $\mathrm{P}$를 $y$축 방향으로 $-2$만큼 평행이동한다. \\[3pt]
+(다) $y=x$이면 점 $\mathrm{P}$는 이동을 멈춘다.
+\end{conditions}
+점 $\mathrm{A}(4,\,10)$에서 출발한 점이 (다)에 의해 멈추게 되는 점을 $\mathrm{B}(p,\,q)$라 할 때, $p+q$의 값은? \pts{6}
+\begin{choices}
+\choice{$16$}
+\choice{$18$}
+\choice{$20$}
+\choice{$22$}
+\choice{$24$}
+\end{choices}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+\clearpage
+
+% ── 페이지 4 (문제 13, 14, 서답형) ─────────────────
+%   서답형은 소문항 vspace가 답 공간 (명시 크기 유지). \probpair 부적합.
+%   각 minipage 크기 = 실제 컨텐츠 크기 (실측): 13번 195mm, 14번 195mm
+\setlength{\probboxheight}{195mm}
+
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\raggedright
+\begin{problem}{13}{s}
+어느 학교 학생 $30$명을 대상으로 방학 동안 진행된 봉사활동 참가 여부를 조사하였다. 세 날짜 $\mathrm{X}$, $\mathrm{Y}$, $\mathrm{Z}$에 진행된 봉사에 참가한 학생 수는 각각 $17$명, $12$명, $13$명이었고, 세 날짜 모두에 참가한 학생 수는 $3$명이었다. 조사 결과 학생 $30$명은 모두 세 날짜 중 하루 이상에 참가하였다. 세 날짜 중 정확히 한 날짜에만 참가한 학생 수를 구하고, 그 과정을 서술하시오. \pts{6}
+
+\vspace{100mm}
+\end{problem}
+\end{minipage}%
+\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\raggedright
+\begin{problem}{14}{s}
+좌표평면 위의 원
+$$C:\; x^{2}+y^{2}-8x-2y=0$$
+이 $x$축과 만나는 서로 다른 두 점을 각각 $\mathrm{A}$, $\mathrm{B}$라 하자. 원 $C$ 위의 점 $\mathrm{P}$가 제 $1$ 사분면 위에 있을 때, 삼각형 $\mathrm{ABP}$의 넓이가 자연수가 되도록 하는 점 $\mathrm{P}$의 개수를 구하고 그 과정을 서술하시오. \pts{7}
+
+\vspace{130mm}
+\end{problem}
+\end{minipage}
+
+\clearpage
+
+% ── 페이지 5 (문제 15·16 좌우 배치) ──
+\begin{pagepair}
+\noindent
+\begin{minipage}[t]{0.46\linewidth}\raggedright
+\begin{problem}{15}{s}
+좌표평면 위의 원
+$$x^{2}+y^{2}+4x-2y-4=0$$
+을 평행이동 $(x,\,y)\to(x+k,\,y-3)$에 의하여 이동한 원이 직선 $4x+3y-5=0$과 접하도록 하는 모든 상수 $k$의 값의 곱을 구하고 그 과정을 서술하시오. \pts{7}
+\end{problem}
+\end{minipage}\hfill\begin{minipage}[t]{0.46\linewidth}\raggedright
+\begin{problem}{16}{s}
+전체집합 $U=\{1,\,2,\,3,\,4,\,5,\,6,\,7,\,8\}$의 두 부분집합
+$$A=\{1,\,2,\,4,\,6,\,8\},\qquad B=\{1,\,a,\,b\}$$
+가 있다. 단, $a$, $b$는 $1<a<b\le 8$인 자연수이다.
+$$A\cup C = B\cup C$$
+를 만족시키는 $U$의 부분집합 $C$의 개수가 $16$이 되도록 하는 모든 순서쌍 $(a,\,b)$의 개수를 구하고 그 과정을 서술하시오. \pts{7}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 6 (문제 17) — 좌측 컬럼 배치 ──
+\begin{pagepair}
+\noindent
+\begin{minipage}[t]{0.46\linewidth}\raggedright
+\begin{problem}{17}{s}
+좌표평면 위의 두 원
+$$(x-1)^{2}+(y+2)^{2}=13,\qquad (x+2)^{2}+(y-1)^{2}=k$$
+가 서로 다른 두 점 $\mathrm{A}$, $\mathrm{B}$에서 만나고, $\overline{\mathrm{AB}}=2\sqrt{3}$이 되도록 하는 모든 양수 $k$의 값의 합을 구하고 그 과정을 서술하시오. \pts{8}
+\end{problem}
+\end{minipage}\hfill\begin{minipage}[t]{0.46\linewidth}\mbox{}\end{minipage}
+\end{pagepair}
+
+\end{document}

@@ -1,0 +1,40 @@
+---
+id: OUT-practice03-여러가지부등식-001
+unit: CM1-EQ
+type: T44
+status: approved
+source_origin: 깊이와통찰 — 우리 책 출제 (검수 완료)
+original_tex_file: output/공통수학1/practice03-여러가지부등식.tex
+original_env: prob
+original_idx_in_file: 1
+dot_star: null
+tags: []
+created: '2026-06-15'
+book_meta:
+  book_title: 공통수학1 여러 가지 부등식 — 상위권 유형 요약편
+  audience: 상위권
+  book_total: 32
+slot_meta:
+  'n': 1
+  role: 도입
+  focus: 분수항+매개 1개 → 끝점 일치
+  problem_id: null
+external_labels:
+  - source: 우리 책 (검수 완료)
+    cohort_type: editor_estimate
+    label_star: null
+    cohort_normalized_star: null
+frequency: 3
+---
+
+*(status: approved — 우리 책에 이미 등록된 검수 완료 문제. status==='draft'·'meta_only' 가 아닌 ground truth 풀.)*
+
+**LaTeX 옵션**: `#1`
+
+**본문 미리보기**: #2
+
+## 본문 (LaTeX)
+
+```latex
+#2
+```

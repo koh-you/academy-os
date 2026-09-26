@@ -1,0 +1,932 @@
+% DeeP Math 정리편 · CM2-RF-01 유리함수 · 답지 v1
+% Phase 3 (2026-07-20 세션 56) : 청사진 v6.2 · Phase 2 본편 대응
+% 답지 v1 골든 계승 (06-FN-함수-답지.tex) · deep-math-answer.sty
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% 세션 55·56·57 신정책 승계:
+%   - \textbf 금지 (정답 zone \dmanswerbox 안 값만)
+%   - 정답 zone 값만 (유도 부연 금지)
+%   - cplabel 완성 문장 (짧고 굵게 · 15자 내 · 등호 표기 금지)
+%   - CM2-RF 정규 도구: 유리식 · 유리함수 표준형 · 점근선 · 대칭 · 역함수
+%   - "자기역함수" 표현 금지 → "역함수가 자기 자신과 같은" 자연어
+%   - 극한·미분·미지수·벡터·삼각함수 자연어화
+%   - 상위 과정 용어 회피 · ★ 노출 금지 · "정리편" 표기 금지
+%   - Overfull 0 필수 · 원문 그림: R-2만 재현 (R-1·R-3 원문 그림 없음)
+%   - L3-1·L3-2 유리함수 고유 도구 (점근선 수선의 발 · 판별식) · 산술기하 회피
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{유리함수}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{유리함수 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{풀이 참조} & \dmquick{2}{$-1$} & \dmquick{3}{$\dfrac{4}{13}$} & \dmquick{4}{$\dfrac{4}{x(x+4)}$} & \dmquick{5}{풀이 참조} \\
+\dmquick{6}{$-18$} & \dmquick{7}{max $\dfrac{1}{3}$·min $-3$} & \dmquick{8}{$12$} & \dmquick{9}{$1$} & \dmquick{10}{$8$} \\
+\dmquick{11}{$3$} & \dmquick{12}{$3$} & & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{유리식의 사칙연산}
+\begin{dmanslist}
+\dmansitem{1} $\dfrac{5x+12}{(x+2)(x+3)}$ \\
+& \dmansitem{2} $\dfrac{x+2}{2x^{2}}$
+\end{dmanslist}
+
+\dmsubprob{1} 공통분모 $(x+2)(x+3)$\ 로 통분하면
+\[ \dfrac{2(x+3)+3(x+2)}{(x+2)(x+3)}=\dfrac{5x+12}{(x+2)(x+3)}. \]
+
+\dmsubprob{2} 첫 분수의 분모 $x^{2}+3x=x(x+3)$\ 로 인수분해 후 공통인수를 소거하면
+\[ \dfrac{x+2}{x(x+3)}\times\dfrac{x+3}{2x}=\dfrac{x+2}{2x^{2}}. \]
+
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{부분분수 분해와 계수 결정}
+\begin{dmanswerbox}
+정답: $-1$
+\end{dmanswerbox}
+
+우변을 통분한 분자 $a(x+1)+b(x-2)$\ 가 $5x-4$\ 와 같아야 한다. $x=2$\ 에서 $6=3a$\ 이므로 $a=2$, $x=-1$\ 에서 $-9=-3b$\ 이므로 $b=3$. 따라서 $a-b=-1$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{분모의 근을 대입하면 상수가 결정된다}: 부분분수 항등식은 통분 후 분자에서 항등식이 성립하므로, 분모의 각 근을 대입하면 남은 상수가 즉시 얻어진다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{인접 항이 상쇄되는 유한 합}
+\begin{dmanswerbox}
+정답: $\dfrac{4}{13}$
+\end{dmanswerbox}
+
+분모가 공차 $3$\ 인 두 수의 곱이므로
+\[ \dfrac{1}{(3k-2)(3k+1)}=\dfrac{1}{3}\!\left(\dfrac{1}{3k-2}-\dfrac{1}{3k+1}\right) \]
+로 분해된다. 이를 적용하면 이웃한 항들이 소거되어 첫 항 $1$\ 과 마지막 항 $-\dfrac{1}{13}$\ 만 남으므로
+\[ \dfrac{1}{3}\!\left(1-\dfrac{1}{13}\right)=\dfrac{4}{13}. \]
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{연속된 곱꼴에서 인접 항의 상쇄}
+\begin{dmanswerbox}
+정답: $\dfrac{4}{x(x+4)}$
+\end{dmanswerbox}
+
+각 항을 부분분수 분해하면
+\[ \dfrac{1}{k(k+1)}=\dfrac{1}{k}-\dfrac{1}{k+1} \]
+이므로 주어진 합은 이웃한 항들이 모두 소거되어 첫 항 $\dfrac{1}{x}$\ 와 마지막 항 $-\dfrac{1}{x+4}$\ 만 남는다. 따라서
+\[ \dfrac{1}{x}-\dfrac{1}{x+4}=\dfrac{(x+4)-x}{x(x+4)}=\dfrac{4}{x(x+4)}. \]
+
+% ─────────────── 확인 5 ───────────────
+\dmsoltitle{5}{일반형에서 표준형으로 변형해 정의역·치역·점근선 결정}
+\begin{dmanswerbox}
+정답: $x\ne -3$,\ $y\ne -2$,\ 점근선 $x=-3$,\ $y=-2$
+\end{dmanswerbox}
+
+분자를 분모로 나누면
+\[ y=\dfrac{-2x+1}{x+3}=\dfrac{-2(x+3)+7}{x+3}=\dfrac{7}{x+3}-2. \]
+표준형에서 대칭 중심이 $(-3,\, -2)$\ 이므로 정의역은 $x\ne -3$\ 인 실수 전체, 치역은 $y\ne -2$\ 인 실수 전체이고, 두 점근선은 $x=-3$\ 과 $y=-2$\ 이다.
+
+% ─────────────── 확인 6 ───────────────
+\dmsoltitle{6}{평행이동한 그래프의 식과 계수 매칭}
+\begin{dmanswerbox}
+정답: $-18$
+\end{dmanswerbox}
+
+$y=-\dfrac{3}{x}$\ 를 $x$\ 축 방향으로 $3$\ 만큼, $y$\ 축 방향으로 $-2$\ 만큼 평행이동하면
+\[ y=-\dfrac{3}{x-3}-2=\dfrac{-3-2(x-3)}{x-3}=\dfrac{-2x+3}{x-3}. \]
+이 식이 $y=\dfrac{ax+b}{x-c}$\ 이므로 $a=-2$,\ $b=3$,\ $c=3$\ 이고
+\[ abc=(-2)\cdot 3\cdot 3=-18. \]
+
+% ─────────────── 확인 7 ───────────────
+\dmsoltitle{7}{폐구간 유리함수의 최댓값·최솟값}
+\begin{dmanswerbox}
+정답: 최댓값 $\dfrac{1}{3}$, 최솟값 $-3$
+\end{dmanswerbox}
+
+$y=\dfrac{2x-3}{x+1}=\dfrac{2(x+1)-5}{x+1}=2-\dfrac{5}{x+1}$\ 이다. 대칭 중심 $(-1,\, 2)$\ 의 오른쪽 구간에 있는 $0\le x\le 2$\ 에서 $\dfrac{5}{x+1}$\ 이 감소하므로 $y$\ 는 증가한다.
+
+경계값을 대입하면
+\[ x=0:\ y=2-5=-3,\quad x=2:\ y=2-\dfrac{5}{3}=\dfrac{1}{3}. \]
+따라서 최솟값은 $-3$, 최댓값은 $\dfrac{1}{3}$\ 이다.
+
+% ─────────────── 확인 8 ───────────────
+\dmsoltitle{8}{조건에서 얻는 상수의 합}
+\begin{dmanswerbox}
+정답: $12$
+\end{dmanswerbox}
+
+$y=\dfrac{3x+k}{x+2}=\dfrac{k-6}{x+2}+3$\ 에서 $k>6$\ 이므로 $k-6>0$\ 이고, 이 함수는 $x>-2$\ 에서 감소한다. 폐구간 $0\le x\le a$\ 가 $-2$\ 의 오른쪽에 있으므로 최댓값은 $x=0$\ 에서, 최솟값은 $x=a$\ 에서 나타난다.
+
+$x=0$\ 에서
+\[ \dfrac{k-6}{2}+3=5\quad\therefore\ k=10. \]
+$x=a$\ 에서
+\[ \dfrac{3a+10}{a+2}=4\quad\therefore\ a=2. \]
+$\therefore\ a+k=12$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{분자 상수의 부호가 증감을 결정한다}: 표준형의 분자 상수 부호로 함수의 증감이 정해지므로, 폐구간의 어느 끝점에서 최댓값과 최솟값이 나타나는지 이 부호로 판단한다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 9 ───────────────
+\dmsoltitle{9}{대칭 중심의 좌표 합}
+\begin{dmanswerbox}
+정답: $1$
+\end{dmanswerbox}
+
+$y=\dfrac{5x+6}{2x+3}=\dfrac{5}{2}-\dfrac{3}{2(2x+3)}$\ 이므로 두 점근선은 $x=-\dfrac{3}{2}$\ 와 $y=\dfrac{5}{2}$\ 이다. 대칭 중심은 두 점근선의 교점이므로
+\[ (a,\, b)=\left(-\dfrac{3}{2},\ \dfrac{5}{2}\right),\qquad a+b=-\dfrac{3}{2}+\dfrac{5}{2}=1. \]
+
+% ─────────────── 확인 10 ───────────────
+% 세션 73 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5 대칭)
+%   골든 : templates/tikz-graph-golden/curve-line-intersection.tex 계승
+%   scale=0.7 · 두 대칭축 + 교점 시각화
+\dmsoltitle{10}{두 직선의 교점이 대칭 중심}
+\begin{dmanswerbox}
+정답: $8$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 세션 77 : 프레임-곡선 여백 재조정 (feedback_figure_frame_screen_fill)
+  %   이전: x[-4.5,1.5] y[-1.5,3.5] · 좌 branch가 x=-4.5 프레임 좌변까지 도달 → 여백 0%
+  %   정정: x[-5.0,2.0] 확장 · 좌 branch domain [-4.2,-2.5] · 우 branch [-1.5,1.5] · 여백 확보
+  %   변환: y=x+6 → y_c=x_c+3 · y=-x-2 → y_c=-x_c-1 · 교점 (-4,2) → (-2,1)
+  %   유리함수 y=(2x+3)/(x+4) → 압축 y_c=(4x_c+3)/(4x_c+8) · 점근선 x_c=-2·y_c=1
+  \draw[-stealth, black, line width=0.7pt] (-5.0, 0) -- (2.0, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -2.0) -- (0, 4.0) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {O};
+  \node[font=\tiny, below] at (-2, -0.02) {$-4$};
+  \node[font=\tiny, left] at (-0.02, 1) {$2$};
+  % ── 두 대칭축 · 축 프레임 좌우 전체 채움 · clip
+  \begin{scope}
+    \clip (-5.0, -2.0) rectangle (2.0, 4.0);
+    % y = x+6 → 압축 y_c = x_c + 3 (점선)
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-5.0, -2.0) -- (2.0, 5.0);
+    % y = -x-2 → 압축 y_c = -x_c - 1 (점선)
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-5.0, 4.0) -- (2.0, -3.0);
+  \end{scope}
+  % ── 유리함수 곡선 y_c=(4x_c+3)/(4x_c+8) · 실효 0.5pt · 검정 실선
+  %   좌 branch (x_c ∈ [-4.2, -2.5]) : y_c ∈ [1.61, 3.5] · 좌 여백 0.8단위 (16%)
+  \draw[black, line width=0.5pt, domain=-4.2:-2.5, samples=80]
+    plot (\x, {(4*\x + 3) / (4*\x + 8)});
+  %   우 branch (x_c ∈ [-1.5, 1.5]) : y_c ∈ [-1.5, 0.64] · 우 여백 0.5단위 (25%)
+  \draw[black, line width=0.5pt, domain=-1.5:1.5, samples=80]
+    plot (\x, {(4*\x + 3) / (4*\x + 8)});
+  % ── 대칭축 라벨 (곡선·다른 대칭축 회피 · 별도 node 배치)
+  \node[font=\tiny, dm-accent, anchor=south east] at (1.9, 3.55) {$y=x+6$};
+  \node[font=\tiny, dm-accent, anchor=north east] at (1.9, -1.55) {$y=-x-2$};
+  % ── 곡선 라벨 (좌하 영역 · 좌 branch 근처)
+  \node[font=\tiny, black, anchor=north west] at (-4.1, 1.6) {$y=f(x)$};
+  % ── 교점 (-4, 2) → 압축 (-2, 1) · 대칭 중심 · 정점 0.8pt
+  \filldraw[black] (-2, 1) circle (0.8pt);
+\end{tikzpicture}
+\end{center}
+
+두 대칭축 $y=x+6$\ 과 $y=-x-2$\ 의 교점은
+\[ x+6=-x-2,\quad 2x=-8,\quad x=-4,\quad y=2 \]
+이므로 대칭 중심은 $(-4,\, 2)$\ 이다.
+
+한편 $y=\dfrac{bx+3}{x+a}$\ 의 대칭 중심은 두 점근선 $x=-a$\ 와 $y=b$\ 의 교점 $(-a,\, b)$\ 이다. 두 좌표를 비교하면 $a=4$,\ $b=2$\ 이므로
+\[ ab=4\cdot 2=8. \]
+
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5 · 자기역함수)
+%   골든 : inverse-symmetry.tex 응용 · scale=1.0 · 좌표 0.5배 압축
+%   f(x)=(2x+1)/(x-2) · 점근선 x=2·y=2 · y=x 대칭이 자기 자신
+% ─────────────── 확인 11 ───────────────
+\dmsoltitle{11}{역함수가 자기 자신과 같은 경우의 함수 합성}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+$(f \circ g)(x) = x$\ 에서 $g = f^{-1}$\ 이므로, $y = f(x)$\ 의 그래프가 $y = x$\ 에 대칭인지를 먼저 확인한다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 세션 77 : 프레임 축소·곡선 domain 확장으로 활용률 상승 (tikz-graph-quality D3)
+  %   이전: x[-1.5,3.8] y[-3.5,5.7] · 좌 branch [-1.4,0.7]·우 branch [1.3,3.5]
+  %   정정: x[-1.2,3.5] y[-3.0,5.2] · 좌 branch [-1.1,0.8]·우 branch [1.2,3.3] · 활용률 65%↑
+  \draw[-stealth, black, line width=0.7pt] (-1.2, 0) -- (3.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -3.0) -- (0, 5.2) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+  \node[font=\tiny, below] at (1, -0.02) {$2$};
+  \node[font=\tiny, left] at (-0.02, 1) {$2$};
+  % ── 점근선 x=2·y=2 → 압축 x=1·y=1 (얇은 점선 · 각 라인 별도 \draw)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1, -3.0) -- (1, 5.2);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-1.2, 1) -- (3.5, 1);
+  % ── 원함수·역함수 (자기 자신) · f(x)=(2x+1)/(x-2) → 압축 y_c=(4x_c+1)/(4x_c-4)
+  %   왼쪽 branch (x_c ∈ [-1.1, 0.8]) : y_c ∈ [0.48, -4.2] (하단 -3.0 프레임 clip)
+  \draw[black, line width=0.5pt, domain=-1.1:0.8, samples=80]
+    plot (\x, {(4*\x + 1) / (4*\x - 4)});
+  %   오른쪽 branch (x_c ∈ [1.2, 3.3]) : y_c ∈ [7.25, 1.68] (상단 5.2 프레임 clip)
+  \begin{scope}
+    \clip (-1.2, -3.0) rectangle (3.5, 5.2);
+    \draw[black, line width=0.5pt, domain=1.2:3.3, samples=80]
+      plot (\x, {(4*\x + 1) / (4*\x - 4)});
+  \end{scope}
+  \node[font=\tiny, anchor=south west] at (2.6, 1.6) {$y=f(x)$};
+  % ── y = x 대각선 · 점선 dm-accent 0.4pt · 프레임 좌우 채움
+  \begin{scope}
+    \clip (-1.2, -3.0) rectangle (3.5, 5.2);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-1.2, -1.2) -- (3.5, 3.5);
+  \end{scope}
+  \node[font=\tiny, dm-accent, anchor=south west] at (3.1, 3.2) {$y=x$};
+\end{tikzpicture}
+\end{center}
+
+$y = \dfrac{2x+1}{x-2}$\ 에서 $x$\ 와 $y$\ 를 바꾼 뒤 $y$\ 에 대하여 풀면 $x(y-2)=2y+1$\ 에서 $y=\dfrac{2x+1}{x-2}$\ 이므로 $f^{-1}(x)=f(x)$\ 이다. 즉 $g=f$\ 이므로 $g(3)$\ 부터 순차 계산하면
+$$g(3)=\dfrac{7}{1}=7,\qquad g(7)=\dfrac{15}{5}=3$$
+$\therefore\ (g \circ g)(3)=g(7)=3$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$a+d=0$\ 이면 역함수가 자기 자신}: 유리함수 $\dfrac{ax+b}{cx+d}$\ 의 계수가 $a+d=0$\ 이면 $f^{-1}=f$\ 이므로 두 번 합성이 항등함수가 되어 임의의 값이 그대로 돌아온다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 12 ───────────────
+\dmsoltitle{12}{반복 합성과 주기}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+$f(3)=\dfrac{3-2}{3-1}=\dfrac{1}{2}$\ 이고 $f\!\left(\dfrac{1}{2}\right)=\dfrac{\dfrac{1}{2}-2}{\dfrac{1}{2}-1}=\dfrac{-3/2}{-1/2}=3$\ 이다. 따라서 $f^{2}(3)=3$\ 이므로 $f$\ 는 값 $3$\ 을 주기 $2$\ 로 순환시킨다.
+\[ f^{2024}(3)=(f^{2})^{1012}(3)=3. \]
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$\dfrac{x-1}{x+3}$} & \dmquick{2}{$\dfrac{6x+8}{x^{2}-4}$} & \dmquick{3}{$\dfrac{x+2}{x}$} & \dmquick{4}{$-3$} & \dmquick{5}{$2$} \\
+\dmquick{6}{ㄱ, ㄷ} & \dmquick{7}{$1$} & \dmquick{8}{$-3\le x<-2$ 또는 $-2<x\le 0$} & \dmquick{9}{$1$} & \dmquick{10}{$-1$} \\
+\dmquick{11}{$6$} & \dmquick{12}{$0$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{유리식의 약분}
+\begin{dmanswerbox}
+정답: $\dfrac{x-1}{x+3}$
+\end{dmanswerbox}
+
+분자와 분모를 각각 인수분해하면
+\[ \dfrac{x^{2}-3x+2}{x^{2}+x-6}=\dfrac{(x-1)(x-2)}{(x-2)(x+3)}. \]
+공통인수 $x-2$\ 를 소거하면 $\dfrac{x-1}{x+3}$\ 이다.
+
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{유리식의 사칙연산}
+\begin{dmanswerbox}
+정답: $\dfrac{6x+8}{x^{2}-4}$
+\end{dmanswerbox}
+
+$x^{2}-4=(x-2)(x+2)$\ 를 공통분모로 하여 통분하면 분자는 $(x^{2}+3x+2)-(x^{2}-3x+2)+8=6x+8$\ 이므로
+\[ \dfrac{(x+1)(x+2)-(x-1)(x-2)+8}{(x-2)(x+2)}=\dfrac{6x+8}{x^{2}-4}. \]
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{번분수식의 정리}
+\begin{dmanswerbox}
+정답: $\dfrac{x+2}{x}$
+\end{dmanswerbox}
+
+분자와 분모를 각각 정리하면
+\[ \dfrac{1}{x}-\dfrac{1}{x+1}=\dfrac{1}{x(x+1)}, \]
+\[ \dfrac{1}{x+1}-\dfrac{1}{x+2}=\dfrac{1}{(x+1)(x+2)}. \]
+번분수식은 두 유리식의 나눗셈이므로
+\begin{align*}
+\dfrac{1}{x(x+1)}\div\dfrac{1}{(x+1)(x+2)}
+  &=\dfrac{(x+1)(x+2)}{x(x+1)} \\
+  &=\dfrac{x+2}{x}.
+\end{align*}
+
+% ─────────────── L1-4 ───────────────
+\dmsoltitle{4}{조건 $x+y+z=0$\ 과 유리식의 값}
+\begin{dmanswerbox}
+정답: $-3$
+\end{dmanswerbox}
+
+$x+y+z=0$\ 이므로 $y+z=-x$,\ $z+x=-y$,\ $x+y=-z$\ 이다. 세 유리식에 대입하면
+\[ \dfrac{y+z}{x}+\dfrac{z+x}{y}+\dfrac{x+y}{z}=\dfrac{-x}{x}+\dfrac{-y}{y}+\dfrac{-z}{z}=-3. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 변수의 합은 남은 변수의 부호를 뒤집는다}: $x+y+z=0$\ 의 형태에서 두 변수의 합이 남은 한 변수의 부호를 바꾼 값과 같으므로, 이 관계로 유리식의 분자가 즉시 치환된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{일반형에서 표준형으로 변형해 계수의 합}
+\begin{dmanswerbox}
+정답: $2$
+\end{dmanswerbox}
+
+분자를 분모로 나누면
+\[ y=\dfrac{3x-5}{x-1}=\dfrac{3(x-1)-2}{x-1}=-\dfrac{2}{x-1}+3. \]
+표준형 $\dfrac{k}{x-p}+q$\ 와 비교하면 $k=-2$,\ $p=1$,\ $q=3$\ 이므로
+\[ k+p+q=-2+1+3=2. \]
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{평행이동으로 겹치기 위한 표준형의 $k$\ 값}
+\begin{dmanswerbox}
+정답: ㄱ, ㄷ
+\end{dmanswerbox}
+
+$y=\dfrac{2}{x}$\ 의 그래프를 평행이동한 그래프는 표준형 $y=\dfrac{2}{x-p}+q$\ 의 꼴이므로 $k=2$\ 가 필요조건이다. 각 보기를 표준형으로 변형해 $k$ 값을 비교한다.
+
+\smallskip
+ㄱ. $\dfrac{x-1}{x-3}=\dfrac{(x-3)+2}{x-3}=\dfrac{2}{x-3}+1$\ 이므로 $k=2$. 겹친다.
+
+\smallskip
+ㄴ. $\dfrac{2x+2}{x+2}=\dfrac{2(x+2)-2}{x+2}=\dfrac{-2}{x+2}+2$\ 이므로 $k=-2$. 겹치지 않는다.
+
+\smallskip
+ㄷ. $\dfrac{-4x-2}{x+1}=\dfrac{-4(x+1)+2}{x+1}=\dfrac{2}{x+1}-4$\ 이므로 $k=2$. 겹친다.
+
+\smallskip
+따라서 조건을 만족시키는 것은 ㄱ, ㄷ이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{평행이동은 분자 상수 $k$\ 를 바꾸지 않는다}: 표준형으로 정리한 뒤 $k$ 값을 비교하면, 부호가 다르거나 크기가 다른 두 그래프는 평행이동만으로 겹칠 수 없다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{점근선과 지나는 점으로 상수 결정}
+\begin{dmanswerbox}
+정답: $1$
+\end{dmanswerbox}
+
+$y=\dfrac{k}{x+a}+b$\ 의 점근선은 $x=-a$\ 와 $y=b$\ 이다. 조건에서 $-a=3$\ 이므로 $a=-3$\ 이고 $b=2$\ 이다. 이 함수가 점 $(2,\, 0)$\ 을 지나므로
+\[ 0=\dfrac{k}{2+(-3)}+2=\dfrac{k}{-1}+2,\qquad k=2. \]
+따라서 $a+b+k=-3+2+2=1$\ 이다.
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{치역에서 역으로 정의역을 복원}
+\begin{dmanswerbox}
+정답: $-3\le x<-2$ 또는 $-2<x\le 0$
+\end{dmanswerbox}
+
+$y=\dfrac{2x+3}{x+2}=2-\dfrac{1}{x+2}$\ 이므로 점근선은 $x=-2$\ 와 $y=2$\ 이다. 치역의 경계값 $y=\dfrac{3}{2}$\ 와 $y=3$\ 에 대응되는 $x$\ 값을 구하면
+\[ y=\dfrac{3}{2}:\ 2-\dfrac{1}{x+2}=\dfrac{3}{2},\ \dfrac{1}{x+2}=\dfrac{1}{2},\ x=0, \]
+\[ y=3:\ 2-\dfrac{1}{x+2}=3,\ \dfrac{1}{x+2}=-1,\ x=-3. \]
+치역이 $y\le \dfrac{3}{2}$ 또는 $y\ge 3$\ 이므로 두 경계값 사이에서 함수의 감소·증가 방향을 확인하면 정의역은
+\[ -3\le x<-2\quad\text{또는}\quad -2<x\le 0. \]
+
+% ─────────────── L1-9 ───────────────
+\dmsoltitle{9}{대칭축 직선이 대칭 중심을 지남}
+\begin{dmanswerbox}
+정답: $1$
+\end{dmanswerbox}
+
+$y=\dfrac{3x+4}{x+2}=-\dfrac{2}{x+2}+3$\ 이므로 두 점근선은 $x=-2$\ 와 $y=3$\ 이고 대칭 중심은 $(-2,\, 3)$\ 이다.
+
+직선 $y=-x+k$\ 가 이 대칭 중심을 지나야 그래프의 대칭축이 되므로
+\[ 3=-(-2)+k=2+k,\qquad k=1. \]
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{역함수가 자기 자신인 조건과 두 함숫값}
+\begin{dmanswerbox}
+정답: $-1$
+\end{dmanswerbox}
+
+역함수가 자기 자신과 같으려면 $\dfrac{ax+b}{x+c}$\ 의 계수 사이에 $a+c=0$\ 이 성립해야 하므로 $c=-a$\ 이다.
+
+조건 $f(-1)=0$\ 에서
+\[ \dfrac{-a+b}{-1+c}=0,\qquad -a+b=0,\qquad b=a. \]
+조건 $f(2)=3$\ 에서 $b=a$,\ $c=-a$\ 를 대입하면
+\[ \dfrac{2a+a}{2-a}=3,\qquad 3a=3(2-a),\qquad 6a=6,\qquad a=1. \]
+따라서 $b=1$,\ $c=-1$\ 이고
+\[ abc=1\cdot 1\cdot(-1)=-1. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{역함수가 자기 자신이면 대각선 계수의 합이 0이다}: 유리함수 $\dfrac{ax+b}{x+c}$\ 의 역함수가 자기 자신이 되려면 $a+c=0$\ 이 필요하므로, 이 관계로 미지수 하나가 다른 하나의 부호를 뒤집은 값으로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{유리함수와 직선의 접함 조건과 판별식}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$y=-\dfrac{3}{x}+3$\ 과 $y=3x+a$\ 를 연립하면
+\[ -\dfrac{3}{x}+3=3x+a,\qquad -\dfrac{3}{x}=3x+a-3. \]
+양변에 $x$\ 를 곱하여 정리하면
+\[ 3x^{2}+(a-3)x+3=0. \tag{$\ast$} \]
+
+두 그래프가 오직 한 점에서 만나려면 이차방정식 $(\ast)$\ 이 중근을 가져야 한다. 즉 판별식이 $0$\ 이므로
+\[ (a-3)^{2}-4\cdot 3\cdot 3=0,\qquad (a-3)^{2}=36,\qquad a-3=\pm 6. \]
+
+따라서 $a=9$ 또는 $a=-3$\ 이다. 두 값의 합은 $9+(-3)=6$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{연립 이차방정식의 판별식 0이 접함 조건이다}: 유리함수와 직선을 연립하면 이차방정식이 얻어지므로, 판별식이 $0$\ 이 되는 조건이 곧 두 그래프의 접함 조건이 된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{폐구간 최댓값 조건에서 상수 결정}
+\begin{dmanswerbox}
+정답: $0$
+\end{dmanswerbox}
+
+$y=\dfrac{4x+a}{x-1}=\dfrac{4(x-1)+(a+4)}{x-1}=\dfrac{a+4}{x-1}+4$\ 로 표준형을 얻는다. 구간 $2\le x\le 4$\ 는 점근선 $x=1$\ 의 오른쪽에 있으므로, $a+4$\ 의 부호에 따라 이 구간에서의 증감이 결정된다.
+
+\medskip
+(i) $a+4>0$\ 이면 그래프는 감소하므로 $x=2$\ 에서 최댓값
+\[ \dfrac{a+4}{1}+4=a+8=8\quad\therefore\ a=0. \]
+$a=0$\ 이면 $a+4=4>0$\ 이므로 전제와 부합한다.
+
+\medskip
+(ii) $a+4<0$\ 이면 그래프는 증가하므로 $x=4$\ 에서 최댓값
+\[ \dfrac{a+4}{3}+4=8\quad\therefore\ a=8. \]
+그런데 $a=8$\ 이면 $a+4=12>0$\ 이 되어 전제 $a+4<0$\ 과 모순이므로 (ii)에서는 해가 없다.
+
+\medskip
+$a+4=0$\ 이면 함숫값이 $4$\ 로 일정하여 최댓값이 $4\ne 8$\ 이므로 배제된다.
+
+$\therefore\ a=0$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{분자 부호 가정과 얻은 값의 일치를 확인한다}: 분자 $a+4$\ 의 부호로 두 경우로 나누어 얻은 $a$ 값이 그 경우의 전제를 실제로 만족시키는지 대입하여 확인해야 한다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$1$} & \dmquick{2}{$-\dfrac{16}{3}$} & \dmquick{3}{ㄹ} & \dmquick{4}{$6$} & \dmquick{5}{$7$} \\
+\dmquick{6}{$-2$} & \dmquick{7}{$\sqrt{7}$} & \dmquick{8}{$5-2\sqrt{6}<k<5+2\sqrt{6}$} & \dmquick{9}{$6$} & \dmquick{10}{$11$} \\
+\dmquick{11}{$\dfrac{1}{2}$} & \dmquick{12}{$18\pi$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+\dmsoltitle{1}{두 유리함수의 점근선이 서로 일치}
+\begin{dmanswerbox}
+정답: $1$
+\end{dmanswerbox}
+
+$y=\dfrac{ax+3}{2x+1}$\ 을 표준형으로 정리하면 세로 점근선은 $x=-\dfrac{1}{2}$\ 이고 가로 점근선은 $y=\dfrac{a}{2}$\ 이다.
+
+$y=\dfrac{x-2}{3x+b}$\ 의 세로 점근선은 $x=-\dfrac{b}{3}$\ 이고 가로 점근선은 $y=\dfrac{1}{3}$\ 이다.
+
+두 점근선이 각각 일치하므로
+\[ -\dfrac{1}{2}=-\dfrac{b}{3},\quad b=\dfrac{3}{2}, \]
+\[ \dfrac{a}{2}=\dfrac{1}{3},\quad a=\dfrac{2}{3}. \]
+따라서 $ab=\dfrac{2}{3}\cdot\dfrac{3}{2}=1$\ 이다.
+
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{폐구간 최댓값 조건에서 최솟값}
+\begin{dmanswerbox}
+정답: $-\dfrac{16}{3}$
+\end{dmanswerbox}
+
+$y=\dfrac{k-4x}{x+2}=\dfrac{k+8}{x+2}-4$\ 에서 $k>-8$\ 이므로 $k+8>0$\ 이고, 이 함수는 $x>-2$\ 에서 감소한다. 구간 $-1\le x\le 1$\ 이 $-2$\ 의 오른쪽에 있으므로 최댓값은 $x=-1$, 최솟값은 $x=1$\ 에서 나타난다.
+
+$x=-1$\ 에서 최댓값
+\[ (k+8)-4=k+4=1\quad\therefore\ k=-3. \]
+$x=1$\ 에서 최솟값
+\[ m=\dfrac{5}{3}-4=-\dfrac{7}{3}. \]
+$\therefore\ k+m=-3-\dfrac{7}{3}=-\dfrac{16}{3}$.
+
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{그래프의 성질 검증과 옳지 않은 명제}
+\begin{dmanswerbox}
+정답: ㄹ
+\end{dmanswerbox}
+
+표준형으로 정리하면
+\[ y=\dfrac{x+1}{2x-4}=\dfrac{3/2}{x-2}+\dfrac{1}{2}. \]
+
+\medskip
+ㄱ. 두 점근선은 $x=2,\ y=\dfrac{1}{2}$\ 이다. 참.
+
+\smallskip
+ㄴ. 대칭 중심은 두 점근선의 교점 $\left(2,\, \dfrac{1}{2}\right)$\ 이다. 참.
+
+\smallskip
+ㄷ. $y=\dfrac{3}{2x}=\dfrac{3/2}{x}$\ 의 $k$\ 값이 표준형의 $k=\dfrac{3}{2}$\ 와 같으므로 $x$\ 축 방향 $2$,\ $y$\ 축 방향 $\dfrac{1}{2}$ 평행이동으로 겹친다. 참.
+
+\smallskip
+ㄹ. $x$\ 절편은 $x=-1$\ 이고 $y$\ 절편은 $y=-\dfrac{1}{4}$\ 이다. 우측 갈래 ($x>2$)는 $y>\dfrac{1}{2}$\ 이므로 제$1$\ 사분면만, 좌측 갈래 ($x<2$)는 $x<-1$\ 에서 제$2$\ 사분면·$-1<x<2$\ 에서 제$3$\ 사분면을 지난다. 지나는 사분면은 $1,\ 2,\ 3$\ 사분면이므로 "$1,\ 2,\ 4$\ 사분면"이라는 서술은 거짓.
+
+$\therefore$ 옳지 않은 것은 ㄹ.
+
+\begin{dmcriticalpoint}
+\dmcplabel{절편으로 사분면 확정}: $x$\ 절편·$y$\ 절편의 부호로 두 갈래가 지나는 영역이 결정되며, 대칭 중심의 부호만 보면 사분면을 놓친다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-4 ───────────────
+\dmsoltitle{4}{반복 합성의 주기 발견}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$f(6)=\dfrac{3\cdot 6-3}{6-3}=\dfrac{15}{3}=5$\ 이고 $f(5)=\dfrac{3\cdot 5-3}{5-3}=\dfrac{12}{2}=6$\ 이다. 따라서 $f^{2}(6)=6$\ 이므로 $f$\ 는 값 $6$\ 을 주기 $2$\ 로 순환시킨다.
+
+$2024$\ 가 짝수이므로
+\[ f^{2024}(6)=(f^{2})^{1012}(6)=6. \]
+
+% ─────────────── L2-5 ───────────────
+\dmsoltitle{5}{두 그래프가 $y=x$\ 에 대칭이면 서로 역함수}
+\begin{dmanswerbox}
+정답: $7$
+\end{dmanswerbox}
+
+두 그래프가 $y=x$\ 에 대칭이면 두 함수는 서로 역함수이다. $y=-\dfrac{2x+3}{2x+5}$\ 에서 $x$\ 와 $y$\ 를 바꿔 $y$\ 에 대하여 풀면 $y(2x+5)=-(2x+3)$\ 에서 $2x(y+1)=-5y-3$\ 이므로
+\[ f^{-1}(x)=\dfrac{-5x-3}{2x+2}. \]
+이 식을 $\dfrac{ax-3}{2x+b}$\ 와 비교하면 $a=-5,\ b=2$\ 이므로 $b-a=7$\ 이다.
+
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{세 점이 한 직선 위에 있을 조건}
+\begin{dmanswerbox}
+정답: $-2$
+\end{dmanswerbox}
+
+$y=\dfrac{k}{x-2}+1$\ 의 두 점근선은 $x=2$\ 와 $y=1$\ 이므로 교점은 $\mathrm{C}(2,\, 1)$\ 이다.
+
+$x$\ 축 절편은 $\dfrac{k}{x-2}=-1$\ 에서 $x=2-k$\ 이므로 $\mathrm{A}(2-k,\, 0)$\ 이다. $y$\ 축 절편은 $x=0$\ 을 대입하여 $y=-\dfrac{k}{2}+1$\ 이므로 $\mathrm{B}\!\left(0,\, 1-\dfrac{k}{2}\right)$\ 이다.
+
+세 점이 한 직선 위에 있으려면 두 직선 $\mathrm{AC}$\ 와 $\mathrm{AB}$\ 의 기울기가 같아야 한다.
+\[ \text{기울기 }\mathrm{AC}=\dfrac{1-0}{2-(2-k)}=\dfrac{1}{k}. \]
+\[ \text{기울기 }\mathrm{AB}=\dfrac{1-k/2-0}{0-(2-k)}=\dfrac{2-k}{2(k-2)}=-\dfrac{1}{2}. \]
+두 기울기를 같게 놓으면
+\[ \dfrac{1}{k}=-\dfrac{1}{2},\qquad k=-2. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 점근선의 교점은 그래프의 대칭 중심이다}: 유리함수의 두 점근선이 만나는 점이 그래프의 대칭 중심이므로, 이 점을 좌표로 확정한 뒤 다른 두 점과의 공선 조건을 기울기로 전환한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{두 유리함수의 점근선으로 이루어진 직사각형}
+\begin{dmanswerbox}
+정답: $\sqrt{7}$
+\end{dmanswerbox}
+
+$y=\dfrac{2x-3}{x-a}$\ 의 두 점근선은 $x=a$\ 와 $y=2$\ 이다. $y=\dfrac{-ax+2}{x-2}$\ 의 두 점근선은 $x=2$\ 와 $y=-a$\ 이다.
+
+네 점근선으로 둘러싸인 직사각형의 두 변의 길이는 $|a-2|$\ 와 $|2-(-a)|=a+2$\ 이므로 넓이는
+\[ |a-2|\cdot(a+2)=3. \]
+
+\smallskip
+(i) $0<a<2$\ 이면 $(2-a)(a+2)=4-a^{2}=3$\ 에서 $a^{2}=1$\ 이므로 $a=1$\ 이다.
+
+\smallskip
+(ii) $a>2$\ 이면 $(a-2)(a+2)=a^{2}-4=3$\ 에서 $a^{2}=7$\ 이므로 $a=\sqrt{7}$\ 이다.
+
+\smallskip
+모든 양수 $a$\ 의 값의 곱은
+\[ 1\cdot\sqrt{7}=\sqrt{7}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 유리함수의 점근선 네 개가 좌표축과 평행하므로 이들이 이루는 도형은 직사각형이다}: 두 변의 길이가 절댓값으로 나오므로 상수 $a$\ 의 부호에 따라 경우를 나누어야 모든 해가 빠짐없이 나온다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{두 그래프의 공통점이 없을 조건}
+\begin{dmanswerbox}
+정답: $5-2\sqrt{6}<k<5+2\sqrt{6}$
+\end{dmanswerbox}
+
+두 그래프가 만나지 않으려면 방정식 $\dfrac{2x-4}{x-1}=kx+1$\ 이 실근을 갖지 않아야 한다. 정리하면
+\[ 2x-4=(kx+1)(x-1),\qquad kx^{2}-(k+1)x+3=0. \]
+
+\smallskip
+(i) $k=0$\ 이면 $-x+3=0$\ 에서 $x=3$\ 의 실근이 존재하므로 조건에 부합하지 않는다.
+
+\smallskip
+(ii) $k\ne 0$\ 이면 판별식이 음수이어야 한다.
+\[ (k+1)^{2}-12k=k^{2}-10k+1<0. \]
+이차방정식 $k^{2}-10k+1=0$\ 의 두 근이 $k=5\pm 2\sqrt{6}$\ 이므로
+\[ 5-2\sqrt{6}<k<5+2\sqrt{6}. \]
+이 범위에서 $k=0$\ 은 $5-2\sqrt{6}\approx 0.10$\ 보다 작으므로 자동으로 배제된다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 그래프가 만나지 않을 조건은 두 식을 연립한 방정식이 실근을 갖지 않아야 한다는 것이다}: 분모를 없앤 뒤 최고차항 계수가 $k$\ 이므로 $k=0$\ 과 $k\ne 0$\ 을 나누어야 이차·일차 방정식으로 옳게 분류된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-9 ───────────────
+\dmsoltitle{9}{역함수의 평행이동과 원함수 일치}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$f(x)=\dfrac{4x+1}{x-1}=\dfrac{5}{x-1}+4$\ 이다. 역함수 $g(x)$\ 를 구하면
+\[ y(x-1)=4x+1,\ x(y-4)=y+1,\ x=\dfrac{y+1}{y-4}, \]
+\[ g(x)=\dfrac{x+1}{x-4}=\dfrac{5}{x-4}+1. \]
+$g(x)$\ 를 $x$\ 축 방향으로 $m$\ 만큼, $y$\ 축 방향으로 $n$\ 만큼 평행이동한 함수는
+\[ \dfrac{5}{(x-m)-4}+(1+n)=\dfrac{5}{x-(m+4)}+(1+n). \]
+이 함수가 $f(x)=\dfrac{5}{x-1}+4$\ 와 일치하려면 두 상수를 비교해
+\[ m+4=1,\quad m=-3,\qquad 1+n=4,\quad n=3. \]
+따라서 $n-m=3-(-3)=6$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{원함수와 역함수를 표준형 $\dfrac{k}{x-p}+q$\ 로 나타내면 평행이동 상수 $p$·$q$\ 가 그대로 노출된다}: 두 표준형에서 대응되는 두 상수를 비교하면 이동량 $m$·$n$\ 이 두 개의 일차식으로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-10 ───────────────
+\dmsoltitle{10}{반비례곡선 위 점에서 만드는 직사각형과 삼각형}
+\begin{dmanswerbox}
+정답: $11$
+\end{dmanswerbox}
+
+$\mathrm{A}\!\left(a,\, \dfrac{1}{a}\right)$\ 이라 두면 $\mathrm{A}$\ 의 $y$\ 좌표 $\dfrac{1}{a}$\ 를 유지하며 $y=\dfrac{k}{x}$\ 와 만나는 점의 $x$\ 좌표는 $\dfrac{k}{x}=\dfrac{1}{a}$\ 에서 $x=ak$\ 이므로 $\mathrm{B}\!\left(ak,\, \dfrac{1}{a}\right)$\ 이다.
+
+$\mathrm{A}$\ 의 $x$\ 좌표 $a$\ 를 유지하며 $y=\dfrac{k}{x}$\ 와 만나는 점의 $y$\ 좌표는 $\dfrac{k}{a}$\ 이므로 $\mathrm{C}\!\left(a,\, \dfrac{k}{a}\right)$\ 이다.
+
+$\overline{\mathrm{AB}}$\ 는 수평, $\overline{\mathrm{AC}}$\ 는 수직이므로 삼각형 $\mathrm{ABC}$\ 는 $\mathrm{A}$\ 에서 직각을 갖는다.
+\[ \overline{\mathrm{AB}}=ak-a=a(k-1),\quad \overline{\mathrm{AC}}=\dfrac{k}{a}-\dfrac{1}{a}=\dfrac{k-1}{a}. \]
+넓이는
+\[ \dfrac{1}{2}\cdot a(k-1)\cdot\dfrac{k-1}{a}=\dfrac{(k-1)^{2}}{2}=50. \]
+$(k-1)^{2}=100$\ 에서 $k>1$\ 이므로 $k-1=10$, 즉 $k=11$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{한 좌표를 고정하고 다른 좌표를 방정식으로 얻는다}: $y$\ 좌표를 유지하며 다른 곡선과 만나는 점은 두 곡선의 $y$\ 좌표를 같게 놓아 $x$\ 좌표가 결정되고, $x$\ 좌표를 유지하는 경우도 같은 방식으로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-11 ───────────────
+\dmsoltitle{11}{두 직선 사이에 곡선이 놓일 부등식 조건}
+\begin{dmanswerbox}
+정답: $\dfrac{1}{2}$
+\end{dmanswerbox}
+
+$1\le x\le 3$\ 에서 $x>0$\ 이므로 부등식의 세 변을 $x$\ 로 나누면
+\[ a\le \dfrac{2}{x+1}\le b. \]
+
+$\dfrac{2}{x+1}$\ 의 값은 $x$\ 가 증가할 때 감소하므로 $1\le x\le 3$\ 에서
+\[ \dfrac{2}{3+1}=\dfrac{1}{2}\le \dfrac{2}{x+1}\le \dfrac{2}{1+1}=1. \]
+
+모든 $x$\ 에서 $a\le \dfrac{2}{x+1}$\ 이 성립하려면 $a$\ 가 이 함수의 최솟값 $\dfrac{1}{2}$ 이하이어야 하므로 $a\le \dfrac{1}{2}$\ 이다. 마찬가지로 $\dfrac{2}{x+1}\le b$\ 가 성립하려면 $b$\ 가 이 함수의 최댓값 $1$ 이상이어야 하므로 $b\ge 1$\ 이다.
+
+따라서 $b-a$\ 의 최솟값은
+\[ 1-\dfrac{1}{2}=\dfrac{1}{2}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{모든 $x$\ 에서 부등식이 성립할 조건은 곡선의 최댓값·최솟값과 상수의 대소로 옮겨진다}: 세 변 부등식이므로 아래 경계는 함수의 최솟값 이하이고 위 경계는 함수의 최댓값 이상이어야 하며, $b-a$\ 의 최솟값은 두 극값의 차와 같다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-12 ───────────────
+\dmsoltitle{12}{대칭 중심을 통해 얻는 반지름의 최솟값}
+\begin{dmanswerbox}
+정답: $18\pi$
+\end{dmanswerbox}
+
+$y=\dfrac{4x+13}{x+1}=\dfrac{4(x+1)+9}{x+1}=\dfrac{9}{x+1}+4$\ 이므로 두 점근선은 $x=-1$\ 과 $y=4$\ 이다. 두 점근선의 교점 $(-1,\, 4)$\ 가 곧 대칭 중심이며 발문의 점 $\mathrm{P}$\ 와 일치한다.
+
+곡선 위의 점 $\mathrm{Q}\!\left(t,\, \dfrac{9}{t+1}+4\right)$ ($t\ne -1$)에 대하여
+\[ \overline{\mathrm{PQ}}^{2}=(t+1)^{2}+\!\left(\dfrac{9}{t+1}\right)^{2}. \]
+
+$s=(t+1)^{2}$ ($s>0$)로 놓으면 $\overline{\mathrm{PQ}}^{2}=s+\dfrac{81}{s}$\ 이고, 산술평균과 기하평균 사이의 관계로부터
+\[ s+\dfrac{81}{s}\ge 2\sqrt{s\cdot\dfrac{81}{s}}=2\cdot 9=18. \]
+
+등호는 $s=9$, 즉 $t+1=\pm 3$\ 일 때 성립하므로 반지름 $r=\overline{\mathrm{PQ}}$\ 의 최솟값은 $\sqrt{18}=3\sqrt{2}$\ 이고, 원의 넓이의 최솟값은
+\[ \pi r^{2}=18\pi. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{대칭 중심을 원의 중심으로 삼으면 거리가 곱꼴이 된다}: 유리함수는 두 점근선의 교점에 대하여 점대칭이므로, 이 점을 원의 중심으로 삼으면 곡선 위 점과의 거리 제곱이 곱꼴로 정리되어 최솟값이 결정된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$4$} & \dmquick{2}{$3$} & \dmquick{3}{$18$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 ───────────────
+\dmsoltitle{1}{두 점근선에 내린 수선으로 이루어진 직사각형의 넓이}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+$y=\dfrac{4}{x}+2$\ 의 두 점근선은 $y$\ 축 $x=0$\ 과 가로 직선 $y=2$\ 이므로 두 점근선의 교점은 $\mathrm{C}(0,\, 2)$\ 이다.
+
+곡선 위의 점 $\mathrm{P}(a,\, b)$ ($a>0$)에서 두 점근선에 내린 수선의 발은
+\[ \mathrm{H}_{1}=(0,\, b),\qquad \mathrm{H}_{2}=(a,\, 2). \]
+두 수선은 서로 수직이므로 사각형 $\mathrm{PH}_{1}\mathrm{CH}_{2}$\ 는 직사각형이고, 두 변의 길이는
+\[ \overline{\mathrm{PH}_{1}}=a,\qquad \overline{\mathrm{PH}_{2}}=b-2. \]
+$\mathrm{P}$\ 가 곡선 위에 있으므로 $b=\dfrac{4}{a}+2$\ 이고 $b-2=\dfrac{4}{a}$\ 이다. 따라서 넓이는
+\[ a\cdot\dfrac{4}{a}=4. \]
+이 값은 $a$\ 의 값과 무관하게 항상 $4$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{곡선 위 점의 두 좌표의 곱이 상수로 고정된다}: 표준형 $y-2=\dfrac{4}{x}$\ 에서 $x\cdot(y-2)=4$\ 가 상수식으로 정리되므로, 이 곱이 곧 직사각형의 넓이가 되어 미지수에 의존하지 않는다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 ───────────────
+\dmsoltitle{2}{두 점근선까지 거리의 합 조건과 $x$\ 좌표}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+$f(x)=\dfrac{2x-3}{x-2}=\dfrac{2(x-2)+1}{x-2}=\dfrac{1}{x-2}+2$\ 이다. 두 점근선은 세로 직선 $x=2$\ 와 가로 직선 $y=2$\ 이다.
+
+곡선 위의 점 $\mathrm{P}(x,\, f(x))$ ($x>2$)에서 두 점근선에 내린 수선의 발까지의 거리는
+\[ \overline{\mathrm{PA}}=x-2,\qquad \overline{\mathrm{PB}}=f(x)-2=\dfrac{1}{x-2}. \]
+합이 $2$\ 이므로
+\[ (x-2)+\dfrac{1}{x-2}=2. \]
+$t=x-2>0$\ 으로 놓고 양변에 $t$\ 를 곱하면
+\[ t^{2}-2t+1=0,\qquad (t-1)^{2}=0. \]
+중근 $t=1$\ 이므로 $x-2=1$\ 에서 $x=3$\ 이 유일한 값이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 점근선까지 거리의 합은 한 변수의 식으로 축약된다}: 표준형 $\dfrac{1}{x-2}+2$\ 에서 곡선 위 점의 두 좌표차의 합이 곧 두 점근선까지 거리의 합이므로, 이 관계가 $t=x-2$\ 에 대한 방정식으로 축약된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 (세션 63 교체 · 세션 77 답 정정) ───────────────
+% source : 블랙라벨-CM2-07-STEP3-#08 축약 · O-NEW-31 (a,b) 대칭중심 역함수
+% 세션 77 : 답 60 → 18 (계산 오류 정정 · b=1/2 · 12(b-a)=12(1/2-(-1))=18)
+\dmsoltitle{3}{점근선 교점의 이동과 합성함수와 직선의 접선 조건}
+\begin{dmanswerbox}
+정답: $18$
+\end{dmanswerbox}
+
+$f(x) = \dfrac{4x + b}{x - 2a} = \dfrac{8a + b}{x - 2a}+4$\ 의 두 점근선은 $x = 2a$\ 와 $y = 4$\ 이므로 대칭 중심은 $(2a,\, 4)$\ 이다.
+
+$f^{-1}(x) = f(x - 6) - 6$\ 은 $y = f^{-1}(x)$\ 의 그래프가 $y = f(x)$\ 의 그래프를 $x$\ 축 방향으로 $6$,\ $y$\ 축 방향으로 $-6$\ 만큼 평행이동한 것임을 뜻한다. 한편 $y = f^{-1}(x)$\ 는 $y = f(x)$\ 를 직선 $y = x$\ 에 대하여 대칭이동한 그래프이므로, 대칭 중심 $(2a,\, 4)$\ 의 $y = x$ 대칭점 $(4,\, 2a)$\ 가 평행이동한 점 $(2a + 6,\, 4 - 6)$\ 과 같다. 따라서
+\[ 4 = 2a + 6\quad\therefore\ a = -1. \]
+대입하면 $f(x) = \dfrac{4x + b}{x + 2}$\ 이다.
+
+이제 $(f \circ f)(x)$\ 를 계산하면
+\begin{align*}
+(f \circ f)(x)
+  &= \dfrac{4(4x+b)+b(x+2)}{(4x+b)+2(x+2)} \\
+  &= \dfrac{(16+b)x+6b}{6x+b+4}.
+\end{align*}
+$(f \circ f)(x) = x + 1$\ 의 양변에 $6x+b+4$\ 를 곱해 정리하면
+\[ 6x^{2} - 6x + (4 - 5b) = 0. \]
+이 이차방정식이 오직 한 실근을 가지려면 판별식이 $0$\ 이므로
+\[ 36 - 24(4 - 5b) = 120b - 60 = 0\quad\therefore\ b = \dfrac{1}{2}. \]
+$\therefore\ 12(b - a) = 12\!\left(\dfrac{1}{2} - (-1)\right) = 12 \cdot \dfrac{3}{2} = 18$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 대칭 표현이 일치하여 $a$\ 가 결정된다}: $y = f^{-1}$\ 은 직선 $y = x$\ 에 대한 대칭이동과 주어진 평행이동 두 방식으로 표현되므로, 대칭 중심의 대칭점이 곧 평행이동한 점과 같아지는 조건에서 $a$\ 가 유일하게 정해진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결 (세션 70 문항 순서 스왑)
+% 세션 70 스왑 (마스터 지시 · 마지막 페이지 1문 원칙 · feedback_min_solution_space_4cm) :
+%   원 R-1 (2024.3 고2 17번 · 조건 박스) 을 R-3 자리로 이동
+%   원 R-2 (2016.3 고2 18번) → R-1 · 원 R-3 (2023.11 고1 16번) → R-2
+% 최종 배치 :
+%   - R-1 : 2016학년도 3월 고2 학평 18번 (원문 그림 재현) · 정답 $\dfrac{32}{9}$
+%   - R-2 : 2023학년도 11월 고1 학평 16번 (그림 없음) · 정답 $5$
+%   - R-3 : 2024학년도 3월 고2 학평 17번 (조건 박스 · 마지막 페이지 단독) · 정답 $4$
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$\dfrac{32}{9}$} & \dmquick{2}{$5$} & \dmquick{3}{$4$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── R-1 (세션 70 승격 · 원 R-2 · 2016학년도 3월 고2 학평 18번) ───────────────
+\dmsoltitle{1}{반비례곡선과 직선의 두 교점으로 만드는 삼각형의 넓이}
+\begin{dmanswerbox}
+정답: $\dfrac{32}{9}$
+\end{dmanswerbox}
+
+곡선 $y=\dfrac{k}{x}$\ 와 직선 $y=-x+6$\ 의 두 교점 $\mathrm{P},\ \mathrm{Q}$\ 를 좌표평면에 표시하면 다음과 같다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 74 : scale=1.0 통일 · 좌표 압축 0.5 (원본 P(1.13, 4.87)·Q(4.87, 1.13))
+  % 실효 : 축 0.7pt · 곡선·직선 0.5pt · 점선 0.4pt · 정점 0.7pt · 여백 ≥25%
+  \draw[-stealth, black, line width=0.7pt] (-1, 0) -- (4, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1) -- (0, 4) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {$\mathrm{O}$};
+  % 곡선 y = k/x (압축 · y=1/x)
+  \draw[black, line width=0.5pt, domain=0.35:3.5, samples=80] plot (\x, {1/\x});
+  % 직선 y = -x + 6 (압축 · y=-x+3) · 축 프레임 좌우 채움
+  \begin{scope}
+    \clip (-1, -1) rectangle (4, 4);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-1, 4) --
+      node[pos=0.18, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=-x+6$}
+      (4, -1);
+  \end{scope}
+  % 정점 P·Q (교점 · 파생점)
+  \filldraw[dm-accent] (0.565, 2.435) circle (0.7pt) node[above right, font=\scriptsize] {$\mathrm{P}$};
+  \filldraw[dm-accent] (2.435, 0.565) circle (0.7pt) node[above right, font=\scriptsize] {$\mathrm{Q}$};
+  % 곡선 라벨 · 오른쪽 갈래 끝 옆
+  \node[font=\scriptsize, anchor=west] at (3.55, 0.28) {$y=\dfrac{k}{x}$};
+\end{tikzpicture}
+\end{center}
+
+곡선과 직선의 교점을 구하기 위해 $\dfrac{k}{x}=-x+6$\ 의 양변에 $x$\ 를 곱하면
+\[ x^{2}-6x+k=0. \]
+두 근을 $\alpha$,\ $\beta$\ 라 하면 근과 계수의 관계에서
+\[ \alpha+\beta=6,\qquad \alpha\beta=k. \]
+
+두 점 $\mathrm{P}(\alpha,\, -\alpha+6)$\ 와 $\mathrm{Q}(\beta,\, -\beta+6)$ 사이의 거리는
+\begin{align*}
+\overline{\mathrm{PQ}}
+  &=\sqrt{(\alpha-\beta)^{2}+(-\alpha+\beta)^{2}} \\
+  &=\sqrt{2}\,|\alpha-\beta|.
+\end{align*}
+
+원점 $\mathrm{O}$\ 에서 직선 $y=-x+6$\ 까지의 거리는
+\[ \dfrac{|0+0-6|}{\sqrt{1^{2}+1^{2}}}=\dfrac{6}{\sqrt{2}}=3\sqrt{2}. \]
+
+삼각형 $\mathrm{OPQ}$\ 의 넓이는
+\[ \dfrac{1}{2}\cdot\sqrt{2}\,|\alpha-\beta|\cdot 3\sqrt{2}=3\,|\alpha-\beta|=14, \]
+이므로 $|\alpha-\beta|=\dfrac{14}{3}$\ 이다.
+
+$(\alpha-\beta)^{2}=(\alpha+\beta)^{2}-4\alpha\beta$\ 이므로
+\[ \dfrac{196}{9}=36-4k, \]
+\[ 4k=36-\dfrac{196}{9}=\dfrac{128}{9}. \]
+따라서 $k=\dfrac{32}{9}$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 교점의 좌표는 근과 계수의 관계로 얻어진다}: $\dfrac{k}{x}=-x+6$\ 의 양변에 $x$\ 를 곱하면 이차방정식이 되므로 두 근의 합과 곱이 그 계수로 곧바로 결정되어 두 교점의 좌표를 대칭식으로 다룰 수 있다.
+\end{dmcriticalpoint}
+
+% ─────────────── R-2 (세션 70 승격 · 원 R-3 · 2023학년도 11월 고1 학평 16번) ───────────────
+\dmsoltitle{2}{유리함수의 축 절편·점근선 교점과 사각형의 넓이}
+\begin{dmanswerbox}
+정답: $5$
+\end{dmanswerbox}
+
+$f(x)=\dfrac{4}{x-a}-4$\ 의 두 점근선은 $x=a,\ y=-4$\ 이므로 두 점근선의 교점은 $\mathrm{C}(a,\, -4)$\ 이다. $x$\ 축·$y$\ 축과의 교점은 각각
+$$\mathrm{A}(a+1,\, 0),\qquad \mathrm{B}\!\left(0,\, -\dfrac{4}{a}-4\right).$$
+
+사각형 $\mathrm{OBCA}$\ 를 대각선 $\overline{\mathrm{OC}}$\ 로 이분한 두 삼각형의 넓이는
+\begin{align*}
+\triangle\mathrm{OBC}
+  &=\dfrac{1}{2}\!\left(\dfrac{4}{a}+4\right)\!\cdot a=2+2a, \\
+\triangle\mathrm{OCA}
+  &=\dfrac{1}{2}(a+1)\cdot 4=2a+2
+\end{align*}
+이므로 사각형의 넓이는 $4a+4=24$\ 에서 $a=5$\ 이다.\ ($a>1$ 만족)
+
+\begin{dmcriticalpoint}
+\dmcplabel{대각선 $\overline{\mathrm{OC}}$\ 로 사각형을 두 직각삼각형으로 나눈다}: 원점과 두 축 위 절편, 점근선의 교점으로 이루어진 사각형은 대각선 $\overline{\mathrm{OC}}$\ 를 그으면 두 직각삼각형으로 나뉘므로, 각 밑변과 높이가 축 위의 길이로 그대로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── R-3 (세션 70 강등 · 원 R-1 · 2024학년도 3월 고2 학평 17번) ───────────────
+\dmsoltitle{3}{반비례곡선 위 두 점과 원점 대칭 사각형의 넓이}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+두 점 $\mathrm{P}\!\left(a,\, \dfrac{k}{a}\right)$\ 와 $\mathrm{Q}\!\left(a+2,\, \dfrac{k}{a+2}\right)$\ 의 직선 $\mathrm{PQ}$\ 의 기울기는
+\[ \dfrac{\dfrac{k}{a+2}-\dfrac{k}{a}}{(a+2)-a}=\dfrac{k\cdot\dfrac{a-(a+2)}{a(a+2)}}{2}=-\dfrac{k}{a(a+2)}. \]
+조건 (가)에서 이 값이 $-1$\ 이므로
+\[ \dfrac{k}{a(a+2)}=1,\qquad k=a(a+2). \tag{$\ast$} \]
+
+$\mathrm{R}=(-a,\, -k/a)$,\ $\mathrm{S}=(-a-2,\, -k/(a+2))$\ 이므로 사각형 $\mathrm{PQRS}$\ 는 원점을 중심으로 하는 평행사변형이다. 이 평행사변형의 넓이는 삼각형 $\mathrm{OPQ}$ 넓이의 $4$\ 배와 같으므로 삼각형 $\mathrm{OPQ}$\ 의 넓이를 밑변 $\overline{\mathrm{PQ}}$\ 와 원점에서 직선 $\mathrm{PQ}$\ 까지의 거리로 구한다.
+
+두 점 사이의 거리 공식에서
+\[ \overline{\mathrm{PQ}}^{\,2}=\bigl((a+2)-a\bigr)^{2}+\bigl(\dfrac{k}{a+2}-\dfrac{k}{a}\bigr)^{2}=4+4=8 \]
+이므로 $\overline{\mathrm{PQ}}=2\sqrt{2}$\ 이다. (조건 (가)의 기울기 $-1$\ 에서 세로변화는 $-2$\ 이다.)
+
+직선 $\mathrm{PQ}$\ 의 기울기가 $-1$\ 이고 점 $\mathrm{P}(a,\, k/a)$\ 를 지나므로 방정식은
+\[ y-\dfrac{k}{a}=-(x-a),\qquad x+y-\left(a+\dfrac{k}{a}\right)=0. \]
+$(\ast)$\ 의 $k=a(a+2)$\ 를 대입하면 $\dfrac{k}{a}=a+2$\ 이므로 방정식은 $x+y-(2a+2)=0$\ 이 된다. 원점에서 이 직선까지의 거리는
+\[ \dfrac{|0+0-(2a+2)|}{\sqrt{1^{2}+1^{2}}}=\dfrac{2a+2}{\sqrt{2}}=\sqrt{2}\,(a+1). \]
+따라서 삼각형 $\mathrm{OPQ}$\ 의 넓이는
+\[ \dfrac{1}{2}\cdot 2\sqrt{2}\cdot \sqrt{2}\,(a+1)=2(a+1) \]
+이고, 평행사변형 $\mathrm{PQRS}$\ 의 넓이는
+\[ 4\cdot 2(a+1)=8(a+1). \]
+
+이 값이 $8\sqrt{5}$\ 이므로 $a+1=\sqrt{5}$,\ $a=\sqrt{5}-1$\ 이다. $(\ast)$\ 에 대입하면
+\[ k=(\sqrt{5}-1)(\sqrt{5}+1)=5-1=4. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{반비례곡선 위 두 점의 기울기가 두 $x$\ 좌표의 곱을 결정한다}: $y=\dfrac{k}{x}$ 위 두 점 사이의 기울기는 $-\dfrac{k}{a(a+2)}$\ 로 표현되므로, 이 값이 $-1$\ 이라는 조건에서 $k=a(a+2)$\ 의 관계가 즉시 얻어진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

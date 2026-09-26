@@ -1,0 +1,72 @@
+% 골든 · 곡선-직선 교점 개수 조건 (feedback_solution_graph_requirement 유형 1·4)
+% 확립 : 2026-07-22 세션 73 · L2-12 무리함수 답지 재조판
+% 원본 위치 : output/공통수학2/DeeP-Math-정리편/Deep Math Review Note 08-RF02-무리함수-답지.tex §L2-12
+%
+% 목적 : 곡선 (무리함수·이차함수 등) + 매개변수 직선 (y=x+k · y=mx 등) 의 교점 개수 조건 시각화
+%   - 두 임계 직선 (접함·시작점 통과 등) 을 축 프레임 좌우 전체로 그림
+%   - 곡선 · 시작점 · 접점 명시
+%   - 라벨은 여백 지역에 배치 (실선·점선 겹침 회피)
+%
+% 규약 준수 :
+%   - scale=1.0 통일
+%   - 실효 두께 : 축 0.7pt · 곡선 0.5pt · 점선 0.4pt
+%   - 점 크기 : 주요 정점 0.8pt · 파생점 0.7pt
+%   - 직선 축 프레임 좌우 [xmin, xmax] 전체 채움 (\clip 사용)
+%   - 라벨 : 곡선 끝단 옆 밀착 · 두 매개변수 라벨 세로 이격 확보
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 목표 [0.55, 0.85])
+  %   축 라벨 규정 (feedback_figure_authoring_protocol §3-B) :
+  %     `x` 라벨 : below (S) · 화살표 끝 (E · `right`) 금지
+  %     `y` 라벨 : left (W)  · 화살표 끝 (N · `above`) 금지
+  \draw[-stealth, black, line width=0.7pt] (-2.5, 0) -- (3.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1.5) -- (0, 2.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+  \node[font=\scriptsize, below] at (1, -0.02) {$1$};
+
+  % ── 곡선 y = √|x-1| 두 갈래 (실효 0.5pt · 목표 [0.30, 0.60])
+  %   양수 갈래 (오른쪽) : y = √(x-1), x ≥ 1
+  %   음수 갈래 (왼쪽)   : y = √(-x+1), x ≤ 1
+  \draw[black, line width=0.5pt, domain=1:3.5, samples=60] plot (\x, {sqrt(\x - 1)});
+  \draw[black, line width=0.5pt, domain=-2.5:1, samples=60] plot (\x, {sqrt(1 - \x)});
+
+  % ── 임계 직선 · 축 프레임 좌우 전체 채움 · clip 으로 상하 잘림
+  %   라벨은 sloped + pos 로 선 방향 밀착 · 서로 다른 pos 값으로 세로 분리
+  \begin{scope}
+    \clip (-2.5, -1.5) rectangle (3.5, 2.5);
+    % 경계 1 : k = -3/4 · 오른쪽 갈래 접함 · y = x - 3/4 · 라벨 pos=0.85 위쪽
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2.5, -3.25) --
+      node[pos=0.85, above=0.5pt, sloped, font=\tiny, dm-accent] {$k=-\tfrac{3}{4}$}
+      (3.5, 2.75);
+    % 경계 2 : k = -1 · 시작점 통과 · y = x - 1 · 라벨 pos=0.60 위쪽 (아래로 이격)
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2.5, -3.5) --
+      node[pos=0.60, above=0.5pt, sloped, font=\tiny, dm-accent] {$k=-1$}
+      (3.5, 2.5);
+  \end{scope}
+
+  % ── 시작점 (1, 0) · 주요 정점 · 실효 0.8pt
+  \filldraw[black] (1, 0) circle (0.8pt);
+  % ── 접점 (5/4, 1/2) · 파생점 · 실효 0.7pt (k = -3/4 접선의 접점)
+  \filldraw[dm-accent] (1.25, 0.5) circle (0.7pt);
+
+  % ── 곡선 라벨 · 오른쪽 갈래 끝점 (3.5, √2.5) 옆 밀착
+  %   feedback_label_placement v2 : 점선·실선 겹침 불허 → 여백 지역 배치
+  \node[font=\scriptsize, anchor=west] at (3.55, 1.58) {$y=\sqrt{|x-1|}$};
+\end{tikzpicture}
+\end{center}
+
+% === 사용 시 교체 대상 ===
+% 1. 곡선 방정식 · domain 범위 (오른쪽·왼쪽 갈래 각각)
+% 2. 시작점 좌표 (예제는 (1, 0))
+% 3. 접점 좌표 (판별식 = 0 에서 계산)
+% 4. 두 임계 직선의 y-절편 값 (경계 1 · 경계 2)
+% 5. 축 범위 (\clip 및 x축·y축 range)
+% 6. 라벨 텍스트 (k 값·곡선 방정식)
+%
+% === 유지 대상 (규약 자동 준수) ===
+% - scale=1.0
+% - line width 값 (0.7pt · 0.5pt · 0.4pt)
+% - circle 반경 (0.8pt · 0.7pt)
+% - dash pattern (on 2pt off 1.5pt)
+% - 라벨 anchor 방향 (leg 자연 연장 · 곡선 끝단 밀착)

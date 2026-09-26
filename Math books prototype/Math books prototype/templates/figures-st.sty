@@ -1,0 +1,232 @@
+% figures-st.sty — CM2-ST (집합과 명제) 매크로 라이브러리 v1.0 (2026-07-11)
+% 목적: 벤 다이어그램·영역 채움·격자 원소·조건 다이어그램 필체 표준화
+% 단일 출처: bank/그래프-양식-카탈로그.md §"ST 단원 벤치마크"
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{figures-st}[2026/07/11 ST figure macros v1.0]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc,arrows.meta,intersections,backgrounds}
+
+% ══════════════════════════════════════════════════════════════════
+% 1. 색 팔레트 (집합·논리 전용)
+% ══════════════════════════════════════════════════════════════════
+
+\definecolor{st-ink}{HTML}{111111}
+\definecolor{st-a}{HTML}{1E4A8F}          % 집합 A — 블루
+\definecolor{st-b}{HTML}{C44536}          % 집합 B — 붉음
+\definecolor{st-c}{HTML}{2E8B57}          % 집합 C — 초록
+\definecolor{st-u}{HTML}{6B7A8E}          % 전체집합 U — 회청
+\definecolor{st-fill-a}{HTML}{E8EFF8}     % A 옅은 채움
+\definecolor{st-fill-b}{HTML}{FBEEEC}     % B 옅은 채움
+\definecolor{st-fill-c}{HTML}{E8F5EE}     % C 옅은 채움
+\definecolor{st-highlight}{HTML}{FFD966}  % 하이라이트 (교집합·차집합 등 강조)
+
+% ══════════════════════════════════════════════════════════════════
+% 2. 필체 표준
+% ══════════════════════════════════════════════════════════════════
+
+\tikzset{
+  st-box/.style={line width=0.9pt, st-u},
+  st-set-a/.style={line width=1.1pt, st-a},
+  st-set-b/.style={line width=1.1pt, st-b},
+  st-set-c/.style={line width=1.1pt, st-c},
+  st-fill-a/.style={fill=st-a, fill opacity=0.10},
+  st-fill-b/.style={fill=st-b, fill opacity=0.10},
+  st-fill-c/.style={fill=st-c, fill opacity=0.10},
+  st-highlight/.style={fill=st-highlight, fill opacity=0.55},
+  st-elem/.style={circle, inner sep=0pt, minimum size=0.16cm, fill=st-ink, draw=none},
+  st-elem-hollow/.style={circle, inner sep=0pt, minimum size=0.20cm, fill=white, draw=st-ink, line width=0.5pt},
+  st-label/.style={font=\small, st-ink, inner sep=1.5pt},
+  st-label-set/.style={font=\small\bfseries, st-ink, inner sep=1.5pt},
+  st-label-small/.style={font=\scriptsize, st-ink, inner sep=1pt},
+  st-implication/.style={line width=0.9pt, -{Stealth[length=2mm]}, st-ink}
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 3. 벤 다이어그램 2집합
+% ══════════════════════════════════════════════════════════════════
+
+% \stvenntwo{Alabel}{Blabel} — 2집합 벤 다이어그램 (전체집합 U 사각형 포함)
+% 좌우 원 중심 (-0.9, 0)·(0.9, 0), 반경 1.5. 전체 (-3, -2) 대각선
+% 노드: stA (좌원), stB (우원), stAB (교집합 중심), stAonly (A만), stBonly (B만), stU (전체)
+\newcommand{\stvenntwo}[2]{%
+  \draw[st-box] (-3, -2) rectangle (3, 2);
+  \node[st-label-set, above left=0pt and 2pt] at (-3, 2) {$U$};
+  \begin{scope}
+    \fill[st-fill-a] (-0.9, 0) circle (1.5);
+    \fill[st-fill-b] (0.9, 0) circle (1.5);
+    \draw[st-set-a] (-0.9, 0) circle (1.5);
+    \draw[st-set-b] (0.9, 0) circle (1.5);
+  \end{scope}
+  \node[st-label-set] at (-2, 1.3) {$#1$};
+  \node[st-label-set] at (2, 1.3) {$#2$};
+  \coordinate (stA) at (-0.9, 0);
+  \coordinate (stB) at (0.9, 0);
+  \coordinate (stAB) at (0, 0);
+  \coordinate (stAonly) at (-1.6, 0);
+  \coordinate (stBonly) at (1.6, 0);
+  \coordinate (stUonly) at (-2.4, -1.4);
+}
+
+% \stvennthree{Alabel}{Blabel}{Clabel} — 3집합 벤 다이어그램
+\newcommand{\stvennthree}[3]{%
+  \draw[st-box] (-3.2, -2.6) rectangle (3.2, 2.6);
+  \node[st-label-set, above left=0pt and 2pt] at (-3.2, 2.6) {$U$};
+  \begin{scope}
+    \fill[st-fill-a] (-1.1, 0.6) circle (1.5);
+    \fill[st-fill-b] (1.1, 0.6) circle (1.5);
+    \fill[st-fill-c] (0, -1.1) circle (1.5);
+    \draw[st-set-a] (-1.1, 0.6) circle (1.5);
+    \draw[st-set-b] (1.1, 0.6) circle (1.5);
+    \draw[st-set-c] (0, -1.1) circle (1.5);
+  \end{scope}
+  \node[st-label-set] at (-2.2, 2.0) {$#1$};
+  \node[st-label-set] at (2.2, 2.0) {$#2$};
+  \node[st-label-set] at (0, -2.3) {$#3$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 4. 영역 채움 (교·차·합집합 강조)
+% ══════════════════════════════════════════════════════════════════
+
+% 2집합 기준. \stvenntwo 호출 후 원하는 영역만 강조.
+
+% \stfillAB — A∩B 강조
+\newcommand{\stfillAB}{%
+  \begin{scope}
+    \clip (-0.9, 0) circle (1.5);
+    \fill[st-highlight] (0.9, 0) circle (1.5);
+  \end{scope}
+  \draw[st-set-a] (-0.9, 0) circle (1.5);
+  \draw[st-set-b] (0.9, 0) circle (1.5);
+}
+
+% \stfillAminusB — A - B 강조
+\newcommand{\stfillAminusB}{%
+  \begin{scope}
+    \clip (-0.9, 0) circle (1.5);
+    \begin{scope}
+      \clip (0.9, 0) circle (1.5);
+      \fill[white] (-3, -2) rectangle (3, 2);
+    \end{scope}
+  \end{scope}
+  \begin{scope}
+    \clip (-3, -2) rectangle (3, 2);
+    \clip (-0.9, 0) circle (1.5);
+    \fill[st-highlight] (-0.9, 0) circle (1.5);
+  \end{scope}
+  \begin{scope}
+    \clip (0.9, 0) circle (1.5);
+    \fill[white] (-3, -2) rectangle (3, 2);
+  \end{scope}
+  \draw[st-set-a] (-0.9, 0) circle (1.5);
+  \draw[st-set-b] (0.9, 0) circle (1.5);
+}
+
+% \stfillAcupBc — A^c ∪ B^c = (A∩B)^c 강조 = 교집합 밖 전체
+\newcommand{\stfillAcupBc}{%
+  \fill[st-highlight] (-3, -2) rectangle (3, 2);
+  \begin{scope}
+    \clip (-0.9, 0) circle (1.5);
+    \clip (0.9, 0) circle (1.5);
+    \fill[white] (-3, -2) rectangle (3, 2);
+  \end{scope}
+  \draw[st-box] (-3, -2) rectangle (3, 2);
+  \draw[st-set-a] (-0.9, 0) circle (1.5);
+  \draw[st-set-b] (0.9, 0) circle (1.5);
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 5. 원소 배치 (구체 원소 시각화)
+% ══════════════════════════════════════════════════════════════════
+
+% \stelem{node-name}{x}{y}{label} — 원소 점+라벨
+\newcommand{\stelem}[4]{%
+  \node[st-elem] (#1) at (#2, #3) {};
+  \node[st-label-small, above right=0pt and 1pt of #1] {$#4$};
+}
+
+% \stelemhollow{node-name}{x}{y}{label} — 빈 점 원소 (교집합 밖 강조)
+\newcommand{\stelemhollow}[4]{%
+  \node[st-elem-hollow] (#1) at (#2, #3) {};
+  \node[st-label-small, above right=0pt and 1pt of #1] {$#4$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 6. 원소 개수 표기 (n(A) = ... 등)
+% ══════════════════════════════════════════════════════════════════
+
+% \stcountlabel{x}{y}{value} — 영역 안 원소 개수 숫자 (큰 글씨)
+\newcommand{\stcountlabel}[3]{%
+  \node[st-label-set, font=\normalsize] at (#1, #2) {$#3$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 7. 정수 격자·좌표평면 집합 (원+격자점 조합)
+% ══════════════════════════════════════════════════════════════════
+
+% \stlattice{xmin}{xmax}{ymin}{ymax} — 정수 격자점 표기
+\newcommand{\stlattice}[4]{%
+  \foreach \stlx in {#1,...,#2} {%
+    \foreach \stly in {#3,...,#4} {%
+      \fill[st-ink] (\stlx, \stly) circle (0.06);
+    }%
+  }%
+}
+
+% \stlatticeinside{xmin}{xmax}{ymin}{ymax}{cx}{cy}{r} — 원 내부 격자점만 채움
+\newcommand{\stlatticeinside}[7]{%
+  \foreach \stlx in {#1,...,#2} {%
+    \foreach \stly in {#3,...,#4} {%
+      \pgfmathsetmacro{\stdd}{sqrt((\stlx-#5)*(\stlx-#5)+(\stly-#6)*(\stly-#6))}
+      \ifdim\stdd pt < #7 pt
+        \fill[st-highlight] (\stlx, \stly) circle (0.09);
+        \draw[line width=0.4pt, st-ink] (\stlx, \stly) circle (0.09);
+      \else
+        \fill[st-ink] (\stlx, \stly) circle (0.05);
+      \fi
+    }%
+  }%
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 8. 명제 함축 도식 (p → q)
+% ══════════════════════════════════════════════════════════════════
+
+% \stimplication{p-x}{p-y}{q-x}{q-y}{p-label}{q-label} — 조건 함축 화살표
+\newcommand{\stimplication}[6]{%
+  \node[st-label-set] (stpP) at (#1, #2) {$#5$};
+  \node[st-label-set] (stpQ) at (#3, #4) {$#6$};
+  \draw[st-implication] (stpP) -- (stpQ) node[midway, above, font=\scriptsize] {$\Rightarrow$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 9. 완성형 조합 매크로
+% ══════════════════════════════════════════════════════════════════
+
+% \stvennwithcounts{A}{B}{n_only_A}{n_AB}{n_only_B}{n_outside}
+% 벤 다이어그램 + 각 영역 원소 개수 자동 배치
+\newcommand{\stvennwithcounts}[6]{%
+  \stvenntwo{#1}{#2}
+  \node[st-label-set] at (-1.6, 0) {$#3$};
+  \node[st-label-set] at (0, 0) {$#4$};
+  \node[st-label-set] at (1.6, 0) {$#5$};
+  \node[st-label-set] at (-2.4, -1.4) {$#6$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 사용 예 (주석)
+% ══════════════════════════════════════════════════════════════════
+% \begin{center}
+% \begin{tikzpicture}
+%   \stvennwithcounts{A}{B}{5}{3}{4}{2}
+% \end{tikzpicture}
+% \end{center}
+%
+% \begin{center}
+% \begin{tikzpicture}[scale=0.7]
+%   \stlatticeinside{-3}{3}{-3}{3}{0}{0}{2}
+%   \draw[st-set-a] (0, 0) circle (2);
+% \end{tikzpicture}
+% \end{center}

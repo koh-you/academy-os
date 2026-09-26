@@ -1,0 +1,149 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-eq}
+\renewcommand{\examround}{미니모의고사}
+\renewcommand{\examvol}{vol.4}
+
+\newcommand{\solnote}[1]{\par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+    boxrule=0pt, arc=3pt, left=10pt, right=10pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\footnotesize\color{vB-ink}]
+    \textbf{\color{vB-deep}통찰}\quad #1
+  \end{tcolorbox}}
+
+\begin{document}
+
+\answerheader{정답·해설}{공통수학1 — 고차방정식·연립방정식·부등식 — 8문 / 20분}
+
+\begin{quickgrid}
+\quick{01}{③ $5$}    & \quick{02}{③ $5$}     & \quick{03}{③ $1$}     & \quick{04}{④ ㄱ, ㄴ} & \quick{05}{② $6$}     \\
+\quick{06}{③ $10$}    & \quick{07}{$46$} & \quick{08}{$11$} & & \\
+\end{quickgrid}
+
+\examsection{객관식 \#1\textendash{}\#6 풀 답지}
+
+\soltitle{1}{삼차방정식 — 한 근 대입과 인수정리}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $5$\end{answerbox}
+\step{1} $x = 1$이 근이므로 대입.
+\[ 1 - 6 + (k + 9) - 4 = 0 \;\Longrightarrow\; k = 0. \]
+\step{2} 방정식은 $x^3 - 6x^2 + 9x - 4 = 0$. $(x - 1)$로 나눈다.
+\[ x^3 - 6x^2 + 9x - 4 = (x - 1)(x^2 - 5x + 4). \]
+\step{3} 둘째 인수 $x^2 - 5x + 4 = (x - 1)(x - 4)$로 분해되어 전체는
+\[ (x - 1)^2 (x - 4) = 0. \]
+\step{4} 세 근은 $1, 1, 4$. 나머지 두 근의 합은
+\[ 1 + 4 = 5. \]
+정답은 $\textbf{③}$.
+\solnote{삼차방정식의 \emph{한 근}이 주어지면 \emph{미정계수 $k$}를 한 줄에 결정한 뒤 \emph{인수분해로 나머지 두 근}을 얻는 표준 도구. $(x - 1)^2$ \emph{중근} 발견이 핵심 함정 — 학생이 *나머지 두 근*에 $1$도 포함됨을 놓치면 답이 $4$로 떨어진다.}
+
+\soltitle{2}{연립부등식 — 일차·이차 공통 범위}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $5$\end{answerbox}
+\step{1} 일차 부등식: $2x - 3 \le 5 \Longrightarrow x \le 4$.
+\step{2} 이차 부등식: $x^2 - 6x + 5 = (x - 1)(x - 5) \le 0 \Longrightarrow 1 \le x \le 5$.
+\step{3} 두 부등식의 \emph{공통 범위}는
+\[ 1 \le x \le 4. \]
+따라서 $a = 1, b = 4$이므로
+\[ a + b = 1 + 4 = 5. \]
+정답은 $\textbf{③}$.
+\solnote{연립부등식은 \emph{각 부등식의 해의 교집합}으로 환원되는 표준 도구. 일차 부등식의 상한 $4$와 이차 부등식의 상한 $5$ 중 \emph{더 작은 쪽}이 공통 범위의 상한 — \emph{좌·우 경계 각각에 더 좁은 부등식 적용}이 변별의 핵심.}
+
+\soltitle{3}{연립방정식 — 일차·이차 대입과 중근}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $1$\end{answerbox}
+\step{1} 일차 식 $2x - y = 5$에서 $y = 2x - 5$로 두고 이차 식에 대입.
+\[ x^2 + (2x - 5)^2 = 5 \;\Longrightarrow\; x^2 + 4x^2 - 20x + 25 = 5. \]
+\step{2} 정리하면
+\[ 5x^2 - 20x + 20 = 0 \;\Longrightarrow\; x^2 - 4x + 4 = 0 \;\Longrightarrow\; (x - 2)^2 = 0. \]
+\step{3} 중근 $x = 2$, 따라서 $y = 2 \cdot 2 - 5 = -1$. 조건 $y < 0$ ✓.
+\step{4} $x + y = 2 + (-1) = 1$.
+정답은 $\textbf{③}$.
+\solnote{일차·이차 연립은 \emph{일차 식을 대입}하여 이차 식으로 환원하는 표준 도구. 본 문제는 환원 결과가 \emph{중근}이라 해가 유일하게 결정된다. $y < 0$ 단서가 \emph{있어도 없어도 같은 답}이라 함정 없는 입문형.}
+
+\soltitle{4}{이차부등식 — 미지수 + [보기] 진위 (정교화 3 조건 박스 분기)}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ④ ㄱ, ㄴ\end{answerbox}
+\step{1} 좌변 $x^2 - 2ax + a^2 - 9 = (x - a)^2 - 9 = (x - (a - 3))(x - (a + 3))$.
+\step{2} \textbf{ㄱ.} 부등식 해는 두 근 사이.
+\[ a - 3 < x < a + 3. \]
+\textbf{ㄱ은 참}.
+\step{3} \textbf{ㄴ.} $a > 0$일 때 해 $(a - 3, a + 3)$의 \emph{상한} $a + 3 > 3$이고 \emph{하한} $a - 3 > -3$. 따라서 \emph{$\{1, 2, 3\}$ 중 적어도 일부}는 항상 해에 포함된다. 더 정확히, $a > 0$이면 $a + 3 > 3$이므로 $x = 1$ 또는 $x = 2$ 중 하나는 항상 해 안에 있다 (하한이 $1$ 이상이 되려면 $a > 4$이고, 그때도 상한이 $7$ 이상이라 양의 정수가 적어도 하나 있다). \textbf{ㄴ은 참}.
+\step{4} \textbf{ㄷ.} 양의 정수 $5$개를 포함하려면 해 $(a - 3, a + 3)$가 길이 $6$이고 \emph{양의 정수 $5$개를 포함}하는 위치여야 한다.
+\paramcase{$a$의 값}{$a = 3$: 해 $(0, 6)$, 양의 정수 $\{1, 2, 3, 4, 5\}$ → \emph{$5$개} ✓}{$a = 4$: 해 $(1, 7)$, 양의 정수 $\{2, 3, 4, 5, 6\}$ → \emph{$5$개} ✓}
+$a = 3$ 외에도 $a = 4$가 \emph{또 다른 해}이므로 "유일하다"는 \emph{거짓}. \textbf{ㄷ은 거짓}.
+\step{5} ㄱ, ㄴ만 참이므로 정답은 $\textbf{④}$.
+\solnote{이차부등식 해의 \emph{길이는 일정}하나 \emph{위치는 $a$의 평행이동}으로 결정된다. 양의 정수 카운팅 시 \emph{경계 정수 포함 여부} ($a = 3$의 $x = 0$과 $x = 6$ 모두 제외)가 핵심 함정 — 학생은 \emph{$a$의 미정계수}를 깊게 탐색해 ㄷ의 \emph{유일성 위배 반례}를 발견해야 한다.}
+
+\soltitle{5}{연립부등식 — 미지수 분기와 정수해 유일성}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ② $6$\end{answerbox}
+\step{1} 첫 부등식 $|x - 5| \le 3$의 해는 $2 \le x \le 8$, 정수 $\{2, 3, \ldots, 8\}$로 \emph{$7$개}.
+\step{2} 둘째 부등식 $(x - 6)(x - k) \le 0$.
+\paramcasethree{미지수 $k$의 값}{$k > 6$: 해는 $6 \le x \le k$ — 정수 $\{6, 7, \ldots, k\}$}{$k = 6$: 해는 $x = 6$ — 정수 $\{6\}$}{$k < 6$: 해는 $k \le x \le 6$ — 정수 $\{k, k+1, \ldots, 6\}$}
+\step{3} 공통 정수해 = 첫 정수 범위와 둘째 정수 범위에 \emph{모두} 속하는 정수. 각 정수 $k$에서 공통 개수를 점검.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $k = 6$: 공통 $\{6\}$ → \emph{$1$개} ✓
+\item $k = 7$ 또는 $k = 5$: 공통 $\{6, 7\}$ 또는 $\{5, 6\}$ → $2$개 ✗
+\item $k \ge 9$: 공통 $\{6, 7, 8\}$ (이상) → $\ge 3$개 ✗
+\item $k \le 1$: 공통 $\{2, 3, \ldots, 6\}$ → $5$개 ✗
+\end{itemize}
+\step{4} 만족하는 정수 $k$는 $k = 6$ \emph{하나뿐}. 합은 $6$.
+정답은 $\textbf{②}$.
+\solnote{미지수가 \emph{둘째 이차식 인수}에 등장하는 표준 분기 패턴. $k = 6$ 경계에서 \emph{둘째 부등식 해가 한 점}으로 압축되어 공통 정수해가 \emph{유일 1개}로 결정되는 자연 장치. 학생은 $k > 6$·$k = 6$·$k < 6$ \emph{세 경우}를 모두 점검해야 함정에 빠지지 않는다.}
+
+\soltitle{6}{복소수 — 제곱 등식과 실수·허수부분 분리}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $5$\end{answerbox}
+\step{1} $z^2 = (a + bi)^2 = (a^2 - b^2) + 2abi = 5 + 12i$. 실수부와 허수부분 분리.
+\[ a^2 - b^2 = 5, \qquad 2ab = 12 \;\Longrightarrow\; ab = 6. \]
+\step{2} $a = 6/b$ 대입.
+\[ \frac{36}{b^2} - b^2 = 5 \;\Longrightarrow\; 36 - b^4 = 5b^2 \;\Longrightarrow\; b^4 + 5b^2 - 36 = 0. \]
+\step{3} $u = b^2 \ge 0$으로 두면 $u^2 + 5u - 36 = (u + 9)(u - 4) = 0$. $u \ge 0$이므로 $u = 4$, 곧 $b = 2$ ($b > 0$).
+\step{4} $a = 6/b = 3$. 따라서
+\[ a + b = 3 + 2 = 5. \]
+정답은 $\textbf{③}$.
+\solnote{복소수 제곱 등식은 \emph{실수부분·허수부분 분리}로 \emph{이변수 연립}으로 환원되는 표준 도구. 본 문제는 $ab = 6$의 \emph{치환}으로 \emph{사차방정식}이 되어 $u = b^2$ 추가 치환으로 인수분해된다. \emph{양수 조건} ($a, b > 0$)이 미정계수를 \emph{한 쌍 $(3, 2)$}로 압축.}
+
+\examsection{서답 \#7\textendash{}\#8 풀 답지}
+
+\soltitle{7}{이차방정식 — 자연수 근의 조건과 다중 미정계수}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $46$\end{answerbox}
+\step{1} 두 근을 $\alpha$, $\beta$라 하면 $\alpha + \beta = a$, $\alpha\beta = b$. 두 근 자연수.
+\step{2} \textbf{(가)} 두 근의 제곱의 합
+\[ \alpha^2 + \beta^2 = (\alpha + \beta)^2 - 2\alpha\beta = a^2 - 2b. \]
+이 값이 \emph{$a$의 배수}, 곧 $a \mid (a^2 - 2b)$. $a \mid a^2$ 자명이므로 $a \mid 2b$.
+\step{3} \textbf{(나)} $a + b \le 20$.
+\step{4} 자연수 $a$를 분기하여 가능한 $(\alpha, \beta)$ 쌍과 $b$를 점검한다 (단, $\alpha \le \beta$).
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $a = 2$: $\alpha + \beta = 2$, $(1, 1)$. $b = 1$. $2b = 2$, $a \mid 2$ ✓. $a + b = 3 \le 20$ ✓.
+\item $a = 4$: $(\alpha, \beta) \in \{(1, 3), (2, 2)\}$. $b = 3$ → $2b = 6$, $4 \mid 6$ ✗. $b = 4$ → $2b = 8$, $4 \mid 8$ ✓. $a + b = 8$.
+\item $a = 6$: $(1, 5), (2, 4), (3, 3)$. $b = 5, 8, 9$. $2b = 10, 16, 18$. $6 \mid 18$ ✓ (오직 $b = 9$). $a + b = 15$.
+\item $a = 8$: $(1, 7), (2, 6), (3, 5), (4, 4)$. $b = 7, 12, 15, 16$. $2b = 14, 24, 30, 32$. $8 \mid 24$ ✓ ($b = 12$). $8 \mid 32$ ✓ ($b = 16$). $a + b = 20$ ($b = 12$) 또는 $24$ ($b = 16$).
+\item $a + b \le 20$ 적용: $a = 8, b = 12$ → $20$ ✓. $a = 8, b = 16$ → $24$ ✗.
+\item $a = 10$: $b \le 10$, 두 근 합 $10$ + 곱 $\le 10$. $(1, 9), (2, 8)$. $b = 9, 16$. $b = 16 > 10$ ✗. $b = 9$: $2b = 18$, $10 \mid 18$ ✗.
+\item $a \ge 12$: 두 근 자연수 + 곱 $\le 8$이라 분기 제약 강해 만족 X (점검 생략).
+\end{itemize}
+\step{5} 가능한 $a + b \in \{3, 8, 15, 20\}$. 합은
+\[ 3 + 8 + 15 + 20 = 46. \]
+답은 $\textbf{46}$.
+\solnote{이차방정식의 \emph{근과 계수의 관계}로 \emph{제곱합}이 $a^2 - 2b$로 환원되고, \emph{$a$의 배수} 조건은 $a \mid 2b$로 단순화된다. 다중 미정계수 $(\alpha, \beta)$ × ($a$의 약수 조건)을 \emph{$a$ 값별로 분기 카운팅}하여 유한 범위로 압축. (나)의 \emph{$a + b \le 20$} 상한이 $a \le 10$으로 미정계수를 자연 차단.}
+
+\soltitle{8}{이차부등식 — 미지수 자기참조와 정수합의 제곱 배수 조건}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $11$\end{answerbox}
+\step{1} 좌변을 \emph{완전제곱식 환원}.
+\[ x^2 - 4ax + 4a^2 - a = (x - 2a)^2 - a. \]
+\step{2} 해는 $|x - 2a| \le \sqrt{a}$, 곧 $2a - \sqrt{a} \le x \le 2a + \sqrt{a}$. 정수 개수는 $a$의 값에 따라 다르며, \emph{$\sqrt{a}$가 정수}인 완전제곱수 $a$에서 정수 개수가 일정하게 결정된다.
+\step{3} 각 자연수 $a$의 \emph{정수해 합} $S$와 $a^2$로 나누어 떨어지는지 점검.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $a = 1$: $\sqrt{1} = 1$, 정수 $\{1, 2, 3\}$. $S = 6$. $1^2 = 1 \mid 6$ ✓.
+\item $a = 2$: $\sqrt{2} \approx 1.41$, 정수 $\{3, 4, 5\}$. $S = 12$. $4 \mid 12$ ✓.
+\item $a = 3$: $\sqrt{3} \approx 1.73$, 정수 $\{5, 6, 7\}$. $S = 18$. $9 \mid 18$ ✓.
+\item $a = 4$: $\sqrt{4} = 2$, 정수 $\{6, \ldots, 10\}$. $S = 40$. $16 \mid 40$ ✗.
+\item $a = 5$: $\sqrt{5} \approx 2.24$, 정수 $\{8, \ldots, 12\}$. $S = 50$. $25 \mid 50$ ✓.
+\item $a = 6$: 정수 $\{10, \ldots, 14\}$. $S = 60$. $36 \mid 60$ ✗.
+\item $a = 7, 8$: 정수 5개. $S$ ✗.
+\item $a = 9$: $\sqrt{9} = 3$, 정수 $\{15, \ldots, 21\}$. $S = 126$. $81 \mid 126$ ✗.
+\item $a = 10$~$15$: 정수 7개. $S$ ✗.
+\item $a = 16$: 정수 $\{28, \ldots, 36\}$. $S = 288$. $256 \mid 288$ ✗.
+\item $a = 17$~$20$: 정수 7개. $S$ ✗.
+\end{itemize}
+\step{4} 만족 $a = 1, 2, 3, 5$. 합은
+\[ 1 + 2 + 3 + 5 = 11. \]
+답은 $\textbf{11}$.
+\solnote{미지수 $a$가 \emph{좌변 계수·결과 미정계수·배수 조건} 모두에 등장하는 \emph{삼중 자기참조}. 해 구간이 \emph{$2a$ 중심·반폭 $\sqrt{a}$}로 $a$의 미정계수에 따라 정수 개수가 변동되며, 정수합 $S \approx (\text{개수}) \cdot 2a$로 환원되어 \emph{$a^2 \mid S$ 조건이 작은 $a$일수록 자연히 성립}한다. 큰 $a$에서 \emph{$a^2$ 크기가 $S$를 빠르게 추월}해 자연 차단되는 \emph{유한 미정계수} 구조 — $a = 4$가 \emph{경계 직전 함정}.}
+
+\end{document}

@@ -1,0 +1,39 @@
+% 골든 · 유형 6 그리드·색칠 넓이 (문제용 · 미니멀)
+% 세션 75 신설 · 와부고 스타일 도입 · 계기 : 참조 pdf "문제에 넣을 그림 (수정)"
+% [[feedback_wabuko_graph_standard]] 5대 원칙 준수
+%
+% 목적 : 두 곡선 사이 영역의 넓이·격자점 개수 등 (본편)
+%   - 문제용 : 두 곡선 + 축 + 방정식 라벨만
+%   - 영역 색칠·grid·눈금 없음 (학생이 문제 이해)
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (6, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {$\mathrm{O}$};
+
+  % ── 상단 곡선 예시 : y = 36/(x+10) + 4 (반비례·평행이동) · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=0:5.7, samples=100]
+    plot (\x, {36/(\x + 10) + 4 - 3.6});   % -3.6은 시각 fit 위한 offset (예시)
+
+  % ── 하단 곡선 예시 : y = √x
+  \draw[black, line width=0.5pt, domain=0:5.7, samples=100]
+    plot (\x, {sqrt(\x)});
+
+  % ── 곡선 라벨 (프레임 안 · 자연 위치)
+  \node[font=\scriptsize, anchor=west] at (2, 2.7) {$y=\dfrac{36}{x+10}+4$};
+  \node[font=\scriptsize, anchor=west] at (4.5, 1.9) {$y=\sqrt{x}$};
+\end{tikzpicture}
+\end{center}
+
+% === 사용 시 교체 대상 ===
+% 1. 두 곡선 방정식·domain
+% 2. 축 범위
+% 3. 곡선 라벨 위치
+%
+% === 유지 대상 ===
+% - scale=1.0
+% - line width 표준
+% - 곡선이 프레임 안에 자연 배치
+% - 문제용은 미니멀 · 색칠·grid 없음

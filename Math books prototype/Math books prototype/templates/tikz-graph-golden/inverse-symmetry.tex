@@ -1,0 +1,72 @@
+% 골든 · 역함수·y=x 대칭 관계 (feedback_solution_graph_requirement 유형 5)
+% 확립 : 2026-07-22 세션 75 · 원함수 f + 역함수 f⁻¹ + y=x 대각선 병기
+% 원본 위치 (참조) : output/공통수학2/DeeP-Math-정리편/Deep Math Review Note 08-RF02-무리함수-답지.tex §L2-11
+%
+% 목적 : 원함수와 역함수의 그래프 개형·y=x 대칭·교점 (y=x 위) 시각화
+%   - 원함수 f 검정 실선 · 역함수 f⁻¹ dm-accent 실선 (색 구분)
+%   - y=x 대각선 점선 · 축 프레임 좌우 전체 채움
+%   - 교점 : y=x 위 · 파생점 dm-accent 0.7pt
+%   - 정점/시작점 : 검정·dm-accent 0.8pt (원함수·역함수 대응)
+%
+% 규약 준수 :
+%   - scale=1.0 통일 (feedback_figure_effective_rendering §37)
+%   - 실효 두께 : 축 0.7pt · 곡선 0.5pt · 점선 0.4pt
+%   - 점 크기 : 주요 정점 0.8pt · 파생점 0.7pt
+%   - 라벨 : 실선·점선·다른 라벨 겹침 불허 (feedback_label_placement v2)
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 목표 [0.55, 0.85])
+  %   축 라벨 : x below · y left (화살표 끝 금지)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (4.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 4.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+
+  % ── 원함수 f · 예 : y = √(x+1) (시작점 (-1, 0)) · 정의역 x ≥ -1 · 실효 0.5pt
+  %   (예시 · 실제 사용 시 곡선 방정식·domain 교체)
+  \draw[black, line width=0.5pt, domain=-1:4, samples=80]
+    plot (\x, {sqrt(\x + 1)});
+  \filldraw[black] (-1, 0) circle (0.8pt);
+  \node[font=\scriptsize, anchor=south west] at (3.9, {sqrt(4.9)}) {$y=f(x)$};
+
+  % ── 역함수 f⁻¹ · y = x²-1 (x ≥ 0 · 정의역 = f의 치역) · dm-accent 실효 0.5pt
+  \draw[dm-accent, line width=0.5pt, domain=0:2.2, samples=80]
+    plot (\x, {\x*\x - 1});
+  \filldraw[dm-accent] (0, -1) circle (0.8pt);
+  \node[font=\scriptsize, anchor=south west, dm-accent] at (2.15, {2.2*2.2 - 1}) {$y=f^{-1}(x)$};
+
+  % ── y = x 대각선 · 점선 dm-accent 0.4pt · 프레임 좌우 전체 채움
+  \begin{scope}
+    \clip (-0.5, -0.5) rectangle (4.5, 4.5);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-0.5, -0.5) -- node[pos=0.75, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=x$}
+      (4.5, 4.5);
+  \end{scope}
+
+  % ── 교점 (y = x 위) · f(x) = x = f⁻¹(x) 지점 · 파생점 dm-accent 0.7pt
+  %   예 : y = √(x+1) = x → x² - x - 1 = 0 → x = (1+√5)/2 ≈ 1.618 (교점 한 개)
+  \filldraw[dm-accent] (1.618, 1.618) circle (0.7pt);
+  \node[font=\tiny, anchor=north west, dm-accent] at (1.68, 1.62) {교점};
+\end{tikzpicture}
+\end{center}
+
+% === 사용 시 교체 대상 ===
+% 1. 원함수 f 방정식·domain · 시작점 좌표 (예: $\sqrt{ax+b}+c$·이차함수 제한 정의역 등)
+% 2. 역함수 f⁻¹ 방정식·domain · 대응 시작점
+%    (역함수는 원함수의 y=x 대칭 · 대응 domain 은 원 함수 치역)
+% 3. y = x 교점 좌표 (원함수와 y=x 연립해 구함 · f(x) = x)
+% 4. 축 범위 · 눈금 라벨 (특징적 x, y 값)
+% 5. 색 : 원함수 검정 · 역함수 dm-accent · y=x dm-accent 점선 (유지)
+%
+% === 유지 대상 (규약 자동 준수) ===
+% - scale=1.0
+% - line width 값 (0.7pt · 0.5pt · 0.4pt)
+% - circle 반경 (0.8pt · 0.7pt)
+% - dash pattern (on 2pt off 1.5pt)
+% - y=x 축 프레임 좌우 전체 채움 (clip 사용)
+%
+% === 확장 유형 ===
+% - 두 그래프의 두 교점·거리 : 두 교점을 잇는 선분 dm-accent · 거리 라벨
+% - 원함수·역함수가 같은 그래프 (자기 자신) : y=f(x) 와 y=x가 같은 경우 특수 처리
+% - 이차함수 제한 정의역의 역함수 : 반쪽 곡선만 표시 · 대응 시작점 상세
+% - 조각별 역함수 : piecewise-shape.tex 겸용

@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-05-F9
+source: bank/creation-archive/phase-a2/creations/creation-05.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-05-F9.tex
+flaw_type: F9
+flaw_name: 조판 결함
+expected_verdict: PENDING
+ground_truth: flawed
+seed: false
+injection:
+  method: replace
+  find: "점 $(3, 4)$에서 원 $x^2 + y^2 = 5$에 그은"
+  replace: "점 $(3, 4)$에서 원 $x^2 + y^2 = 5$ (단, 이 반지름 제곱은 $5 = 1+1+1+1+1 = \\sqrt{25} = \\tfrac{10}{2} = 2.5\\times 2 = 4+1 = 3+2 = 6-1$ 등 여러 방식으로 표현되며 조판 시 한 줄을 크게 넘겨 Overfull hbox 를 유발한다) 에 그은"
+note: "긴 인라인 수식 → Overfull hbox · 조판 결함 (A1 미검출 blindspot 테스트)"
+date: 2026-07-28

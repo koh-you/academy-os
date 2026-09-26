@@ -1,0 +1,69 @@
+# 골든 배치 관행 · Registry v1.0 (2026-07-13 세션 38 신설)
+#
+# 목적: 마스터가 확립한 실전 골든 배치 관행을 시스템 지식으로 등재.
+# layout-auto-decider가 이 파일을 **1순위 참조** (알고리즘 판정 fallback).
+#
+# 원칙: 알고리즘 임의 규칙보다 마스터 실전 관행 우선.
+# 신규 관행 발견 시 즉시 등재 (2회 tex 주석 등에서 감지 시 반영).
+#
+# 형식:
+#   {과목}:
+#     선택형|서술형:
+#       page_N: <macro> | conditional
+#       page_N_override: [{condition, layout}]
+
+CM2:
+  선택형:
+    # 마스터 확립 관행: 페이지 1·2 = probpair×2 + \vfill 기본 (편차·특수요소 무관)
+    # 근거: 2회 골든 (output/공통수학2/2026-2학기-와부고-예상-중간-2회/문제.tex)
+    # - 페이지 1 (1~4): probpair×2 + \vfill (편차 σ=9.5, 특수요소 4번 bogibox)
+    # - 페이지 2 (5~8): probpair×2 + \vfill (편차 σ=9.5, 특수요소 8번 conditions)
+    # - 페이지 3 (9~12): probgridfour "마스터 반복 지적 대응 · 고정 슬롯"
+    page_1: probpair×2 + \vfill
+    page_2: probpair×2 + \vfill
+    page_3: probgridfour            # 문항 크기 균등 시 grid 우선
+    page_3_override:
+      - condition: special_element_count >= 2
+        layout: probpair×2 + \vfill
+      - condition: stddev_mm > 15
+        layout: probpair×2 + \vfill
+    # 페이지 4 이상 (13문 초과 대회) — 청사진 결정
+
+  서술형:
+    # 서답형은 청사진 layout_hint 우선. 알고리즘 fallback.
+    default: 청사진 layout_hint 우선 → 알고리즘 판정
+    # 정점 문항 (composite ≥ 30) 단독 페이지 원칙:
+    premium_slots_isolation:
+      composite_threshold: 30
+      layout: probpairfillpage
+
+CM1:
+  선택형:
+    # 마스터 확립 관행: 페이지 1 = probpair×2 + \vfill 기본
+    # 근거: 1회 골든 (output/공통수학1/2026-1학기-기말예상-1회/문제.tex)
+    page_1: probpair×2 + \vfill
+    page_2: probpair×2 + \vfill
+    page_3: probgridfour
+    page_3_override:
+      - condition: special_element_count >= 2
+        layout: probpair×2 + \vfill
+
+  서술형:
+    default: 청사진 layout_hint 우선 → 알고리즘 판정
+    premium_slots_isolation:
+      composite_threshold: 30
+      layout: probpairfillpage
+
+# 신규 등재 히스토리
+registry_history:
+  - date: 2026-07-13
+    session: 38
+    added: CM2 선택형 page_1·page_2 (probpair×2 + \vfill 기본)
+    reason: 3회 시범에서 decider가 probgridfour 판정 → 골든 관행 미준수 발견
+    reference: bank/세션38-시범-실패-분석.md
+
+# 관련 자원
+related:
+  - scripts/layout-auto-decider.mjs (v3.0 · registry 1순위 참조)
+  - feedback_layout_auto_decider (v3.0)
+  - bank/세션38-시범-실패-분석.md

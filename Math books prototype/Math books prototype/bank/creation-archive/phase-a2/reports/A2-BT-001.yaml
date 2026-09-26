@@ -1,0 +1,19 @@
+pair_id: BT-001
+p_file: creation-01.tex
+q_file: anchor-01.tex
+p_grade: star_4
+q_grade: star_4
+p_insight_count: 3
+q_insight_count: 3
+p_answer_cleanliness: integer
+q_answer_cleanliness: integer
+winner: Q
+confidence: 0.62
+reasoning: |
+  두 문항은 mechanism이 사실상 동일 (원 위 점 삼각형 넓이 자연수 · 자연수 카운트).
+  M·I·X 3층 모델 모두 유사 (Mₛ 4·Mₖ 2·Mₐ 2·Mₜ 2, I-EQV+I-MI+I-CON, X=CM2-GM).
+  차이점: Q는 x축 절편 AB 길이가 6 (자연수)로 즉시 산출되어 발문↔풀이 흐름이 청결.
+  P는 y축 절편 AB 길이가 $2\sqrt{6}$ (무리수)로 넓이 조건이 $\sqrt{6} \cdot x$ = 자연수로
+  변환되어 학생이 무리수 계수를 처리해야 함 (통찰 밀도는 오히려 +0.5 상승 가능).
+  well-defined는 양측 모두 통과. 답 청결도·발문 자연스러움에서 Q 우세.
+  단, P는 통찰 깊이(무리수 계수 분리)에서 미세 우위 → 대상층 상위권 정합 시 P도 유효.

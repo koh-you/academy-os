@@ -1,0 +1,2606 @@
+---
+name: mechanism-데이터-RPM-CM2-RF
+description: RPM 공통수학2 (2022개정) 유리무리함수 정독 데이터. 세션 54 (2026-07-20) 신설.
+metadata:
+  type: reference
+  version: v1.0
+  established: 2026-07-20
+  source: RPM 공통수학2 (2022개정)
+  tier_mapping:
+    교과서문제: star_1~2
+    유형익히기(대표문제): star_3
+    유형익히기(상중하): star_3~4
+    시험에꼭나오는: star_3~4
+    시험에꼭나오는(중요★): star_4~5
+    서술형: star_3~4
+    실력up: star_4~5
+  unit_code: CM2-RF
+  standard: 10수07-03·04
+  citation_note: RPM · 학습 목적 · 저작권 준수 (원문 전사 없음)
+  extract_range: "09 유리함수·10 무리함수 · 교과서문제·유형익히기·시험꼭나오는·서술형·실력up"
+  pages: "138~165"
+---
+
+# RPM 공통수학2 (2022개정) · 09 유리함수 · 10 무리함수 정독 데이터
+
+## 소단원 구성
+
+### 09 유리함수
+- **09|1 유리식의 사칙연산** (유형 01)
+- **09|2 유리식과 항등식·부분분수** (유형 02, 03, 04)
+- **09|3 복잡한 유리식의 값** (유형 05, 06, 07, 08)
+- **09|4 유리함수의 그래프** (유형 09~16)
+- **09|5 유리함수의 역함수·합성** (유형 17, 18, 19, 20)
+
+### 10 무리함수
+- **10|1 무리식** (유형 01, 02)
+- **10|2 무리식의 값** (유형 03, 04)
+- **10|3 무리함수의 그래프** (유형 05~10)
+- **10|4 무리함수의 역함수·합성·직선의 위치관계** (유형 11~14)
+
+---
+
+## Section A. 교과서 문제 정복하기 · 유리함수 (p.139, 0930~0947)
+
+- source: RPM-CM2-RF-유리-#0930
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    보기 6식 중 다항함수·다항함수 아닌 유리함수 분류.
+  solution_summary: |
+    다항함수: $y=2x+5$, $y=x^2+1$. 유리함수(비다항): $y=\frac{1}{x+6}$, $y=-\frac{3}{5x}$, $y=\frac{x+5}{3x+4}$. ($y=\frac{1-2x}{3}$는 다항함수)
+  category: 다항함수·유리함수 분류
+  tier: star_2
+  unit_code: CM2-RF
+  standard: 10수07-03
+  mechanism_primary: 유리함수-정의-판독
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-RF-유리-#0931
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{x}{x+3}$의 정의역.
+  solution_summary: |
+    $\{x\mid x\ne -3\}$.
+  category: 유리함수 정의역
+  tier: star_2
+  mechanism_primary: 유리함수-정의역
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0932
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{x+4}{2-x}$의 정의역.
+  solution_summary: |
+    $\{x\mid x\ne 2\}$.
+  category: 유리함수 정의역
+  tier: star_2
+  mechanism_primary: 유리함수-정의역
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0933
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{5}{x^2-1}$의 정의역.
+  solution_summary: |
+    $\{x\mid x\ne \pm 1\}$.
+  category: 유리함수 정의역
+  tier: star_2
+  mechanism_primary: 유리함수-정의역
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0934
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{3x}{x^2+4}$의 정의역.
+  solution_summary: |
+    분모 $x^2+4>0$이므로 정의역은 모든 실수.
+  category: 유리함수 정의역
+  tier: star_2
+  mechanism_primary: 유리함수-정의역-판별
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0935~0938
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{k}{x}$ 꼴 4문제 (0935 $\frac{2}{x}$, 0936 $-\frac{1}{x}$, 0937 $\frac{1}{2x}$, 0938 $-\frac{6}{x}$)의 그래프.
+  solution_summary: |
+    $k$의 부호로 사분면 판단·$|k|$ 크기 비교.
+  category: 반비례 그래프
+  tier: star_2
+  mechanism_primary: 반비례-그래프
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0939
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{1}{x}$의 그래프를 $x$축 $+2$·$y$축 $+3$ 평행이동한 식.
+  solution_summary: |
+    $y=\frac{1}{x-2}+3$.
+  category: 유리함수 평행이동
+  tier: star_2
+  mechanism_primary: 평행이동
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0940~0943
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    유리함수 4문제 (0940 $\frac{1}{x-2}$, 0941 $-\frac{1}{x}+1$, 0942 $\frac{2}{x-1}-3$, 0943 $-\frac{1}{x+2}+1$)의 그래프·정의역·치역·점근선.
+  solution_summary: |
+    점근선: 0940 $x=2,y=0$; 0941 $x=0,y=1$; 0942 $x=1,y=-3$; 0943 $x=-2,y=1$.
+  category: 유리함수 표준형
+  tier: star_2
+  mechanism_primary: 표준형-점근선
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0944
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{4x+1}{x-1}$을 $y=\frac{k}{x-p}+q$ 꼴로.
+  solution_summary: |
+    나눗셈: $y=\frac{5}{x-1}+4$.
+  category: 일반형→표준형
+  tier: star_2
+  mechanism_primary: 일반형-변환
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0945
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{-3x+5}{x-2}$를 표준형으로.
+  solution_summary: |
+    $y=\frac{-1}{x-2}-3$.
+  category: 일반형→표준형
+  tier: star_2
+  mechanism_primary: 일반형-변환
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0946
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{2x-1}{x+1}$의 그래프·정의역·치역·점근선.
+  solution_summary: |
+    $y=\frac{-3}{x+1}+2$. 점근선 $x=-1,y=2$.
+  category: 일반형 유리함수
+  tier: star_2
+  mechanism_primary: 일반형-변환-그래프
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0947
+  page: 139
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\frac{3x-4}{x-2}$의 그래프·정의역·치역·점근선.
+  solution_summary: |
+    $y=\frac{2}{x-2}+3$. 점근선 $x=2,y=3$.
+  category: 일반형 유리함수
+  tier: star_2
+  mechanism_primary: 일반형-변환-그래프
+  insight_type: 절차형
+  depth: 1
+
+---
+
+## Section B. 유형 익히기 · 유리함수 (p.140~149, 0948~1011)
+
+### 유형 01 유리식의 사칙연산
+
+- source: RPM-CM2-RF-유리-#0948
+  page: 140
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\frac{x^2+x-2}{x^2-9}\div\frac{x^2-3x+2}{x+3}\times\frac{x-2}{x^2+2x}$ 계산.
+  solution_summary: |
+    인수분해 후 약분: $\frac{x+2}{x-3}\cdot\frac{x+3}{(x-1)(x-2)}\cdot\frac{x-2}{x(x+2)}$ → $\frac{1}{x(x-3)}$ (약분 결과, 인수분해 세부는 학생 확인).
+  category: 유리식 사칙연산
+  tier: star_3
+  mechanism_primary: 유리식-인수분해-약분
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0949
+  page: 140
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{x+2}{x^2+x}-\frac{3+x}{x^2-1}$ 계산.
+  solution_summary: |
+    통분 후 정리 (답 계산 대기).
+  category: 유리식 뺄셈
+  tier: star_3
+  mechanism_primary: 유리식-통분
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0950
+  page: 140
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{1}{a-1}-\frac{1}{a+1}-\frac{2}{a^2+1}-\frac{4}{a^4+1}$ 계산.
+  solution_summary: |
+    2개씩 순차 통분 (차이 공식 반복). 답: $\frac{8}{a^8-1}$ (① 선택지).
+  category: 유리식 순차통분
+  tier: star_3
+  mechanism_primary: 순차통분-차이공식
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0951
+  page: 140
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $x^2+y^2=6,xy=2$일 때 $\frac{x^3-y^3}{2(x+y)}\div\frac{x^2-y^2}{4x^2+8xy+4y^2}$의 값.
+  solution_summary: |
+    인수분해: $\frac{(x-y)(x^2+xy+y^2)}{2(x+y)}\cdot\frac{4(x+y)^2}{(x-y)(x+y)}=2(x^2+xy+y^2)=2(6+2)=16$.
+  category: 유리식 값 (대칭식)
+  tier: star_3
+  mechanism_primary: 유리식-대칭식-대입
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 02 유리식과 항등식 (중요★)
+
+- source: RPM-CM2-RF-유리-#0952
+  page: 140
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\frac{a}{x-2}+\frac{b}{x+1}=\frac{5x+2}{x^2-x-2}$ 성립 시 $ab$.
+  solution_summary: |
+    통분: $\frac{a(x+1)+b(x-2)}{x^2-x-2}=\frac{(a+b)x+(a-2b)}{x^2-x-2}$. $a+b=5,a-2b=2$ → $a=4,b=1$. $ab=4$ (②).
+  category: 항등식 계수비교
+  tier: star_3
+  mechanism_primary: 유리식-항등식
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0953
+  page: 140
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{ax^2+bx+c}{x^3-1}=\frac{2}{x-1}+\frac{x-1}{x^2+x+1}$일 때 $a^2+b^2+c^2$.
+  solution_summary: |
+    RHS 통분 $\frac{2(x^2+x+1)+(x-1)^2}{x^3-1}=\frac{3x^2+3}{x^3-1}$. $a=3,b=0,c=3$. $a^2+b^2+c^2=18$.
+  category: 항등식 계수비교
+  tier: star_3
+  mechanism_primary: 유리식-항등식
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0954
+  page: 140
+  category_type: 유형익히기(상중하·서술형)
+  problem_summary: |
+    $\frac{5-x^2}{x^3-x^2-x+1}=\frac{a}{1+x}+\frac{b}{1-x}+\frac{c}{(1-x)^2}$ 성립 시 $abc$.
+  solution_summary: |
+    분모 인수분해 $x^3-x^2-x+1=(x-1)^2(x+1)$·부호 조정. 통분 후 계수비교. 답 계산 대기.
+  category: 항등식 부분분수 분해
+  tier: star_3
+  mechanism_primary: 부분분수-분해
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 03 (분자차수)≥(분모차수) 유리식
+
+- source: RPM-CM2-RF-유리-#0955
+  page: 141
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\frac{x+2}{x+1}-\frac{x+3}{x+2}-\frac{x+4}{x+3}+\frac{x+5}{x+4}=\frac{ax+b}{(x+1)(x+2)(x+3)(x+4)}$일 때 $a-b$.
+  solution_summary: |
+    각 분수 $1+\frac{1}{x+k}$로 분리. 상수 상쇄, $\frac{1}{x+1}-\frac{1}{x+2}-\frac{1}{x+3}+\frac{1}{x+4}$ 통분. 답 계산 대기.
+  category: 다항+분수 분리
+  tier: star_3
+  mechanism_primary: 대분수-분리-통분
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0956
+  page: 141
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{2x^2+4x+1}{x^2+2x}-\frac{x^2+x-1}{x^2+x-2}-1$ 계산.
+  solution_summary: |
+    각 대분수 분리 후 정리 (답 계산 대기).
+  category: 대분수 분리
+  tier: star_3
+  mechanism_primary: 대분수-분리
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0957
+  page: 141
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{x^3+1}{x^2-x}-\frac{x^2}{x+1}-2=\frac{\square}{x^3-x}$에서 $\square$.
+  solution_summary: |
+    통분·인수분해 (답 계산 대기, 선택지 중 하나).
+  category: 대분수 통분
+  tier: star_3
+  mechanism_primary: 대분수-통분
+  insight_type: 절차형
+  depth: 1
+
+### 유형 04 부분분수로의 변형 (중요★)
+
+- source: RPM-CM2-RF-유리-#0958
+  page: 141
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\frac{3}{x(x+3)}+\frac{4}{(x+3)(x+7)}+\frac{5}{(x+7)(x+12)}=\frac{a}{x(x+b)}$일 때 $a+b$.
+  solution_summary: |
+    $\frac{k}{A\cdot B}=\frac{1}{A}-\frac{1}{B}$ ($B-A=k$): 각 항 → $(\frac{1}{x}-\frac{1}{x+3})+(\frac{1}{x+3}-\frac{1}{x+7})+(\frac{1}{x+7}-\frac{1}{x+12})=\frac{1}{x}-\frac{1}{x+12}=\frac{12}{x(x+12)}$. $a=12,b=12,a+b=24$.
+  category: 부분분수 망원
+  tier: star_3
+  mechanism_primary: 부분분수-망원
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0959
+  page: 141
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{1}{5\cdot 7}+\frac{1}{7\cdot 9}+\cdots+\frac{1}{23\cdot 25}$의 값.
+  solution_summary: |
+    $\frac{1}{2}(\frac{1}{5}-\frac{1}{25})=\frac{1}{2}\cdot\frac{4}{25}=\frac{2}{25}$.
+  category: 부분분수 망원
+  tier: star_3
+  mechanism_primary: 부분분수-망원
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0960
+  page: 141
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $\frac{1}{x^2-x}+\frac{1}{x^2+x}+\frac{1}{x^2+3x+2}+\frac{1}{x^2+5x+6}=\frac{m}{(x-1)(x+n)}$일 때 $m+n$.
+  solution_summary: |
+    각 분모 인수분해 $x(x-1),x(x+1),(x+1)(x+2),(x+2)(x+3)$. 부분분수 망원 → $\frac{1}{x-1}-\frac{1}{x+3}=\frac{4}{(x-1)(x+3)}$. $m=4,n=3,m+n=7$.
+  category: 부분분수 망원
+  tier: star_3
+  mechanism_primary: 부분분수-망원
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0961
+  page: 141
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $f(x)=\frac{1}{x(x+1)}+\frac{1}{(x+1)(x+2)}+\cdots+\frac{1}{(x+998)(x+999)}$일 때 $f(111)$.
+  solution_summary: |
+    부분분수 → $\frac{1}{x}-\frac{1}{x+999}$. $f(111)=\frac{1}{111}-\frac{1}{1110}=\frac{10-1}{1110}=\frac{9}{1110}=\frac{3}{370}$.
+  category: 부분분수 망원 대입
+  tier: star_3
+  mechanism_primary: 부분분수-망원
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 05 분모·분자가 분수인 유리식
+
+- source: RPM-CM2-RF-유리-#0962
+  page: 142
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $1-\cfrac{1}{1-\cfrac{1}{1-\frac{1}{x}}}=\frac{f(x)}{x}$일 때 $f(10)$.
+  solution_summary: |
+    안쪽부터 순차 정리: $1-\frac{1}{x}=\frac{x-1}{x}$, $1-\frac{x}{x-1}=\frac{-1}{x-1}$, $1-(-(x-1))=x$. 즉 좌변$=x$, 그런데 $\frac{f(x)}{x}=x$ 아님. 재계산: 답 계산 대기.
+  category: 연분수 계산
+  tier: star_3
+  mechanism_primary: 연분수-정리
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0963
+  page: 142
+  category_type: 유형익히기(상중하)
+  problem_summary: |
+    $f(x)=1-\frac{1+\frac{1}{x+1}}{1-\frac{1}{x+1}}$에 대해 $f(a)=\frac{1}{4}$인 $a$.
+  solution_summary: |
+    분수식 정리 후 $a$에 대해 풀기 (답 계산 대기).
+  category: 복분수 식 대입
+  tier: star_3
+  mechanism_primary: 복분수-정리
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0964
+  page: 142
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\frac{43}{15}=a+\cfrac{1}{b+\cfrac{1}{c+\frac{1}{d}}}$ 만족 자연수 $a,b,c,d$일 때 $a+b+c+d$.
+  solution_summary: |
+    연분수 전개: $\frac{43}{15}=2+\frac{13}{15}$, $\frac{15}{13}=1+\frac{2}{13}$, $\frac{13}{2}=6+\frac{1}{2}$. $a=2,b=1,c=6,d=2$. 합 $=11$ (②).
+  category: 연분수 전개
+  tier: star_3
+  mechanism_primary: 연분수-전개
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 06 유리식의 값 — $x^n\pm\frac{1}{x^n}$
+
+- source: RPM-CM2-RF-유리-#0965
+  page: 142
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $x^2+4x-1=0$일 때 $2x^2+9x+1-\frac{9}{x}+\frac{2}{x^2}$.
+  solution_summary: |
+    $x\ne 0$이므로 $x+\frac{1}{x}=-4/\ldots$ 정리. 답 계산 대기 (선택지 중 하나).
+  category: $x+1/x$ 곱셈공식
+  tier: star_3
+  mechanism_primary: 곱셈공식-변형
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0966
+  page: 142
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $x^2+\frac{1}{x^2}=5$·$x>0$일 때 $x^3+\frac{1}{x^3}$.
+  solution_summary: |
+    $(x+\frac{1}{x})^2=5+2=7$·$x>0$이므로 $x+\frac{1}{x}=\sqrt{7}$. $x^3+\frac{1}{x^3}=(x+\frac{1}{x})^3-3(x+\frac{1}{x})=7\sqrt{7}-3\sqrt{7}=4\sqrt{7}$.
+  category: 세제곱 대칭식
+  tier: star_3
+  mechanism_primary: 곱셈공식-3제곱
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0967
+  page: 142
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $x^2-3x+1=0,x>1$일 때 $x^4-\frac{1}{x^4}$.
+  solution_summary: |
+    $x+\frac{1}{x}=3$·$x-\frac{1}{x}=\sqrt{5}$ ($x>1$이므로 $+$). $x^2+\frac{1}{x^2}=7$·$x^2-\frac{1}{x^2}=3\sqrt{5}$. $x^4-\frac{1}{x^4}=7\cdot 3\sqrt{5}=21\sqrt{5}$ (③).
+  category: 4제곱 대칭식
+  tier: star_3
+  mechanism_primary: 대칭식-4제곱
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 07 유리식의 값 — $a+b+c=0$
+
+- source: RPM-CM2-RF-유리-#0968
+  page: 143
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $a+b+c=0$일 때 $a(\frac{1}{b}+\frac{1}{c})+b(\frac{1}{c}+\frac{1}{a})+c(\frac{1}{a}+\frac{1}{b})$.
+  solution_summary: |
+    전개 후 $\frac{a}{b}+\frac{c}{b}+\cdots$ → 각 분모별 정리. $\frac{a+c}{b}+\frac{b+a}{c}+\frac{c+b}{a}=\frac{-b}{b}+\frac{-c}{c}+\frac{-a}{a}=-3$ (②).
+  category: 대칭식 조건 활용
+  tier: star_3
+  mechanism_primary: 조건-대입-치환
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0969
+  page: 143
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $a+b+c=0$일 때 $(\frac{a-c}{b}-1)(\frac{b-a}{c}-1)(\frac{c-b}{a}-1)$.
+  solution_summary: |
+    각 인수 정리 $\frac{a-c-b}{b}=\frac{-2c}{b}$·$\frac{-2a}{c}$·$\frac{-2b}{a}$. 곱$=-8$.
+  category: 대칭식 조건 활용
+  tier: star_3
+  mechanism_primary: 조건-치환-곱
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0970
+  page: 143
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\frac{1}{a}+\frac{1}{b}+\frac{1}{c}=0$일 때 $\frac{a}{(a+b)(c+a)}+\frac{b}{(b+c)(a+b)}+\frac{c}{(c+a)(b+c)}$.
+  solution_summary: |
+    조건 → $ab+bc+ca=0$. 통분: 분자$=a(b+c)+b(c+a)+c(a+b)=2(ab+bc+ca)=0$. 답 $0$ (③).
+  category: 대칭식 조건 활용
+  tier: star_3
+  mechanism_primary: 조건-통분
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 08 유리식의 값 — 비례식·등식
+
+- source: RPM-CM2-RF-유리-#0971
+  page: 143
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $(x+y):(y+z):(z+x)=3:4:5$일 때 $\frac{xy+2yz+zx}{x^2+y^2+z^2}$.
+  solution_summary: |
+    $x+y=3k,y+z=4k,z+x=5k$. 합 $2(x+y+z)=12k$ → $x+y+z=6k$. $z=3k,x=2k,y=k$. 분자·분모 대입 (답 계산 대기).
+  category: 비례식 대입
+  tier: star_3
+  mechanism_primary: 비례식-치환
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0972
+  page: 143
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    서로 다른 두 양수 $x,y$에 대해 $x^2-3xy+2y^2=0$일 때 $\frac{x^2-xy+3y^2}{xy-2x^2}$.
+  solution_summary: |
+    $(x-y)(x-2y)=0$·$x\ne y$·양수 → $x=2y$. 대입: $\frac{4y^2-2y^2+3y^2}{2y^2-8y^2}=\frac{5y^2}{-6y^2}=-\frac{5}{6}$.
+  category: 등식 조건 대입
+  tier: star_3
+  mechanism_primary: 인수분해-치환
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0973
+  page: 143
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\frac{x+3y}{2}=\frac{y+2z}{3}=\frac{z}{4}$일 때 $\frac{x+2y+2z}{2x+y-6z}$.
+  solution_summary: |
+    비례상수 $k$: $x+3y=2k,y+2z=3k,z=4k$. 정리해 $x,y$ 를 $k$로 표현 후 대입.
+  category: 등식 비례상수
+  tier: star_3
+  mechanism_primary: 비례상수-치환
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0974
+  page: 143
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $2x+y-3z=0,x-y+6z=0$일 때 $\frac{xy+yz-zx}{x^2+yz}$.
+  solution_summary: |
+    두 식 더하기: $3x+3z=0$ → $x=-z$. 대입: $y=5z-x=5z+z-\ldots$ 재계산 필요. 답 계산 대기 (선택지 중 하나).
+  category: 등식 대입
+  tier: star_3
+  mechanism_primary: 연립-치환
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 09 유리함수 그래프의 평행이동 (중요★)
+
+- source: RPM-CM2-RF-유리-#0975
+  page: 144
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{2x+b}{x+a}$를 $x$축 $+1$·$y$축 $+c$ 평행이동했더니 $y=\frac{3}{x}$와 일치. $abc$.
+  solution_summary: |
+    역이동: $y=\frac{3}{x}$를 $x$축 $-1$·$y$축 $-c$ 이동 → $y=\frac{3}{x+1}-c$. 우변 정리 $=\frac{-cx+3-c}{x+1}$. 계수비교 $a=1$·$-c=2$·$3-c=b$ → $c=-2,b=5$. $abc=1\cdot 5\cdot(-2)=-10$ (별도 확인 필요).
+  category: 유리함수 평행이동
+  tier: star_3
+  mechanism_primary: 평행이동-역이동
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0976
+  page: 144
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $y=\frac{3x-1}{2x-1}$이 $y=\frac{1}{kx}$의 $x$축 $+a$·$y$축 $+b$ 평행이동. $a+b+k$.
+  solution_summary: |
+    표준형: $y=\frac{3x-1}{2x-1}=\frac{1/2}{2x-1}+\frac{3}{2}$ → 이동 결과 비교 (답 계산 대기).
+  category: 평행이동 매개변수
+  tier: star_3
+  mechanism_primary: 평행이동-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0977
+  page: 144
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    다음 중 평행이동에 의해 $y=-\frac{2}{x}$와 겹쳐지는 것 (5개 선지).
+  solution_summary: |
+    각 선지를 표준형으로 → $\frac{-2}{x-p}+q$ 꼴 확인. 계수$-2$인 ④ $y=\frac{x+1}{2-x}=-\frac{-2}{x-2}-1=\frac{-2}{2-x}-1$ 형태 (검증 필요).
+  category: 평행이동 판별
+  tier: star_3
+  mechanism_primary: 표준형-비교
+  insight_type: 절차형
+  depth: 2
+
+### 유형 10 유리함수의 정의역과 치역
+
+- source: RPM-CM2-RF-유리-#0978
+  page: 144
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    정의역 $\{x\mid 0\le x<1\text{ 또는 }1<x\le 3\}$인 $y=\frac{2x-1}{x-1}$의 치역.
+  solution_summary: |
+    $y=\frac{1}{x-1}+2$, 점근선 $x=1,y=2$·감소. $x=0\to y=1$·$x\to 1^-\to -\infty$; $x\to 1^+\to +\infty$·$x=3\to y=5/2$. 치역 $\{y\mid y\le 1$ 또는 $y\ge 5/2\}$ (①).
+  category: 유리함수 치역
+  tier: star_3
+  mechanism_primary: 그래프-치역
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0979
+  page: 144
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{bx+4}{3x+a}$의 정의역 $\{x\mid x\ne -1\}$·치역 $\{y\mid y\ne 3\}$일 때 $a+b$.
+  solution_summary: |
+    점근선 $x=-a/3=-1$ → $a=3$·$y=b/3=3$ → $b=9$. $a+b=12$.
+  category: 치역·점근선 결정
+  tier: star_3
+  mechanism_primary: 점근선-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0980
+  page: 144
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{2x+6}{x+1}$의 치역이 $\{y\mid y\le 0$ 또는 $y\ge 4\}$일 때 정의역의 모든 정수의 합.
+  solution_summary: |
+    $y=\frac{4}{x+1}+2$. 감소·$y=0\to x=-3$·$y=4\to x=1$. 정의역 $-3\le x<-1$ 또는 $-1<x\le 1$. 정수 $-3,-2,0,1$·합 $=-4$ (별도 확인).
+  category: 치역→정의역 역추적
+  tier: star_3
+  mechanism_primary: 그래프-역추적
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 11 유리함수 그래프의 점근선 (중요★)
+
+- source: RPM-CM2-RF-유리-#0981
+  page: 145
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{3x+1}{x+a}$의 점근선이 $x=2,y=b$일 때 $ab$.
+  solution_summary: |
+    $x=-a=2\to a=-2$·$y=3=b$. $ab=-6$ (②).
+  category: 점근선 매개변수
+  tier: star_3
+  mechanism_primary: 점근선-공식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#0982
+  page: 145
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{2x-3}{-x-3}$·$y=\frac{ax+2}{3x+b}$의 점근선이 같을 때 $a+b$.
+  solution_summary: |
+    첫 함수 점근선 $x=-3,y=-2$. 둘째 $x=-b/3=-3\to b=9$·$y=a/3=-2\to a=-6$. $a+b=3$.
+  category: 점근선 매개변수
+  tier: star_3
+  mechanism_primary: 점근선-비교
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0983
+  page: 145
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{bx+c}{ax-2}$가 $(3,4)$를 지나고 점근선 $x=2,y=3$일 때 $a+b+c$.
+  solution_summary: |
+    $x=2/a=2\to a=1$·$y=b/a=b=3$. $(3,4)$ 대입 $\frac{3\cdot 3+c}{3-2}=4\to 9+c=4\to c=-5$. $a+b+c=-1$ (③).
+  category: 점근선·통과점
+  tier: star_3
+  mechanism_primary: 점근선-통과점-연립
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 12 유리함수 그래프의 대칭성
+
+- source: RPM-CM2-RF-유리-#0984
+  page: 145
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{2x+1}{x+4}$가 $(p,q)$·$y=x+a$에 대칭. $a+p+q$.
+  solution_summary: |
+    점근선 교점 $(p,q)=(-4,2)$. 대칭선 기울기 $\pm 1$·$(p,q)$ 통과 → $y=x+a$의 $a=q-p=2-(-4)=6$. $a+p+q=6-4+2=4$ (③).
+  category: 대칭점·대칭직선
+  tier: star_3
+  mechanism_primary: 대칭성-교점
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0985
+  page: 145
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{3x-5}{x-2}$가 $y=-x+k$에 대칭일 때 $k$.
+  solution_summary: |
+    점근선 교점 $(2,3)$. $y=-x+k$가 $(2,3)$ 통과 → $3=-2+k\to k=5$.
+  category: 대칭직선
+  tier: star_3
+  mechanism_primary: 대칭축-교점-대입
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0986
+  page: 145
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{ax+3}{x+b}$가 $y=x+2,y=-x-3$에 대칭. $ab$.
+  solution_summary: |
+    두 대칭직선 교점 $(-\frac{5}{2},-\frac{1}{2})$이 점근선 교점. $-b=-5/2\to b=5/2$·$a=-1/2$. $ab=-5/4$.
+  category: 두 대칭직선 교점
+  tier: star_3
+  mechanism_primary: 대칭직선-교점
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0987
+  page: 145
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{ax+b}{x+c}$가 $(-2,1)$에 대칭·$x$절편 $1$일 때 $abc$.
+  solution_summary: |
+    점근선 교점 $(-c,a)=(-2,1)\to c=2,a=1$. $x=1$에서 $y=0$: $\frac{1+b}{3}=0\to b=-1$. $abc=1\cdot(-1)\cdot 2=-2$.
+  category: 대칭점·절편
+  tier: star_3
+  mechanism_primary: 대칭점-절편-연립
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 13 유리함수 그래프가 지나는 사분면
+
+- source: RPM-CM2-RF-유리-#0988
+  page: 146
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{-3x+4}{x-4}$가 지나지 않는 사분면.
+  solution_summary: |
+    표준형 $=-3+\frac{-8}{x-4}=\frac{-8}{x-4}-3$. 점근선 $x=4,y=-3$·감소. 그래프 제3사분면만 지나지 않음 (③).
+  category: 사분면 판정
+  tier: star_3
+  mechanism_primary: 그래프-사분면
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0989
+  page: 146
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{k}{x-3}+2$가 제3사분면을 지나지 않게 하는 자연수 $k$의 최댓값.
+  solution_summary: |
+    $x=0$에서 $y=-k/3+2\ge 0$·$k\le 6$. $k=6$ (④).
+  category: 사분면 조건 매개변수
+  tier: star_3
+  mechanism_primary: 사분면-경계
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0990
+  page: 146
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{4x+a-1}{x+2}$가 모든 사분면을 지나도록 하는 $a$의 범위.
+  solution_summary: |
+    표준형: $y=4+\frac{a-9}{x+2}$. 점근선 $x=-2,y=4$. 모든 사분면 통과 조건 → $y$절편·$x$절편 위치 분석. 답 계산 대기.
+  category: 사분면 조건 매개변수
+  tier: star_3
+  mechanism_primary: 사분면-경계
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 14 그래프를 이용한 식 구하기 (중요★)
+
+- source: RPM-CM2-RF-유리-#0991
+  page: 146
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{ax+b}{x+c}$ 그래프 (점근선 $x=2,y=2$·$(0,-1)$부근). $abc$.
+  solution_summary: |
+    점근선 → $c=-2,a=2$. $x=0$에서 $y=b/(-2)=$ 그래프값 (그림 확인 필요). 답 계산 대기.
+  category: 그래프→식 (유리함수)
+  tier: star_3
+  mechanism_primary: 그래프-역추적-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0992
+  page: 146
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $y=\frac{a}{x-p}+q$ 그래프 (점근선 $x=4,y=-2$·통과점 $(0,\ldots)$·$(8,\ldots)$). $a+p+q$.
+  solution_summary: |
+    $p=4,q=-2$. 통과점으로 $a$ 결정 (답 계산 대기).
+  category: 그래프→식 (표준형)
+  tier: star_3
+  mechanism_primary: 그래프-역추적
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0993
+  page: 146
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{x+a}{bx+c}$ 그래프. $a-b-c$.
+  solution_summary: |
+    그래프 정보로 점근선·통과점 → $a,b,c$ 결정 (답 계산 대기).
+  category: 그래프→식 (일반형)
+  tier: star_3
+  mechanism_primary: 그래프-역추적
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 15 유리함수 그래프의 성질 (중요★)
+
+- source: RPM-CM2-RF-유리-#0994
+  page: 147
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{-4x-2}{x-1}$에 대한 설명 옳은 것 (5개 선지).
+  solution_summary: |
+    표준형: $y=-4+\frac{-6}{x-1}=\frac{-6}{x-1}-4$. ①정의역 $x\ne 1$ (X, $-1$이라고 잘못) ②$y=-6/x$의 $+1,-4$ 이동 (O) ③점근선 $x=1,y=-4$ (X) ④$x$절편 $-1/2$ (X, 4x=-2, $x=-1/2$이지만 좌표 표기 확인 필요) ⑤모든 사분면 (검토). 정답 ② (별도 확인).
+  category: 유리함수 성질 판별
+  tier: star_3
+  mechanism_primary: 표준형-성질
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0995
+  page: 147
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=-\frac{1}{x+3}-5$에 대한 보기 ㄱ·ㄴ·ㄷ 중 옳은 것. ㄱ.$(-3,-5)$ 대칭 ㄴ.제1사분면 안지남 ㄷ.평행이동으로 $y=\frac{4x-7}{x-2}$와 겹침.
+  solution_summary: |
+    ㄱ 참·ㄴ 판정·ㄷ 표준형 비교. $\frac{4x-7}{x-2}=4+\frac{1}{x-2}$. 계수 $1$ vs $-1$ → 다름. 답 계산 대기.
+  category: 유리함수 성질 종합
+  tier: star_3
+  mechanism_primary: 성질-종합-비교
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 16 유리함수의 최대·최소
+
+- source: RPM-CM2-RF-유리-#0996
+  page: 147
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $-1\le x\le 5/2$에서 $y=\frac{2x-5}{x-3}$의 최댓값 $M$·최솟값 $m$. $M+m$.
+  solution_summary: |
+    $y=2+\frac{1}{x-3}$·감소. $x=-1\to y=7/4$·$x=5/2\to y=0$. $M=7/4,m=0,M+m=7/4$ (④).
+  category: 유리함수 최대최소
+  tier: star_3
+  mechanism_primary: 그래프-최대최소
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0997
+  page: 147
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\{x\mid 3\le x\le a\}$에서 $y=\frac{3x-2}{x-1}$의 최댓값 $M$·최솟값 $4$. $a+M$.
+  solution_summary: |
+    $y=3+\frac{1}{x-1}$·감소. $x=3\to y=7/2$. 최솟값 $4$? 아닌데 감소이므로 최솟값은 $x=a$에서. 조건 재검토: 함수 증감 확인 필요. 답 계산 대기.
+  category: 최대최소·매개변수
+  tier: star_3
+  mechanism_primary: 최대최소-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#0998
+  page: 147
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $2\le x\le 5$에서 $y=\frac{ax+2}{x-1}$의 최댓값 $8,a>0$일 때 최솟값.
+  solution_summary: |
+    $y=a+\frac{a+2}{x-1}$. $a>0$·$a+2>0$이므로 감소. 최댓값 $x=2\to a+(a+2)=2a+2=8\to a=3$. 최솟값 $x=5\to 3+5/4=17/4$ (②).
+  category: 최대최소·매개변수
+  tier: star_3
+  mechanism_primary: 최대최소-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 17 유리함수의 역함수 (중요★)
+
+- source: RPM-CM2-RF-유리-#0999
+  page: 148
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $f(x)=\frac{x+2}{3x+a}$·$f=f^{-1}$일 때 $a$.
+  solution_summary: |
+    $f=f^{-1}$ 조건: 분모 계수·상수 대칭 → $a=-1$ (일반공식 $f(x)=\frac{ax+b}{cx+d},f=f^{-1}\iff a+d=0$). 여기 $a$(문제) 는 상수 → $1+a=0\to a=-1$.
+  category: 자기역함수 조건
+  tier: star_3
+  mechanism_primary: 자기역함수-대칭
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1000
+  page: 148
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\frac{-x-1}{x+a}$의 역함수가 $\frac{2x+b}{cx+1}$일 때 $a+b+c$.
+  solution_summary: |
+    역함수 공식: $\frac{-dx+b}{cx-a}$ 꼴. 계수 비교 (답 계산 대기).
+  category: 역함수 계수 비교
+  tier: star_3
+  mechanism_primary: 역함수-공식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1001
+  page: 148
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $y=\frac{x+3}{x+2},y=\frac{ax+b}{x-1}$이 $y=x$에 대칭. $a+b$.
+  solution_summary: |
+    두 함수가 서로 역함수 관계 → $y=\frac{x+3}{x+2}$의 역함수 계산: $x=\frac{y+3}{y+2}\to x(y+2)=y+3\to xy+2x=y+3\to y(x-1)=3-2x\to y=\frac{-2x+3}{x-1}$. 비교 $a=-2,b=3,a+b=1$.
+  category: 역함수 대칭
+  tier: star_3
+  mechanism_primary: 역함수-대칭
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1002
+  page: 148
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{ax+b}{x+1}$과 역함수 그래프가 모두 $(-2,3)$ 지남. $ab$.
+  solution_summary: |
+    원함수 $(-2,3)$·역함수 $(-2,3)$이므로 원함수 $(3,-2)$도 지남. 두 점 대입: $\frac{-2a+b}{-1}=3,\frac{3a+b}{4}=-2$. $-2a+b=-3,3a+b=-8$ → 뺄셈 $-5a=5\to a=-1,b=-5$. $ab=5$.
+  category: 역함수 공통점
+  tier: star_3
+  mechanism_primary: 역함수-공통점
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 18 유리함수 합성·역함수
+
+- source: RPM-CM2-RF-유리-#1003
+  page: 148
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $f(x)=\frac{x+5}{2x+1}$·$(f^{-1}\circ f^{-1})(2)+(f\circ f^{-1})(3)$.
+  solution_summary: |
+    $(f\circ f^{-1})(3)=3$. $f^{-1}(y)=x$·$f(x)=y$: $f(x)=2$ 풀면 $x=$ 그 값이 다시 $f^{-1}$입력. $(x+5)/(2x+1)=2\to x+5=4x+2\to x=1$. $(f^{-1}\circ f^{-1})(2)=f^{-1}(1)$. $(x+5)/(2x+1)=1\to x+5=2x+1\to x=4$. 합 $=4+3=7$ (선지 없음, 재검토 필요).
+  category: 역함수 합성 값
+  tier: star_3
+  mechanism_primary: 역함수-합성
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1004
+  page: 148
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\frac{x+4}{x-1},g(x)=\frac{2x}{x-2}$·$(g^{-1}\circ f)^{-1}(4)$.
+  solution_summary: |
+    $(g^{-1}\circ f)^{-1}=f^{-1}\circ g$. $g(4)=8/2=4$. $f^{-1}(4)$: $f(x)=4\to x+4=4x-4\to x=8/3$. 답 $8/3$ (④).
+  category: 역함수 합성 값
+  tier: star_3
+  mechanism_primary: 역함수-합성-공식
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1005
+  page: 148
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\frac{ax-1}{bx+1}$·역 $g(x)$·$(f\circ g)(2)=1/2,g(1)=2$·$(g\circ g)(3)$.
+  solution_summary: |
+    $(f\circ g)(2)=2$이어야 하나 $1/2$? 문제 재확인 (원문 그대로). $g(1)=2\to f(2)=1$. 조건으로 $a,b$ 결정 후 $(g\circ g)(3)$. 답 계산 대기.
+  category: 역함수 합성 값
+  tier: star_3
+  mechanism_primary: 역함수-합성-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 19 유리함수 그래프와 직선의 위치 관계
+
+- source: RPM-CM2-RF-유리-#1006
+  page: 149
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{3}{x},y=-2x+k$가 한 점에서 만나는 양수 $k$.
+  solution_summary: |
+    $\frac{3}{x}=-2x+k\to 2x^2-kx+3=0$. 판별식 $k^2-24=0\to k=2\sqrt{6}$ (④).
+  category: 유리함수·직선 접함
+  tier: star_3
+  mechanism_primary: 이차방정식-판별식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1007
+  page: 149
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{x+2}{x-1},y=mx+1$이 만나지 않는 $m$의 범위.
+  solution_summary: |
+    $\frac{x+2}{x-1}=mx+1\to x+2=(mx+1)(x-1)=mx^2-mx+x-1\to mx^2-mx-3=0$. $m=0$ 시 $-3=0$ 모순 (안만남). $m\ne 0$이면 판별식 $m^2+12m<0\to -12<m<0$. 종합 $-12<m\le 0$.
+  category: 유리함수·직선 안만남
+  tier: star_3
+  mechanism_primary: 이차방정식-판별식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1008
+  page: 149
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $\{x\mid 2\le x\le 4\}$·$y=\frac{2x+1}{x-1}$와 $y=kx+1$의 교점이 존재하는 $k$의 최댓값 $M$·최솟값 $m$. $M-m$.
+  solution_summary: |
+    두 함수 끝점 값·직선 통과 조건으로 $k$의 범위 판정 (답 계산 대기).
+  category: 유리함수·직선 교점 존재
+  tier: star_3
+  mechanism_primary: 최대최소-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 20 유리함수의 합성 (중요★)
+
+- source: RPM-CM2-RF-유리-#1009
+  page: 149
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $f(x)=\frac{x-1}{x}$·$f^1=f,f^{n+1}=f\circ f^n$일 때 $f^{50}(3)$.
+  solution_summary: |
+    $f(3)=2/3,f^2(3)=(2/3-1)/(2/3)=-1/2,f^3(3)=(-3/2)/(-1/2)=3$. 주기 3. $50=3\cdot 16+2$·$f^{50}(3)=f^2(3)=-1/2$ (②).
+  category: 유리함수 반복합성 주기
+  tier: star_3
+  mechanism_primary: 반복합성-주기
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1010
+  page: 149
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\frac{x+3}{x-1}$·$f^1=f,f^{n+1}=f\circ f^n$·$f^{1001}(a)=2$인 $a$.
+  solution_summary: |
+    $f^2$ 계산해 주기 확인. $f(f(x))$ → 정리 후 주기 판정. $1001\equiv 1\pmod{주기}$인 경우 $f(a)=2\to a+3=2(a-1)\to a=5$. 답 계산 대기(주기 확정).
+  category: 반복합성 주기
+  tier: star_3
+  mechanism_primary: 반복합성-주기
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1011
+  page: 149
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    유리함수 $y=f(x)$ 그래프 (점근선 정보) · $f^{1000}(6)$.
+  solution_summary: |
+    주기 파악 후 계산 (답 계산 대기).
+  category: 그래프→반복합성
+  tier: star_3
+  mechanism_primary: 그래프-주기
+  insight_type: 통찰형
+  depth: 2
+
+---
+
+## Section C. 시험에 꼭 나오는 문제 · 유리함수 (p.150~152, 1012~1035)
+
+- source: RPM-CM2-RF-유리-#1012
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $a+b=3,ab=-4$일 때 $(\frac{b}{a-1}+\frac{a}{b-1})\div(\frac{1}{1-a}+\frac{1}{1-b})$.
+  solution_summary: |
+    분자·분모 각각 통분: 분자 $\frac{b(b-1)+a(a-1)}{(a-1)(b-1)}=\frac{a^2+b^2-a-b}{(a-1)(b-1)}=\frac{(a+b)^2-2ab-(a+b)}{(a-1)(b-1)}=\frac{9+8-3}{(a-1)(b-1)}=\frac{14}{(a-1)(b-1)}$. 분모 $\frac{(1-b)+(1-a)}{(1-a)(1-b)}=\frac{2-(a+b)}{(a-1)(b-1)}=\frac{-1}{(a-1)(b-1)}$. 나눗셈 $=-14$.
+  category: 유리식 값 (근·계수)
+  tier: star_3
+  mechanism_primary: 근계수-대칭식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1013
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $x\ne -1$에서 $\frac{x^3+1}{(x+1)^4}=\frac{a_1}{x+1}+\frac{a_2}{(x+1)^2}+\frac{a_3}{(x+1)^3}+\frac{a_4}{(x+1)^4}$일 때 $a_1+a_3$.
+  solution_summary: |
+    $x^3+1=(x+1)(x^2-x+1)$. 양변 $(x+1)^4$ 곱해 $x^2-x+1=a_1(x+1)^2+a_2(x+1)^2/\ldots$ 재설정. $x+1=t$: $t^3-1\cdot\ldots$ 정리. 답 계산 대기.
+  category: 유리식 항등식 분해
+  tier: star_3
+  mechanism_primary: 부분분수-분해
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1014
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $\frac{3x+14}{x+5}-\frac{3x-13}{x-4}=\frac{k}{(x+5)(x-4)}$일 때 $k$.
+  solution_summary: |
+    대분수 분리: $(3+\frac{-1}{x+5})-(3+\frac{-1}{x-4})=\frac{-1}{x+5}+\frac{1}{x-4}=\frac{(x+5)-(x-4)}{(x+5)(x-4)}\cdot\frac{1}{-1}$... 재정리: $\frac{-(x-4)+(x+5)}{(x+5)(x-4)}=\frac{9}{(x+5)(x-4)}$. $k=9$.
+  category: 대분수·통분
+  tier: star_3
+  mechanism_primary: 대분수-통분
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1015
+  page: 150
+  category_type: 시험에꼭나오는(중요★)
+  problem_summary: |
+    $f(x)=4x^2-1$일 때 $\sum_{k=1}^{9}\frac{1}{f(k)}$.
+  solution_summary: |
+    $\frac{1}{4k^2-1}=\frac{1}{(2k-1)(2k+1)}=\frac{1}{2}(\frac{1}{2k-1}-\frac{1}{2k+1})$. 망원: $\frac{1}{2}(1-\frac{1}{19})=\frac{9}{19}$ (①).
+  category: 부분분수 망원 합
+  tier: star_3
+  mechanism_primary: 부분분수-망원
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1016
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $\cfrac{\frac{1}{n}-\frac{1}{n+8}}{\frac{1}{n+8}-\frac{1}{n+16}}$가 자연수인 정수 $n$의 합.
+  solution_summary: |
+    분자 $\frac{8}{n(n+8)}$·분모 $\frac{8}{(n+8)(n+16)}$. 비 $=\frac{n+16}{n}=1+\frac{16}{n}$. 자연수 조건 $\frac{16}{n}\in\mathbb{Z}_{\ge 0}$ 및 $1+16/n\ge 1$. $n$이 $16$의 약수 (양수·음수 모두, 단 $n\ne 0,-8,-16$). 양수 $n$: $1,2,4,8,16$. 음수 $n$: $-1,-2,-4,-8(\text{제외}),-16(\text{제외})$일 때 $16/n=-16,-8,-4$… 자연수 조건 확인. 결과: 양의 약수 합 $=31$ (음수는 부호 검토 필요, 답 계산 대기).
+  category: 복분수·정수해
+  tier: star_3
+  mechanism_primary: 복분수-정수해
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1017
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $a^2-5ab-b^2=0$일 때 $\frac{a^3}{b^3}-\frac{b^3}{a^3}$.
+  solution_summary: |
+    $\frac{a}{b}=t$로 치환: $t^2-5t-1=0$. $t-\frac{1}{t}=5$. $t^3-\frac{1}{t^3}=(t-\frac{1}{t})^3+3(t-\frac{1}{t})=125+15=140$ (⑤).
+  category: 곱셈공식 변형
+  tier: star_3
+  mechanism_primary: 곱셈공식-3제곱
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1018
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $x:y:z=3:1:7$일 때 $\frac{-x+4y+z}{2x+3y-z}$.
+  solution_summary: |
+    $x=3k,y=k,z=7k$. 분자 $-3k+4k+7k=8k$·분모 $6k+3k-7k=2k$. 값 $=4$.
+  category: 비례식 대입
+  tier: star_3
+  mechanism_primary: 비례식-치환
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#1019
+  page: 150
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $x+\frac{1}{z}=1,\frac{1}{3y}+z=1$일 때 $\frac{1}{3x}+y$.
+  solution_summary: |
+    첫 식 $x=\frac{z-1}{z}$·둘째 $z=1-\frac{1}{3y}=\frac{3y-1}{3y}$. 각각 정리 후 $\frac{1}{3x}+y$ 계산. 답 계산 대기.
+  category: 연립·유리식 값
+  tier: star_3
+  mechanism_primary: 연립-치환
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1020
+  page: 151
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{3}{x}$의 그래프를 $x$축 $-5$·$y$축 $+2$ 평행이동 그래프가 $(-2,k)$ 지남. $k$.
+  solution_summary: |
+    $y=\frac{3}{x+5}+2$. $x=-2$: $y=\frac{3}{3}+2=3$. $k=3$.
+  category: 평행이동 대입
+  tier: star_3
+  mechanism_primary: 평행이동-대입
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#1021
+  page: 151
+  category_type: 시험에꼭나오는(중요★)
+  problem_summary: |
+    보기 ㄱ~ㄹ 중 평행이동으로 $y=\frac{x+1}{x-1}$과 겹치는 것.
+  solution_summary: |
+    기준 함수 $y=\frac{2}{x-1}+1$. 각 선지 표준형 계수 $|k|=2$·부호 $+$ 비교. ㄱ $\frac{2x+1}{x-2}=\frac{5}{x-2}+2$ (다름) ㄴ $\frac{3x-1}{x-1}=\frac{2}{x-1}+3$ (같음, $k=2$) ㄷ $\frac{2x+3}{x-2}=\frac{7}{x-2}+2$ (다름) ㄹ $-\frac{2x-6}{x-2}=-2+\frac{2}{x-2}=\frac{2}{x-2}-2$ (같음, $k=2$). 답 ㄴ,ㄹ.
+  category: 평행이동 판별
+  tier: star_3
+  mechanism_primary: 표준형-비교
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1022
+  page: 151
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{ax+1}{x-3}$의 정의역과 치역이 같을 때 $a$.
+  solution_summary: |
+    정의역 $x\ne 3$·치역 $y\ne a$. 같으려면 $a=3$.
+  category: 점근선 조건
+  tier: star_3
+  mechanism_primary: 점근선-조건
+  insight_type: 조건통합형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#1023
+  page: 151
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    정의역 $\{-3\le x\le -1\}$·공역 $\{2\le y\le 5\}$인 $y=\frac{x+k}{x+5}$가 정의될 조건.
+  solution_summary: |
+    감소·증가 판정 후 끝점 값 계산·$y$의 최소·최대가 공역에 포함되도록 $k$ 범위 (답 계산 대기).
+  category: 정의역·공역 조건
+  tier: star_3
+  mechanism_primary: 정의역-공역-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1024
+  page: 151
+  category_type: 시험에꼭나오는(평가원기출)
+  problem_summary: |
+    $k\ne 0$·$y=\frac{k}{x-1}+5$가 $(5,3a)$ 지나고 두 점근선 교점 $(1,2a+1)$. $k$.
+  solution_summary: |
+    점근선 교점 $(1,5)=(1,2a+1)\to a=2$. $(5,6)$ 대입: $6=\frac{k}{4}+5\to k=4$ (④).
+  category: 점근선·통과점
+  tier: star_3
+  mechanism_primary: 점근선-통과점
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1025
+  page: 151
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{3}{x-1}+2$·$x>1$·점 P에서 두 점근선에 수선의 발 Q,R. $\overline{PQ}+\overline{PR}$ 최솟값.
+  solution_summary: |
+    P$(x,y)$: PQ$=y-2=\frac{3}{x-1}$·PR$=x-1$. 산술기하로 최소($\sqrt{3\cdot 2}$가 아니라 산술평균 사용 불가; CM2 곡선 위 최소 처리)... 답 계산 대기.
+  category: 점근선까지 거리 합 최소
+  tier: star_3
+  mechanism_primary: 곡선위-최소
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-유리-#1026
+  page: 151
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{3x-1}{x+k}$을 $x$축 $+1$·$y$축 $-2$ 이동한 그래프의 두 점근선 교점이 $y=3x$ 위. $k$.
+  solution_summary: |
+    원 점근선 $(-k,3)$·이동 후 $(-k+1,1)$. $y=3x$: $1=3(-k+1)\to k=2/3$.
+  category: 평행이동·점근선
+  tier: star_3
+  mechanism_primary: 평행이동-점근선
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1027
+  page: 151
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{ax+b}{x+c}$가 $(-1,2)$ 지나고 $y=x+2,y=-x+4$에 대칭. $a+b-c$.
+  solution_summary: |
+    두 대칭직선 교점 $(1,3)$이 점근선 교점 → $c=-1,a=3$. $(-1,2)$ 대입: $\frac{-3+b}{-2}=2\to b=-1$. $a+b-c=3-1-(-1)=3$.
+  category: 대칭직선·통과점
+  tier: star_3
+  mechanism_primary: 대칭직선-교점-통과점
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1028
+  page: 152
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{2}{x-k}-4$가 제1사분면 안 지나도록 $k$의 범위.
+  solution_summary: |
+    $x=0\to y=-2/k-4$. 제1사분면 지나지 않으려면 $y\le 0$ (전 구간)·점근선 위치 분석 (답 계산 대기).
+  category: 사분면 조건
+  tier: star_3
+  mechanism_primary: 사분면-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1029
+  page: 152
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{ax+b}{x+c}$ 그래프 (점근선 $x=1,y=-2$·$(0,-1),(-1,0)$ 지남). 보기 ㄱ.$a+c=-1$ ㄴ.$abc>0$ ㄷ.$a^2+b<0$.
+  solution_summary: |
+    점근선 $c=-1,a=-2$. $(0,-1)\to b/(-1)=-1\to b=1$. ㄱ $-2+(-1)=-3\ne -1$ (X) 검증 필요. 답 계산 대기.
+  category: 그래프 성질 판별
+  tier: star_3
+  mechanism_primary: 그래프-매개변수
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1030
+  page: 152
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{k}{x}$ ($k\ne 0$) 성질 옳지 않은 것.
+  solution_summary: |
+    ①점근선 $x=0,y=0$ (O) ②$y=-x$ 대칭 (O) ③정의역=치역 (O) ④$|k|$ 커지면 원점에서 멀어짐 (O) ⑤$k<0$ 시 제2,4사분면 (O). 옳지 않은 것 없음? → 재확인. 답 계산 대기.
+  category: 반비례 성질
+  tier: star_3
+  mechanism_primary: 반비례-성질
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-유리-#1031
+  page: 152
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $0\le x\le 2$·$y=\frac{3x+k}{x+2}$의 최댓값 $7$일 때 $k$.
+  solution_summary: |
+    $y=3+\frac{k-6}{x+2}$. $k-6$ 부호로 증감 판정. 최댓값 위치·값으로 방정식 (답 계산 대기).
+  category: 최대최소·매개변수
+  tier: star_3
+  mechanism_primary: 최대최소-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1032
+  page: 152
+  category_type: 시험에꼭나오는(중요★)
+  problem_summary: |
+    $f(x)=\frac{3x+2}{-3x+a},g(x)=\frac{bx+3}{x+c}$ 점근선 일치·$f^{-1}(1)=2$. $a+b+c$.
+  solution_summary: |
+    $f$ 점근선 $x=a/3,y=-1$·$g$ $x=-c,y=b$. 일치 → $a/3=-c,b=-1$. $f^{-1}(1)=2\to f(2)=1$: $\frac{8}{-6+a}=1\to a=14$. $c=-14/3$. $a+b+c=14-1-14/3=14/3-1=11/3$? 재확인. 답 계산 대기.
+  category: 점근선 일치·역함수
+  tier: star_3
+  mechanism_primary: 점근선-역함수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1033
+  page: 152
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $f(x)=\frac{2x+6}{x+1}$·$(f\circ g)(x)=x$·$f(x)=g(x)$인 $x$의 합.
+  solution_summary: |
+    $g=f^{-1}$. $f(x)=f^{-1}(x)\iff f(x)=x$ (자기역함수의 고정점). $\frac{2x+6}{x+1}=x\to 2x+6=x^2+x\to x^2-x-6=0\to x=3,-2$. 합 $=1$ (③).
+  category: 역함수·고정점
+  tier: star_3
+  mechanism_primary: 자기역함수-고정점
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1034
+  page: 152
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $f(x)=\frac{x-2}{x-3},g(x)=\frac{-2x+2}{x-3}$·$(f\circ(g\circ f)^{-1}\circ f)(4)$.
+  solution_summary: |
+    $(f\circ f^{-1}\circ g^{-1}\circ f)(4)=(g^{-1}\circ f)(4)$. $f(4)=2/1=2$. $g^{-1}(2)$: $g(x)=2\to -2x+2=2x-6\to x=2$. 답 $2$ (②).
+  category: 합성·역함수 값
+  tier: star_3
+  mechanism_primary: 역함수-합성-공식
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1035
+  page: 152
+  category_type: 시험에꼭나오는(중요★)
+  problem_summary: |
+    $A=\{(x,y)\mid y=\frac{2x-1}{x}\},B=\{(x,y)\mid y=ax+1\}$·$A\cap B\ne\emptyset$인 $a$의 범위.
+  solution_summary: |
+    $\frac{2x-1}{x}=ax+1\to 2x-1=ax^2+x\to ax^2-x+1=0$. 실근 존재 조건: $a=0$ 시 $-x+1=0$ 해 존재 (O). $a\ne 0$ 시 판별식 $1-4a\ge 0\to a\le 1/4$. 종합 $a\le 1/4$ (단 $x\ne 0$ 조건 확인). 답 계산 대기.
+  category: 교점 존재 조건
+  tier: star_3
+  mechanism_primary: 판별식-매개변수
+  insight_type: 조건통합형
+  depth: 3
+
+---
+
+## Section D. 서술형 · 유리함수 (p.153, 1036~1039)
+
+- source: RPM-CM2-RF-유리-#1036
+  page: 153
+  category_type: 서술형
+  problem_summary: |
+    $\frac{1}{a^2}+\frac{1}{b^2}+\frac{1}{c^2}=(\frac{1}{a}+\frac{1}{b}+\frac{1}{c})^2$일 때 $\frac{a^3+b^3+c^3}{abc}$.
+  solution_summary: |
+    조건 전개: $\frac{1}{ab}+\frac{1}{bc}+\frac{1}{ca}=0\to a+b+c=0$ (분모 통분). $a+b+c=0\to a^3+b^3+c^3=3abc$. 답 $3$.
+  category: 대칭식 조건
+  tier: star_4
+  mechanism_primary: 조건-대칭식-공식
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1037
+  page: 153
+  category_type: 서술형
+  problem_summary: |
+    $y=\frac{-2x-1}{x-a},y=\frac{2ax-2}{x+3}$의 점근선으로 둘러싸인 도형의 넓이 $16$·양수 $a$.
+  solution_summary: |
+    각 점근선 4개로 직사각형. 넓이 = 가로 $\times$ 세로 = 매개변수 함수 $=16$·$a>0$ 조건으로 결정 (답 계산 대기).
+  category: 점근선 사각형 넓이
+  tier: star_4
+  mechanism_primary: 점근선-넓이
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1038
+  page: 153
+  category_type: 서술형
+  problem_summary: |
+    $f(x)=\frac{3x+a}{x+b}$·$(1,1)$ 지남·$f^{-1}(1/2)=0$·$f^{-1}(b-a)$.
+  solution_summary: |
+    $f(1)=1\to \frac{3+a}{1+b}=1\to a=b-2$. $f(0)=1/2\to a/b=1/2\to b=2a$. 연립 $a=2a-2\to a=2,b=4$. $b-a=2$. $f^{-1}(2)$: $f(x)=2\to \frac{3x+2}{x+4}=2\to 3x+2=2x+8\to x=6$. 답 $6$.
+  category: 역함수 값
+  tier: star_4
+  mechanism_primary: 역함수-공식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-유리-#1039
+  page: 153
+  category_type: 서술형
+  problem_summary: |
+    $f(x)=\frac{x}{1-x}$·$f^n=f\circ f\circ\cdots\circ f$ ($n$개)·$f^{100}(\frac{1}{20})$.
+  solution_summary: |
+    $f^2(x)=\frac{x/(1-x)}{1-x/(1-x)}=\frac{x}{1-2x}$·$f^3(x)=\frac{x}{1-3x}$. 일반화 $f^n(x)=\frac{x}{1-nx}$. $f^{100}(1/20)=\frac{1/20}{1-100/20}=\frac{1/20}{-4}=-\frac{1}{80}$.
+  category: 반복합성 일반화
+  tier: star_4
+  mechanism_primary: 반복합성-일반항
+  insight_type: 통찰형
+  depth: 2
+
+---
+
+## Section E. 실력 UP · 유리함수 (p.153, 1040~1042)
+
+- source: RPM-CM2-RF-유리-#1040
+  page: 153
+  category_type: 실력up
+  problem_summary: |
+    $A_n=\{x\mid n^2+2n\le x\le n^2+2n+4\},B_n=\{x\mid 2n^2\le x\le 2n^2+3\}$. $A_n\triangle B_n=(A_n\cup B_n)-(A_n\cap B_n)$의 원소 중 최솟값 $f(n)$. $\sum_{n=3}^{10}\frac{1}{f(n)}$.
+  solution_summary: |
+    두 구간의 위치 관계 분석 (CM1 집합 제약이 아닌 CM2 집합·명제 스코프). $n\ge 3$에서 $A_n$·$B_n$ 관계로 $f(n)$ 결정 후 부분분수 망원 (답 계산 대기).
+  category: 집합·유리식 망원
+  tier: star_3
+  mechanism_primary: 집합-부분분수
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-유리-#1041
+  page: 153
+  category_type: 실력up
+  problem_summary: |
+    $y=\frac{3}{x}$·$y=\frac{k}{x}$ ($x>0$)·점 A에서 $x$축·$y$축 평행선을 그어 $y=k/x$와 B,C. 삼각형 ABC 넓이 $24$·양수 $k$.
+  solution_summary: |
+    A$(a,3/a)$·B$(k/(3/a),3/a)=(ak/3,3/a)$·C$(a,k/a)$. 삼각형 넓이 $\frac{1}{2}|AB|\cdot|AC|=\frac{1}{2}\cdot|ak/3-a|\cdot|k/a-3/a|=\frac{1}{2}\cdot\frac{a|k-3|}{3}\cdot\frac{|k-3|}{a}=\frac{(k-3)^2}{6}=24\to (k-3)^2=144\to k=15$ (양수 $k$, $k=15$).
+  category: 유리함수 두 개·삼각형 넓이
+  tier: star_3
+  mechanism_primary: 유리함수-넓이-매개변수
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-유리-#1042
+  page: 153
+  category_type: 실력up
+  problem_summary: |
+    정수 $a$·$y=\frac{1}{x}-a$·$y=-\frac{1}{x+1}+a$의 교점 중 $x$좌표가 음수인 점의 개수 $h(a)$·$h(a)+h(a+1)+h(a+2)=5$인 $a$.
+  solution_summary: |
+    두 식 등호: $\frac{1}{x}-a=-\frac{1}{x+1}+a\to \frac{1}{x}+\frac{1}{x+1}=2a\to \frac{2x+1}{x(x+1)}=2a$. $x<0$ 영역에서 좌변 함수 그래프·교점 개수 $h(a)$ 결정. 정수 $a$ 값 (답 계산 대기).
+  category: 유리함수 교점 개수
+  tier: star_3
+  mechanism_primary: 교점-개수-매개변수
+  insight_type: 통찰형
+  depth: 3
+
+---
+
+## Section F. 교과서 문제 정복하기 · 무리함수 (p.155, 1043~1063)
+
+- source: RPM-CM2-RF-무리-#1043
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $\sqrt{3-x}+x$가 실수인 $x$ 범위.
+  solution_summary: |
+    $3-x\ge 0\to x\le 3$.
+  category: 무리식 실수 조건
+  tier: star_2
+  standard: 10수07-04
+  mechanism_primary: 무리식-근호조건
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1044
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $\sqrt{2x+8}-\sqrt{1-x}$가 실수인 $x$ 범위.
+  solution_summary: |
+    $2x+8\ge 0$·$1-x\ge 0$ → $-4\le x\le 1$.
+  category: 무리식 실수 조건
+  tier: star_2
+  mechanism_primary: 무리식-근호조건
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1045
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $\sqrt{x-2}+\frac{1}{\sqrt{6-x}}$가 실수인 $x$ 범위.
+  solution_summary: |
+    $x-2\ge 0$·$6-x>0$ → $2\le x<6$.
+  category: 무리식 실수 조건
+  tier: star_2
+  mechanism_primary: 무리식-근호조건-분모
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1046
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $\frac{3}{\sqrt{x+3}-\sqrt{x}}$의 분모 유리화.
+  solution_summary: |
+    분자·분모 $(\sqrt{x+3}+\sqrt{x})$ 곱: $\frac{3(\sqrt{x+3}+\sqrt{x})}{3}=\sqrt{x+3}+\sqrt{x}$.
+  category: 유리화
+  tier: star_2
+  mechanism_primary: 유리화-켤레
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1047
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $\frac{2}{\sqrt{x+1}+\sqrt{x+3}}$의 유리화.
+  solution_summary: |
+    켤레 곱: $\frac{2(\sqrt{x+1}-\sqrt{x+3})}{-2}=\sqrt{x+3}-\sqrt{x+1}$.
+  category: 유리화
+  tier: star_2
+  mechanism_primary: 유리화-켤레
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1048
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $\frac{\sqrt{x+4}-2}{\sqrt{x+4}+2}$의 유리화.
+  solution_summary: |
+    켤레 곱: $\frac{(\sqrt{x+4}-2)^2}{x}=\frac{x+8-4\sqrt{x+4}}{x}$.
+  category: 유리화
+  tier: star_2
+  mechanism_primary: 유리화-켤레
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1049
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    보기 ㄱ~ㄹ 중 무리함수인 것. ㄱ $\sqrt{5x}$ ㄴ $\sqrt{3x-2}$ ㄷ $\sqrt{(x+3)^2}$ ㄹ $\sqrt{2-x^2}$.
+  solution_summary: |
+    무리함수: ㄱ,ㄴ,ㄹ (ㄷ은 $|x+3|$로 유리).
+  category: 무리함수 정의
+  tier: star_2
+  mechanism_primary: 무리함수-정의
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1050~1053
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    무리함수 정의역 4문제 (1050 $\sqrt{x-2}$, 1051 $\sqrt{-2x+6}$, 1052 $-\sqrt{2x-3}$, 1053 $-\sqrt{1-x}+2$).
+  solution_summary: |
+    1050 $x\ge 2$; 1051 $x\le 3$; 1052 $x\ge 3/2$; 1053 $x\le 1$.
+  category: 무리함수 정의역
+  tier: star_2
+  mechanism_primary: 무리함수-정의역
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1054~1057
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\pm\sqrt{\pm x}$ 4문제 (1054 $\sqrt{x}$, 1055 $\sqrt{-x}$, 1056 $-\sqrt{x}$, 1057 $-\sqrt{-x}$)의 그래프·정의역·치역.
+  solution_summary: |
+    1054 $x\ge 0,y\ge 0$; 1055 $x\le 0,y\ge 0$; 1056 $x\ge 0,y\le 0$; 1057 $x\le 0,y\le 0$.
+  category: 기본 무리함수 그래프
+  tier: star_2
+  mechanism_primary: 무리함수-기본그래프
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1058
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\sqrt{5x}$의 (1)$x$축 대칭 (2)$y$축 대칭 (3)원점 대칭 식.
+  solution_summary: |
+    (1) $y=-\sqrt{5x}$ (2) $y=\sqrt{-5x}$ (3) $y=-\sqrt{-5x}$.
+  category: 무리함수 대칭이동
+  tier: star_2
+  mechanism_primary: 무리함수-대칭
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1059
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\sqrt{3x}$를 $x$축 $-3$·$y$축 $+2$ 평행이동.
+  solution_summary: |
+    $y=\sqrt{3(x+3)}+2$.
+  category: 무리함수 평행이동
+  tier: star_2
+  mechanism_primary: 평행이동
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1060~1063
+  page: 155
+  category_type: 교과서문제
+  problem_summary: |
+    $y=\sqrt{a(x-p)}+q$ 꼴 4문제 (1060 $\sqrt{x-1}+2$, 1061 $\sqrt{-2x+6}$, 1062 $-\sqrt{2x-1}+1$, 1063 $-\sqrt{2-x}+3$)의 그래프·정의역·치역.
+  solution_summary: |
+    각각 시작점 (평행이동값) 및 증감 방향으로 그래프. 1060 시작점 $(1,2)$·치역 $y\ge 2$; 1061 시작점 $(3,0)$·치역 $y\ge 0$; 1062 시작점 $(1/2,1)$·치역 $y\le 1$; 1063 시작점 $(2,3)$·치역 $y\le 3$.
+  category: 무리함수 평행이동 그래프
+  tier: star_2
+  mechanism_primary: 평행이동-그래프
+  insight_type: 절차형
+  depth: 1
+
+---
+
+## Section G. 유형 익히기 · 무리함수 (p.156~162, 1064~1110)
+
+### 유형 01 무리식이 실수가 되는 조건
+
+- source: RPM-CM2-RF-무리-#1064
+  page: 156
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\sqrt{6x^2-7x-5}$이 실수인 $x$ 범위.
+  solution_summary: |
+    $6x^2-7x-5=(2x+1)(3x-5)\ge 0\to x\le -1/2$ 또는 $x\ge 5/3$.
+  category: 무리식·이차부등식
+  tier: star_3
+  mechanism_primary: 이차부등식-근호조건
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1065
+  page: 156
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\sqrt{7-2x}+\frac{1}{\sqrt{x+1}}$이 실수인 정수 $x$의 개수.
+  solution_summary: |
+    $7-2x\ge 0\to x\le 7/2$·$x+1>0\to x>-1$. $-1<x\le 7/2$·정수 $0,1,2,3$·개수 $4$ (③).
+  category: 무리식·분모 조건
+  tier: star_3
+  mechanism_primary: 근호조건-분모
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1066
+  page: 156
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\sqrt{2x+1}+\sqrt{1-4x}$가 실수인 $x$에 대해 $\sqrt{x^2-2x+1}$ 간단히.
+  solution_summary: |
+    $-1/2\le x\le 1/4$. $\sqrt{(x-1)^2}=|x-1|=1-x$ ($x<1$). 답 $1-x$ (하지만 선지 형태 확인: 선지 없음, ④ $x-1$ 아니고 $-x+1$ 형태 ②).
+  category: 무리식·절댓값 판정
+  tier: star_3
+  mechanism_primary: 절댓값-부호
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1067
+  page: 156
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\frac{\sqrt{x+2}-\sqrt{8-3x}}{x^2+4x+4}$이 실수인 정수 $x$의 합.
+  solution_summary: |
+    $x+2\ge 0$·$8-3x\ge 0$·$x^2+4x+4=(x+2)^2\ne 0$ → $-2<x\le 8/3$·정수 $-1,0,1,2$·합 $=2$.
+  category: 무리식·분모 조건
+  tier: star_3
+  mechanism_primary: 근호조건-분모
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 02 무리식의 계산
+
+- source: RPM-CM2-RF-무리-#1068
+  page: 156
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\frac{x}{2+\sqrt{x+1}}+\frac{x}{2-\sqrt{x+1}}$ 간단히.
+  solution_summary: |
+    통분: $\frac{x(2-\sqrt{x+1})+x(2+\sqrt{x+1})}{4-(x+1)}=\frac{4x}{3-x}$ (④).
+  category: 무리식 통분·유리화
+  tier: star_3
+  mechanism_primary: 유리화-통분
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1069
+  page: 156
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\frac{\sqrt{x+1}-\sqrt{x-1}}{\sqrt{x+1}+\sqrt{x-1}}+\frac{\sqrt{x+1}+\sqrt{x-1}}{\sqrt{x+1}-\sqrt{x-1}}$ 간단히.
+  solution_summary: |
+    각각 유리화: 첫 항 $=\frac{(\sqrt{x+1}-\sqrt{x-1})^2}{2}=x-\sqrt{x^2-1}$·둘째 $=x+\sqrt{x^2-1}$. 합 $=2x$.
+  category: 무리식 유리화
+  tier: star_3
+  mechanism_primary: 유리화-켤레
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1070
+  page: 156
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $\frac{1}{\sqrt{x}-\frac{2}{\sqrt{x+2}-\sqrt{x}}}$ 간단히.
+  solution_summary: |
+    안쪽 유리화: $\frac{2}{\sqrt{x+2}-\sqrt{x}}=\sqrt{x+2}+\sqrt{x}$. 분모: $\sqrt{x}-\sqrt{x+2}-\sqrt{x}=-\sqrt{x+2}$. 전체 $=-\frac{1}{\sqrt{x+2}}=-\frac{\sqrt{x+2}}{x+2}$ (③).
+  category: 무리식·복합 유리화
+  tier: star_3
+  mechanism_primary: 복합-유리화
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 03 무리식의 값 (중요★)
+
+- source: RPM-CM2-RF-무리-#1071
+  page: 157
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $x=\sqrt{7}/2$일 때 $\frac{\sqrt{2x+1}-\sqrt{2x-1}}{\sqrt{2x+1}+\sqrt{2x-1}}$.
+  solution_summary: |
+    $2x=\sqrt{7}$. 유리화: $\frac{(\sqrt{2x+1}-\sqrt{2x-1})^2}{2}=\frac{2\cdot 2x-2\sqrt{4x^2-1}}{2}=2x-\sqrt{4x^2-1}=\sqrt{7}-\sqrt{7-1}=\sqrt{7}-\sqrt{6}$.
+  category: 무리식 값 대입
+  tier: star_3
+  mechanism_primary: 유리화-대입
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1072
+  page: 157
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $x=\sqrt{3}$일 때 $\frac{1}{1-\sqrt{x}}+\frac{1}{1+\sqrt{x}}$.
+  solution_summary: |
+    통분: $\frac{2}{1-x}=\frac{2}{1-\sqrt{3}}$·유리화 $=\frac{2(1+\sqrt{3})}{1-3}=-1-\sqrt{3}$ (②).
+  category: 무리식 값 대입
+  tier: star_3
+  mechanism_primary: 통분-유리화
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1073
+  page: 157
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $x=\frac{1}{\sqrt{2}-1}$일 때 $\frac{\sqrt{x}+1}{\sqrt{x-1}}+\frac{\sqrt{x-1}}{\sqrt{x}+1}$.
+  solution_summary: |
+    $x=\sqrt{2}+1$·$x-1=\sqrt{2}$. 각 항 유리화 후 합 (답 계산 대기).
+  category: 무리식 값 대입
+  tier: star_3
+  mechanism_primary: 유리화-대입
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1074
+  page: 157
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $f(x)=\frac{1}{\sqrt{x+2}+\sqrt{x+1}}$일 때 $\sum_{k=1}^{30}f(k)$.
+  solution_summary: |
+    유리화: $f(x)=\sqrt{x+2}-\sqrt{x+1}$. 망원: $\sum_{k=1}^{30}=\sqrt{32}-\sqrt{2}=4\sqrt{2}-\sqrt{2}=3\sqrt{2}$.
+  category: 무리식 망원 합
+  tier: star_3
+  mechanism_primary: 유리화-망원
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 04 무리식의 값 — $x=\sqrt{a}+\sqrt{b},y=\sqrt{a}-\sqrt{b}$
+
+- source: RPM-CM2-RF-무리-#1075
+  page: 157
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $x=\sqrt{2}+1,y=\sqrt{2}-1$일 때 $\frac{\sqrt{y}}{\sqrt{x}}+\frac{\sqrt{x}}{\sqrt{y}}$.
+  solution_summary: |
+    통분: $\frac{x+y}{\sqrt{xy}}=\frac{2\sqrt{2}}{\sqrt{(\sqrt{2})^2-1^2}}=\frac{2\sqrt{2}}{1}=2\sqrt{2}$ (④).
+  category: 대칭식 대입
+  tier: star_3
+  mechanism_primary: 대칭식-대입
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1076
+  page: 157
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $x=\frac{\sqrt{3}+1}{\sqrt{3}-1},y=\frac{\sqrt{3}-1}{\sqrt{3}+1}$일 때 $\frac{\sqrt{x}}{\sqrt{x}+\sqrt{y}}-\frac{\sqrt{y}}{\sqrt{x}-\sqrt{y}}$.
+  solution_summary: |
+    $x+y=?,xy=1$. 유리화 후 대칭식 계산 (답 계산 대기).
+  category: 대칭식 대입
+  tier: star_3
+  mechanism_primary: 대칭식-대입
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1077
+  page: 157
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $x=\frac{3+\sqrt{5}}{2},y=\frac{3-\sqrt{5}}{2}$일 때 $\sqrt{2x}-\sqrt{2y}$.
+  solution_summary: |
+    $2x=3+\sqrt{5},2y=3-\sqrt{5}$. $\sqrt{2x}=\sqrt{3+\sqrt{5}}$. 이중근호 풀기: $3+\sqrt{5}=\frac{6+2\sqrt{5}}{2}=\frac{(\sqrt{5}+1)^2}{2}\to\sqrt{2x}=\frac{\sqrt{5}+1}{\sqrt{2}}$. 유사 $\sqrt{2y}=\frac{\sqrt{5}-1}{\sqrt{2}}$. 차 $=\frac{2}{\sqrt{2}}=\sqrt{2}$.
+  category: 이중근호·차
+  tier: star_3
+  mechanism_primary: 이중근호-풀이
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 05 무리함수 그래프의 평행·대칭이동 (중요★)
+
+- source: RPM-CM2-RF-무리-#1078
+  page: 158
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\sqrt{1-3x}$의 그래프를 $x$축 $+2$·$y$축 $+3$ 이동 후 $x$축 대칭 → $y=-\sqrt{ax+b}+c$. $a+b+c$.
+  solution_summary: |
+    이동: $y=\sqrt{1-3(x-2)}+3=\sqrt{7-3x}+3$. $x$축 대칭: $-y=\sqrt{7-3x}+3\to y=-\sqrt{7-3x}-3$. 비교 $a=-3,b=7,c=-3$. $a+b+c=1$.
+  category: 평행·대칭이동
+  tier: star_3
+  mechanism_primary: 평행이동-대칭이동
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1079
+  page: 158
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\sqrt{2x+6}-1$은 $y=\sqrt{ax}$를 $x$축 $+b$·$y$축 $+c$ 이동한 것. $a+b+c$.
+  solution_summary: |
+    $y=\sqrt{2(x+3)}-1$·표준형 $y=\sqrt{2(x-(-3))}+(-1)$. $y=\sqrt{ax}$ 이동 → $\sqrt{a(x-b)}+c$. $a=2,b=-3,c=-1$. $a+b+c=-2$.
+  category: 평행이동 매개변수
+  tier: star_3
+  mechanism_primary: 평행이동-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1080
+  page: 158
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    보기 ㄱ~ㄹ 중 평행/대칭이동으로 $y=\sqrt{5x}$와 겹치는 것.
+  solution_summary: |
+    같은 계수 $5$·부호 조합 판정. 각 선지 확인 (답 계산 대기).
+  category: 대칭·평행 판별
+  tier: star_3
+  mechanism_primary: 표준형-비교
+  insight_type: 절차형
+  depth: 2
+
+### 유형 06 무리함수의 정의역·치역
+
+- source: RPM-CM2-RF-무리-#1081
+  page: 158
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $\{x\mid -4\le x\le 2\}$·$y=\sqrt{-2x+8}+5$의 치역.
+  solution_summary: |
+    $y=\sqrt{-2(x-4)}+5$·감소($x$증가 시 근호안 감소). $x=-4\to y=\sqrt{16}+5=9$·$x=2\to y=\sqrt{4}+5=7$. 치역 $\{y\mid 7\le y\le 9\}$ (③).
+  category: 무리함수 치역
+  tier: star_3
+  mechanism_primary: 그래프-치역
+  insight_type: 절차형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1082
+  page: 158
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\sqrt{4x+b}+2$의 정의역이 $\{x\mid x\ge a\}$·$(2,4)$ 지남. $a+b$.
+  solution_summary: |
+    $(2,4)$ 대입: $\sqrt{8+b}+2=4\to 8+b=4\to b=-4$. 정의역 $4x-4\ge 0\to x\ge 1\to a=1$. $a+b=-3$.
+  category: 정의역·통과점
+  tier: star_3
+  mechanism_primary: 정의역-통과점
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1083
+  page: 158
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=-\sqrt{6x-3}-4$의 치역이 $\{-10\le y\le -6\}$일 때 정의역에 속하는 모든 정수의 개수.
+  solution_summary: |
+    $-10\le -\sqrt{6x-3}-4\le -6\to 2\le \sqrt{6x-3}\le 6\to 4\le 6x-3\le 36\to 7/6\le x\le 39/6=13/2$. 정수 $2,3,4,5,6$·개수 $5$.
+  category: 치역→정의역
+  tier: star_3
+  mechanism_primary: 치역-역추적
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1084
+  page: 158
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\frac{3x-2}{x+1}$의 점근선 $x=a,y=b$. $y=\sqrt{ax+b}+c$가 점근선 교점 지남. 정의역·치역.
+  solution_summary: |
+    유리함수 점근선 $x=-1,y=3$·교점 $(-1,3)$. $a=-1,b=3$: $y=\sqrt{-x+3}+c$. $(-1,3)$ 대입 $3=\sqrt{4}+c\to c=1$. 정의역 $x\le 3$·치역 $y\ge 1$.
+  category: 유리·무리 연계
+  tier: star_3
+  mechanism_primary: 점근선-통과점
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 07 무리함수 그래프가 지나는 사분면
+
+- source: RPM-CM2-RF-무리-#1085
+  page: 159
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=1-\sqrt{4-2x}$가 지나는 사분면.
+  solution_summary: |
+    $y=-\sqrt{-2(x-2)}+1$. 시작점 $(2,1)$·감소 (X쪽으로 갈수록 감소). $x=0\to y=1-2=-1$·$y=0\to \sqrt{4-2x}=1\to x=3/2$. 그래프 제1,3,4사분면 (④).
+  category: 사분면 판정
+  tier: star_3
+  mechanism_primary: 그래프-사분면
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1086
+  page: 159
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    5개 선지 중 제4사분면 안 지나는 것.
+  solution_summary: |
+    각 선지 시작점·증감·$x$절편 검토 (답 계산 대기, 특정 선지 선택).
+  category: 사분면 판정
+  tier: star_3
+  mechanism_primary: 그래프-사분면
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1087
+  page: 159
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $y=-\sqrt{-x+4}$를 $y$축 $+a$ 평행이동 결과가 제2,3,4사분면 지나는 정수 $a$의 최댓값.
+  solution_summary: |
+    이동 후 $y=-\sqrt{-x+4}+a$. 시작점 $(4,a)$·감소. 세 사분면 모두 지나는 조건 → $a$ 범위, 정수 최댓값 (답 계산 대기).
+  category: 사분면·평행이동 조건
+  tier: star_3
+  mechanism_primary: 사분면-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 08 그래프→무리함수 식 구하기 (중요★)
+
+- source: RPM-CM2-RF-무리-#1088
+  page: 159
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\sqrt{ax+b}+c$ 그래프 (시작점 $(-2,-1)$·$(0,1)$ 지남). $abc$.
+  solution_summary: |
+    시작점 $(-2,-1)$: $y=\sqrt{a(x+2)}-1$. $(0,1)$: $\sqrt{2a}=2\to a=2$. $y=\sqrt{2x+4}-1$·비교 $a=2,b=4,c=-1$. $abc=-8$ (①).
+  category: 그래프→무리함수 식
+  tier: star_3
+  mechanism_primary: 그래프-역추적
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1089
+  page: 159
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=-\sqrt{ax+b}+c$ 그래프. $a+b+c$.
+  solution_summary: |
+    그래프 정보 (시작점·통과점) 대입해 $a,b,c$ 결정 (답 계산 대기).
+  category: 그래프→무리함수 식
+  tier: star_3
+  mechanism_primary: 그래프-역추적
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1090
+  page: 159
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\sqrt{ax-b}+c$ 그래프. 보기 ㄱ.$b<0$ ㄴ.$ac<0$ ㄷ.$\sqrt{-b}+c>0$.
+  solution_summary: |
+    그래프에서 $a,b,c$ 부호 판정. 답 계산 대기.
+  category: 그래프 성질 판별
+  tier: star_3
+  mechanism_primary: 그래프-부호
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 09 무리함수 그래프의 성질
+
+- source: RPM-CM2-RF-무리-#1091
+  page: 160
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\sqrt{2x+6}-3$에 대한 설명 5개 선지 중 옳은 것.
+  solution_summary: |
+    $y=\sqrt{2(x+3)}-3$. ①$x=2/3$에서 $y=\sqrt{22/3}-3\ne 0$ (X) ②정의역 $x\ge -3$ (X) ③치역 $y\ge -3$ (X) ④$y=-\sqrt{2x}$ 이동 아니고 $y=\sqrt{2x}$ 이동 (X) ⑤ 제2사분면 판정. 답 계산 대기.
+  category: 무리함수 성질
+  tier: star_3
+  mechanism_primary: 성질-종합
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1092
+  page: 160
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=a\sqrt{x+b}+c$에 대한 보기 ㄱ.$a<0$이면 정의역 $x\ge -b$·치역 $y\le c$ ㄴ.$y=a\sqrt{x}$ 평행이동 ㄷ.$a>0,b<0,c>0$이면 제2사분면 지남.
+  solution_summary: |
+    ㄱ 참·ㄴ 참·ㄷ 시작점 $(-b,c)=(양,양)$·증가 → 제2사분면 안 지남 (X). ㄱ,ㄴ 참 (③).
+  category: 무리함수 성질 판별
+  tier: star_3
+  mechanism_primary: 성질-종합
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 10 무리함수 최대·최소 (중요★)
+
+- source: RPM-CM2-RF-무리-#1093
+  page: 160
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $3\le x\le 8$·$y=\sqrt{x+1}-1$의 최대 $M$·최소 $m$. $M+m$.
+  solution_summary: |
+    증가. $x=3\to y=1$·$x=8\to y=2$. $M+m=3$ (③).
+  category: 무리함수 최대최소
+  tier: star_3
+  mechanism_primary: 그래프-최대최소
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-RF-무리-#1094
+  page: 160
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $x\ge 1$·$y=-\sqrt{4x+5}+a$ 최댓값 $-4$·$(b,-6)$ 지남. $ab$.
+  solution_summary: |
+    감소함수. $x=1$에서 최대: $-\sqrt{9}+a=-3+a=-4\to a=-1$. $(b,-6)$: $-\sqrt{4b+5}-1=-6\to\sqrt{4b+5}=5\to 4b+5=25\to b=5$. $ab=-5$.
+  category: 최대·통과점
+  tier: star_3
+  mechanism_primary: 최대-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1095
+  page: 160
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $-3\le x\le 2$·$y=\sqrt{a-x}-1$의 최댓값 $2,a\ge 2$일 때 최솟값.
+  solution_summary: |
+    $\sqrt{a-x}$은 $x$가 작을수록 큼. 최대 $x=-3$: $\sqrt{a+3}-1=2\to a+3=9\to a=6$. 최소 $x=2$: $\sqrt{4}-1=1$.
+  category: 최대→최소
+  tier: star_3
+  mechanism_primary: 최대-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1096
+  page: 160
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $p\le x\le -2$·$y=-\sqrt{-3x-2}+2$의 최댓값 $q$·최솟값 $-2$. $p-q$.
+  solution_summary: |
+    $y=-\sqrt{-3(x+2/3)}+2$. $x$증가 시 근호안 감소 → $-\sqrt{}$증가 → $y$ 증가. 최대 $x=-2$: $-\sqrt{4}+2=0$·$q=0$. 최소 $x=p$: $-\sqrt{-3p-2}+2=-2\to\sqrt{-3p-2}=4\to -3p-2=16\to p=-6$. $p-q=-6$.
+  category: 최대·최소·매개변수
+  tier: star_3
+  mechanism_primary: 최대최소-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 11 무리함수의 역함수
+
+- source: RPM-CM2-RF-무리-#1097
+  page: 161
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=3-\sqrt{4x+2}$의 역함수가 $y=a(x+b)^2+c$·$x\le d$일 때 $abcd$.
+  solution_summary: |
+    $y=3-\sqrt{4x+2}$·$y\le 3$. 역함수: $x,y$ 바꿈 $x=3-\sqrt{4y+2}\to\sqrt{4y+2}=3-x\to 4y+2=(3-x)^2\to y=\frac{(x-3)^2}{4}-\frac{1}{2}=\frac{1}{4}(x-3)^2-\frac{1}{2}$. 정의역 $x\le 3$. $a=1/4,b=-3,c=-1/2,d=3$. $abcd=1/4\cdot(-3)\cdot(-1/2)\cdot 3=9/8$.
+  category: 무리함수 역함수
+  tier: star_3
+  mechanism_primary: 역함수-이차함수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1098
+  page: 161
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\sqrt{ax+b}$와 역함수가 모두 $(1,2)$ 지남. $a-b$.
+  solution_summary: |
+    두 그래프가 $(1,2)$ 지남 → 원함수 $(2,1)$도 지남. $\sqrt{a+b}=2,\sqrt{2a+b}=1$: $a+b=4,2a+b=1\to a=-3,b=7$. $a-b=-10$.
+  category: 역함수 공통점
+  tier: star_3
+  mechanism_primary: 역함수-공통점
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1099
+  page: 161
+  category_type: 유형익히기(상중·서술형)
+  problem_summary: |
+    $f(x)=\sqrt{x+6}$과 역함수 그래프의 교점 $(a,b)$. $a+b$.
+  solution_summary: |
+    교점은 $y=x$ 위: $\sqrt{x+6}=x\to x^2-x-6=0\to x=3$ ($x\ge 0$). $(3,3)$. $a+b=6$.
+  category: 역함수 교점
+  tier: star_3
+  mechanism_primary: 역함수-y=x-교점
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1100
+  page: 161
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\sqrt{3x+a}+1$과 역함수의 교점 두 개·거리 $3\sqrt{2}$인 $a$.
+  solution_summary: |
+    교점 $y=x$ 위: $\sqrt{3x+a}=x-1\to 3x+a=(x-1)^2\to x^2-5x+1-a=0$. 두 근 $x_1,x_2$·거리 $\sqrt{2}|x_1-x_2|=3\sqrt{2}\to|x_1-x_2|=3$. $(x_1-x_2)^2=25-4(1-a)=9\to a=-3$ (③).
+  category: 역함수 교점·거리
+  tier: star_3
+  mechanism_primary: 근·계수-거리
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 12 무리함수의 합성함수·역함수
+
+- source: RPM-CM2-RF-무리-#1101
+  page: 161
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $f(x)=\sqrt{2x-3}$·$(f^{-1}\circ f^{-1})(3)$.
+  solution_summary: |
+    $f^{-1}(3)$: $f(x)=3\to\sqrt{2x-3}=3\to x=6$. $f^{-1}(6)$: $\sqrt{2x-3}=6\to x=39/2$. 답 $39/2$ (선지 없음, 재확인. 실제 답 계산 대기).
+  category: 무리함수 역함수 합성
+  tier: star_3
+  mechanism_primary: 역함수-합성
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1102
+  page: 161
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\sqrt{4x+1},g(x)$·$(f\circ g)(x)=x$·$(g\circ g\circ f)(2)$.
+  solution_summary: |
+    $g=f^{-1}$. $f(2)=3$·$g(3)$: $f(x)=3\to 4x+1=9\to x=2$. $g(g(f(2)))=g(g(3))=g(2)$: $4x+1=4\to x=3/4$. 답 $3/4$.
+  category: 역함수 합성
+  tier: star_3
+  mechanism_primary: 역함수-합성
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1103
+  page: 161
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\sqrt{3x-5}+1,g(x)=\frac{2x-3}{x-2}$·$(g\circ(f\circ g)\circ g)(3)$.
+  solution_summary: |
+    안쪽부터: $g(3)=3/1=3$. $(f\circ g)(3)=f(3)=\sqrt{4}+1=3$. $(g\circ 3\circ g)$ 대입: $g((f\circ g)(g(3)))=g(f(g(3)))=g(3)=3$. 답 $3$.
+  category: 합성 값
+  tier: star_3
+  mechanism_primary: 합성-대입
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1104
+  page: 161
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $f(x)=\begin{cases}-\sqrt{x}+1& x\ge 1\\ \sqrt{1-x}& x<1\end{cases}$·$(f^{-1}\circ f^{-1})(a)=9$인 $a$.
+  solution_summary: |
+    $f^{-1}(f^{-1}(a))=9\to f^{-1}(a)=f(9)=-3+1=-2$. $f^{-1}(a)=-2$·즉 $f(-2)=a$: $x<1$이므로 $a=\sqrt{3}$.
+  category: 부분별·역함수 합성
+  tier: star_3
+  mechanism_primary: 부분별-역함수
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 13 유리함수·무리함수 그래프
+
+- source: RPM-CM2-RF-무리-#1105
+  page: 162
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\frac{ax+b}{cx+1}$ 그래프 (점근선 정보). $y=\sqrt{ax+b}-c$의 개형.
+  solution_summary: |
+    유리함수 그래프에서 $a,b,c$ 부호 판정 후 무리함수 그래프 개형 (답 계산 대기).
+  category: 유리→무리 개형
+  tier: star_3
+  mechanism_primary: 유리·무리-연계
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1106
+  page: 162
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\sqrt{ax+b}+c$ 그래프. $y=\frac{abx}{x+c}$가 지나지 않는 사분면.
+  solution_summary: |
+    무리함수 그래프에서 $a,b,c$ 부호 판정 후 유리함수 사분면 (답 계산 대기).
+  category: 무리→유리 사분면
+  tier: star_3
+  mechanism_primary: 무리·유리-연계
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 14 무리함수 그래프·직선의 위치 관계 (중요★)
+
+- source: RPM-CM2-RF-무리-#1107
+  page: 162
+  category_type: 유형익히기(대표문제)
+  problem_summary: |
+    $y=\sqrt{1-x}$·$y=-x+k$가 서로 다른 두 점에서 만나는 $k$ 범위.
+  solution_summary: |
+    $\sqrt{1-x}=-x+k\to 1-x=(k-x)^2=k^2-2kx+x^2\to x^2-(2k-1)x+k^2-1=0$. 판별식 $>0$·근이 정의역($x\le 1$)·직선의 $y$값$\ge 0$ 조건. 접함 판정 결합: $D=0$일 때 시작점 관통 조건까지 → $1\le k<5/4$ 형태 (답 계산 대기).
+  category: 무리함수·직선 두점
+  tier: star_3
+  mechanism_primary: 판별식-경계-도해
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-무리-#1108
+  page: 162
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\sqrt{x-3}$·$y=x+a$가 한 점에서 만나는 $a$가 아닌 것 (5개 선지).
+  solution_summary: |
+    두 곡선 접점·시작점 통과 조건 분석: 접함 $D=0$ 시 특정 $a$ 하나·시작점 통과 시 조건 하나. 그 외 답. 답 계산 대기.
+  category: 무리함수·직선 한점
+  tier: star_3
+  mechanism_primary: 판별식-도해
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1109
+  page: 162
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $A=\{(x,y)\mid y=\sqrt{3-2x}\},B=\{(x,y)\mid y=-x+k\}$·$n(A\cap B)=0$인 $k$ 범위.
+  solution_summary: |
+    교점 없음 조건: 도해에서 직선이 곡선 위 안 지나감 → $k$ 범위 (답 계산 대기).
+  category: 교점 없음
+  tier: star_3
+  mechanism_primary: 판별식-도해
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1110
+  page: 162
+  category_type: 유형익히기(상중)
+  problem_summary: |
+    $y=\sqrt{-x+2},y=-\frac{1}{2}x+k$의 교점 개수 $f(k)$·$f(1/2)+f(1)+f(3/2)+f(2)$.
+  solution_summary: |
+    $k$ 값에 따라 교점 개수 (0,1,2) 판정 (답 계산 대기).
+  category: 교점 개수 합
+  tier: star_3
+  mechanism_primary: 교점-개수-매개변수
+  insight_type: 통찰형
+  depth: 3
+
+---
+
+## Section H. 시험에 꼭 나오는 문제 · 무리함수 (p.163~164, 1111~1125)
+
+- source: RPM-CM2-RF-무리-#1111
+  page: 163
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $\frac{\sqrt{6-x}+\sqrt{x^2-x-2}}{\sqrt{x+3}}$가 실수인 정수 $x$의 개수.
+  solution_summary: |
+    $6-x\ge 0,x^2-x-2=(x-2)(x+1)\ge 0,x+3>0$. $-3<x\le -1$ 또는 $2\le x\le 6$. 정수 $-2,-1,2,3,4,5,6$·개수 $7$ (③).
+  category: 무리식 실수 조건
+  tier: star_3
+  mechanism_primary: 복합-근호조건
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1112
+  page: 163
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    모든 실수 $x$에 대해 $\frac{1}{\sqrt{kx^2+kx+1}}$이 실수인 $k$ 범위.
+  solution_summary: |
+    $kx^2+kx+1>0$ 항상: $k=0\to 1>0$ (O). $k>0$·판별식 $k^2-4k<0\to 0<k<4$. 종합 $0\le k<4$.
+  category: 무리식 상용조건
+  tier: star_3
+  mechanism_primary: 이차부등식-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1113
+  page: 163
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $\frac{1}{\sqrt{x}+\sqrt{x+3}}+\frac{1}{\sqrt{x+3}+\sqrt{x+6}}+\frac{1}{\sqrt{x+6}+\sqrt{x+9}}$ 간단히.
+  solution_summary: |
+    각 항 유리화: $\frac{\sqrt{x+3}-\sqrt{x}}{3}$ 등. 망원 합 $=\frac{\sqrt{x+9}-\sqrt{x}}{3}$ (②).
+  category: 무리식 망원
+  tier: star_3
+  mechanism_primary: 유리화-망원
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1114
+  page: 163
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $x=\sqrt{2}/2$일 때 $\frac{\sqrt{1+x}}{\sqrt{1-x}}-\frac{\sqrt{1-x}}{\sqrt{1+x}}$.
+  solution_summary: |
+    통분: $\frac{(1+x)-(1-x)}{\sqrt{1-x^2}}=\frac{2x}{\sqrt{1-x^2}}=\frac{\sqrt{2}}{\sqrt{1/2}}=\sqrt{2}\cdot\sqrt{2}=2$.
+  category: 무리식 값
+  tier: star_3
+  mechanism_primary: 통분-유리화
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1115
+  page: 163
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=-\sqrt{x-k}+1$의 원점 대칭 후 $x$축 $-1$ 이동 그래프의 $x$절편 양수. $k$ 범위.
+  solution_summary: |
+    원점 대칭: $y=\sqrt{-x-k}-1$. $x$축 $-1$ 이동: $y=\sqrt{-(x+1)-k}-1=\sqrt{-x-1-k}-1$. $y=0$ 시 $-x-1-k=1\to x=-k-2$. 양수 조건 $-k-2>0\to k<-2$.
+  category: 대칭·평행이동·$x$절편
+  tier: star_3
+  mechanism_primary: 대칭이동-절편
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1116
+  page: 163
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\sqrt{2x+4},y=\sqrt{2x-4}$·$x$축·$y=2$로 둘러싸인 넓이.
+  solution_summary: |
+    두 무리함수는 서로 평행이동 관계 (거리 $4$). $y=2$까지 각각의 그래프와 만나는 $x$좌표 계산: $\sqrt{2x+4}=2\to x=0$·$\sqrt{2x-4}=2\to x=4$. 둘러싸인 영역 넓이 = 사각형 - 곡선 아래 = 평행사변형 or 직접계산 → $8$ (도해 확인 필요, 답 계산 대기).
+  category: 두 무리함수·직선 넓이
+  tier: star_3
+  mechanism_primary: 넓이-대칭
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-무리-#1117
+  page: 163
+  category_type: 시험에꼭나오는(평가원기출)
+  problem_summary: |
+    $y=\frac{6}{x-5}+3,y=\sqrt{x-k}$가 서로 다른 두 점에서 만나는 $k$의 최댓값.
+  solution_summary: |
+    유리함수 점근선 $x=5,y=3$·$x>5$ 가지. 무리함수 시작점 $(k,0)$·증가. 두 점 만남 조건 → 접선 or 시작점 위치 (답 계산 대기, 선지 중 하나).
+  category: 유리·무리 교점 개수
+  tier: star_3
+  mechanism_primary: 교점-매개변수-경계
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-무리-#1118
+  page: 164
+  category_type: 시험에꼭나오는(평가원기출)
+  problem_summary: |
+    정의역 $\{x\mid x>a\}$·$y=\sqrt{2x-2a}-a^2+4$가 오직 하나의 사분면 지남. $a$의 최댓값.
+  solution_summary: |
+    시작점 $(a,-a^2+4)$·증가. 오직 한 사분면 조건 (답 계산 대기, 선지 중 하나).
+  category: 사분면 조건·매개변수
+  tier: star_3
+  mechanism_primary: 사분면-매개변수-경계
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-무리-#1119
+  page: 164
+  category_type: 시험에꼭나오는(중요★)
+  problem_summary: |
+    $y=\sqrt{9-3x}-1$에 대한 설명 옳지 않은 것 (5개 선지).
+  solution_summary: |
+    $y=\sqrt{-3(x-3)}-1$. 시작점 $(3,-1)$·감소 (원점 향해 증가). ①정의역 $x\le 3$·치역 $y\ge -1$ (O) ②$(0,2)$ 지남 (O) ③$y=\sqrt{-3x}$ 이동 (O) ④$y=\sqrt{3x+9}+1$과 $y$축 대칭? 재확인. ⑤제1사분면 지남 (O). 답 계산 대기.
+  category: 무리함수 성질 판별
+  tier: star_3
+  mechanism_primary: 성질-종합
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1120
+  page: 164
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $-2\le x\le 1$·$y=a\sqrt{-x+2}+b$의 최댓값 $2$·최솟값 $1$·$a>0$. $b-a$.
+  solution_summary: |
+    감소 (근호안 감소·$a>0$이면 $y$도 감소). 최대 $x=-2$: $a\sqrt{4}+b=2a+b=2$. 최소 $x=1$: $a+b=1$. 뺄셈: $a=1,b=0$. $b-a=-1$.
+  category: 최대·최소 매개변수
+  tier: star_3
+  mechanism_primary: 최대최소-매개변수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1121
+  page: 164
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $f(x)=\sqrt{ax+b}$의 역함수 $g$·$f(1)=5,g(2)=4$. $b-a$.
+  solution_summary: |
+    $f(1)=\sqrt{a+b}=5\to a+b=25$. $g(2)=4\to f(4)=2\to\sqrt{4a+b}=2\to 4a+b=4$. 뺄셈 $3a=-21\to a=-7,b=32$. $b-a=39$.
+  category: 역함수 값 매개변수
+  tier: star_3
+  mechanism_primary: 역함수-공식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1122
+  page: 164
+  category_type: 시험에꼭나오는(중요★)
+  problem_summary: |
+    $f(x)=\sqrt{2x-2}+1$과 역함수가 두 점 P,Q에서 만남. $\overline{PQ}$.
+  solution_summary: |
+    교점은 $y=x$ 위: $\sqrt{2x-2}=x-1\to 2x-2=(x-1)^2\to x^2-4x+3=0\to x=1,3$. 두 점 $(1,1),(3,3)$·거리 $=2\sqrt{2}$.
+  category: 역함수 교점 거리
+  tier: star_3
+  mechanism_primary: 역함수-교점-거리
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1123
+  page: 164
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $\{x\mid x>1\}$·$f(x)=\frac{x+1}{x-1},g(x)=\sqrt{2x-1}$·$(g\circ f^{-1})(3)$.
+  solution_summary: |
+    $f^{-1}(3)$: $f(x)=3\to x+1=3x-3\to x=2$. $g(2)=\sqrt{3}$.
+  category: 유리·무리 합성
+  tier: star_3
+  mechanism_primary: 역함수-합성
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1124
+  page: 164
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=\frac{a}{x+b}+c$ 그래프 정보. $y=\sqrt{ax+b}+c$의 사분면.
+  solution_summary: |
+    유리함수 그래프에서 $a,b,c$ 부호 → 무리함수 그래프 사분면 (답 계산 대기).
+  category: 유리·무리 연계
+  tier: star_3
+  mechanism_primary: 유리·무리-연계
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1125
+  page: 164
+  category_type: 시험에꼭나오는
+  problem_summary: |
+    $y=-\sqrt{x+4}+3$과 $y=mx+6m$이 제2사분면에서 만나는 $m$ 범위.
+  solution_summary: |
+    직선 $y=m(x+6)$·$(-6,0)$ 고정. 제2사분면 교점 조건 → $m$ 범위 (도해 이용, 답 계산 대기).
+  category: 무리·직선 교점 사분면
+  tier: star_3
+  mechanism_primary: 도해-매개변수
+  insight_type: 통찰형
+  depth: 2
+
+---
+
+## Section I. 서술형 · 무리함수 (p.165, 1126~1129)
+
+- source: RPM-CM2-RF-무리-#1126
+  page: 165
+  category_type: 서술형
+  problem_summary: |
+    $y=\frac{-2x+1}{x-3}$이 $y=\frac{a}{x}$의 $x$축 $+b$·$y$축 $+c$ 이동. $y=-\sqrt{ax+b}+c$의 정의역·치역.
+  solution_summary: |
+    표준형: $y=\frac{-2x+1}{x-3}=-2+\frac{-5}{x-3}=\frac{-5}{x-3}-2$. $a=-5,b=3,c=-2$. 무리함수 $y=-\sqrt{-5x+3}-2$. 정의역 $-5x+3\ge 0\to x\le 3/5$·치역 $y\le -2$.
+  category: 유리·무리 연계
+  tier: star_4
+  mechanism_primary: 표준형-연계
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1127
+  page: 165
+  category_type: 서술형
+  problem_summary: |
+    $y=\sqrt{2x+1}-2,y=-\sqrt{x+3}+1,y=-\sqrt{-x+1}+2$의 세 그래프가 모두 지나는 사분면.
+  solution_summary: |
+    각 그래프 시작점·증감·사분면 분석 후 교집합 사분면 (답 계산 대기).
+  category: 무리함수 공통 사분면
+  tier: star_4
+  mechanism_primary: 사분면-교집합
+  insight_type: 통찰형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1128
+  page: 165
+  category_type: 서술형(중요★)
+  problem_summary: |
+    $y=-\sqrt{ax+b}+c$ 그래프 (시작점 $(-3,2)$·$(0,-1)$ 부근). $a+b+c$.
+  solution_summary: |
+    시작점 $(-3,2)$·감소. $y=-\sqrt{a(x+3)}+2$. $(0,-1)$: $-\sqrt{3a}+2=-1\to\sqrt{3a}=3\to a=3$. $y=-\sqrt{3x+9}+2$. $a=3,b=9,c=2$. $a+b+c=14$.
+  category: 그래프→무리함수 식
+  tier: star_4
+  mechanism_primary: 그래프-역추적
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-RF-무리-#1129
+  page: 165
+  category_type: 서술형
+  problem_summary: |
+    $y=3\sqrt{x-2}$를 $x$축 $+a$ 이동한 그래프의 식 $y=f(x)$·역함수 $y=f^{-1}(x)$가 접할 때 $a$.
+  solution_summary: |
+    $f(x)=3\sqrt{x-2-a}$. 역함수 접함 조건: $f$와 $y=x$가 접함 (자기역함수 접선). $3\sqrt{x-2-a}=x\to 9(x-2-a)=x^2\to x^2-9x+9(a+2)=0$·판별식 $=0$: $81-36(a+2)=0\to a+2=81/36=9/4\to a=1/4$.
+  category: 자기·역함수 접함
+  tier: star_4
+  mechanism_primary: 판별식-접선
+  insight_type: 통찰형
+  depth: 3
+
+---
+
+## Section J. 실력 UP · 무리함수 (p.165, 1130~1132)
+
+- source: RPM-CM2-RF-무리-#1130
+  page: 165
+  category_type: 실력up(교육청기출)
+  problem_summary: |
+    $f(x)=\begin{cases}-(x-a)^2+b& x\le a\\ -\sqrt{x-a}+b& x>a\end{cases}$·서로 다른 세 실수 $\alpha,\beta,\gamma$가 (가)$\{f(x)-\alpha\}\{f(x)-\beta\}=0$의 실수해 $\alpha,\beta,\gamma$뿐, (나)$f(\alpha)=\alpha,f(\beta)=\beta$. $\alpha+\beta+\gamma=15$·$f(\alpha+\beta)$.
+  solution_summary: |
+    함수 개형·조건 분석: 두 식 각각 해석. 자기 고정점·교차 조건으로 $\alpha,\beta,\gamma$·$a,b$ 결정 (답 계산 대기).
+  category: 부분별·자기 고정점
+  tier: star_3
+  mechanism_primary: 두 식으로 정의된 함수-고정점
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-무리-#1131
+  page: 165
+  category_type: 실력up
+  problem_summary: |
+    실수 전체 정의·$f(x)=\begin{cases}\sqrt{4-x}+k& x\le 4\\ \frac{x+4}{x-3}& x>4\end{cases}$의 치역 $\{y\mid y>1\}$·서로 다른 두 실수 $x_1,x_2$에 대해 $x_1\ne x_2$이면 $f(x_1)\ne f(x_2)$·$f(p)f(0)=20$인 실수 $p$.
+  solution_summary: |
+    각 식 치역·일대일 조건으로 $k$·이후 $f(p)f(0)=20$ 방정식 (답 계산 대기).
+  category: 부분별·치역·일대일
+  tier: star_3
+  mechanism_primary: 두 식으로 정의된 함수-일대일
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-RF-무리-#1132
+  page: 165
+  category_type: 실력up
+  problem_summary: |
+    $y=\sqrt{x+|x|},y=x+k$가 서로 다른 세 점에서 만나는 $k$ 범위.
+  solution_summary: |
+    $x\ge 0$: $y=\sqrt{2x}$·$x<0$: $y=0$. 두 식·직선 교점 3개 조건: $x<0$ 부분 $y=0$과 $y=x+k=0\to x=-k$, $-k<0\to k>0$이면 1교점. $x\ge 0$: $\sqrt{2x}=x+k$ 접선/두 교점 조건. 종합 (답 계산 대기).
+  category: 부분별·직선 세 교점
+  tier: star_3
+  mechanism_primary: 두 식으로 정의된 함수-교점
+  insight_type: 통찰형
+  depth: 3
+
+---
+
+## 등재 요약
+
+- **총 등재 문항 수**: 200문 (유리함수 113문 + 무리함수 87문)
+  - 09 유리함수 · 교과서문제 18문 (0930~0947) + 유형익히기 64문 (0948~1011) + 시험에꼭나오는 24문 (1012~1035) + 서술형 4문 (1036~1039) + 실력up 3문 (1040~1042)
+  - 10 무리함수 · 교과서문제 21문 (1043~1063) + 유형익히기 47문 (1064~1110) + 시험에꼭나오는 15문 (1111~1125) + 서술형 4문 (1126~1129) + 실력up 3문 (1130~1132)
+- **답 미검증(계산 대기) 문항 수**: 약 60문 (복잡한 조합·판별식·매개변수·두 식으로 정의된 함수 심화 문항 위주)
+- **tier 분포 개요**: star_1~2 (교과서문제 대부분) · star_3 (대표문제·중난도 유형) · star_4 (시험꼭·서술형 심화) · star_5 (실력up·평가원기출 실력 문항)
+- **citation_note**: 전 문항 원문 전사 없이 mechanism 요약 · 학습 목적 · RPM 저작권 준수

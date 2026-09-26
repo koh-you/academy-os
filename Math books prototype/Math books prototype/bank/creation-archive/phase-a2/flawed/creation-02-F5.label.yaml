@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-02-F5-seed
+source: bank/creation-archive/phase-a2/creations/creation-02.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-02-F5.tex
+flaw_type: F5
+flaw_name: 답 유일성 위반
+expected_verdict: LOSS
+ground_truth: flawed
+seed: true
+injection:
+  method: seed-copy
+  find: null
+  replace: null
+note: "세션 99 실측 · 대칭중심 case 2개 (a+b = -15/4·-27/4) 답 비유일"
+date: 2026-07-28

@@ -1,0 +1,989 @@
+% DeeP Math 정리편 · CM2-ST 집합과 명제
+% v2.2 (2026-07-26 세션 88 확장 후속) : 인터리브 배치 · c3·c4 상세화
+% 시리즈: jeongribyeon · DeeP Math 정리편 · 상위권
+% 구조: 개념 5 + 대표 10 + 확인 20 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 23p / 60 슬롯
+% 원본 은행: 개념원리·RPM·고쟁이 STEP1·전국연합 (모든 슬롯 source 명시)
+% 스타일: templates/DeeP-Math-v6/dm-editorial.sty
+%
+% 세션 88 v2.0 → v2.2 변경 (마스터 재검토):
+%   결함 1: c3·c4 vspace 60mm 잔존 → 실 콘텐츠 상세화로 대체 (dmsub 4개 + dmnote/dmexample)
+%   결함 2: 뭉치 배치 (c1~c5 → E1~E10) → 인터리브 (c1→E1·E2→c2→E3·E4·E5→c3→E6·E7→c4→E8·E9→c5→E10)
+%   dmbracket 15~29 페이지 순서대로 재배정
+%
+% 세션 87 상세화 4항목 보존:
+%   - c1 dmsub 2: 부분집합 성질 3종 (공집합·자기포함·추이관계)
+%   - c1 dmsub 3: 진부분집합 개수 2^n - 1
+%   - c4 dmsub 3: 삼단논법
+%   - c5 dmsub 2: 실수 성질 5종
+%
+% 세션 85 원칙 준수:
+%   1. 핵심 개념만 실을 것 (시중 개념원리 개념 페이지 공통 기재 항목만)
+%   2. 넘칠 때만 페이지 추가 (5 개념박스 유지 · 상세화로 여백 흡수)
+%   3. 복원 아닌 상세한 기술 (상위권 대상 재기술)
+\documentclass[10pt]{article}
+\usepackage{dm-editorial}
+\renewcommand{\dmchapunit}{II. 집합과 명제}
+
+\begin{document}
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 1 · 챕터 배너 + 개념 C1 (집합의 뜻과 부분집합)
+% ══════════════════════════════════════════════════════════════
+\dmchapter{05}{집합과 명제}
+\dmbracket{15}
+
+\begin{dmconcept}{1}{집합의 뜻과 부분집합}
+% v2.0 세션 88 : c1 확장 · 부분집합 성질 3종 (세션 87 상세화)·진부분집합 2ⁿ-1 (세션 87 상세화) 보존
+\setlength{\parskip}{1.3mm plus 1.4mm minus 0mm}\linespread{1.20}\selectfont%
+
+\dmsub{1}{집합과 원소}
+
+어떤 조건에 의하여 그 대상을 명확하게 구분할 수 있는 것들의 모임을 \dmstrong{집합}이라 하고, 집합을 이루는 대상 하나하나를 그 집합의 \dmstrong{원소}라 한다. $a$\ 가 집합 $A$\ 의 원소이면 $a \in A$, 아니면 $a \notin A$\ 로 나타낸다.
+
+집합의 표현에는 원소를 모두 나열하는 \dmstrong{원소나열법} $\{1,\, 2,\, 3\}$, 원소의 공통 성질을 조건으로 쓰는 \dmstrong{조건제시법} $\{x \mid x \text{는 } 10 \text{ 이하의 자연수}\}$, 그리고 벤 다이어그램이 있다. 원소가 유한개인 집합을 \dmstrong{유한집합}, 무수히 많은 집합을 \dmstrong{무한집합}, 원소가 하나도 없는 집합을 \dmstrong{공집합}이라 하고 $\varnothing$\ 으로 나타낸다. 유한집합 $A$\ 의 원소의 개수는 $n(A)$\ 로 나타내며 $n(\varnothing) = 0$\ 이다.
+
+\dmsub{2}{부분집합과 서로 같은 집합}
+
+집합 $A$\ 의 모든 원소가 집합 $B$\ 의 원소일 때 $A$\ 를 $B$\ 의 \dmstrong{부분집합}이라 하고 $A \subset B$\ 로 나타낸다. 부분집합의 기본 성질로 다음 세 가지가 성립한다.
+\begin{itemize}[leftmargin=8mm, itemsep=0.4mm, topsep=0.8mm]
+  \item 임의의 집합 $A$\ 에 대하여 $\varnothing \subset A$
+  \item 임의의 집합 $A$\ 에 대하여 $A \subset A$
+  \item $A \subset B$\ 이고 $B \subset C$\ 이면 $A \subset C$\quad(추이관계)
+\end{itemize}
+
+두 집합 $A$,\ $B$\ 의 모든 원소가 같을 때 $A$\ 와 $B$\ 는 \dmstrong{서로 같다}고 하며 $A = B$\ 로 쓴다.
+\begin{equation*}
+  A = B \ \Longleftrightarrow\ A \subset B \ \text{이고}\ B \subset A
+\end{equation*}
+
+한편 $A \subset B$\ 이면서 $A \ne B$\ 일 때 $A$\ 를 $B$\ 의 \dmstrong{진부분집합}이라 한다.
+
+\dmsub{3}{부분집합의 개수}
+
+원소가 $n$\ 개인 집합의 부분집합의 개수와 진부분집합의 개수는 각각
+\begin{equation*}
+  \text{부분집합의 개수: } 2^{n}, \qquad \text{진부분집합의 개수: } 2^{n} - 1
+\end{equation*}
+이다. 또한 원소가 $n$\ 개인 집합에서 특정한 $k$\ 개의 원소는 반드시 포함하고 다른 $m$\ 개의 원소는 포함하지 않는 부분집합의 개수는 나머지 $n - k - m$\ 개의 원소의 포함 여부가 자유이므로
+\begin{equation*}
+  2^{n - k - m}
+\end{equation*}
+이다.
+
+\begin{dmnote}
+공집합 $\varnothing$\ 과 $\{\varnothing\}$\ 은 다른 집합이다. $\varnothing$\ 은 원소가 없으므로 $n(\varnothing) = 0$\ 이지만, $\{\varnothing\}$\ 은 원소 $\varnothing$\ 을 하나 가지므로 $n(\{\varnothing\}) = 1$\ 이다.
+\end{dmnote}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 2 · 대표예제 E1 (c1 부분집합 개수) + CHK1·CHK2
+% ══════════════════════════════════════════════════════════════
+\dmbracket{16}
+\dmex{1}{부분집합의 개수와 조건 만족}
+
+\begin{dmproblem}
+집합 $A = \{3,\, 4,\, 5,\, 6,\, 7\}$\ 에 대하여 다음 물음에 답하시오.
+
+\vspace{3mm}
+\dmsubprob{1} $5$\ 는 반드시 원소로 갖고 $3$,\ $6$\ 은 원소로 갖지 \dmemph{않는} $A$\ 의 부분집합의 개수를 구하시오.
+
+\vspace{3mm}
+\dmsubprob{2} 적어도 한 개의 홀수를 원소로 갖는 $A$\ 의 부분집합의 개수를 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+$(1)$\ 원소가 $n$\ 개인 집합에서 특정 원소 $k$\ 개를 반드시 포함하고 $m$\ 개는 포함하지 않는 부분집합의 개수는 $2^{n - k - m}$\ 이다.
+
+$(2)$\ 적어도 한 개의 홀수를 포함하는 부분집합의 개수는 전체 부분집합 개수에서 홀수를 하나도 포함하지 않는 부분집합의 개수를 뺀 것과 같다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$(1)$\ 원소 $5$\ 는 반드시 포함하고 원소 $3$,\ $6$\ 은 포함하지 않으므로 나머지 원소 $4$,\ $7$\ 의 포함 여부가 자유이다. 따라서 부분집합의 개수는
+\[ 2^{5-1-2} = 2^{2} = 4. \]
+
+$(2)$\ 전체 부분집합의 개수는 $2^{5} = 32$\ 이다. 이 중 홀수를 하나도 포함하지 않는 부분집합은 짝수 원소 $\{4,\, 6\}$\ 만으로 이루어진 부분집합이므로 그 개수는 $2^{2} = 4$\ 이다. 따라서 적어도 한 개의 홀수를 포함하는 부분집합의 개수는
+\[ 32 - 4 = 28. \]
+\dmanswer{$(1)$\ $4$ \qquad $(2)$\ $28$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{1}{%
+집합 $A = \{1,\, 3,\, 5,\, 7,\, 9,\, 11\}$\ 에 대하여 $3 \in X$,\ $5 \in X$,\ $9 \notin X$\ 를 만족시키는 $A$\ 의 부분집합 $X$\ 의 개수를 구하시오.%
+}
+
+\dmcheck{2}{%
+두 집합 $A = \{1,\, 2\}$,\ $B = \{1,\, 2,\, 3,\, \ldots,\, n\}$\ 에 대하여 $A \subset X \subset B$\ 를 만족시키는 집합 $X$\ 의 개수가 $128$\ 일 때, 자연수 $n$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 3 · 대표예제 E2 (c1 서로 같은 집합) + CHK3·CHK4
+% ══════════════════════════════════════════════════════════════
+\dmbracket{17}
+\dmex{2}{서로 같은 집합과 원소의 결정}
+
+\begin{dmproblem}
+두 집합 $A = \{-2,\, a^{2} + 2a\}$,\ $B = \{3,\, a^{2} - 3a\}$\ 에 대하여 $A = B$\ 가 성립할 때, 상수 $a$\ 의 값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+$A = B$\ 이면 두 집합의 원소가 완전히 일치하므로, $-2 \in B$\ 이고 $3 \in A$\ 여야 한다. 두 조건을 방정식으로 세워 공통해를 구한 뒤, 원소를 실제 대입하여 확인한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$A = B$\ 이므로 $B$\ 의 원소 $3$\ 이 $A$\ 에 속하고, $A$\ 의 원소 $-2$\ 가 $B$\ 에 속해야 한다.
+
+$-2 \in B$\ 에서
+\[ a^{2} - 3a = -2\ \Longrightarrow\ a^{2} - 3a + 2 = 0\ \Longrightarrow\ (a - 1)(a - 2) = 0 \]
+$\therefore\ a = 1$\ 또는 $a = 2$.
+
+$3 \in A$\ 에서
+\[ a^{2} + 2a = 3\ \Longrightarrow\ a^{2} + 2a - 3 = 0\ \Longrightarrow\ (a - 1)(a + 3) = 0 \]
+$\therefore\ a = 1$\ 또는 $a = -3$.
+
+두 조건의 공통값은 $a = 1$\ 이고, $a = 1$\ 을 대입하면 $A = \{-2,\, 3\} = B$\ 로 실제 $A = B$\ 가 성립한다.
+\dmanswer{$a = 1$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{3}{%
+두 집합 $A = \{-1,\, a^{2} - 1\}$,\ $B = \{2,\, a - 2,\, 1 - a\}$\ 에 대하여 $A \subset B$\ 가 성립할 때, 상수 $a$\ 의 값을 구하시오.%
+}
+
+\dmcheck{4}{%
+두 집합 $A = \{4,\, a + 1,\, a - 2\}$,\ $B = \{2,\, 5,\, a^{2} - 3a\}$\ 에 대하여 $A = B$\ 가 성립할 때, 상수 $a$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 4 · 개념 C2 (집합의 연산과 원소의 개수)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{18}
+
+\begin{dmconcept}{2}{집합의 연산과 원소의 개수}
+% v2.0 세션 88 : c2 신설 · 2-01·2-02·2-03 통합
+\setlength{\parskip}{1.9mm plus 2.0mm minus 0mm}\linespread{1.29}\selectfont%
+
+\dmsub{1}{합집합 $\cdot$ 교집합 $\cdot$ 여집합 $\cdot$ 차집합}
+
+전체집합 $U$\ 의 두 부분집합 $A$,\ $B$\ 에 대하여
+\begin{itemize}[leftmargin=8mm, itemsep=0.4mm, topsep=0.8mm]
+  \item 합집합: $A \cup B = \{x \mid x \in A \text{ 또는 } x \in B\}$
+  \item 교집합: $A \cap B = \{x \mid x \in A \text{ 이고 } x \in B\}$
+  \item 여집합: $A^\mathrm{c} = \{x \mid x \in U \text{ 이고 } x \notin A\}$
+  \item 차집합: $A - B = \{x \mid x \in A \text{ 이고 } x \notin B\}$
+\end{itemize}
+
+두 집합에 공통 원소가 없어 $A \cap B = \varnothing$\ 이면 두 집합은 \dmstrong{서로소}라 한다. 또 $A - B = A \cap B^\mathrm{c}$\ 가 성립한다.
+
+\dmsub{2}{집합의 연산 법칙}
+
+세 집합 $A$,\ $B$,\ $C$\ 에 대하여 다음 법칙이 성립한다.
+\begin{itemize}[leftmargin=8mm, itemsep=0.4mm, topsep=0.8mm]
+  \item 교환법칙: $A \cup B = B \cup A$,\ $A \cap B = B \cap A$
+  \item 결합법칙: $(A \cup B) \cup C = A \cup (B \cup C)$,\ $(A \cap B) \cap C = A \cap (B \cap C)$
+  \item 분배법칙: $A \cup (B \cap C) = (A \cup B) \cap (A \cup C)$,\ $A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$
+\end{itemize}
+
+그리고 여집합에 대하여 \dmstrong{드모르간의 법칙}이 성립한다.
+\begin{equation*}
+  (A \cup B)^\mathrm{c} = A^\mathrm{c} \cap B^\mathrm{c}, \qquad (A \cap B)^\mathrm{c} = A^\mathrm{c} \cup B^\mathrm{c}
+\end{equation*}
+
+\dmsub{3}{유한집합의 원소의 개수}
+
+두 유한집합 $A$,\ $B$\ 에 대하여
+\begin{equation*}
+  n(A \cup B) = n(A) + n(B) - n(A \cap B)
+\end{equation*}
+가 성립하고, 여집합과 차집합에 대해서는
+\begin{equation*}
+  n(A^\mathrm{c}) = n(U) - n(A), \qquad n(A - B) = n(A) - n(A \cap B)
+\end{equation*}
+가 성립한다. 세 유한집합에 대해서는 다음이 성립한다.
+\begin{equation*}
+  n(A \cup B \cup C) = n(A) + n(B) + n(C) - n(A \cap B) - n(B \cap C) - n(C \cap A) + n(A \cap B \cap C)
+\end{equation*}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 5 · 대표예제 E3 (c2 벤 4영역 결정) + CHK5·CHK6
+% ══════════════════════════════════════════════════════════════
+\dmbracket{19}
+\dmex{3}{벤 다이어그램에서 집합 결정}
+
+\begin{dmproblem}
+두 집합 $A$,\ $B$\ 에 대하여
+\begin{equation*}
+  B = \{1,\, 2,\, 4,\, 5\}, \qquad A \cap B = \{2,\, 5\}, \qquad A \cup B = \{1,\, 2,\, 3,\, 4,\, 5,\, 6,\, 7\}
+\end{equation*}
+이 성립할 때, 집합 $A$\ 를 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+집합 $A$\ 를 벤 다이어그램의 두 영역으로 나누어 파악한다. $A$\ 에만 속하는 부분과 $A$\ 와 $B$\ 에 모두 속하는 부분의 합이 $A$\ 이다. 앞은 $(A \cup B) - B$\ 로, 뒤는 $A \cap B$\ 로 각각 표현된다.
+\end{dmapproach}
+
+\begin{dmsolution}
+집합 $A$\ 는 $A \cap B$\ 와 $A - B$\ 로 나뉜다.
+
+$B$\ 에 속하지 않고 $A \cup B$\ 에는 속하는 원소는 $A$\ 에만 속하므로
+\[ A - B = (A \cup B) - B = \{1,\, 3,\, 6,\, 7\} - \{1,\, 4\} = \{3,\, 6,\, 7\}. \]
+
+$A \cap B = \{2,\, 5\}$\ 를 함께 취하면
+\[ A = (A \cap B) \cup (A - B) = \{2,\, 5\} \cup \{3,\, 6,\, 7\} = \{2,\, 3,\, 5,\, 6,\, 7\}. \]
+\dmanswer{$A = \{2,\, 3,\, 5,\, 6,\, 7\}$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{5}{%
+전체집합 $U = \{x \mid x \text{는 } 9 \text{ 이하의 자연수}\}$\ 의 두 부분집합 $A$,\ $B$\ 에 대하여 $(A \cup B)^\mathrm{c} = \{2\}$,\ $A \cap B = \{5,\, 8\}$,\ $A - B = \{1,\, 6,\, 7\}$\ 일 때, 집합 $B$\ 를 구하시오.%
+}
+
+\dmcheck{6}{%
+두 집합 $A = \{1,\, 4,\, a^{2} + 2\}$,\ $B = \{3,\, 3a - 5,\, a^{2} + 2a - 2\}$\ 에 대하여 $A \cap B = \{1,\, 6\}$\ 일 때, 상수 $a$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 6 · 대표예제 E4 (c2 연산 법칙 간단화) + CHK7·CHK8
+% ══════════════════════════════════════════════════════════════
+\dmbracket{20}
+\dmex{4}{집합의 연산 법칙을 이용한 간단화}
+
+\begin{dmproblem}
+전체집합 $U$\ 의 두 부분집합 $A$,\ $B$\ 에 대하여 다음 식을 간단히 하시오.
+
+\vspace{3mm}
+\dmsubprob{1} $A \cap (A - B)^\mathrm{c}$
+
+\vspace{3mm}
+\dmsubprob{2} $A^\mathrm{c} \cup (B - A)^\mathrm{c}$
+\end{dmproblem}
+
+\begin{dmapproach}
+차집합을 $A - B = A \cap B^\mathrm{c}$\ 로 변형한 뒤 드모르간의 법칙과 분배법칙, 그리고 $A \cap A^\mathrm{c} = \varnothing$,\ $A \cup A^\mathrm{c} = U$\ 등의 성질을 순서대로 적용한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$(1)$\ 차집합의 정의와 드모르간의 법칙에 의해
+\[ (A - B)^\mathrm{c} = (A \cap B^\mathrm{c})^\mathrm{c} = A^\mathrm{c} \cup B. \]
+분배법칙을 적용하면
+\[ A \cap (A - B)^\mathrm{c} = A \cap (A^\mathrm{c} \cup B) = (A \cap A^\mathrm{c}) \cup (A \cap B) = \varnothing \cup (A \cap B) = A \cap B. \]
+
+$(2)$\ 같은 방식으로 $(B - A)^\mathrm{c} = (B \cap A^\mathrm{c})^\mathrm{c} = B^\mathrm{c} \cup A$\ 이므로
+\[ A^\mathrm{c} \cup (B - A)^\mathrm{c} = A^\mathrm{c} \cup B^\mathrm{c} \cup A = (A \cup A^\mathrm{c}) \cup B^\mathrm{c} = U \cup B^\mathrm{c} = U. \]
+\dmanswer{$(1)$\ $A \cap B$ \qquad $(2)$\ $U$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{7}{%
+전체집합 $U$\ 의 세 부분집합 $A$,\ $B$,\ $C$\ 에 대하여 $(A - B^\mathrm{c}) \cup (B - A)$\ 를 간단히 하시오.%
+}
+
+\dmcheck{8}{%
+전체집합 $U$\ 의 두 부분집합 $A$,\ $B$\ 에 대하여 $(A \cup B) \cap (B - A)^\mathrm{c} = A \cap B$\ 가 성립할 때, 옳은 것을 고르시오.
+
+\vspace{1mm}
+\begin{choices32}
+{$A \cap B = \varnothing$}
+{$A \cap B = B$}
+{$A \cap B^\mathrm{c} = A$}
+{$A \cup B = U$}
+{$A \cup B = B$}
+\end{choices32}%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 7 · 대표예제 E5 (c2 원소 개수) + CHK9·CHK10
+% ══════════════════════════════════════════════════════════════
+\dmbracket{21}
+\dmex{5}{원소의 개수 공식의 조합}
+
+\begin{dmproblem}
+전체집합 $U$\ 의 두 부분집합 $A$,\ $B$\ 에 대하여
+\begin{equation*}
+  n(U) = 60, \qquad n(A) = 37, \qquad n(B) = 40, \qquad n(A^\mathrm{c} \cap B^\mathrm{c}) = 15
+\end{equation*}
+일 때, $n(B - A)$\ 의 값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+드모르간의 법칙으로 $A^\mathrm{c} \cap B^\mathrm{c} = (A \cup B)^\mathrm{c}$\ 임을 이용해 먼저 $n(A \cup B)$\ 를 구한다. 그 값을 두 집합의 합집합 원소의 개수 공식에 대입하여 $n(A \cap B)$\ 를 얻고, $n(B - A) = n(B) - n(A \cap B)$\ 로 마무리한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+드모르간의 법칙으로 $A^\mathrm{c} \cap B^\mathrm{c} = (A \cup B)^\mathrm{c}$\ 이므로
+\[ n(A \cup B) = n(U) - n((A \cup B)^\mathrm{c}) = 60 - 15 = 45. \]
+
+두 집합의 원소의 개수 공식에서
+\[ n(A \cap B) = n(A) + n(B) - n(A \cup B) = 37 + 40 - 45 = 32. \]
+
+$\therefore\ n(B - A) = n(B) - n(A \cap B) = 40 - 32 = 8$.
+\dmanswer{$8$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{9}{%
+전체집합 $U$\ 의 두 부분집합 $A$,\ $B$\ 에 대하여 $n(U) = 33$,\ $n(A) = 21$,\ $n(B) = 14$,\ $n(A \cap B) = 9$\ 일 때, $n(A^\mathrm{c} \cap B^\mathrm{c})$\ 의 값을 구하시오.%
+}
+
+\dmcheck{10}{%
+$60$\ 명의 학생 중에서 영어 문제를 맞힌 학생이 $35$\ 명, 수학 문제를 맞힌 학생이 $28$\ 명, 두 문제를 모두 틀린 학생이 $5$\ 명일 때, 영어 문제만 맞힌 학생 수를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 8 · 개념 C3 (명제와 조건 · 모든과 어떤)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{22}
+
+\begin{dmconcept}{3}{명제와 조건 $\cdot$ 모든과 어떤}
+% v2.1 세션 88 확장 : c3 명제·조건·양화 통합 (3-01·3-02·3-03) · dmsub 4개 상세화
+\setlength{\parskip}{0.6mm plus 0.7mm minus 0mm}\linespread{1.10}\selectfont%
+
+\dmsub{1}{명제와 조건 $\cdot$ 진리집합}
+
+참, 거짓을 명확히 판별할 수 있는 문장이나 식을 \dmstrong{명제}라 하고, 변수를 포함하여 그 값에 따라 참, 거짓이 결정되는 문장이나 식을 \dmstrong{조건}이라 한다. 명제나 조건 $p$\ 에 대하여 '$p$\ 가 아니다'를 $p$\ 의 \dmstrong{부정}이라 하고 $\sim p$\ 로 나타낸다.
+
+전체집합 $U$\ 에서 조건 $p$\ 가 참이 되게 하는 원소의 집합을 조건 $p$\ 의 \dmstrong{진리집합}이라 하고 흔히 $P$\ 로 나타낸다. 조건의 부정 $\sim p$\ 의 진리집합은 여집합 $P^\mathrm{c}$\ 와 같다.
+
+\dmsub{2}{조건의 연산과 진리집합}
+
+두 조건 $p$,\ $q$\ 의 진리집합을 $P$,\ $Q$\ 라 할 때, 조건의 연산 '$p$\ 그리고 $q$', '$p$\ 또는 $q$'의 진리집합은 각각 교집합, 합집합에 대응된다.
+\begin{equation*}
+  \text{`$p$\ 그리고 $q$'의 진리집합}\ = P \cap Q, \qquad \text{`$p$\ 또는 $q$'의 진리집합}\ = P \cup Q
+\end{equation*}
+
+이들의 부정에는 드모르간의 법칙이 그대로 적용된다.
+\begin{equation*}
+  \sim (p \text{ 그리고 } q) = (\sim p) \text{ 또는 } (\sim q), \qquad \sim (p \text{ 또는 } q) = (\sim p) \text{ 그리고 } (\sim q)
+\end{equation*}
+
+\dmsub{3}{명제 $p \to q$\ 의 참, 거짓과 반례}
+
+두 조건 $p$,\ $q$\ 로 이루어진 명제 $p \to q$\ 에서 $p$\ 를 \dmstrong{가정}, $q$\ 를 \dmstrong{결론}이라 한다. 두 진리집합 $P$,\ $Q$\ 에 대하여
+\begin{equation*}
+  p \to q \text{가 참} \ \Longleftrightarrow\ P \subset Q
+\end{equation*}
+이다. 명제 $p \to q$\ 가 거짓임을 보이는 원소를 \dmstrong{반례}라 하는데, 이는 가정 $p$\ 는 참이지만 결론 $q$\ 는 거짓이 되게 하는 원소, 즉 $P$\ 에는 속하지만 $Q$\ 에는 속하지 않는 $P - Q = P \cap Q^\mathrm{c}$\ 의 원소이다. 한편 결론이 부정인 명제 $p \to \sim q$\ 가 참인 것은
+\begin{equation*}
+  P \subset Q^\mathrm{c}\ \Longleftrightarrow\ P \cap Q = \varnothing
+\end{equation*}
+과 같다.
+
+\dmsub{4}{'모든'과 '어떤'을 포함한 명제}
+
+전체집합 $U$\ 에서 조건 $p$\ 의 진리집합이 $P$\ 일 때
+\begin{itemize}[leftmargin=8mm, itemsep=0.4mm, topsep=0.8mm]
+  \item '모든 $x$\ 에 대하여 $p(x)$\ 이다.'는 $P = U$\ 일 때 참, 그렇지 않으면 거짓
+  \item '어떤 $x$\ 에 대하여 $p(x)$\ 이다.'는 $P \ne \varnothing$\ 일 때 참, $P = \varnothing$\ 일 때 거짓
+\end{itemize}
+이다. 두 명제의 부정에서는 '모든'과 '어떤'이 서로 뒤바뀐다.
+\begin{equation*}
+  \sim (\text{모든 } x,\ p(x)) = (\text{어떤 } x,\ \sim p(x)), \qquad \sim (\text{어떤 } x,\ p(x)) = (\text{모든 } x,\ \sim p(x))
+\end{equation*}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 9 · 대표예제 E6 (c3 진리집합 연산) + CHK11·CHK12
+% ══════════════════════════════════════════════════════════════
+\dmbracket{23}
+\dmex{6}{진리집합의 연산}
+
+\begin{dmproblem}
+실수 전체의 집합에서 두 조건 $p$,\ $q$\ 가
+\begin{equation*}
+  p:\ 1 < x \le 4, \qquad q:\ x < 3 \text{ 또는 } x > 5
+\end{equation*}
+일 때, 다음 조건의 진리집합을 각각 구하시오.
+
+\vspace{3mm}
+\noindent\dmsubprob{1} $\sim p$\hfill\dmsubprob{2} $\sim p$\ 또는 $q$\hfill\dmsubprob{3} $p$\ 그리고 $\sim q$\hfill\null
+\end{dmproblem}
+
+\begin{dmapproach}
+두 조건의 진리집합을 각각 $P$,\ $Q$\ 라 하고, 여집합 $P^\mathrm{c}$,\ $Q^\mathrm{c}$\ 와 합집합 $\cup$, 교집합 $\cap$\ 의 연산을 수직선 위에서 시각적으로 확인한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$P = \{x \mid 1 < x \le 4\}$,\ $Q = \{x \mid x < 3 \text{ 또는 } x > 5\}$\ 에서
+\[ P^\mathrm{c} = \{x \mid x \le 1 \text{ 또는 } x > 4\},\qquad Q^\mathrm{c} = \{x \mid 3 \le x \le 5\}. \]
+
+$(1)$\ $\sim p$\ 의 진리집합은 $P^\mathrm{c} = \{x \mid x \le 1 \text{ 또는 } x > 4\}$\ 이다.
+
+$(2)$\ $P^\mathrm{c} \cup Q$\ 를 수직선에서 합치면 $\{x \mid x < 3 \text{ 또는 } x > 4\}$\ 이다.
+
+$(3)$\ $P \cap Q^\mathrm{c}$\ 를 수직선에서 겹치면 $\{x \mid 3 \le x \le 4\}$\ 이다.
+\dmanswer{\begin{tabular}[t]{@{}l@{}}$(1)$\ $\{x \mid x \le 1 \text{ 또는 } x > 4\}$\\[0.4ex] $(2)$\ $\{x \mid x < 3 \text{ 또는 } x > 4\}$\\[0.4ex] $(3)$\ $\{x \mid 3 \le x \le 4\}$\end{tabular}}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{11}{%
+전체집합 $U = \{1,\, 2,\, 3,\, 4,\, 5,\, 6\}$\ 에서 두 조건 $p$,\ $q$\ 가 $p:\ x \text{는 짝수}$,\ $q:\ x^{2} - 5x + 6 = 0$\ 일 때, '$\sim p$\ 그리고 $q$'의 진리집합을 구하시오.%
+}
+
+\dmcheck{12}{%
+실수 $x$\ 에 대한 조건 '$x \le -2$\ 또는 $x > 3$'의 부정을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 10 · 대표예제 E7 (c3 모든/어떤) + CHK13·CHK14
+% ══════════════════════════════════════════════════════════════
+\dmbracket{24}
+\dmex{7}{'모든'과 '어떤'을 포함한 명제의 참, 거짓}
+
+\begin{dmproblem}
+전체집합 $U = \{-2,\, -1,\, 0,\, 1,\, 2\}$\ 에 대하여 다음 중 참인 명제를 모두 고르시오.
+
+\vspace{1mm}
+\begin{dmoptionbox}
+ㄱ. 모든 $x$\ 에 대하여 $2x - 1 < 5$\ 이다.
+
+ㄴ. 어떤 $x$\ 에 대하여 $|x| > 2$\ 이다.
+
+ㄷ. 어떤 $x$\ 에 대하여 $x^{2} > x + 2$\ 이다.
+
+ㄹ. 모든 $x$\ 에 대하여 $|x| = x$\ 이다.
+\end{dmoptionbox}
+\end{dmproblem}
+
+\begin{dmapproach}
+'모든'을 포함한 명제는 $U$\ 의 모든 원소에서 부등식이 성립해야 참, '어떤'을 포함한 명제는 조건을 만족시키는 원소가 $U$\ 에 하나라도 있으면 참이다. 원소가 유한하므로 전수 확인한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+ㄱ.\ 부등식 $2x - 1 < 5$\ 를 정리하면 $x < 3$\ 이다. $U$\ 의 모든 원소 $-2,\, -1,\, 0,\, 1,\, 2$\ 는 모두 $x < 3$\ 을 만족시키므로 참이다.
+
+ㄴ.\ 부등식 $|x| > 2$\ 를 만족시키는 원소는 $U$\ 에 없으므로 (최대 $|x| = 2$) 거짓이다.
+
+ㄷ.\ 부등식 $x^{2} - x - 2 > 0$, 즉 $(x - 2)(x + 1) > 0$\ 을 만족시키는 원소를 확인하면 $x = -2$\ 에서 $(-2 - 2)(-2 + 1) = 4 > 0$\ 이 성립하므로 참이다.
+
+ㄹ.\ $x = -1$\ 을 대입하면 $|-1| = 1 \ne -1$\ 이므로 반례가 존재하여 거짓이다.
+\dmanswer{ㄱ,\ ㄷ}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{13}{%
+다음 명제 중 거짓인 것을 고르시오.
+
+\vspace{1mm}
+\noindent\textcircled{\scriptsize 1}\ 어떤 양의 정수 $x$\ 에 대하여 $x - 2 = 4$\ 이다.\\
+\textcircled{\scriptsize 2}\ 어떤 무리수 $x$\ 에 대하여 $\sqrt{2} + x = 0$\ 이다.\\
+\textcircled{\scriptsize 3}\ 모든 실수 $x$\ 에 대하여 $x^{2} \ge 0$\ 이다.\\
+\textcircled{\scriptsize 4}\ 모든 실수 $x$,\ $y$\ 에 대하여 $x^{2} + y^{2} > 0$\ 이다.\\
+\textcircled{\scriptsize 5}\ 모든 자연수 $x$,\ $y$\ 에 대하여 $x + y \ge 2$\ 이다.%
+}
+
+\dmcheck{14}{%
+실수 $x$\ 에 대한 명제 '모든 실수 $x$\ 에 대하여 $x^{2} - x + 4 > 0$\ 이다.'의 부정을 서술하고, 그 부정의 참, 거짓을 판별하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 11 · 개념 C4 (역·대우 · 필요조건·충분조건)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{25}
+
+\begin{dmconcept}{4}{역 $\cdot$ 대우 $\cdot$ 필요조건 $\cdot$ 충분조건}
+% v2.1 세션 88 확장 : c4 상세화 · 3-04·3-05 통합 · 삼단논법 세션 87 상세화 보존
+\setlength{\parskip}{1.8mm plus 1.9mm minus 0mm}\linespread{1.27}\selectfont%
+
+\dmsub{1}{역 $\cdot$ 이 $\cdot$ 대우}
+
+명제 $p \to q$\ 에 대하여
+\begin{itemize}[leftmargin=8mm, itemsep=0.4mm, topsep=0.8mm]
+  \item \dmstrong{역}: $q \to p$
+  \item \dmstrong{이}: $\sim p \to \sim q$
+  \item \dmstrong{대우}: $\sim q \to \sim p$
+\end{itemize}
+라 한다. 원명제와 그 대우는 참, 거짓이 항상 일치한다. 반면 역과 이는 원명제의 참, 거짓과 관계없이 참일 수도 거짓일 수도 있다. 한편 역의 대우가 이가 되고 이의 대우가 역이 되므로, 역과 이도 서로 대우 관계이며 참, 거짓이 일치한다.
+
+\dmsub{2}{대우를 이용한 증명의 원리}
+
+원명제와 대우의 참, 거짓이 항상 일치한다는 사실은 명제 증명에 활용된다. 명제 $p \to q$\ 를 직접 증명하기 어려운 경우, 대우 $\sim q \to \sim p$\ 가 참임을 보이는 것으로 원명제가 참임을 대신 밝힐 수 있다.
+
+\dmsub{3}{삼단논법}
+
+세 조건 $p$,\ $q$,\ $r$\ 에 대하여 두 명제 $p \to q$\ 와 $q \to r$\ 이 모두 참이면 $p \to r$\ 도 참이다. 이를 \dmstrong{삼단논법}이라 한다. 진리집합 관점에서 두 포함관계 $P \subset Q$,\ $Q \subset R$\ 로부터 $P \subset R$\ 이 성립함을 확인할 수 있다.
+
+\dmsub{4}{충분조건 $\cdot$ 필요조건 $\cdot$ 필요충분조건}
+
+명제 $p \to q$\ 가 참일 때, 즉 $P \subset Q$\ 일 때 $p$\ 를 $q$\ 이기 위한 \dmstrong{충분조건}, $q$\ 를 $p$\ 이기 위한 \dmstrong{필요조건}이라 하고 $p \Rightarrow q$\ 로 나타낸다.
+
+두 명제 $p \to q$\ 와 $q \to p$\ 가 모두 참이면, 즉 $P = Q$\ 이면 $p$\ 는 $q$\ 이기 위한 \dmstrong{필요충분조건}이라 하고 $p \Longleftrightarrow q$\ 로 나타낸다. 진리집합의 포함관계에 따른 대응을 정리하면 다음과 같다.
+\begin{center}
+\begin{tabular}{c c l}
+$P \subset Q$ & : & $p$\ 는 $q$\ 이기 위한 충분조건 \\[0.4ex]
+$Q \subset P$ & : & $p$\ 는 $q$\ 이기 위한 필요조건 \\[0.4ex]
+$P = Q$ & : & $p$\ 는 $q$\ 이기 위한 필요충분조건
+\end{tabular}
+\end{center}
+
+\begin{dmexample}
+두 조건 $p:\ x = 1$,\ $q:\ x^{2} = 1$\ 에 대한 확인은 다음과 같다. $x = 1$\ 이면 $x^{2} = 1$\ 이므로 $p \to q$\ 가 참이지만, 그 역 $x^{2} = 1 \to x = 1$\ 은 $x = -1$\ 이 반례이므로 거짓이다. 따라서 $p$\ 는 $q$\ 이기 위한 충분조건이지만 필요조건은 아니다. 진리집합은 $P = \{1\} \subsetneq \{-1,\, 1\} = Q$\ 로 나타난다.
+\end{dmexample}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 12 · 대표예제 E8 (c4 삼단논법·대우) + CHK15·CHK16
+% ══════════════════════════════════════════════════════════════
+\dmbracket{26}
+\dmex{8}{대우와 삼단논법의 결합}
+
+\begin{dmproblem}
+세 조건 $p$,\ $q$,\ $r$\ 에 대하여 두 명제
+\begin{equation*}
+  p \to q, \qquad \sim r \to \sim q
+\end{equation*}
+가 모두 참일 때, 항상 참인 명제를 보기에서 모두 고르시오.
+
+\vspace{1mm}
+\begin{dmoptionbox}
+ㄱ. $p \to r$\qquad ㄴ. $\sim r \to \sim p$\qquad ㄷ. $\sim p \to \sim r$
+
+\vspace{0.6mm}
+ㄹ. $\sim q \to \sim p$\qquad ㅁ. $q \to \sim r$
+\end{dmoptionbox}
+\end{dmproblem}
+
+\begin{dmapproach}
+원명제와 대우는 참, 거짓이 일치함을 이용하여 주어진 두 명제로부터 유도되는 함의를 정리한다. 이어 두 명제가 참일 때 세 번째 명제 $p \to r$\ 이 참임을 삼단논법으로 확인한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$\sim r \to \sim q$\ 가 참이므로 그 대우 $q \to r$\ 도 참이다. 여기에 $p \to q$\ 가 참임을 결합하여 삼단논법을 적용하면 $p \to r$\ 이 참이다.
+
+ㄱ.\ $p \to r$\ 은 위 삼단논법의 결론이므로 참이다.
+
+ㄴ.\ $\sim r \to \sim p$\ 는 $p \to r$\ 의 대우이므로 참이다.
+
+ㄷ.\ $\sim p \to \sim r$\ 은 $p \to r$\ 의 이에 해당하므로 항상 참이라 할 수 없다.
+
+ㄹ.\ $\sim q \to \sim p$\ 는 $p \to q$\ 의 대우이므로 참이다.
+
+ㅁ.\ $q \to \sim r$\ 은 $q \to r$\ 과 결론이 반대이므로 항상 참이라 할 수 없다.
+\dmanswer{ㄱ,\ ㄴ,\ ㄹ}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{15}{%
+다음 명제 중 그 역과 대우가 모두 참인 것을 고르시오.
+
+\vspace{1mm}
+\noindent\textcircled{\scriptsize 1}\ $x^{3} = x$\ 이면 $x = 0$\ 또는 $x = 1$\ 이다.\\
+\textcircled{\scriptsize 2}\ $xy > 1$\ 이면 $x > 1$\ 이고 $y > 1$\ 이다.\\
+\textcircled{\scriptsize 3}\ $|x| + |y| = 0$\ 이면 $x = 0$\ 이고 $y = 0$\ 이다.\\
+\textcircled{\scriptsize 4}\ $xy < 0$\ 이면 $x^{2} + y^{2} > 0$\ 이다.\\
+\textcircled{\scriptsize 5}\ 두 삼각형이 합동이면 두 삼각형의 둘레의 길이가 같다.%
+}
+
+\dmcheck{16}{%
+실수 $x$\ 에 대한 명제 '$x^{2} - ax + 7 \ne 0$\ 이면 $x - 1 \ne 0$\ 이다.'가 참이 되도록 하는 상수 $a$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 13 · 대표예제 E9 (c4 필요·충분) + CHK17·CHK18
+% ══════════════════════════════════════════════════════════════
+\dmbracket{27}
+\dmex{9}{충분조건 $\cdot$ 필요조건과 상수의 결정}
+
+\begin{dmproblem}
+다음 각 조건을 만족시키는 값을 구하시오.
+
+\vspace{3mm}
+\dmsubprob{1} 실수 $x$\ 에 대한 두 조건 $p:\ -2 \le x \le 5$,\ $q:\ |x| \le a$\ 에 대하여 $p$\ 가 $q$\ 이기 위한 충분조건이 되도록 하는 양수 $a$\ 의 값의 범위.
+
+\vspace{3mm}
+\dmsubprob{2} 실수 $x$\ 에 대하여 $x + 3 \ne 0$\ 이 $x^{2} + 3ax + 27 \ne 0$\ 이기 위한 필요조건이 되도록 하는 상수 $a$\ 의 값.
+\end{dmproblem}
+
+\begin{dmapproach}
+$p$\ 가 $q$\ 이기 위한 충분조건인 것은 진리집합 사이에 $P \subset Q$\ 가 성립하는 것과 동치이다. 필요조건의 경우 반대 방향 $Q \subset P$\ 가 되므로, 대우 명제로 바꾸어 다루면 편리하다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$(1)$\ $P = \{x \mid -2 \le x \le 5\}$,\ $Q = \{x \mid -a \le x \le a\}$\ ($a > 0$).
+$P \subset Q$\ 가 성립할 조건은
+\[ -a \le -2\ \text{이고}\ 5 \le a\ \Longrightarrow\ a \ge 5. \]
+
+$(2)$\ 주어진 명제의 대우는
+\[ x^{2} + 3ax + 27 = 0\ \Longrightarrow\ x + 3 = 0. \]
+즉 $x^{2} + 3ax + 27 = 0$\ 의 해가 $x = -3$\ 을 만족시켜야 한다. $x = -3$\ 을 대입하면
+\[ 9 - 9a + 27 = 0\ \Longrightarrow\ a = 4. \]
+\dmanswer{$(1)$\ $a \ge 5$ \qquad $(2)$\ $a = 4$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{17}{%
+실수 $x$\ 에 대한 두 조건 $p:\ -1 \le x \le k$,\ $q:\ -\dfrac{k}{6} \le x \le 4$\ 에 대하여 $p$\ 가 $q$\ 이기 위한 필요조건이 되도록 하는 양수 $k$\ 의 값의 범위를 구하시오.%
+}
+
+\dmcheck{18}{%
+실수 $x$\ 에 대한 두 조건 $p:\ x^{2} - x + a = 0$,\ $q:\ (x + 3)(x - 4)^{2} = 0$\ 에 대하여 $p$\ 가 $q$\ 이기 위한 필요충분조건이 되도록 하는 상수 $a$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 14 · 개념 C5 (명제의 증명 · 절대부등식)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{28}
+
+\begin{dmconcept}{5}{명제의 증명 $\cdot$ 절대부등식}
+% v2.0 세션 88 : c5 신설 · 3-06·3-07 통합 · 실수 성질 5종 세션 87 상세화 보존
+\setlength{\parskip}{1.7mm plus 1.8mm minus 0mm}\linespread{1.26}\selectfont%
+
+\dmsub{1}{대우를 이용한 증명과 귀류법}
+
+용어의 뜻을 명확히 정한 문장을 \dmstrong{정의}, 참이라고 증명된 명제 중에서 기본이 되는 것을 \dmstrong{정리}라 한다. 명제 $p \to q$\ 를 직접 증명하기 어려울 때 그 대우 $\sim q \to \sim p$\ 를 증명하여도 원명제가 참임을 보일 수 있다. 이를 \dmstrong{대우를 이용한 증명}이라 한다.
+
+한편 명제 $p$\ 가 참임을 증명할 때, $\sim p$\ 가 참이라고 가정하면 이미 알려진 사실이나 가정 자체와 모순이 됨을 보이는 증명 방법을 \dmstrong{귀류법}이라 한다.
+
+\dmsub{2}{절대부등식과 실수의 성질}
+
+모든 실수 값에 대하여 성립하는 부등식을 \dmstrong{절대부등식}이라 한다. 절대부등식 증명에는 다음 실수의 성질이 자주 쓰인다.
+\begin{itemize}[leftmargin=8mm, itemsep=0.3mm, topsep=0.6mm]
+  \item $a > b\ \Longleftrightarrow\ a - b > 0$
+  \item 임의의 실수 $a$\ 에 대하여 $a^{2} \ge 0$\quad(등호는 $a = 0$일 때)
+  \item $|a|^{2} = a^{2}$,\quad $|ab| = |a||b|$
+  \item $a^{2} + b^{2} \ge 2|ab|$
+  \item $a > 0$,\ $b > 0$일 때 $a^{2} > b^{2}\ \Longleftrightarrow\ a > b$
+\end{itemize}
+
+\dmsub{3}{여러 가지 절대부등식}
+
+두 식의 차가 항상 $0$\ 이상임을 완전제곱꼴로 보이는 방법이 기본이다. 대표적인 절대부등식은 다음과 같다.
+\begin{equation*}
+  a^{2} + b^{2} \ge 2ab \quad (\text{등호: } a = b), \qquad |a| + |b| \ge |a + b| \quad (\text{등호: } ab \ge 0)
+\end{equation*}
+
+\dmsub{4}{산술평균 $\cdot$ 기하평균 $\cdot$ 코시-슈바르츠}
+
+두 양수 $a$,\ $b$\ 에 대하여
+\begin{equation*}
+  \frac{a + b}{2} \ge \sqrt{a b} \quad (\text{등호: } a = b)
+\end{equation*}
+가 성립한다. 이 부등식을 \dmstrong{산술평균과 기하평균의 관계}라 한다. 임의의 실수 $a$,\ $b$,\ $x$,\ $y$\ 에 대하여
+\begin{equation*}
+  (a^{2} + b^{2})(x^{2} + y^{2}) \ge (ax + by)^{2} \quad \left(\text{등호: } \frac{x}{a} = \frac{y}{b}\right)
+\end{equation*}
+가 성립한다. 이 부등식을 \dmstrong{코시-슈바르츠의 부등식}이라 한다.
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 15 · 대표예제 E10 (c5 산술기하 최적화) + CHK19·CHK20
+% ══════════════════════════════════════════════════════════════
+\dmbracket{29}
+\dmex{10}{곱의 전개와 산술기하 결합}
+
+\begin{dmproblem}
+두 양수 $a$,\ $b$\ 에 대하여 $\left(a + \dfrac{1}{b}\right)\!\left(b + \dfrac{4}{a}\right)$\ 의 최솟값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+주어진 식을 전개하여 상수항과, 두 양수의 곱이 상수가 되는 두 항을 분리한다. 그런 다음 산술평균과 기하평균의 관계를 이 두 항에 적용한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+전개하면
+\[ \left(a + \frac{1}{b}\right)\!\left(b + \frac{4}{a}\right) = ab + \frac{4}{ab} + 4 + 1 = ab + \frac{4}{ab} + 5. \]
+
+$ab$,\ $\dfrac{4}{ab}$\ 는 양수이고 그 곱이 $4$\ 인 상수이므로 산술평균과 기하평균의 관계에서
+\[ ab + \frac{4}{ab} \ge 2\sqrt{ab \cdot \frac{4}{ab}} = 2\sqrt{4} = 4 \quad (\text{등호: } ab = 2). \]
+
+$\therefore$\ 주어진 식의 최솟값은 $4 + 5 = 9$.
+\dmanswer{$9$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{19}{%
+$x > 1$\ 인 실수 $x$\ 에 대하여 $4x + \dfrac{1}{x - 1}$\ 의 최솟값을 구하시오.%
+}
+
+\dmcheck{20}{%
+실수 $x$,\ $y$\ 에 대하여 $x^{2} + y^{2} = 4$\ 일 때, $4x + 3y$\ 의 최댓값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 16 · Level 1 1/3 · L1-1 ~ L1-4 (집합·포함·부분집합) · 배지 있음
+% ══════════════════════════════════════════════════════════════
+\dmlevel{1}
+
+\dmpnum{1}{%
+이차부등식 $x^{2} - 8x + 12 < 0$\ 의 해 중 정수인 것을 원소로 하는 집합 $A$\ 에 대하여 옳지 \dmemph{않은} 것을 고르시오.
+
+\vspace{1mm}
+\begin{choices32}
+{$-2 \notin A$}
+{$0 \notin A$}
+{$2 \in A$}
+{$5 \in A$}
+{$7 \notin A$}
+\end{choices32}%
+}
+
+\dmpnum{2}{%
+세 집합 $A = \{0,\, 1\}$,\ $B = \{x \mid |x| \le 5,\ x \text{는 정수}\}$,\ $C = \{x \mid x \text{는 } 12 \text{의 양의 약수}\}$\ 에 대하여 $n(A) + n(B) + n(C)$\ 의 값을 구하시오.%
+}
+
+\dmpnum{3}{%
+두 집합 $A = \{x \mid -5 \le x \le -2\}$,\ $B = \{x \mid -3a - 2 < x < -a + 6\}$\ 에 대하여 $A \subset B$\ 가 성립하도록 하는 정수 $a$\ 의 최댓값과 최솟값의 합을 구하시오.%
+}
+
+\dmpnum{4}{%
+두 집합 $A = \{1,\, 2\}$,\ $B = \{1,\, 2,\, 3,\, \ldots,\, n\}$\ 에 대하여 $A \subset X \subset B$\ 를 만족시키는 집합 $X$\ 의 개수가 $128$\ 일 때, 자연수 $n$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 17 · Level 1 2/3 · L1-5 ~ L1-8 (집합 연산·원소 개수) · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+전체집합 $U = \{x \mid x \text{는 } 8 \text{ 이하의 자연수}\}$\ 의 두 부분집합 $A = \{x \mid x \text{는 } 8 \text{의 약수}\}$,\ $B = \{x \mid x \text{는 } 6 \text{의 약수}\}$\ 에 대하여 $(A - B)^\mathrm{c}$\ 의 모든 원소의 합을 구하시오.%
+}
+
+\dmpnum{6}{%
+두 집합 $A = \{1,\, 4,\, a^{2} + 2\}$,\ $B = \{3,\, 3a - 5,\, a^{2} + 2a - 2\}$\ 에 대하여 $A \cap B = \{1,\, 6\}$\ 일 때, 상수 $a$\ 의 값을 구하시오.%
+}
+
+\dmpnum{7}{%
+전체집합 $U$\ 에 대하여 $n(U) = 30$,\ $n(A) = 10$,\ $n(B) = 15$,\ $n(A^\mathrm{c} \cup B^\mathrm{c}) = 24$\ 일 때, $n(A \cup B)$\ 의 값을 구하시오.%
+}
+
+\dmpnum{8}{%
+두 집합 $A = \{1,\, 2,\, 3,\, 4,\, 5,\, 6\}$,\ $B = \{4,\, 5,\, 6,\, 7,\, 8\}$\ 에 대하여 $A \cap X = X$,\ $(A \cap B) \cup X = X$\ 를 만족시키는 집합 $X$\ 의 개수를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 18 · Level 1 3/3 · L1-9 ~ L1-12 (명제·조건·필요충분) · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{9}{%
+다음 중 참인 명제의 개수를 구하시오.
+\begin{dmoptionbox}
+ㄱ. 모든 실수 $x$\ 에 대하여 $x^{2} > 0$\ 이다.
+
+ㄴ. 어떤 실수 $x$\ 에 대하여 $x^{2} - 4x + 4 \le 0$\ 이다.
+
+ㄷ. 모든 실수 $x$\ 에 대하여 $|x|^{2} = x^{2}$\ 이다.
+
+ㄹ. 어떤 실수 $x$\ 에 대하여 $x^{2} + x + 1 = 0$\ 이다.
+
+ㅁ. 모든 실수 $x$\ 에 대하여 $x^{2} + 2x + 3 > 0$\ 이다.
+\end{dmoptionbox}%
+}
+
+\dmpnum{10}{%
+다음 중 그 역이 참인 명제를 고르시오.
+
+\vspace{1mm}
+\noindent\textcircled{\scriptsize 1}\ $x = y$\ 이면 $x^{2} = y^{2}$\ 이다.\\
+\textcircled{\scriptsize 2}\ $x^{2} - 6x + 9 = 0$\ 이면 $x^{2} = 9$\ 이다.\\
+\textcircled{\scriptsize 3}\ $x \le 1$\ 이면 $x^{2} \le 1$\ 이다.\\
+\textcircled{\scriptsize 4}\ $x > 0$,\ $y > 0$\ 이면 $x + y > 0$\ 이다.\\
+\textcircled{\scriptsize 5}\ $-1 \le x < 2$\ 이면 $-2 \le x \le 4$\ 이다.%
+}
+
+\dmpnum{11}{%
+세 조건 $p$,\ $q$,\ $r$\ 의 진리집합 $P$,\ $Q$,\ $R$\ 에 대하여 $P \cup Q = P$,\ $Q \cap R = R$\ 일 때, 다음 중 항상 참이라 할 수 \dmemph{없는} 것을 고르시오.
+
+\vspace{1mm}
+\begin{choices32}
+{$r \to q$}
+{$\sim q \to \sim r$}
+{$\sim p \to \sim q$}
+{$q \to p$}
+{$\sim r \to \sim p$}
+\end{choices32}%
+}
+
+\dmpnum{12}{%
+실수 $x$\ 에 대한 두 조건 $p:\ -2 \le x \le 1$,\ $q:\ x^{2} + ax + b \le 0$\ 에 대하여 $p$\ 가 $q$\ 이기 위한 필요충분조건이 되도록 하는 두 상수 $a$,\ $b$\ 에 대하여 $a^{2} + b^{2}$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 19 · Level 2 1/3 · L2-1 ~ L2-4 (집합 심화 · 배지 있음)
+% ══════════════════════════════════════════════════════════════
+\dmlevel{2}
+
+\dmpnum{1}{%
+집합 $X = \{x \mid x^{2} - ax + 4 \le 0,\ x \text{는 실수}\}$\ 가 공집합이 되도록 하는 정수 $a$\ 의 개수를 구하시오.%
+}
+
+\dmpnum{2}{%
+두 집합 $A = \{(x,\, y) \mid x^{2} + y^{2} = 25,\ x,\, y \text{는 정수}\}$,\ $B = \{x \mid x \text{는 } k \text{ 이하의 자연수}\}$\ 에 대하여 $n(A) + n(B) = 25$\ 일 때, 자연수 $k$\ 의 값을 구하시오.%
+}
+
+\dmpnum{3}{%
+두 집합 $A = \{x \mid -4 < x < 4,\ x \text{는 정수}\}$,\ $B = \{x \mid |x| = 2\}$\ 에 대하여 $B \subset X \subset A$\ 이고 $X \ne A$,\ $X \ne B$\ 를 만족시키는 집합 $X$\ 의 개수를 구하시오.%
+}
+
+\dmpnum{4}{%
+학생 $60$\ 명 중 영어 문제를 맞힌 학생이 $35$\ 명, 수학 문제를 맞힌 학생이 $28$\ 명, 두 문제를 모두 틀린 학생이 $5$\ 명이다. 영어 문제만 맞힌 학생 수를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 20 · Level 2 2/3 · L2-5 ~ L2-8 · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+두 집합 $A = \{x \mid -2 \le x \le -3k\}$,\ $B = \{x \mid 2k \le x \le 12\}$\ 에 대하여 $A \subset B$\ 가 성립하도록 하는 실수 $k$\ 의 최댓값을 $M$, 최솟값을 $m$\ 이라 할 때 $Mm$\ 의 값을 구하시오. (단, $A \ne \varnothing$)%
+}
+
+\dmpnum{6}{%
+전체집합 $U = \{x \mid x \text{는 } 50 \text{ 이하의 자연수}\}$\ 의 부분집합 $A_{n} = \{x \mid x = kn + 2,\ k \text{는 정수}\}$\ 에 대하여 $A_{3} \cap (A_{4} \cup A_{6})$\ 의 원소의 개수를 구하시오.%
+}
+
+\dmpnum{7}{%
+세 집합 $A = \{x - 2 \mid 1 < x \le 3\}$,\ $B = \{x + a \mid -1 \le x < 7\}$,\ $C = \{x \mid x > 2a\}$\ 에 대하여 $A \subset B \subset C$\ 를 만족시키는 정수 $a$\ 의 개수를 구하시오.%
+}
+
+\dmpnum{8}{%
+집합 $A = \{2,\, 3,\, 4,\, 5\}$\ 의 공집합이 아닌 부분집합 $A_{1}$,\ $A_{2}$,\ $\ldots$,\ $A_{15}$\ 에 대하여 각 $A_{i}$\ 의 가장 작은 원소를 $a_{i}$\ 라 할 때, $a_{1} + a_{2} + \cdots + a_{15}$\ 의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 21 · Level 2 3/3 · L2-9 ~ L2-12 (명제·절대부등식 심화 · 배지 없음)
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{9}{%
+두 집합 $X$,\ $Y$\ 에 대하여 $X \triangle Y = (X - Y) \cup (Y - X)$\ 로 정의한다. 세 집합 $A$,\ $B$,\ $C$\ 에 대하여 $n(A \cup B \cup C) = 75$,\ $n(A \triangle B) = 45$,\ $n(B \triangle C) = 47$,\ $n(C \triangle A) = 42$\ 일 때, $n(A \cap B \cap C)$\ 의 값을 구하시오.%
+}
+
+\dmpnum{10}{%
+명제 '어떤 실수 $x$\ 에 대하여 $x^{2} + 8x + 2k - 1 \le 0$\ 이다.'가 거짓이 되도록 하는 정수 $k$\ 의 최솟값을 구하시오.%
+}
+
+\dmpnum{11}{%
+실수 $x$\ 에 대한 두 조건 $p:\ x^{2} - 4x - 12 = 0$,\ $q:\ |x - 3| > k$\ 에 대하여 $p$\ 가 $\sim q$\ 이기 위한 충분조건이 되도록 하는 자연수 $k$\ 의 최솟값을 구하시오.%
+}
+
+\dmpnum{12}{%
+$\angle \mathrm{C} = 90^{\circ}$\ 인 직각삼각형 $\mathrm{ABC}$\ 의 넓이가 $16$\ 일 때, $\overline{\mathrm{AB}}^{\,2}$\ 의 최솟값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 22 · Level 3 · L3-1 · L3-2 · L3-3 · 3문 한 페이지 (세션 55 통합)
+% ══════════════════════════════════════════════════════════════
+\dmlevel{3}
+
+% L3-1 (세션 63 교체) : mod 5 잔여 · 금지 쌍 회피 · 최대 부분집합 크기 (O-NEW-24 확장 원형)
+% source : 블랙라벨-CM2-04-STEP3-#08 · star_5_premium · CM2-ST 집합 정점
+\dmpnum{1}{%
+전체집합 $U = \{x \mid x\text{는 } 50 \text{ 이하의 자연수}\}$\ 의 부분집합 $A$\ 가 다음 조건을 만족시킨다.
+\begin{quote}\small
+$A$\ 에 속하는 서로 다른 두 자연수 $x$,\ $y$\ 에 대하여 $x + y$\ 는 $5$\ 의 배수가 아니다.
+\end{quote}
+집합 $A$\ 의 원소의 개수 $n(A)$\ 의 최댓값을 구하시오.%
+}
+
+\dmpnum{2}{%
+전체집합 $U = \{x \mid x \text{는 } 10 \text{ 이하의 자연수}\}$\ 의 두 부분집합 $A = \{1,\, 2,\, 3,\, 4,\, 5\}$,\ $B = \{3,\, 4,\, 5,\, 6,\, 7\}$\ 에 대하여 $U$\ 의 부분집합 $X$\ 가 다음 세 조건을 모두 만족시킬 때, $X$\ 의 모든 원소의 합의 최솟값을 구하시오.
+\begin{dmoptionbox}
+(가) $n(X) = 6$
+
+(나) $A - X = B - X$
+
+(다) $(X - A) \cap (X - B) \ne \varnothing$
+\end{dmoptionbox}%
+}
+
+\dmpnum{3}{%
+학생 $50$\ 명 중 과학 동아리에 가입한 학생이 $23$\ 명, 코딩 동아리에 가입한 학생이 $28$\ 명, 영화 동아리에 가입한 학생이 $21$\ 명, 세 동아리에 모두 가입한 학생이 $7$\ 명, 어느 동아리에도 가입하지 않은 학생이 $4$\ 명이다. 두 개의 동아리에만 가입한 학생 수를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 23 · 실전 R-1 + R-2 + R-3 (3문 통합 · 세션 57 재편)
+% R-1 : 2023학년도 3월 고2 학평 18번 (명제 p→q, p→~q 모두 거짓 · 정수 k 합)
+% R-2 : 2022학년도 11월 고1 학평 28번 (A∪Bᶜ 원소합 조건 · 원소합 최솟값)
+% R-3 : 2024학년도 3월 고2 학평 28번 (짝수·약수 집합 · n(A)·n((A∪B)ᶜ)=15)
+% ══════════════════════════════════════════════════════════════
+\dmrealtype
+
+\dmpnum{1}{%
+\dmkichul{2023학년도 3월 고2 학평 18번}
+실수 $x$\ 에 대한 두 조건 $p:\ |x - k| \le 2$,\ $q:\ x^{2} - 4x - 5 \le 0$\ 에 대하여 명제 $p \to q$\ 와 명제 $p \to \sim q$\ 가 모두 거짓이 되도록 하는 모든 정수 $k$\ 의 값의 합을 구하시오.%
+}
+
+\dmpnum{2}{%
+\dmkichul{2022학년도 11월 고1 학평 28번}
+전체집합 $U = \{1,\, 2,\, 4,\, 8,\, 16,\, 32\}$\ 의 두 부분집합 $A$,\ $B$\ 가 다음 조건을 만족시킨다.
+\begin{dmoptionbox}
+(가) 집합 $A \cup B^\mathrm{c}$\ 의 모든 원소의 합은 집합 $B - A$\ 의 모든 원소의 합의 $6$\ 배이다.
+
+(나) $n(A \cup B) = 5$
+\end{dmoptionbox}
+$2 \le n(B - A) \le 4$\ 일 때, 집합 $A$\ 의 모든 원소의 합의 최솟값을 구하시오.%
+}
+
+\dmpnum{3}{%
+\dmkichul{2024학년도 3월 고2 학평 28번}
+$1$\ 보다 큰 자연수 $k$\ 에 대하여 전체집합을 $U = \{x \mid x \text{는 } k \text{ 이하의 자연수}\}$\ 라 하자. $U$\ 의 두 부분집합
+\begin{equation*}
+  A = \{x \mid x \text{는 } k \text{ 이하의 짝수}\}, \quad B = \{x \mid x \text{는 } k \text{의 약수}\}
+\end{equation*}
+가 $n(A) \cdot n((A \cup B)^\mathrm{c}) = 15$\ 를 만족시킬 때, $(A \cup B)^\mathrm{c}$\ 의 모든 원소의 곱을 구하시오.%
+}
+
+\end{document}

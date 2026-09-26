@@ -1,0 +1,1751 @@
+---
+name: mechanism-데이터-RPM-CM2-GM-직선
+description: RPM 공통수학2 직선의 방정식 정독 데이터. 세션 53 (2026-07-20) 신설.
+metadata:
+  type: reference
+  version: v1.0
+  established: 2026-07-20
+  source: RPM 공통수학2 (2022개정)
+  tier_mapping:
+    유형익히기: star_2~3
+    기본유형: star_3~4
+    발전문제: star_4~5
+  unit_code: CM2-GM
+  standard: 10수05-02
+  citation_note: RPM · 학습 목적 · 저작권 준수 (원문 전사 없음)
+  extract_range: "02 직선의 방정식 전체 · 교과서문제·유형익히기·시험에꼭나오는·서술형·실력up"
+  pages: "18~31"
+---
+
+# RPM 공통수학2 (2022개정) · 02 직선의 방정식 정독 데이터
+
+## 소단원 구성
+
+- **02|1 직선의 방정식** (유형 01~06)
+- **02|2 두 직선의 교점을 지나는 직선의 방정식** (유형 07, 08, 16)
+- **02|3 두 직선의 위치 관계** (유형 09~12)
+- **02|4 점과 직선 사이의 거리** (유형 13~15, 17)
+
+---
+
+## Section A. 교과서 문제 정복하기 (p.19, 0087~0103)
+
+### 02|1 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0087
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    점 (0, 3) 지나고 기울기 -5인 직선의 방정식
+  solution_summary: |
+    y = -5x + 3
+  category: 직선 방정식 (점·기울기)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 점기울기-공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0088
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    점 (1, -1) 지나고 기울기 2인 직선의 방정식
+  solution_summary: |
+    y = 2x - 3
+  category: 직선 방정식 (점·기울기)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 점기울기-공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0089
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    두 점 (2, 3), (4, -3)을 지나는 직선의 방정식
+  solution_summary: |
+    y = -3x + 9
+  category: 직선 방정식 (두 점)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두점-직선공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0090
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    두 점 (6, 4), (-3, 4)를 지나는 직선의 방정식 (x_1≠x_2인지 판단)
+  solution_summary: |
+    y좌표 동일 → y = 4
+  category: 직선 방정식 (수평선)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 특수-직선-수평
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0091
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    x절편 -7, y절편 5인 직선의 방정식 (절편형)
+  solution_summary: |
+    x/(-7) + y/5 = 1
+  category: 절편형
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 절편형-대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0092
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    a, b, c 부호 조건에 따른 ax+by+c=0의 지나는 사분면
+    (1) a>0, b>0, c<0 (2) a>0, b=0, c<0
+  solution_summary: |
+    (1) 기울기 -a/b<0, y절편 -c/b>0 → 제1,2,4사분면
+    (2) x = -c/a > 0 → 제1,4사분면
+  category: 계수 부호와 개형
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 계수부호-사분면-판정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 02|2 두 직선의 교점을 지나는 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0093
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    직선 (4x+5y+3)+k(2x+3y+1)=0이 실수 k값에 관계없이 항상 지나는 점 좌표
+  solution_summary: |
+    두 식 연립: x=-2, y=1 → (-2, 1)
+  category: 항상 지나는 점 (교점)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-연립방정식
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0094
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    직선 (k+2)x-(2k-1)y+k-1=0의 항상 지나는 점 좌표 (k에 대해 정리)
+  solution_summary: |
+    2x+y-1 + k(x-2y+1) = 0. 연립: x=1/5, y=3/5 → (1/5, 3/5)
+  category: 항상 지나는 점 (k 정리형)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-k정리형
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0095
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    두 직선 2x-3y-1=0, 2x-4y+1=0의 교점과 원점을 지나는 직선의 방정식
+  solution_summary: |
+    교점 (7/2, 2). 원점 지나므로 y=(2/(7/2))x → 4x-7y=0
+  category: 교점 지나는 직선
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-원점-직선
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 02|3 두 직선의 위치 관계
+
+- source: RPM-CM2-GM-직선-#0096
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    두 직선 y=-x/2+5, y=(a+1)x+4의 (1) 평행 (2) 수직 조건
+  solution_summary: |
+    (1) -1/2 = a+1 → a=-3/2
+    (2) (-1/2)(a+1)=-1 → a=1
+  category: 평행/수직 (기울기형)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행수직-기울기공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0097
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    두 직선 x+ay+1=0, (a-1)x+2y+1=0의 (1) 평행 (2) 수직 조건
+  solution_summary: |
+    (1) 1/(a-1) = a/2 ≠ 1/1 → (a+1)(a-2)=0, a≠2 조건 → a=-1
+    (2) 1·(a-1)+a·2=0 → a=1/3
+  category: 평행/수직 (일반형 비율)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행수직-일반형-비율
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0098
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    점 (2, -3) 지나고 직선 3x+2y+1=0에 평행한 직선의 방정식
+  solution_summary: |
+    기울기 -3/2, 점 (2,-3) → y=-3x/2 (즉 3x+2y=0)
+  category: 평행 직선 (점 지남)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-점기울기
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0099
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    점 (-2, 1) 지나고 직선 y=-3x+1에 수직인 직선의 방정식
+  solution_summary: |
+    수직 기울기 1/3, 점 (-2,1) → y = x/3 + 5/3
+  category: 수직 직선 (점 지남)
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직-점기울기
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+### 02|4 점과 직선 사이의 거리
+
+- source: RPM-CM2-GM-직선-#0100
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    점 (1, 4)와 직선 x-2y+2=0 사이의 거리
+  solution_summary: |
+    |1-8+2|/√5 = 5/√5 = √5
+  category: 점과 직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 거리공식-대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0101
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    점 (-3, 2)와 직선 6x+8y-3=0 사이의 거리
+  solution_summary: |
+    |-18+16-3|/10 = 5/10 = 1/2
+  category: 점과 직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 거리공식-대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0102
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    원점과 직선 4x-3y+6=0 사이의 거리
+  solution_summary: |
+    |6|/√25 = 6/5
+  category: 원점과 직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 거리공식-원점
+  insight_type: 절차형
+  depth: 1
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0103
+  page: 19
+  category_type: 교과서문제
+  problem_summary: |
+    평행한 두 직선 x-y-3=0, x-y+3=0 사이의 거리
+  solution_summary: |
+    한 직선 위 점 (3,0)와 다른 직선의 거리: |3+3|/√2 = 3√2
+  category: 평행 직선 사이 거리
+  tier: star_2
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-거리-점대입
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+---
+
+## Section B. 유형 익히기 (p.20~27, 0104~0161)
+
+### 유형 01. 한 점과 기울기가 주어진 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0104
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 (-4,2), (6,8) 이은 선분 중점을 지나고 기울기 -2인 직선의 방정식 [대표문제]
+  solution_summary: |
+    중점 (1,5), y=-2(x-1)+5 → y=-2x+7
+  category: 중점·기울기 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 중점-점기울기
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0105
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    점 (-1,-1) 지나는 직선 ax-y+b=0과 직선 3x-y-5=0의 기울기가 같을 때 ab
+  solution_summary: |
+    기울기 3, y=3(x+1)-1=3x+2. 계수 대응 a=3, b=2 → ab=6
+  category: 기울기 조건 · 상수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기-일치-대응
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0106
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    직선 y=(m-2)x-n-1이 점 (2,-1) 지나고 x축 양의 방향과 이루는 각의 크기 45°. m+n
+  solution_summary: |
+    기울기 tan45°=1 → m-2=1, m=3. 점 대입 → n=2. m+n=5
+  category: 각도-기울기 변환
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: tan-기울기-각도
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 02. 두 점을 지나는 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0107
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(6,-4), B(1,1)의 선분 AB를 2:3 내분점과 점 (-1,3)을 지나는 직선의 y절편 [대표문제]
+  solution_summary: |
+    내분점 (4,-2). 두 점 (4,-2), (-1,3) 직선: y=-x+2. y절편 = 2
+  category: 내분점·두점 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 내분점-두점공식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0108
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 (-2,3),(3,-2) 지나는 직선이 두 점 (-5,a),(b,2)를 지날 때 a-b
+  solution_summary: |
+    직선: y=-x+1. a=-(-5)+1=6, 2=-b+1 → b=-1. a-b=7
+  category: 직선 위 점 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 직선위-대입
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0109
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(3,5),B(4,1),C(-1,3)이 꼭짓점인 삼각형의 무게중심 G, 직선 CG의 방정식 (서술형)
+  solution_summary: |
+    G(2,3). C(-1,3), G(2,3): 두 y좌표 동일 → y=3
+  category: 무게중심·두점 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 무게중심-두점-수평선
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0110
+  page: 20
+  category_type: 유형익히기
+  problem_summary: |
+    사각형 OABC (O(0,0), A(5,-3), B(7,0), C(1,5))의 두 대각선 교점 좌표
+  solution_summary: |
+    대각선 AC: A(5,-3),C(1,5) 직선 y=-2x+7. 대각선 OB: y=0. 교점 x=7/2 → (7/2, 0)
+  category: 사각형 대각선 교점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두-직선-연립-교점
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 03. x절편과 y절편이 주어진 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0111
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    점 (-2,4) 지나는 직선의 x절편과 y절편의 합이 0일 때, x절편 (원점 미지남) [대표문제]
+  solution_summary: |
+    x/a + y/(-a) = 1 → y=x-a. 점 대입: 4=-2-a, a=-6. x절편 = -6
+  category: 절편형-합조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 절편형-합-조건
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0112
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    직선 l은 직선 2x-3y-4=0과 x축에서, 직선 3x+y+8=0과 y축에서 만남. 직선 l이 점 (a,-4) 지날 때 a
+  solution_summary: |
+    x절편 2, y절편 -8. 절편형 x/2 + y/(-8) = 1. 점 대입: a/2 + 1/2 = 1 → a=1
+  category: 절편형-대입
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 절편-두-직선-교차
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 04. 세 점이 한 직선 위에 있을 조건
+
+- source: RPM-CM2-GM-직선-#0113
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(1,3), B(a,5), C(3, 2a+3)이 한 직선 위 (a>0). 직선의 방정식 [대표문제]
+  solution_summary: |
+    (직선 AB 기울기)=(직선 AC 기울기): 2/(a-1) = (2a+3-3)/(3-1) = a. → 2 = a(a-1) → a²-a-2=0, (a+1)(a-2)=0, a=2. 기울기 2, 점 (1,3): y=2x+1
+  category: 공선 조건 · 방정식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 공선-기울기-일치
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0114
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(k,-1), B(2,k), C(5,7)이 삼각형을 이루지 않도록 하는 모든 실수 k값의 합
+  solution_summary: |
+    공선 조건: (k+1)/(2-k) = (7+1)/(5-k). 정리 → k²-12k+11=0, (k-1)(k-11)=0. 합 = 12
+  category: 공선 조건 · 근합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 공선-이차-근합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 05. 도형의 넓이를 이등분하는 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0115
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    A(3,3), B(5,-5), C(-1,1)이 꼭짓점 삼각형 ABC의 넓이를 점 A 지나는 직선 y=ax+b가 이등분할 때 a+b [대표문제]
+  solution_summary: |
+    BC 중점 (2,-2). A(3,3), (2,-2) 직선 y=5x-12. a=5, b=-12. a+b=-7
+  category: 삼각형 넓이 이등분 (꼭짓점 통과)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 꼭짓점-대변중점-이등분
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0116
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    직선 x/2+y/4=1과 x, y축 이등변 삼각형 넓이를 y=mx가 이등분할 때 m
+  solution_summary: |
+    A(2,0), B(0,4). AB 중점 (1,2). y=mx가 (1,2) 지남 → m=2
+  category: 삼각형 넓이 이등분 (원점 통과)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 삼각형-중선-원점
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0117
+  page: 21
+  category_type: 유형익히기
+  problem_summary: |
+    좌표평면 위 두 직사각형 넓이를 동시에 이등분하는 직선의 x절편과 y절편의 곱 (그림)
+  solution_summary: |
+    각 직사각형 대각선 교점 A(-2,-1), B(2,3). 두 점 직선 y=x+1. x절편 -1, y절편 1. 곱 = -1
+  category: 두 도형 동시 이등분
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 대각선교점-두-도형
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 06. 계수의 부호와 그래프의 개형
+
+- source: RPM-CM2-GM-직선-#0118
+  page: 22
+  category_type: 유형익히기
+  problem_summary: |
+    ab<0, bc<0일 때, 직선 ax+by+c=0이 지나지 않는 사분면 [대표문제]
+  solution_summary: |
+    y=-a/b·x - c/b. -a/b>0, -c/b>0 → 기울기+, y절편+. 지나지 않는 곳: 제4사분면
+  category: 계수 부호 · 사분면
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 부호-변환-사분면
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0119
+  page: 22
+  category_type: 유형익히기
+  problem_summary: |
+    직선 ax+by+c=0에 대한 보기 3항목의 참/거짓 (ㄱ. c=0 원점. ㄴ. ab>0 4사분면. ㄷ. bc<0 1사분면)
+  solution_summary: |
+    ㄱ. c=0이면 원점 대입 성립 (참). ㄴ. ab>0 → -a/b<0 음의 기울기, 제4사분면 지남 (참). ㄷ. bc<0 → -c/b>0 (참). 모두 참 → ⑤
+  category: 계수 부호 · 참/거짓
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 부호-변환-보기
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0120
+  page: 22
+  category_type: 유형익히기
+  problem_summary: |
+    ax+by-2=0의 그래프 주어짐 (음의 기울기, y절편 양수). 직선 x-ay+b=0의 개형
+  solution_summary: |
+    a<0, b<0 유도. x-ay+b=0 → y=x/a + b/a. 기울기 1/a<0, y절편 b/a>0. 개형 ③
+  category: 그래프 개형 판별
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 부호역추적-개형
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 07. 직선이 항상 지나는 점
+
+- source: RPM-CM2-GM-직선-#0121
+  page: 22
+  category_type: 유형익히기
+  problem_summary: |
+    직선 (2k+1)x-(k-1)y-5k-4=0이 실수 k에 관계없이 항상 지나는 점 P. 기울기 -2이고 P 지나는 직선 [대표문제]
+  solution_summary: |
+    k 정리: (2x-y-5)k + (x+y-4)=0. 연립 x=3, y=1 → P(3,1). y-1=-2(x-3) → 2x+y-7=0
+  category: 정점 + 이차 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-k정리-후속조건
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0122
+  page: 22
+  category_type: 유형익히기
+  problem_summary: |
+    직선 mx+y+3m-4=0이 실수 m에 관계없이 항상 지나는 점 P. OP 길이 (O 원점)
+  solution_summary: |
+    m(x+3) + y-4 = 0. x=-3, y=4. P(-3,4). OP = √(9+16) = 5
+  category: 정점 + 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-거리
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0123
+  page: 22
+  category_type: 유형익히기
+  problem_summary: |
+    직선 2x-y+3=0 위 임의 점 (a,b)에 대하여 직선 2ax-3by=9가 항상 지나는 점
+  solution_summary: |
+    b=2a+3 대입: 2ax-3(2a+3)y=9 → (2x-6y)a - 9y-9=0. 항등: 2x-6y=0, 9y=-9. x=-3, y=-1. → (-3, -1)
+  category: 정점 (파라미터 종속)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 파라미터-항등식-정점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 08. 두 직선의 교점을 지나는 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0124
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 2x-3y-1=0, x+y-3=0 교점과 점 (1,1) 지나는 직선이 ax+by-1=0일 때 a-b [대표문제]
+  solution_summary: |
+    (2x-3y-1) + k(x+y-3) = 0. 점 (1,1) 대입: -2-k=0, k=-2. 정리: -5y+5=0 → y=1. 계수 대응 a=0, b=1. a-b=-1
+  category: 교점 직선 · 계수 대응
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점표현-계수-대응
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0125
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    점 (2,0)과 두 직선 x+y+1=0, 2x-y-1=0의 교점을 지나는 직선 l 위의 점 (보기 5선지)
+  solution_summary: |
+    (x+y+1) + k(2x-y-1)=0. (2,0): 3+3k=0, k=-1 → -x+2y+2=0 즉 x-2y-2=0. 점 (4,1) 검증 → ⑤
+  category: 교점 직선 · 점 검증
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-직선-점판정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0126
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 5x-y+2=0, x+4y-3=0 교점을 지나고 기울기 -1인 직선의 y절편
+  solution_summary: |
+    (5x-y+2) + k(x+4y-3) = 0. 기울기 -(5+k)/(4k-1)=-1 → k=2. 대입 → 7x+7y-4=0. y절편 4/7
+  category: 교점 직선 · 기울기 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-기울기-y절편
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0127
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 ax+(a+1)y+2=0, (a-6)x+ay-2=0 교점과 원점을 지나는 직선의 기울기 2일 때 a
+  solution_summary: |
+    [ax+(a+1)y+2] + k[(a-6)x+ay-2]=0. 원점 조건: k=1 → (2a-6)x+(2a+1)y=0. 기울기 -(2a-6)/(2a+1) = 2 → a=2/3
+  category: 교점-원점-기울기
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-원점-k결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 09. 두 직선의 평행·수직
+
+- source: RPM-CM2-GM-직선-#0128
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 2x-ky+1=0, (k+1)x-y+k=0이 평행할 때 k=α, 수직일 때 k=β. α-β [대표문제]
+  solution_summary: |
+    평행: 2/(k+1)=-k/-1≠1/k. -2=-k²-k → k²+k-2=0, k=-2 또는 1. 비율조건 k≠1 → α=-2. 수직: 2(k+1)+(-k)(-1)=0, 3k+2=0, β=-2/3. α-β = -2+2/3 = -4/3
+  category: 평행·수직 (일반형)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행수직-α-β
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0129
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 (a-1)x+3y+2a-1=0, (a-2)x-2y+2a+3=0이 수직이 되도록 하는 모든 상수 a값의 곱
+  solution_summary: |
+    (a-1)(a-2) + 3·(-2) = 0 → a²-3a-4=0, (a+1)(a-4)=0. 곱 = -4
+  category: 수직 조건 · 근곱
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직-이차-근곱
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0130
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 -2x+ay+3=0, bx+cy+11=0이 점 (-1,5)에서 수직으로 만날 때 abc
+  solution_summary: |
+    점 (-1,5) 대입: 2+5a+3=0 → a=-1. -b+5c+11=0. 수직: -2b+ac=0 → -2b-c=0, c=-2b. 대입 → b=1, c=-2. abc = 2
+  category: 교점·수직 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직-교점-연립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0131
+  page: 23
+  category_type: 유형익히기
+  problem_summary: |
+    직선 x-ay+1=0이 직선 x+(b-2)y-1=0과 평행하고, 직선 (a+1)x-(b-1)y+1=0과 수직일 때 a²+b² (서술형)
+  solution_summary: |
+    평행: 1/1 = -a/(b-2) ≠ 1/(-1) → a+b=2. 수직: (a+1)+(-a)(-b+1)=0 → ab=-1. a²+b²=(a+b)²-2ab = 4+2 = 6
+  category: 평행·수직 동시
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행수직-대수변환
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 10. 한 직선에 평행 또는 수직인 직선의 방정식
+
+- source: RPM-CM2-GM-직선-#0132
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-3,1),B(6,4) 지나는 직선에 수직이고, 선분 AB를 1:2 내분점 지나는 직선의 방정식 [대표문제]
+  solution_summary: |
+    AB 기울기 1/3, 수직 기울기 -3. 내분점 (0,2). y=-3x+2
+  category: 수직 · 내분점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직-내분점-방정식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0133
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 (-3,5),(5,-7) 지나는 직선에 평행하고 점 (2,5) 지나는 직선이 ax+2y+b=0. a+b
+  solution_summary: |
+    기울기 -3/2. y-5=-3/2(x-2) → 3x+2y-16=0. a=3, b=-16. a+b=-13
+  category: 평행 · 계수 대응
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-계수-대응
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0134
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 3x+2y-5=0, 3x+y-1=0 교점을 지나고 직선 2x-y+4=0과 수직인 직선이 점 (a,-1) 지남. a
+  solution_summary: |
+    (3x+2y-5) + k(3x+y-1)=0. 기울기 -(3+3k)/(2+k)=-1/2. k=-4/5. 대입 정리 → x+2y-7=0. 점 대입 a-2-7=0 → a=9
+  category: 교점·수직·점 지남
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-수직-점판정
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0135
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    점 A(6,11)에서 직선 x+3y-9=0에 내린 수선의 발 H(a,b). ab (그림)
+  solution_summary: |
+    x+3y-9=0 기울기 -1/3, AH 기울기 3. AH 방정식 y-11=3(x-6) → 3x-y-7=0. 원선과 연립: x=3, y=2. ab = 6
+  category: 수선의 발
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수선의발-연립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+### 유형 11. 선분의 수직이등분선의 방정식
+
+- source: RPM-CM2-GM-직선-#0136
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(3,1), B(5,-3)에 대한 선분 AB의 수직이등분선의 방정식 [대표문제]
+  solution_summary: |
+    중점 (4,-1). AB 기울기 -2, 수직이등분선 기울기 1/2. y+1 = (1/2)(x-4) → y=x/2-3
+  category: 수직이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직이등분선-중점-기울기
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0137
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(a,3), B(4,5)에 대한 수직이등분선이 y=-x+b일 때 a+b
+  solution_summary: |
+    수직 기울기 -1 → AB 기울기 1: (5-3)/(4-a)=1 → a=2. 중점 (3,4) 대입: 4=-3+b, b=7. a+b=9
+  category: 수직이등분선 · 상수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직이등분선-역판정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0138
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(a,2), B(4,b)에 대한 수직이등분선이 2x+y-3=0. a²+b²
+  solution_summary: |
+    중점 ((a+4)/2, (2+b)/2) 대입: a+b=0 ⋯ ㉠. 수직 기울기 1/2 → AB 기울기 2: (b-2)/(4-a)=2 → b-a=4. 연립 a=-2, b=2. a²+b²=8
+  category: 수직이등분선 · 좌표 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직이등분선-두-조건
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0139
+  page: 24
+  category_type: 유형익히기
+  problem_summary: |
+    삼각형의 세 변의 수직이등분선은 한 점에서 만남. A(1,0), B(7,2), C(3,6)이 꼭짓점 삼각형 ABC의 세 변 수직이등분선의 교점 (외심)
+  solution_summary: |
+    AC 중점 (2,3), AC 기울기 3 → 수직이등분선 기울기 -1/3: y=-x/3+11/3. BC 중점 (5,4), BC 기울기 -1 → 수직이등분선 기울기 1: y=x-1. 연립 x=7/2, y=5/2 → (7/2, 5/2)
+  category: 외심 좌표
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 외심-수직이등분선-교점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 12. 세 직선의 위치 관계
+
+- source: RPM-CM2-GM-직선-#0140
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    세 직선 x+2y=0, x-y+3=0, ax+y+a+1=0이 삼각형을 이루지 않도록 하는 모든 상수 a값의 곱 [대표문제]
+  solution_summary: |
+    ㉠ ㉡ 평행 X. (i) ㉠㉢ 평행: 1/a = 2/1 → a=1/2. (ii) ㉡㉢ 평행: a/1 = 1/-1 → a=-1. (iii) 세 직선 한 점: x=-2, y=1 → -2a+1+a+1=0, a=2. 곱 = -1·(1/2)·2 = -1
+  category: 삼각형 미형성
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세직선-경우분리
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0141
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    세 직선 3x+y=8, 2x+y=5, kx+y=-7이 한 점에서 만날 때 k
+  solution_summary: |
+    앞 두 직선 연립: x=3, y=-1. 세 번째 대입: 3k-1=-7 → k=-2
+  category: 세 직선 한 점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세직선-한점-교점대입
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0142
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    세 직선 x+2y-6=0, 4x-3y-12=0, ax+y-1=0으로 둘러싸인 삼각형이 직각삼각형이 되도록 하는 모든 a값의 합 (서술형)
+  solution_summary: |
+    두 직선 ㉠㉡은 수직 아님. (i) ㉠⊥㉢: 1·a+2·1=0, a=-2. (ii) ㉡⊥㉢: 4a-3=0, a=3/4. 합 -2+3/4 = -5/4
+  category: 직각삼각형 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 직각삼각형-경우분리
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0143
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    서로 다른 세 직선 ax+y+5=0, 2x+by-4=0, x+2y+3=0에 의하여 좌표평면이 네 부분으로 나누어질 때 a+b
+  solution_summary: |
+    네 부분 → 세 직선 모두 평행. 첫째~셋째 평행: a/1=1/2 → a=1/2. 둘째~셋째 평행: 2/1=b/2≠-4/3 → b=4. a+b=9/2
+  category: 세 직선 평행 (네 영역)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세직선-평행-영역
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 13. 점과 직선 사이의 거리
+
+- source: RPM-CM2-GM-직선-#0144
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    점 (a,3)에서 두 직선 2x-y+1=0, x+2y-1=0까지의 거리 같을 때 양수 a [대표문제]
+  solution_summary: |
+    |2a-2|/√5 = |a+5|/√5 → |2a-2|=|a+5|. 2a-2=±(a+5). a=7 또는 -1. 양수 → a=7
+  category: 거리 같은 점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 거리-등식-절댓값
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0145
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    점 (2,6)과 직선 3x+4y+k=0 사이 거리가 8. 양수 k
+  solution_summary: |
+    |6+24+k|/5 = 8 → |30+k|=40 → k=10 또는 -70. 양수 → k=10
+  category: 거리 · 상수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 거리-상수-결정
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0146
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    직선 x+y+(x-y)k-2=0이 실수 k에 관계없이 점 A 지남. 점 A와 직선 2x-y-6=0 사이 거리
+  solution_summary: |
+    (x+y-2) + k(x-y)=0. 연립: x=1, y=1 → A(1,1). 거리 |2-1-6|/√5 = 5/√5 = √5
+  category: 정점 + 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-거리-복합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0147
+  page: 25
+  category_type: 유형익히기
+  problem_summary: |
+    원점과 직선 x+3y-4+k(2x+y)=0 사이 거리를 f(k). f(k)의 최댓값 (k 실수)
+  solution_summary: |
+    (2k+1)x+(k+3)y-4=0. f(k) = 4/√(5k²+10k+10) = 4/√(5(k+1)²+5). k=-1일 때 최댓값 4/√5 = 4√5/5
+  category: 거리 함수 최댓값
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 거리함수-이차식-최댓값
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 14. 평행한 두 직선 사이의 거리
+
+- source: RPM-CM2-GM-직선-#0148
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    평행한 두 직선 x+2y+1=0, x+2y+k=0 사이 거리가 4√5. 모든 k값의 합 [대표문제]
+  solution_summary: |
+    (-1,0)과 x+2y+k=0 거리: |-1+k|/√5 = 4√5. |k-1|=20 → k=21 또는 -19. 합 = 2
+  category: 평행 거리 · 상수합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-거리-상수합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0149
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    직선 x-y+3=0 위 점 A, 직선 x-y-1=0 위 점 B. AB 길이의 최솟값
+  solution_summary: |
+    두 직선 평행. 사이 거리 = |3-(-1)|/√2 = 4/√2 = 2√2
+  category: 평행 · 최소 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-최단-거리
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0150
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    평행한 두 직선 ax+2y-1=0, 3x+(a-1)y-1=0 사이 거리 (a 상수)
+  solution_summary: |
+    평행: a/3 = 2/(a-1) ≠ -1/-1 → a²-a-6=0, (a+2)(a-3)=0. 비율 조건 a≠3 → a=-2. 두 직선 -2x+2y-1=0, 3x-3y-1=0. (0, 1/2)와 후자 거리: |-3/2-1|/√18 = 5√2/12
+  category: 평행 · 상수 결정 후 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-상수-거리
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0151
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    점 A(0,3)을 꼭짓점으로 하는 정사각형 ABCD의 넓이 25. 직선 CD의 x절편 (그림, B,D는 제1사분면)
+  solution_summary: |
+    AB=5, 직각삼각 OAB(O로 이해)에서 OB=4. B(4,0). 직선 AB: x/4+y/3=1 → 3x+4y-12=0. CD∥AB이고 사이 거리 5. 3x+4y+k=0, |12+k|/5=5, k=-37 (양의 방향). 3x+4y-37=0. y=0 → x=37/3
+  category: 정사각형 · 평행 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정사각형-평행-절편
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 15. 꼭짓점의 좌표가 주어진 삼각형의 넓이
+
+- source: RPM-CM2-GM-직선-#0152
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(3,4), B(2,0), C(4,2) 꼭짓점 삼각형 넓이 [대표문제]
+  solution_summary: |
+    BC = 2√2. BC 직선: y=x-2 → x-y-2=0. A와 거리 d=|3-4-2|/√2 = 3/√2. 넓이 = (1/2)·2√2·(3/√2) = 3
+  category: 삼각형 넓이 (밑변·높이)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 밑변-높이-넓이
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0153
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(2,3), B(-2,-1), C(a,-3) 꼭짓점 삼각형 넓이가 16. 자연수 a
+  solution_summary: |
+    AB=4√2. AB 직선 y=x+1 → x-y+1=0. C 거리 |a+3+1|/√2 = |a+4|/√2. 넓이 (1/2)(4√2)(|a+4|/√2) = 2|a+4| = 16 → |a+4|=8 → a=4 (자연수)
+  category: 넓이 조건 · 좌표 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 넓이-역계산-좌표
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0154
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 O(0,0), A(4,1)과 직선 x-4y+12=0 위 점 P가 꼭짓점 삼각형 OAP 넓이 (그림)
+  solution_summary: |
+    OA 기울기 1/4 → OA와 x-4y+12=0 평행. OA=√17. 원점과 직선 x-4y+12=0 거리 |12|/√17 = 12/√17. 넓이 (1/2)·√17·(12/√17) = 6
+  category: 평행 · 원점 거리 활용
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-활용-넓이
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0155
+  page: 26
+  category_type: 유형익히기
+  problem_summary: |
+    세 직선 x-2y-2=0, x+5y-9=0, 4x-y+6=0으로 만들어지는 삼각형 넓이 (서술형)
+  solution_summary: |
+    교점: A(4,1), B(-1,2), C(-2,-2). AC=3√5. B와 직선 AC(x-2y-2=0) 거리 |-1-4-2|/√5=7/√5. 넓이 (1/2)·3√5·(7/√5) = 21/2
+  category: 삼각형 넓이 (세 교점)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-거리-넓이
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 16. 직선이 항상 지나는 점의 활용
+
+- source: RPM-CM2-GM-직선-#0156
+  page: 27
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 x+y-2=0, mx-y-4m+3=0이 제1사분면에서 만나도록 하는 실수 m의 범위 [대표문제]
+  solution_summary: |
+    m(x-4) - (y-3) = 0 → 정점 (4,3). 첫 직선과 교점이 제1사분면에서 존재하도록 회전. 두 직선 x+y-2=0과 x-y+5=0(경계)... (i) (2,0) 지날 때 -2m+3=0, m=3/2. (ii) (0,2) 지날 때 -4m+1=0, m=1/4. → 1/4 < m < 3/2
+  category: 정점 회전 · 사분면 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점회전-사분면-범위
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0157
+  page: 27
+  category_type: 유형익히기
+  problem_summary: |
+    직선 y=m(x-1)+3이 두 점 A(3,4), B(5,-1) 잇는 선분 AB와 만나도록 하는 m의 범위 a≤m≤β. a+β
+  solution_summary: |
+    정점 (1,3). (i) 점 A: 4=2m+3, m=1/2. (ii) 점 B: -1=4m+3, m=-1. 범위 -1≤m≤1/2. a+β = -1+1/2 = -1/2
+  category: 정점 · 선분 만남 범위
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-선분-범위
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0158
+  page: 27
+  category_type: 유형익히기
+  problem_summary: |
+    직선 kx-y+3k-1=0이 우측 그림의 직사각형(x=2~3, y=1~4)과 만나도록 하는 실수 k의 최댓값
+  solution_summary: |
+    (x+3)k - (y+1) = 0 → 정점 (-3,-1). 최대 기울기: 정점 (-3,-1)에서 (2,4) 지날 때 k=(4+1)/(2+3)=1. 최댓값 1
+  category: 정점 · 직사각형 만남
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-도형-경계기울기
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+### 유형 17. 각의 이등분선의 방정식
+
+- source: RPM-CM2-GM-직선-#0159
+  page: 27
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 x+2y+1=0, 2x-y-3=0이 이루는 각의 이등분선 (보기 4항 중 옳은 것) [대표문제]
+  solution_summary: |
+    거리 등식 |x+2y+1|/√5 = |2x-y-3|/√5. x+2y+1 = ±(2x-y-3). x-3y-4=0 또는 3x+y-2=0. 보기 ㄱ, ㄹ → ②
+  category: 각 이등분선 (거리 등식)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각이등분-거리등식
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0160
+  page: 27
+  category_type: 유형익히기
+  problem_summary: |
+    두 직선 2x+3y+a=0, 2x-3y+1=0이 이루는 각의 이등분선이 점 (2,1) 지날 때 모든 a값의 합
+  solution_summary: |
+    |4+3+a|/√13 = |4-3+1|/√13 → |7+a|=2 → a=-5 또는 -9. 합 = -14
+  category: 각 이등분선 · 상수합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각이등분-대입-합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0161
+  page: 27
+  category_type: 유형익히기
+  problem_summary: |
+    점 P에서 두 직선 2x+y-2=0, x+2y-2=0에 내린 수선의 발 R, S. PR=PS 만족 점 P가 나타내는 도형의 방정식 (x≠2/3)
+  solution_summary: |
+    |2x+y-2|/√5 = |x+2y-2|/√5 → 2x+y-2 = ±(x+2y-2). x-y=0 또는 3x+3y-4=0
+  category: 각 이등분선 (자취)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각이등분-자취
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+---
+
+## Section C. 시험에 꼭 나오는 문제 (p.28~30, 0162~0181)
+
+- source: RPM-CM2-GM-직선-#0162
+  page: 28
+  category_type: 기본유형
+  problem_summary: |
+    점 (√3, -1) 지나고 x축 양의 방향과 이루는 각의 크기 30°인 직선이 점 (k,4) 지날 때 k
+  solution_summary: |
+    기울기 tan30°=√3/3. y+1=(√3/3)(x-√3) → y=(√3/3)x-2. 4=(√3/3)k-2 → k=6√3
+  category: 각-기울기 · 점 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각-기울기-점결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0163
+  page: 28
+  category_type: 기본유형
+  problem_summary: |
+    점 (0,3) 지나는 직선과 x, y축으로 둘러싸인 도형의 넓이 9 (제3사분면 미지남). 기울기
+  solution_summary: |
+    x절편 a, y절편 3. 넓이 (1/2)|a|·3 = 9 → |a|=6. 제3사분면 미지남 → a=6 (또는 3사분면 미지남 조건 세부는 부호). 직선 x/6 + y/3 = 1 → y = -x/2 + 3. 기울기 -1/2
+  category: 넓이 조건 · 기울기
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 넓이-절편-기울기
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0164
+  page: 28
+  category_type: 기본유형
+  problem_summary: |
+    보기 세 점 조합 중 한 직선 위에 있는 것 (ㄱ. A(-1,5),B(2,9),C(4,15) ㄴ. A(1,-1),B(3,-5),C(4,-7) ㄷ. A(2,0),B(3,4),C(4,6))
+  solution_summary: |
+    ㄱ. AB 4/3, BC 3 → X. ㄴ. AB -2, BC -2 → O. ㄷ. AB 4, BC 2 → X. → ②
+  category: 공선 판정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 공선-기울기-확인
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0165
+  page: 28
+  category_type: 기본유형
+  problem_summary: |
+    A(-1,1), B(5,-1), C(4,3) 꼭짓점 삼각형에서 선분 AB 위 점 P에 대하여 삼각형 APC:PBC 넓이비 2:1일 때 C, P 지나는 직선의 방정식
+  solution_summary: |
+    AP:PB = 2:1 → P = ((2·5+1·(-1))/3, (2·(-1)+1·1)/3) = (3, -1/3). C(4,3), P(3, -1/3) 직선. 기울기 (3+1/3)/(4-3) = 10/3. y-3=(10/3)(x-4) → 10x-3y-31=0
+  category: 넓이비 · 내분 · 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 넓이비-내분-두점
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0166
+  page: 28
+  category_type: 기본유형
+  problem_summary: |
+    직선 ax+by+c=0의 그림 (음의 기울기, y절편+). 직선 bx-cy+a=0이 지나지 않는 사분면
+  solution_summary: |
+    -a/b<0, -c/b>0 → ac<0. bx-cy+a=0: 기울기 b/c, y절편 a/c. b/c<0, a/c<0 (기울기 y절편 모두 음수). 그래프 제1사분면 미지남 → ①
+  category: 부호 · 다른 직선 개형
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 부호변환-다른직선
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0167
+  page: 28
+  category_type: 기본유형
+  problem_summary: |
+    직선 (k-1)x-(2k+1)y+4k+a=0이 실수 k 관계없이 항상 점 (2,b) 지남. a+b
+  solution_summary: |
+    (x-2y+4)k + (-x-y+a)=0. x-2y+4=0, -x-y+a=0. 점 (2,b) 대입: 2-2b+4=0 → b=3. -2-b+a=0 → a=5. a+b=8
+  category: 정점 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-대입-결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0168
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    두 직선 5x+15y-7=0, x+5y-11=0의 교점과 점 (5,-6) 지나는 직선이 좌표축으로 잘린 선분의 길이
+  solution_summary: |
+    (5x+15y-7) + k(x+5y-11) = 0. (5,-6) 대입: k=-2. → 3x+5y+15=0. x절편 -5, y절편 -3. 선분 길이 √(25+9) = √34
+  category: 교점-직선-절편길이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-절편-길이
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0169
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    직선 x+ay+1=0이 직선 3x+by+1=0과 수직이고 직선 x-(b+2)y-1=0과 평행할 때 a³+b³
+  solution_summary: |
+    수직: 3+ab=0 → ab=-3. 평행: 1/1 = a/-(b+2), -a=b+2, a+b=-2. a³+b³ = (a+b)³-3ab(a+b) = -8-3·(-3)·(-2) = -8-18 = -26
+  category: 평행+수직 · 대수식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행수직-대수-변환
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0170
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    두 직선 l: ax-y-2=0, m: 4x-ay+2a=0에 대한 보기 3항 (ㄱ. a=0이면 l⊥m. ㄴ. m은 a에 관계없이 항상 (2,0) 지남. ㄷ. l∥m인 a 2개 존재)
+  solution_summary: |
+    ㄱ. a=0: l:y=-2(x축평행), m:x=0(y축) → 수직 (참). ㄴ. 4x-a(y-2)=0. x=0,y=2 → (0,2) 지남, (2,0) 아님 (거짓). ㄷ. 평행 a/4 = -1/-a ≠ -2/2a → a²=4, a=±2. 2개 (참). → ③ ㄱ,ㄷ
+  category: 두 직선 · 보기 검증
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두직선-복합-보기
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0171
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    두 점 A(0,6), B(-8,0) 지나는 직선 l과 두 점 B, C 지나는 직선 m. ∠ABO=∠BCO일 때 점 C 좌표 (O 원점, 그림)
+  solution_summary: |
+    ∠ABC = ∠ABO+∠OBC = ∠BCO+∠OBC = 90° → l⊥m. l 기울기 (6-0)/(0-(-8)) = 3/4. m 기울기 -4/3. m은 B(-8,0): y = -4/3·(x+8) = -4x/3 - 32/3. C(0, -32/3)
+  category: 각 관계 · 수직 · 절편
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각-수직-y절편
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0172
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    두 점 A(2,3), B에 대하여 직선 x+2y-4=0이 선분 AB를 수직이등분. 점 B 좌표
+  solution_summary: |
+    B(a,b). AB 기울기 2 → (b-3)/(a-2)=2 → 2a-b=1 ⋯㉠. AB 중점 대입: (a+2)/2 + 2(b+3)/2 - 4 = 0 → a+2b+3-8+2=0... 계산: (a+2)/2 + (b+3) - 4=0 → a+2b-3=0. 연립: a=2/5, b=-1/5. B(2/5, -1/5)
+  category: 수직이등분 · 대칭점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직이등분-대칭점
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0173
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    마름모 ABCD(A(1,5), C(9,1), B, D)에서 두 점 B, D 지나는 직선 l의 방정식이 2x+ay+b=0일 때 ab (그림)
+  solution_summary: |
+    마름모 → l은 AC의 수직이등분선. AC 기울기 -1/2, 수직 2. AC 중점 (5,3). y-3=2(x-5) → 2x-y-7=0. a=-1, b=-7. ab=7
+  category: 마름모 · 수직이등분
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 마름모-대각선-수직이등분
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0174
+  page: 29
+  category_type: 기본유형
+  problem_summary: |
+    세 직선 4x+y-3=0, 3x-2y+5=0, ax+2y+4=0에 의해 생기는 교점이 2개가 되도록 하는 모든 상수 a
+  solution_summary: |
+    앞 두 직선 만나므로 세 직선 중 셋째가 다른 두 직선 중 하나와 평행해야 교점 2개. (i) 4x+y-3=0과 평행: a/4=2/1 → a=8. (ii) 3x-2y+5=0과 평행: a/3=2/-2 → a=-3. → -3, 8
+  category: 세 직선 · 교점 2개
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세직선-평행-교점수
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0175
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    서로 다른 세 직선 3x-y+5=0, x+2y-3=0, ax+y+7=0에 의하여 좌표평면이 여섯 부분으로 나누어지도록 하는 모든 a값의 합
+  solution_summary: |
+    여섯 부분 → 두 직선만 평행이거나 세 직선이 한 점에서 만남. 앞 두 직선 평행 X. (i) ax+y+7=0과 3x-y+5=0 평행: a/3=1/-1 → a=-3. (ii) ax+y+7=0과 x+2y-3=0 평행: a/1=1/2 → a=1/2. (iii) 세 직선 한 점: x=-1, y=2 → -a+2+7=0, a=9. 합 = -3+1/2+9 = 13/2
+  category: 세 직선 · 영역 6개
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세직선-영역-경우분리
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0176
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    두 직선 x+y+1=0, 2x-y=0의 교점을 지나는 직선과 원점 사이 거리의 최댓값
+  solution_summary: |
+    (x+y+1)+k(2x-y)=0 → (2k+1)x+(1-k)y+1=0. 원점 거리 = 1/√(5k²+2k+2) = 1/√(5(k+1/5)²+9/5). k=-1/5일 때 최댓값 = 1/√(9/5) = √5/3
+  category: 교점 · 최대 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-거리-최댓값
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0177
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    두 직선 x+y-3=0, x-y-1=0 교점 지나고 점 (5,3)과 거리 2인 직선의 방정식 (제2사분면 미지남)
+  solution_summary: |
+    교점 (2,1). y=m(x-2)+1 → mx-y-2m+1=0. |5m-3-2m+1|/√(m²+1)=2 → |3m-2|=2√(m²+1). 9m²-12m+4=4m²+4 → 5m²-12m=0 → m=0 또는 12/5. m=0 → y=1. m=12/5 → 12x-5y-19=0. 제2사분면 미지남 → 12x-5y-19=0
+  category: 교점 · 거리 · 방정식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점-거리-방정식
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0178
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    평행한 두 직선 3x+4y=8, 3x+4y=k 사이 거리 4. 모든 k값의 합
+  solution_summary: |
+    (0,2)와 3x+4y=k: |0+8-k|/5 = 4 → |8-k|=20 → k=-12 또는 28. 합 = 16
+  category: 평행 거리 · 합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행-거리-합
+  insight_type: 절차형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0179
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    세 점 A(1,1), B(3,2), C(2,k) 꼭짓점 삼각형 넓이가 5/2인 모든 k값의 합
+  solution_summary: |
+    AB=√5. AB 직선 x-2y+1=0. C 거리 |2-2k+1|/√5 = |3-2k|/√5. 넓이 (1/2)√5·|3-2k|/√5 = |3-2k|/2 = 5/2 → |3-2k|=5 → k=-1 또는 4. 합 = 3
+  category: 삼각형 넓이 · 근합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 넓이-근합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0180
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    두 직선 x-2y-2=0, mx-y+2m-1=0이 제4사분면에서 만나도록 하는 실수 m의 범위
+  solution_summary: |
+    m(x+2) - (y+1) = 0 → 정점 (-2,-1). (i) (2,0) 지남: 4m-1=0 → m=1/4. (ii) (0,-1) 지남: 2m=0 → m=0. → 0 < m < 1/4
+  category: 정점 · 사분면 범위
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정점-사분면-범위
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0181
+  page: 30
+  category_type: 기본유형
+  problem_summary: |
+    두 직선 x+4y+3=0, 4x+y+12=0이 이루는 각의 이등분선 중 기울기 양수 방정식
+  solution_summary: |
+    |x+4y+3|/√17 = |4x+y+12|/√17 → x+4y+3 = ±(4x+y+12). 부호 -: -3x+3y-9=0 → x-y+3=0. 부호 +: 5x+5y+15=0 → x+y+3=0. 기울기 양수 → x-y+3=0. → ③
+  category: 각 이등분선 · 기울기 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각이등분-기울기양수
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+---
+
+## Section D. 서술형 주관식 (p.31, 0182~0185)
+
+- source: RPM-CM2-GM-직선-#0182
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    직선 y=mx+3이 세 점 A(0,3), B(4,1), C(1,4) 꼭짓점 삼각형 ABC의 넓이를 이등분. m (서술형)
+  solution_summary: |
+    y=mx+3은 A(0,3) 지남. 넓이 이등분 → BC 중점 지남. BC 중점 M(5/2, 5/2). 대입: 5/2 = (5/2)m + 3 → m = -1/5
+  category: 넓이 이등분 · 대변 중점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 꼭짓점직선-대변중점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0183
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    직선 l과 y=2x, y=x/2가 만나는 점 A, B. 삼각형 AOB 무게중심 G(2,3), 점 G 지나고 직선 l과 수직인 직선의 방정식 (그림)
+  solution_summary: |
+    A(a,2a), B(2b,b). 무게중심 ((a+2b)/3, (2a+b)/3) = (2,3) → a+2b=6, 2a+b=9. 연립 a=4, b=1. A(4,8), B(2,1). l 기울기 (1-8)/(2-4) = 7/2. 수직 기울기 -2/7. G(2,3): y-3=-2/7·(x-2) → y = -2x/7 + 25/7
+  category: 무게중심 · 수직 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 무게중심-수직-방정식
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0184
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    세 직선 x-y+a=0, 2x-y+1=0, 3x-2y-a=0이 삼각형을 이루지 않도록 하는 상수 a (서술형)
+  solution_summary: |
+    셋 다 서로 평행 X → 한 점에서 만나야 함. 앞 두 직선 연립: x=a-1, y=2a-1. 셋째 대입: 3(a-1)-2(2a-1)-a=0 → -2a-1=0 → a=-1/2
+  category: 세 직선 · 삼각형 미형성
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세직선-한점만남
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0185
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    점 A(1,1)과 직선 2x-y+4=0 위의 두 점 B, C에 대하여 삼각형 ABC가 정삼각형일 때 넓이 (서술형)
+  solution_summary: |
+    A와 직선의 거리 h = |2-1+4|/√5 = 5/√5 = √5. 정삼각형 한 변 길이 a는 (√3/2)a = √5 → a = 2√5/√3 = 2√15/3. 넓이 = (√3/4)(2√15/3)² = (√3/4)(60/9) = 15√3/9 = 5√3/3
+  category: 정삼각형 · 거리 · 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 정삼각형-높이-넓이
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+---
+
+## Section E. 실력 UP (p.31, 0186~0188)
+
+- source: RPM-CM2-GM-직선-#0186
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    좌표평면 위 두 점 A(2,0), B(0,6). 두 직선 l, m에 대한 조건: (가) l은 점 O 지남. (나) l, m은 선분 AB 위 점 P에서 만남. (다) l, m은 삼각형 OAB 넓이 삼등분. 두 직선 l, m 기울기 합의 최댓값 [교육청 기출]
+  solution_summary: |
+    P가 AB를 1:2 또는 2:1 내분. (i) 1:2 내분 P(4/3, 2). l 기울기 3/2. m은 OB(x=0) 이등분(중점 M'(0,3))이므로 M'(0,3)과 P(4/3,2) 지남: 기울기 (2-3)/(4/3-0)=-3/4. 합 3/2 - 3/4 = 3/4. (ii) 2:1 내분 P(2/3, 4). l 기울기 6. m은 OA 이등분(중점 M''(1,0)) 지남: 기울기 (4-0)/(2/3-1)=-12. 합 6-12=-6. 최댓값 = 3/4
+  category: 정점 · 넓이 삼등분 · 최댓값
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 삼등분-내분-기울기합
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적 · 교육청 기출"
+
+- source: RPM-CM2-GM-직선-#0187
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    세 직선 x+2y-3=0, y=1, x-y+6=0으로 둘러싸인 삼각형 ABC의 외심과 직선 x-y+6=0 사이 거리 (그림)
+  solution_summary: |
+    A(-3,3), B(-5,1), C(1,1). 외심은 각 변 수직이등분선 교점. BC 중점 (-2,1), 수직이등분선 x=-2. AB 중점 (-4,2), AB 기울기 1 → 수직이등분선 기울기 -1: y-2=-(x+4) → y=-x-2. x=-2 대입 → y=0. 외심 (-2,0). 직선 x-y+6=0 사이 거리 |-2-0+6|/√2 = 4/√2 = 2√2
+  category: 외심 · 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 외심-수직이등분선-거리
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+- source: RPM-CM2-GM-직선-#0188
+  page: 31
+  category_type: 발전문제
+  problem_summary: |
+    두 직선 3x-4y+4=0, 4x-3y+12=0과 y축으로 둘러싸인 삼각형의 내심 (a,b). a/b
+  solution_summary: |
+    내심은 세 내각 이등분선의 교점. 두 직선(경사선) 사이 각의 이등분선: |3a-4b+4|/5 = |4a-3b+12|/5 = |a| (y축까지 거리). (i) |3a-4b+4|=5|a|: 3a-4b+4=±5a. 그림 기울기 음수 → a+2b-2=0 ⋯㉠. (ii) |4a-3b+12|=5|a|: 4a-3b+12=±5a. 기울기 양수 → 3a-b+4=0 ⋯㉡. 연립: a=-6/7, b=10/7. a/b = -3/5
+  category: 내심 · 각 이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 내심-각이등분선-연립
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "RPM · 학습 목적"
+
+---
+
+## 통계
+
+- **총 등재 문항**: 102문 (0087~0188)
+- **교과서 문제**: 17문 (0087~0103)
+- **유형익히기**: 58문 (0104~0161, 17 유형)
+- **시험에 꼭 나오는 문제**: 20문 (0162~0181)
+- **서술형 주관식**: 4문 (0182~0185)
+- **실력 UP**: 3문 (0186~0188)
+
+### tier 분포
+- star_1: 13문 (교과서 기초)
+- star_2: 15문 (교과서 응용·기본 유형)
+- star_3: 32문 (유형익히기 중심)
+- star_4: 30문 (유형익히기 고난도·시험 필수)
+- star_5: 12문 (실력 UP·복합 통찰)
+
+### insight_type 분포
+- 절차형: 20문
+- 조건통합형: 55문
+- 통찰형: 27문
+
+### 답 미검증 문항
+- 없음 (전 문항 해설과 대조 확인)

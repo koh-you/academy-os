@@ -1,0 +1,111 @@
+# 2026 1학기 기말 예상 4회 청사진 v1.0 (2026-07-02 세션 15)
+# 기본 골격: 1·2·3회와 동일 (23문 100점, 시험범위 CM1 4단원)
+# 자기복제 방지: 1·2·3회 사용 학평 이력 완전 회피
+
+round: "4회"
+version: v1.0
+generated: 2026-07-02
+applies_gates: [G1, G2, G3, G4, G4.5]
+distribution_id: dist-DH-2025-premium
+distribution_check: 100
+title: "1학기 기말 예상 — 4회"
+school_format: 동화고 2025 기말 골격 + 정점 3문 학평 최소변형
+total_problems: 23
+total_points: 100
+
+book_meta:
+  audience: 상위권
+  series: 2026-1학기-기말예상
+  origin: 1·2·3회 계승 + 학평 미사용 회차 정점 슬롯
+  variant_policy: 학평 최소변형(숫자만) + 창작(있는 유형 재조합)
+
+distribution:
+  point_3_5_count: 2
+  point_3_7_count: 2
+  point_3_9_count: 2
+  point_4_1_count: 2
+  point_4_3_count: 2
+  point_4_5_count: 3
+  point_4_6_count: 3
+  point_4_7_count: 3
+  point_4_8_count: 2
+  point_5_0_count: 2
+
+unit_distribution:
+  PL: 2
+  EQ: 9
+  CB: 8
+  MX: 4
+
+# ─────── 정점 슬롯 3문 (★ 5 premium, 학평 미사용 회차) ───────
+# 후보: Explore 에이전트 결과 반영 예정
+premium_slots:
+  - slot: 21
+    unit: TBD
+    point: 4.8
+    source: TBD (Explore 후 확정)
+  - slot: 22
+    unit: TBD
+    point: 5.0
+    source: TBD (Explore 후 확정)
+  - slot: 23
+    unit: TBD
+    point: 5.0
+    source: TBD (Explore 후 확정)
+
+# ─────── 학평 사용 이력 (1·2·3회 회피 대상) ───────
+haghpyeong_avoidance:
+  이미_사용:
+    # 표준 슬롯 (3회)
+    - "2020.3 #13, #17, #22, #29"
+    - "2021.3 #4, #29"
+    - "2022.3 #10, #16"
+    - "2023.3 #12"
+    - "2025.3 #8, #19"
+    - "2026.3 #6, #26"
+    # 정점 슬롯
+    - "2025.9 #29 (3회 #21)"
+    - "2026.6 #27 (3회 #22)"
+    - "2026.6 #30 (3회 #23)"
+    - "2023.9 #21 (1회 #23)"
+    - "2024.6 #30 (1회 #22)"
+
+# ─────── 시그니처 회피 (1·2·3회 대비) ───────
+cross_round_avoidance:
+  vs_1회_signatures:
+    - "1회 #22: 두 이차함수 3조건 최대·최소 (2024.6 30번)"
+    - "1회 #23: {x-f(k)}{x-g(k)}=0 실근 조건 (2023.9 21번)"
+  vs_2회_signatures:
+    - "2회 #21: 이차함수+절댓값 교점 3개"
+    - "2회 #22: 3조건 이차함수 근 위치"
+    - "2회 #23: |x²-tx|-4 매개변수 근 개수 g(t) 3구간"
+  vs_3회_signatures:
+    - "3회 #21: 카드 나열 A/B/C 5의 배수 (2025.9 29번)"
+    - "3회 #22: 두 이차함수 y=k AB=2CD (2026.6 27번)"
+    - "3회 #23: 이 함수 f/g 접선 조건 (2026.6 30번)"
+
+# ─────── 페이지 레이아웃 (3회 v1.4 계승) ───────
+layout:
+  page_1: 4문 표준 grid (#1·#2·#3·#4)
+  page_2: 4문 표준 grid (#5·#6·#7·#8)
+  page_3: 4문 표준 grid (#9·#10·#11·#12)
+  page_4: 4문 표준 grid (#13·#14·#15·#16)
+  page_5: 3+1 (좌열 세로 #17·#18 · 우열 통 #20)
+  page_6: 2문 좌우 grid (#19·#21) — 3회 재배치 계승
+  page_7: 정점 2문 (#22·#23) — 여유 확보
+
+# ─────── 자동 게이트 (G4.5 5종) ───────
+auto_gates_required:
+  - master-feedback-check
+  - cm1-curriculum-check
+  - signature-check
+  - cross-round-insight-check  # 1·2·3회 pool 대비 필수
+  - total-score-check
+
+# ─────── 검수 (5종) ───────
+review_agents_required:
+  - problem-review (v3.4 depth_score 검증)
+  - solution-review (v2 답지 세련도 4축 13패턴)
+  - exam-review (시험지 세련도 4축 14패턴 + 회차간 자기복제 검사)
+  - general-purpose 독립풀이 (정점 3문 답 유일성)
+  - solution-author (신규 정점 3문 답지 재작성 필수)

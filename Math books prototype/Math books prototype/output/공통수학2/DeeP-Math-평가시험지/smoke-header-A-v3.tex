@@ -1,0 +1,235 @@
+% smoke-header-A-v3.tex · 시안 A 컴팩트 정교화 (v2 폐기 · 원본 A 재출발)
+% ============================================================================
+% 마스터 지적 (v2 실패) · 2026-07-26
+%   "너무 과해. 문제 출제 영역을 훼손시키지 마.
+%    짜임새를 높이라고 했지 크게 하라고 한 적이 없어.
+%    유닛코드는 당연히 넣으면 안 되지."
+%
+% 재해석 · "짜임새" 진짜 의미
+% ─────────────────────────────────────────────────
+%   v2 오해 : 정보 밀도 강화 · 요소 추가 · 위계 4단 · 이중 룰
+%   진짜   : 컴팩트한 상태에서 맞춤·정렬·비율 정교화 (요소 수 최소)
+%            문제 영역 최대 확보 (헤더 세로 크기 ≤ 원본 A)
+%
+% v3 조율 (원본 A 대비 · 요소 = 완전 동일 · 세로는 약간 줄임)
+% ─────────────────────────────────────────────────
+% (1) 대타이틀 34pt → 32pt · baseline 34pt (컴팩트)
+% (2) 대타이틀 위 vspace 16pt → 13pt (컴팩트)
+% (3) 대타이틀 아래 부제 위 vspace 6pt → 5pt (baseline 정렬)
+% (4) 부제 아래 → 3-column 위 vspace 18pt → 14pt (컴팩트)
+% (5) 3-column column width 0.30/0.30/0.30 → 0.32/0.30/0.28
+%     (좌 넓게 = "대단원 1" 왼정렬 여유 · 우 좁게 = "50분" 우정렬 여유)
+% (6) vrule height 8mm → 7.5mm (컴팩트 · 3-column 값 baseline 맞춤)
+% (7) 3-column 라벨↔값 vspace 2pt → 2.5pt (baseline 미세 정렬)
+% (8) 3-column 아래 → 하단 룰 vspace 14pt → 11pt (컴팩트)
+% (9) 하단 룰 → 학년/이름 vspace 6pt → 5pt (컴팩트)
+% (10) 학년/이름 아래 addvspace 14pt → 11pt (컴팩트)
+% (11) 상단 hairline → MICRO 라인 vspace 3.5pt → 4pt (미세 상향)
+% (12) 룰 두께 : 상단 0.3pt·하단 0.3pt·서명 0.2pt (원본 유지)
+%
+% 결과 : 헤더 세로 약 6~9mm 축소 · 요소 수 동일 · 정보량 동일
+%        문제 영역 확대 (원본 대비 세로 +6~9mm)
+%
+% 절대 금지 (v2 실패에서 학습)
+% ─────────────────────────────────────────────────
+%   ❌ MICRO LABEL 라인 추가
+%   ❌ SECTION INDEX (NO. 01·SERIES A) 추가
+%   ❌ UNIT CODE 배지 (CM2·GM) 추가 — 학생 노출 부적절
+%   ❌ 이중 룰 (1.4pt+0.3pt)
+%   ❌ 3-column 이중 값 (라벨+값+부속 라인)
+%   ❌ 대타이틀 확대 (34pt 이상)
+%   ❌ vrule 확대 (8mm 이상)
+% ============================================================================
+
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{microtype}
+
+\renewcommand{\examround}{Formative Assessment}
+\renewcommand{\examvol}{}
+
+% ── 검정 통일 팔레트 (마스터 지시) ─────────────────────────────────
+\definecolor{vB-ink}{HTML}{000000}
+\definecolor{vB-deep}{HTML}{000000}
+\definecolor{vB-accent}{HTML}{000000}
+\definecolor{vB-rule}{HTML}{000000}
+\definecolor{vB-light}{HTML}{FFFFFF}
+\definecolor{vB-dim}{HTML}{000000}
+\definecolor{vB-frame}{HTML}{000000}
+
+% ── pagepair 좌우 분할선 · **좌표 노드 기반 픽셀 맞춤** (세션 92 · 방안 1)
+% 원리 : 헤더 하단 룰·푸터 상단 룰이 그려지는 순간 \zsavepos로 y좌표 기록
+%        → \AddToShipoutPictureFG가 두 y좌표를 잇는 세로 룰을 그림 (0mm gap 맞춤)
+% 2-pass 필수 · smoke-test.tex와 동일 시스템
+\usepackage{eso-pic}
+\usepackage{zref-savepos}
+\newcommand{\dmvlinetop}{\zsavepos{dm-vline-top-\thepage}}
+\newcommand{\dmvlinebot}{\zsavepos{dm-vline-bot-\thepage}}
+\AddToShipoutPictureFG{%
+  \begingroup
+  \edef\vlinetopsp{\zposy{dm-vline-top-\thepage}}%
+  \edef\vlinebotsp{\zposy{dm-vline-bot-\thepage}}%
+  \ifnum\vlinetopsp>0 %
+    \ifnum\vlinebotsp>0 %
+      \setlength{\dimen0}{\vlinetopsp sp}%
+      \setlength{\dimen2}{\vlinebotsp sp}%
+      \edef\vlinetoppt{\the\dimen0}%
+      \edef\vlinebotpt{\the\dimen2}%
+      \begin{tikzpicture}[overlay,remember picture]
+        \draw[color=black,line width=0.4pt]
+          ([xshift=1mm,yshift=\vlinetoppt]current page.south)
+          -- ([xshift=1mm,yshift=\vlinebotpt]current page.south);
+      \end{tikzpicture}%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ══════════════════════════════════════════════════════════════════════════
+% examheader v3 · 컴팩트 정교화 (원본 A와 요소·순서 완전 동일)
+% ══════════════════════════════════════════════════════════════════════════
+\makeatletter
+\renewcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  % (1) 상단 hairline · 페이지 폭 전체 (원본 유지)
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (2) SMALL CAPS 시리즈 라벨 (좌) · 회차 (우) — 옅은 muted (원본 유지)
+  \noindent
+  {\sffamily\scriptsize\color{black}\textls[280]{DEPTH \& INSIGHT}}%
+  \hfill
+  {\sffamily\scriptsize\color{black}\textls[280]{2026 \textperiodcentered\ 2 SEMESTER}}%
+  \par\vspace{5pt}
+  % (3) 대타이틀 · 산세리프 32pt · 좌측 정렬 (regular · non-bold)
+  \noindent
+  {\fontsize{32pt}{34pt}\selectfont\sffamily\mdseries\color{black}\examround}%
+  \par\vspace{2pt}
+  % (4) subtitle : 대단원명 · 산세리프
+  \noindent
+  {\sffamily\normalsize\color{black}#1}%
+  \par\vspace{2pt}
+  % (4.5) 부제 아래 가로선
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (5) 3-column grid : 범위 · 문항·배점 · 시간
+  %     column width 0.32/0.30/0.28 (좌 넓게·우 좁게 · 컴팩트 맞춤)
+  %     vrule 7.5mm (원본 8mm 축소)
+  %     라벨↔값 vspace 2.5pt (baseline 미세 정렬)
+  \noindent
+  \makebox[\linewidth][s]{%
+    \begin{minipage}[t]{0.32\linewidth}%
+      {\sffamily\scriptsize\color{black}\textls[200]{RANGE}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}대단원 1}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.30\linewidth}%
+      \centering
+      {\sffamily\scriptsize\color{black}\textls[200]{ITEMS \textperiodcentered\ POINTS}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}20문항 \textperiodcentered\ 100점}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.28\linewidth}%
+      \raggedleft
+      {\sffamily\scriptsize\color{black}\textls[200]{TIME}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}50분}%
+    \end{minipage}%
+  }%
+  \par\vspace{5pt}
+  % (6) 하단 hairline (3-column과 이름 라인 사이 구분 · dmvlinetop 없음)
+  \noindent{\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{3pt}
+  % (7) 이름 [ 필기 공백 ] · 위 아래 표준값 대칭 간격
+  \noindent
+  {\sffamily\footnotesize\color{black}\hfill
+    이름\ [\hspace*{55mm}]}%
+  \par\vspace{3pt}
+  % (8) 종결 가로선 (세로 분할선 시작점)
+  \noindent{\color{black}\rule{\linewidth}{0.4pt}}\dmvlinetop\par
+  \addvspace{4pt}
+  \thispagestyle{examfooter}%
+}
+\makeatother
+
+% ── 학원 로고 축소 · pts · 문제 스타일 (smoke-test 계승) ───────────
+\makeatletter
+\fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}
+% 통상 페이지 headrule/footrule에 세로선 top·bot 좌표 기록
+\renewcommand{\headrule}{\hbox to\headwidth{\color{black}\leaders\hrule height \headrulewidth\hfill}\dmvlinetop}
+\renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+\renewenvironment{problem}[2]{%
+  \par\setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\par\smallskip\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{%
+  \nobreak\hspace*{\fill}%
+  \mbox{\sffamily\small\color{black}[\textbf{#1점}]}%
+  \par%
+}
+
+\renewenvironment{choices}{\par\vspace{5mm}\setcounter{choicecnt}{0}%
+  \noindent\hbox to \linewidth\bgroup\small\ignorespaces}{%
+  \egroup\par\medskip}
+\makeatother
+
+\begin{document}
+
+\examheader{도형의 방정식 · 평면좌표 \textperiodcentered\ 직선 \textperiodcentered\ 원 \textperiodcentered\ 이동}{총 20문 \textperiodcentered\ 100점 \textperiodcentered\ 50분}
+
+% ── 페이지 1 · probpair × 2 + 3-vfill ─────────────────────────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{1}{s}
+좌표평면 위의 두 점 $\mathrm{A}(2,\, 3)$,\ $\mathrm{B}(-1,\, 7)$ 사이의 거리를 구하시오. \pts{4}
+\begin{choicesii}{$3$}{$4$}{$5$}{$6$}{$7$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{2}{s}
+두 점 $\mathrm{A}(4,\, 3)$,\ $\mathrm{B}(-2,\, -6)$에 대하여 선분 $\overline{\mathrm{AB}}$를 $2:1$로 내분하는 점의 좌표를 구하시오. \pts{4}
+\begin{choicesii}{$(0,\, -3)$}{$(1,\, -2)$}{$(2,\, -3)$}{$(0,\, 0)$}{$(2,\, 0)$}
+\end{choicesii}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{3}{s}
+두 점 $(1,\, 2)$,\ $(3,\, -4)$를 지나는 직선의 방정식이 $y = ax + b$일 때, 상수 $a$,\ $b$에 대하여 $a + b$의 값을 구하시오. \pts{5}
+\begin{choicesii}{$1$}{$2$}{$3$}{$4$}{$5$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{4}{s}
+두 직선 $y = 2x + 1$과 $y = ax - 3$이 서로 수직일 때, 상수 $a$의 값을 구하시오. \pts{5}
+\begin{choicesii}{$-\dfrac{1}{2}$}{$-\dfrac{1}{3}$}{$\dfrac{1}{3}$}{$\dfrac{1}{2}$}{$2$}
+\end{choicesii}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+\end{document}

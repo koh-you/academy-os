@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-04-F4
+source: bank/creation-archive/phase-a2/creations/creation-04.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-04-F4.tex
+flaw_type: F4
+flaw_name: 교육과정 침투
+expected_verdict: LOSS
+ground_truth: flawed
+seed: false
+injection:
+  method: replace
+  find: "원의 넓이가 $\\pi$일 때"
+  replace: "원의 넓이가 $\\displaystyle\\lim_{n\\to\\infty}\\frac{\\pi n}{n+1}$일 때"
+note: "극한(미적분) 삽입 → CM 스코프 침투"
+date: 2026-07-28

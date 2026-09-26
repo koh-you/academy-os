@@ -1,0 +1,109 @@
+% answer-classic-smoke.tex — dm-answer-classic.sty 시안 렌더
+% ============================================================================
+% 기존 style.sty(vB 블루) 답지 디자인 → v6 팔레트(navy·accent) + 직각 박스 포팅.
+% 모든 주요 컴포넌트를 한 페이지에 노출:
+%   \dmanswerheader · \dmsection · dmquickgrid + \dmquick
+%   \dmsoltitle · dmanswerbox · dmcriticalpoint · \dmcplabel
+%   \dmstep · \dmsolnote · \dmothersolution
+% ============================================================================
+
+\documentclass[10pt,fleqn,a4paper]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{평면좌표}
+\renewcommand{\examvol}{vol.1}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{평면좌표 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제
+% ══════════════════════════════════════════════════════════════
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.0}
+\begin{dmquickgrid}
+\dmquick{1}{$a=2$} & \dmquick{2}{$a=11$} & \dmquick{3}{최솟값 $36$} & \dmquick{4}{$\mathrm{P}(2,\,2)$} & \dmquick{5}{$\dfrac{\sqrt{5}}{2}$} \\
+\dmquick{6}{$\sqrt{2}$} & \dmquick{7}{$k=6$} & \dmquick{8}{$ab=4$} & \dmquick{9}{$-16$} & \dmquick{10}{$10$} \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+\dmsoltitle{1}{등거리 조건에서 미지수 결정}
+\begin{dmanswerbox}정답: $a=2$\end{dmanswerbox}
+$\overline{\mathrm{AC}}^{\,2}=\overline{\mathrm{BC}}^{\,2}$이므로
+\[ (a+1)^2 + (1-2)^2 = (a-3)^2 + (1-4)^2. \]
+전개하면 $a^2+2a+1+1 = a^2-6a+9+9$이므로 $8a=16$이고 $a=2$이다.
+
+\dmsoltitle{2}{거리 공식과 대칭식}
+\begin{dmanswerbox}정답: $a=11$\end{dmanswerbox}
+두 점 $\mathrm{A}(4,\,a)$,\ $\mathrm{B}(a,\,4)$ 사이의 거리 제곱은
+\[ \overline{\mathrm{AB}}^{\,2} = (a-4)^2 + (4-a)^2 = 2(a-4)^2. \]
+$\overline{\mathrm{AB}} = 7\sqrt{2}$에서 $2(a-4)^2 = 98$이므로 $(a-4)^2 = 49$이다.
+따라서 $a=11$ 또는 $a=-3$이고 양수 조건에서 $a=11$이다.
+
+\dmsoltitle{3}{거리 제곱의 합의 최솟값 · 단계형}
+\begin{dmanswerbox}정답: 최솟값 $36$,\ $\mathrm{P}(-1,\,0)$\end{dmanswerbox}
+
+\dmstep{1} 점을 문자로 설정한다. $\mathrm{P}(x,\,0)$이라 하면
+\[ \overline{\mathrm{AP}}^{\,2}+\overline{\mathrm{BP}}^{\,2} = (x+4)^2+9 + (x-2)^2+9. \]
+
+\dmstep{2} 완전제곱꼴로 정리하면 다음과 같다.
+\[ 2x^2+4x+38 = 2(x+1)^2 + 36. \]
+따라서 $x=-1$일 때 최솟값 $36$을 가지고, 그때 $\mathrm{P}(-1,\,0)$이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{놓치기 쉬운 점.} 거리 제곱은 항상 $x$에 대한 이차식이므로 완전제곱꼴로
+정리하면 최솟값 위치와 값이 동시에 얻어진다.
+\end{dmcriticalpoint}
+
+\dmsoltitle{4}{직선 위 점에서 거리 제곱의 합}
+\begin{dmanswerbox}정답: $\mathrm{P}(2,\,2)$\end{dmanswerbox}
+$\mathrm{P}(t,\,t)$라 하면
+\[ \overline{\mathrm{AP}}^{\,2}+\overline{\mathrm{BP}}^{\,2} = (t+3)^2+(t-2)^2 + (t-4)^2+(t-5)^2. \]
+전개하면 $4t^2 - 16t + 54 = 4(t-2)^2 + 38$이므로 $t=2$일 때 최소가 된다.
+이때 $\mathrm{P}(2,\,2)$이다.
+
+\dmsoltitle{5}{내분점과 중점 사이의 거리}
+\begin{dmanswerbox}정답: $\overline{\mathrm{PM}} = \dfrac{\sqrt{5}}{2}$\end{dmanswerbox}
+$2:3$ 내분점 $\mathrm{P}$의 좌표를 좌표별로 나누면 $\mathrm{P}(2,\,-1)$이다.
+중점 $\mathrm{M}$의 좌표는 $\left(1,\,-\tfrac{1}{2}\right)$이다.
+
+\dmothersolution
+공식 $\mathrm{P}=\dfrac{3\mathrm{A}+2\mathrm{B}}{5}$로 직접 계산해도 동일한 결과이다.
+따라서 $\overline{\mathrm{PM}} = \sqrt{1+\tfrac{1}{4}} = \dfrac{\sqrt{5}}{2}$이다.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1
+% ══════════════════════════════════════════════════════════════
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.0}
+\begin{dmquickgrid}
+\dmquick{1}{$a+b=4$} & \dmquick{2}{$3\sqrt{2}$} & \dmquick{3}{$(0,\,1)$} & \dmquick{4}{이등변삼각형} & \dmquick{5}{$7$} \\
+\dmquick{6}{$15$} & \dmquick{7}{$a=5$} & \dmquick{8}{$k=5$} & \dmquick{9}{$1$} & \dmquick{10}{$2$} \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+\dmsoltitle{1}{등거리 조건과 직선 위의 점}
+\begin{dmanswerbox}정답: $a+b=4$\end{dmanswerbox}
+$\overline{\mathrm{PA}}^{\,2}=\overline{\mathrm{PB}}^{\,2}$이므로
+\[ (a-1)^2+(b-3)^2 = (a-5)^2+(b+1)^2. \]
+전개하면 $8a - 8b = 16$, 즉 $a - b = 2$이다.
+점이 직선 $y=2x-5$ 위에 있으므로 $b = 2a - 5$이다.
+두 식을 연립하면 $a = 3,\ b = 1$이므로 $a + b = 4$이다.
+
+\dmsoltitle{2}{두 축 위의 등거리 점}
+\begin{dmanswerbox}정답: $\overline{\mathrm{PQ}}=3\sqrt{2}$\end{dmanswerbox}
+$\mathrm{P}(p,\,0)$이 등거리 점이므로 $(p-2)^2+1 = (p+2)^2+25$에서 $p=-3$이다.
+$\mathrm{Q}(0,\,q)$가 등거리 점이므로 $4+(q-1)^2 = 4+(q-5)^2$에서 $q=3$이다.
+따라서
+\[ \overline{\mathrm{PQ}} = \sqrt{9+9} = 3\sqrt{2}. \]
+
+\end{multicols*}
+
+\end{document}

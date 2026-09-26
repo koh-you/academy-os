@@ -1,0 +1,2145 @@
+---
+name: mechanism-데이터-개념원리-CM2-FN
+description: 개념원리 공통수학2 (2022개정) 함수와 그래프 정독 데이터. 세션 54 (2026-07-20) 신설.
+metadata:
+  type: reference
+  version: v1.0
+  established: 2026-07-20
+  source: 개념원리 공통수학2 (2022개정)
+  tier_mapping:
+    대표예제: star_3~4
+    유제: star_3~4
+    연습: star_4~5
+  unit_code: CM2-FN
+  standard: 10수07-01·02
+  citation_note: 개념원리 · 학습 목적 · 저작권 준수 (원문 전사 없음)
+  extract_range: "III. 함수 → 1. 함수 4소절 (함수·여러가지 함수·합성함수·역함수) · 유리무리 제외 · 필수·확인체크 전수 + 연습 star 4·5"
+  pages: "206~246"
+---
+
+# 개념원리 공통수학2 (2022개정) — 함수와 그래프(1) 정독 데이터
+
+**출처**: 개념원리 공통수학2 (2022개정) · III. 함수 → 1. 함수
+**대상 범위**: 소절 01~04 (함수·여러 가지 함수·합성함수·역함수) 전체 (필수·확인체크 전수 + 연습 STEP1·STEP2·실력UP 중 star 4·5)
+**정독 페이지**: p.206~246 (유리무리 함수는 별도 파일)
+**총 문항 수**: **90문항** (필수 19 + 확인체크 47 + 연습 24)
+**작업 목적**: 정리편·유형편·연습편·시험지 원본 은행 확장 · CM2-FN 앵커 확보
+**정독 일자**: 2026-07-20
+
+---
+
+## 01 함수 (p.206~216)
+
+### 필수 예제 (대표 유형 · p.210~213)
+
+```yaml
+- source: 개념원리-CM2-FN-함수-예제-01
+  page: 210
+  category_type: 대표예제
+  problem_summary: |
+    X={-1,0,1}, Y={0,1,2}에 대해 다섯 개의 대응(-x, |x|, x²+1, 2x+1, x³+1) 중 X→Y의 함수인 것을 모두 고르기.
+  solution_summary: |
+    ㄱ: x=1일 때 -1이 Y에 없음 → 함수 X. ㄹ: x=-1일 때 -1이 Y에 없음 → 함수 X. ㄴ,ㄷ,ㅁ은 모두 Y 원소로 대응.
+    답: ㄴ, ㄷ, ㅁ.
+  category: 함수 판정 (그림/식 → 함수 여부)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 함수 정의 (정의역 각 원소에 공역 원소 오직 하나)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-예제-02
+  page: 211
+  category_type: 대표예제
+  problem_summary: |
+    실수 전체에서 f(x) = {x-2 (x는 유리수), -x (x는 무리수)}일 때 f(3) - f(√3-1)의 값 구하기.
+  solution_summary: |
+    3은 유리수 → f(3)=1. √3-1은 무리수 → f(√3-1)=1-√3. 답: √3.
+  category: 분기 정의 함수의 함숫값
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 유리/무리 판단 → 조건별 식 적용
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-예제-03
+  page: 211
+  category_type: 대표예제
+  problem_summary: |
+    X={1,2,3,4,5,6}에서 정의된 f(x)={2x-1 (x는 홀수), -x+2 (x는 짝수)}일 때 치역 구하기.
+  solution_summary: |
+    홀수: f(1)=1, f(3)=5, f(5)=9. 짝수: f(2)=0, f(4)=-2, f(6)=-4. 치역={-4,-2,0,1,5,9}.
+  category: 조건별 정의 · 치역
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의역 원소 모두 대입해 함숫값 수집
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-예제-04
+  page: 212
+  category_type: 대표예제
+  problem_summary: |
+    X={-1,1}, f(x)=ax+b, g(x)=x³+2a에 대해 f=g일 때 상수 a,b 구하기.
+  solution_summary: |
+    f(-1)=g(-1): -a+b=-1+2a → 3a-b=1. f(1)=g(1): a+b=1+2a → a-b=-1. 연립 → a=1, b=2.
+  category: 서로 같은 함수
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의역 모든 원소에서 함숫값 일치 → 연립
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-예제-05
+  page: 213
+  category_type: 대표예제
+  problem_summary: |
+    네 그래프(직선/타원/오른쪽으로 열린 포물선/V자) 중 실수 전체에서 정의된 함수의 그래프인 것 모두 고르기.
+  solution_summary: |
+    직선 x=a와 오직 한 점에서 만나야 함. 직선·V자는 함수 O. 타원·옆포물선은 두 점에서 만남 → X.
+    답: ㄱ, ㄹ.
+  category: 함수의 그래프 판정 (수직선 검사)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 세로 직선 x=a 교점 1개 조건
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제 · p.209~212)
+
+```yaml
+- source: 개념원리-CM2-FN-함수-유제-482
+  page: 209
+  category_type: 유제
+  problem_summary: |
+    네 개의 대응 그림 중 X→Y의 함수인 것을 모두 찾고, 그 정의역·공역·치역 구하기.
+  solution_summary: |
+    (1) 원소 1에 두 원소 대응 → 함수 아님. (2) 원소 4에 대응 없음 → 함수 아님.
+    (3) 함수, 정의역{1,2,3}, 공역{a,b,c}, 치역{a,b,c}.
+    (4) 함수, 정의역{1,2,3,4}, 공역{a,b,c}, 치역{a,b}.
+  category: 대응 그림 → 함수 판정 + 치역
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 함수 정의 검사 · 치역 = f(X)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-483
+  page: 209
+  category_type: 유제
+  problem_summary: |
+    X={-1,0,1}, Y={-2,-1,0,1,2,3}. f:X→Y가 (1) f(x)=-x+1, (2) f(x)=x²+x+1, (3) f(x)=|x|-1일 때 각 치역 구하기.
+  solution_summary: |
+    (1) f(-1)=2, f(0)=1, f(1)=0. 치역={0,1,2}.
+    (2) f(-1)=1, f(0)=1, f(1)=3. 치역={1,3}.
+    (3) f(-1)=0, f(0)=-1, f(1)=0. 치역={-1,0}.
+  category: 유한 정의역 · 치역 직접 계산
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의역 각 원소 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-484
+  page: 209
+  category_type: 유제
+  problem_summary: |
+    X={-1,1}을 정의역으로 하는 두 함수 f,g가 서로 같은 것 고르기.
+    ㄱ. f=x+1, g=x-1. ㄴ. f=|x|, g=x. ㄷ. f=x³, g=1/x.
+  solution_summary: |
+    ㄱ. f(-1)=0≠g(-1)=-2 → X. ㄴ. f(-1)=1≠g(-1)=-1 → X. ㄷ. f(-1)=g(-1)=-1, f(1)=g(1)=1 → O.
+    답: ㄷ.
+  category: 서로 같은 함수 판정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 유한 정의역 · 모든 원소 값 비교
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-485
+  page: 210
+  category_type: 유제
+  problem_summary: |
+    X={0,1,2}, Y={0,1,2,3}에 대해 X→Y의 함수인 것: ㄱ. f=3-x. ㄴ. g=|x-1|. ㄷ. h=x².
+  solution_summary: |
+    ㄱ. f(0)=3, f(1)=2, f(2)=1 → 모두 Y에 속함 → 함수 O.
+    ㄴ. g(0)=1, g(1)=0, g(2)=1 → O. ㄷ. h(2)=4∉Y → 함수 X.
+    답: ㄱ, ㄴ.
+  category: 함수식 → 함수 판정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 치역 ⊂ Y 여부
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-486
+  page: 210
+  category_type: 유제
+  problem_summary: |
+    X={-1,0,1}에서 X→X의 함수가 아닌 것은? ①x, ②|x|+1, ③x²-|x|+1, ④-x²+1, ⑤x³.
+  solution_summary: |
+    ②: |−1|+1=2, |0|+1=1, |1|+1=2 → 2∉X → 함수 아님.
+    답: ②.
+  category: 공역 이탈 감지
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 각 식 결과가 X 안에 있는지 확인
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-487
+  page: 211
+  category_type: 유제
+  problem_summary: |
+    f(x) = {3x+4 (x<0), -3x+2 (x≥0)}. f(1-√2) + f(3-2√2) 구하기.
+  solution_summary: |
+    1-√2 < 0 → f=3(1-√2)+4=7-3√2. 3-2√2 > 0 → f=-3(3-2√2)+2=6√2-7. 합 = 3√2.
+  category: 분기 정의 함수 · 부호 판단
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 인수의 부호 판정 → 조건 매칭
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-488
+  page: 211
+  category_type: 유제
+  problem_summary: |
+    X={x||x|≤2인 정수}에서 f(x)=|x+1|일 때 치역의 모든 원소의 합.
+  solution_summary: |
+    X={-2,-1,0,1,2}. f값 = 1,0,1,2,3. 치역={0,1,2,3}. 합 = 6.
+  category: 정수 정의역 · 치역 원소 합
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의역 원소 대입 · 중복 제거
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-489
+  page: 211
+  category_type: 유제
+  problem_summary: |
+    X={0,1,2,3,4,5}, Y={정수}. f(x)=(x²을 5로 나눈 나머지)일 때 치역 구하기.
+  solution_summary: |
+    x²=0,1,4,9,16,25 → 나머지 0,1,4,4,1,0. 치역={0,1,4}.
+  category: 나머지 정의 · 치역
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: mod 계산 · 중복 제거
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-490
+  page: 212
+  category_type: 유제
+  problem_summary: |
+    X={-1,0,1} 정의역, f(x)=x일 때 f와 서로 같은 것: ㄱ. g=x³. ㄴ. h=x². ㄷ. p=√(x²).
+  solution_summary: |
+    ㄱ. g(-1)=-1, g(0)=0, g(1)=1 → 모두 일치 → f=g.
+    ㄴ. h(-1)=1≠f(-1) → 다름.
+    ㄷ. p(-1)=1≠f(-1) → 다름.
+    답: ㄱ.
+  category: 서로 같은 함수 (홀함수 성질)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 유한 정의역 · 값 비교
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-491
+  page: 212
+  category_type: 유제
+  problem_summary: |
+    X={0,1}. f(x)=2x²+ax-3, g(x)=x+b. f=g일 때 ab 구하기.
+  solution_summary: |
+    f(0)=g(0): -3=b → b=-3. f(1)=g(1): 2+a-3=1+b=-2 → a=-1. ab = 3.
+  category: 서로 같은 함수 · 두 상수 결정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의역 각 원소 대입 → 연립
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-492
+  page: 212
+  category_type: 유제
+  problem_summary: |
+    공집합 아닌 X에서 f(x)=x³+3x, g(x)=6x²-8x+6 (f=g)를 만족시키는 X를 모두 구하기.
+  solution_summary: |
+    f(x)=g(x): x³-6x²+11x-6=0 → (x-1)(x-2)(x-3)=0 → x∈{1,2,3}.
+    X는 {1,2,3}의 공집합 아닌 부분집합: {1},{2},{3},{1,2},{1,3},{2,3},{1,2,3}.
+  category: 서로 같은 함수 · 조건 만족 정의역 열거
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 방정식 해집합 · 부분집합 (공집합 제외)
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-유제-493
+  page: 213
+  category_type: 유제
+  problem_summary: |
+    네 그래프 중 실수 전체에서 정의된 함수의 그래프인 것 고르기 (계단·좌우 이동 등).
+  solution_summary: |
+    ㄱ. 직선 x=a와 무수히 많이/전혀 안 만남 → X.
+    ㄴ. 실수 a에 대해 안 만나기도 함 → X.
+    ㄷ, ㄹ. 오직 한 점에서 만남 → 함수 O.
+    답: ㄷ, ㄹ.
+  category: 함수 그래프 판정 (계단·불연속 포함)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 수직선 x=a 검사 (모든 a에서 교점 1개)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (기본 · p.215) — star 4 이상만
+
+*(모든 문항이 star 3 수준이며 등재 제외. 필수·유제로 충분히 커버됨.)*
+
+### 연습문제 STEP2 (심화 · p.216)
+
+```yaml
+- source: 개념원리-CM2-FN-함수-연습-499
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    X={-1,0,1}, Y={1,2,3}. f(x)=ax²+(a+1)x+2가 X→Y의 함수가 되도록 하는 모든 상수 a의 값의 합.
+  solution_summary: |
+    f(-1)=a-(a+1)+2=1, f(0)=2, f(1)=a+(a+1)+2=2a+3.
+    f(1)∈{1,2,3}: 2a+3=1,2,3 → a=-1, -1/2, 0.
+    합 = -3/2.
+  category: 함수 조건 만족 상수 결정 · 여러 값 합
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 치역 ⊂ 공역 조건 · 경우 분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-연습-500
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    실수 전체에서 f(x)={|x|+2 (x<0), x²-3x-2 (x≥0)}. f(a)=8을 만족하는 모든 실수 a의 값의 곱.
+  solution_summary: |
+    a<0: |a|+2=8 → a=-6. a≥0: a²-3a-10=0 → (a+2)(a-5)=0 → a=5. 곱 = -30.
+  category: 분기 함수 · 방정식 f(a)=k의 모든 해
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 분기별 방정식 · 부호 조건 필터
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-연습-501
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    임의의 실수 a,b에 대해 f(a+b)=f(a)+f(b)+4. f(4)+f(-4)의 값.
+  solution_summary: |
+    a=b=0: f(0)=2f(0)+4 → f(0)=-4. a=4,b=-4: f(0)=f(4)+f(-4)+4 → f(4)+f(-4)=-8.
+  category: 함수방정식 (Cauchy형 변형)
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 특수값 대입 → 전체 관계 유도
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-연습-502
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    X={-2,0,a}에서 f(x)=x²+2x, g(x)=x³+bx. f=g일 때 a,b 구하기 (a≠-2, a≠0).
+  solution_summary: |
+    f(-2)=g(-2): 0=-8-2b → b=-4. f(a)=g(a): a²+2a=a³-4a → a³-a²-6a=0 → a(a+2)(a-3)=0 → a=3.
+    답: a=3, b=-4.
+  category: 서로 같은 함수 · 3원 정의역
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 알려진 값 대입 → b 결정 → a 방정식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 실력UP (p.216)
+
+```yaml
+- source: 개념원리-CM2-FN-함수-실력-503
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    양의 실수에서 정의된 f가 (가) f(4x)=4f(x) (모든 양수 x), (나) f(x)=|3-x|-1 (1≤x<4)을 만족.
+    f(2025)의 값.
+  solution_summary: |
+    (가) 반복 적용: f(2025)=4·f(2025/4)=4²·f(2025/16)=…=4⁵·f(2025/4⁵)=4⁵·f(2025/1024).
+    1≤2025/1024<4이므로 (나) 적용: f(2025/1024)=|3-2025/1024|-1=2-2025/1024.
+    f(2025)=4⁵·(2-2025/1024)=1024·(2-2025/1024)=2048-2025=23.
+  category: 자기유사(스케일링) 함수방정식
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 재귀 축소 · 기본구간 도달 후 절댓값 계산
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-실력-504
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    세 변의 길이가 a, 6, 10인 삼각형의 둘레의 길이를 f(a)라 할 때 y=f(a)의 치역이 {y|p<y<q}이다. pq의 값.
+  solution_summary: |
+    삼각부등식: (i) 10이 최대변이면 6+a>10 → a>4, 그리고 a≤10 → 4<a≤10.
+    (ii) a가 최대변이면 a>10 그리고 6+10>a → 10<a<16.
+    합쳐 4<a<16. f(a)=a+16 → 치역: 20<f<32. p=20, q=32. pq=640.
+  category: 삼각부등식 · 정의역 → 치역
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 삼각부등식 두 경우 · a 범위 → 일차식 치역
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-함수-실력-505
+  page: 216
+  category_type: 연습
+  problem_summary: |
+    A={x|x는 30 이하의 자연수}의 부분집합 X를 정의역으로 하는 f(x)=(x를 4로 나눈 나머지)에 대해 f의 치역이 {3}이 되도록 하는 X의 개수.
+  solution_summary: |
+    f(x)=3 ⇔ x∈{3,7,11,15,19,23,27} (7개). X는 이 7원소집합의 공집합 아닌 부분집합.
+    개수 = 2⁷-1 = 127.
+  category: 특정 치역 갖는 정의역 개수
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 조건 만족 원소 열거 · 부분집합 개수 (공집합 제외)
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 02 여러 가지 함수 (p.217~223)
+
+### 필수 예제 (p.219~221)
+
+```yaml
+- source: 개념원리-CM2-FN-여러-예제-06
+  page: 219
+  category_type: 대표예제
+  problem_summary: |
+    다섯 그래프(반비례곡선/수평선/포물선/감소곡선/y=x 직선) 중 (1)일대일함수 (2)일대일대응 (3)상수함수 (4)항등함수 각각 고르기.
+  solution_summary: |
+    (1) 치역의 각 k에 대해 y=k와 교점 1개 이하: ㄱ,ㄹ,ㅁ. (2) 그중 치역=공역: ㄱ,ㅁ. (3) 수평선: ㄴ. (4) y=x: ㅁ.
+  category: 함수 유형 그래프 판정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 각 유형 정의와 그래프 특성 매칭
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-예제-07
+  page: 220
+  category_type: 대표예제
+  problem_summary: |
+    X={x|-2≤x≤3}, Y={y|1≤y≤11}. f(x)=ax+b가 일대일대응일 때 상수 a, b 구하기 (a>0).
+  solution_summary: |
+    a>0이므로 f는 증가. f(-2)=1, f(3)=11. -2a+b=1, 3a+b=11 → a=2, b=5.
+  category: 일대일대응 · 두 점 대응 → 계수
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 증가/감소 · 양 끝점 대응
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-예제-08
+  page: 220
+  category_type: 대표예제
+  problem_summary: |
+    실수 전체에서 f는 항등함수, g는 상수함수. g(x)=-3일 때 f(5)+g(-2) 구하기.
+  solution_summary: |
+    f(5)=5, g(-2)=-3. 합 = 2.
+  category: 항등함수·상수함수 정의 적용
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의 직접 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 특강 함수의 개수 (p.221) — 참고
+
+*n(X)=n, n(Y)=m일 때 함수 개수 m^n, 일대일함수 mPn, 일대일대응 mPm=m!, 상수함수 m. 정독만.*
+
+### 확인체크 (p.219~221)
+
+```yaml
+- source: 개념원리-CM2-FN-여러-유제-506
+  page: 219
+  category_type: 유제
+  problem_summary: |
+    실수 전체에서 정의된 y=4x, y=3, y=x², y=x 중 (1)일대일대응 (2)상수함수 (3)항등함수 각각 고르기.
+  solution_summary: |
+    (1) 일대일대응: ㄱ(y=4x), ㄹ(y=x).
+    (2) 상수함수: ㄴ(y=3).
+    (3) 항등함수: ㄹ(y=x).
+  category: 여러 함수 유형 분류
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 각 유형 정의
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-유제-507
+  page: 220
+  category_type: 유제
+  problem_summary: |
+    X={x|-1≤x≤a}, Y={y|-1≤y≤7}. f(x)=-2x+b가 일대일대응일 때 a-b.
+  solution_summary: |
+    기울기 음수이므로 f(-1)=7, f(a)=-1. 7=2+b → b=5. -1=-2a+5 → a=3. a-b=-2.
+  category: 감소 일대일대응 · 계수·정의역
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 부호별 양끝 대응
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-유제-508
+  page: 220
+  category_type: 유제
+  problem_summary: |
+    f(x)={-x+3 (x≥0), (a+1)x+3 (x<0)}이 일대일대응이 되도록 하는 a의 범위.
+  solution_summary: |
+    x≥0에서 기울기 음수. 연속(x=0에서 값 3 일치). x<0에서도 기울기 음수여야 → a+1<0 → a<-1.
+  category: 두 식으로 정의된 함수 일대일대응 · 계수 범위
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 양분기 기울기 부호 일치
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-유제-509
+  page: 220
+  category_type: 유제
+  problem_summary: |
+    실수 전체에서 f는 항등함수, g는 상수함수. f(5)=g(5)일 때 f(7)+g(7) 값.
+  solution_summary: |
+    f(5)=5, g(5)=5(상수). g(7)=5. f(7)=7. 합=12.
+  category: 항등·상수 조건 연결
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 상수함수 상수값 결정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-유제-510
+  page: 221
+  category_type: 유제
+  problem_summary: |
+    X={-1,0,1}. X→X 함수 개수 a, 일대일대응 개수 b, 상수함수 개수 c일 때 a+b+c.
+  solution_summary: |
+    a=3³=27, b=3!=6, c=3. 합 = 36.
+  category: 함수 개수 (특강 적용)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: m^n · m! · m 공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-유제-511
+  page: 221
+  category_type: 유제
+  problem_summary: |
+    X={3,5}, Y={-2,-1,0,1,2}. (1) x₁≠x₂이면 f(x₁)≠f(x₂), (2) x₁<x₂이면 f(x₁)>f(x₂)인 함수 개수.
+  solution_summary: |
+    (1) 일대일함수 개수 = ₅P₂ = 20.
+    (2) 감소: Y의 5원소에서 2개 택해 큰 것부터 x=3에 대응 → ₅C₂ = 10.
+  category: 조건부 함수 개수
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 순열·조합 공식 적용
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (p.222) — star 4 이상만
+
+```yaml
+- source: 개념원리-CM2-FN-여러-연습-513
+  page: 222
+  category_type: 연습
+  problem_summary: |
+    X={x|x≥2}, Y={y|y≥3}. f(x)=x²+2x+a가 일대일대응일 때 a 구하기.
+  solution_summary: |
+    x≥2에서 f(x)=(x+1)²+a-1 증가. f(2)=4+4+a=a+8=3 → a=-5.
+  category: 이차 · 정의역 제한 일대일대응
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 꼭짓점 좌측/우측 판정 · 최솟값 대응
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-연습-514
+  page: 222
+  category_type: 연습
+  problem_summary: |
+    실수 전체에서 f(x)=|2x-5|+kx-3이 일대일대응일 때 k의 범위.
+  solution_summary: |
+    x≥5/2: f=(k+2)x-8. x<5/2: f=(k-2)x+2. 항상 증가 또는 감소.
+    두 기울기 부호 같아야: (k+2)(k-2)>0 → k<-2 또는 k>2.
+  category: 절댓값 포함 일대일대응
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 부분별 기울기 부호 일치
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-연습-517
+  page: 222
+  category_type: 연습
+  problem_summary: |
+    X={a,b,c}, Y={d,e}. X→Y 함수 중 치역과 공역이 같은 것의 개수.
+  solution_summary: |
+    전체 2³=8에서 치역이 {d}뿐, {e}뿐인 상수함수 2개 뺌 → 6.
+  category: 함수 개수 · 치역=공역 조건
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 전체 - 치역 결핍 (포함배제)
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP2 (p.223) — star 4·5
+
+```yaml
+- source: 개념원리-CM2-FN-여러-연습-518
+  page: 223
+  category_type: 연습
+  problem_summary: |
+    X={x|x≥a}에서 Y={y|y≥b}로의 f(x)=x²-4x+3이 일대일대응이 되도록 하는 a,b에 대해 a-b의 최댓값을 q/p (서로소 자연수)로 나타낼 때 p+q.
+  solution_summary: |
+    (x-2)²-1. 일대일대응이 되려면 a≥2, b=f(a)=a²-4a+3.
+    a-b = a-(a²-4a+3) = -a²+5a-3 = -(a-5/2)²+13/4.
+    a≥2에서 최대 = 13/4 (a=5/2). p=4, q=13, p+q=17.
+  category: 정점 이동 · a-b 최댓값
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 정의역 하한 · 이차식 최적화
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-연습-519
+  page: 223
+  category_type: 연습
+  problem_summary: |
+    f(x)=x³+x²-x가 항등함수가 되도록 하는 X의 개수 (X≠∅).
+  solution_summary: |
+    f(x)=x ⇔ x³+x²-2x=0 ⇔ x(x+2)(x-1)=0 → x∈{-2,0,1}.
+    X는 이 3원소의 공집합 아닌 부분집합: 2³-1=7.
+  category: 항등함수 조건 · 부분집합 개수
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 고정점 방정식 · 부분집합 열거
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-연습-520
+  page: 223
+  category_type: 연습
+  problem_summary: |
+    X={-1,0,1}에서 X→X 세 함수 f,g,h는 각각 일대일대응·항등함수·상수함수. (가) f(0)=g(-1)=h(1), (나) h(0)+g(1)=f(1). f(-1)-g(1)+h(0) 값.
+  solution_summary: |
+    g는 항등: g(x)=x → g(-1)=-1, g(1)=1.
+    h는 상수: h(x)=c (모두 같은 값). (가): f(0)=-1=c → h(1)=h(0)=-1.
+    (나): h(0)+g(1)=-1+1=0 → f(1)=0. f는 일대일대응, f(0)=-1, f(1)=0 → f(-1)=1.
+    f(-1)-g(1)+h(0) = 1-1+(-1) = -1.
+  category: 세 함수 유형 조합 논리
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 각 유형 성질 결합 · 값 결정
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-연습-521
+  page: 223
+  category_type: 연습
+  problem_summary: |
+    X={1,2,3,4,5}, Y={1,2,3,4,5,6,7,8}. f가 x₁<x₂이면 f(x₁)<f(x₂), f(4)=6인 함수 f의 개수.
+  solution_summary: |
+    f(1)<f(2)<f(3)<f(4)=6, f(5)>f(4)=6. f(1),f(2),f(3)은 {1,...,5}에서 3개 택하는 조합 = ₅C₃ = 10.
+    f(5)는 {7,8}에서 1개 = 2. 총 = 10·2 = 20.
+  category: 증가함수 개수 · 고정값 포함
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 증가 순서 자동 · 조합 나누기
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 실력UP (p.223)
+
+```yaml
+- source: 개념원리-CM2-FN-여러-실력-522
+  page: 223
+  category_type: 연습
+  problem_summary: |
+    X={a,b,c}. X→X 함수 f(x)={-4 (x<-2), 2x+1 (-2≤x≤1), 3 (x>1)}이 항등함수일 때 a+b+c (a,b,c 서로 다른 상수).
+  solution_summary: |
+    항등: f(x)=x. x<-2 분기: f=-4 → x=-4. -2≤x≤1: 2x+1=x → x=-1. x>1: f=3 → x=3.
+    {a,b,c}={-4,-1,3}. 합 = -2.
+  category: 두 식으로 정의된 함수 항등함수 · 정의역 결정
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 각 분기별 f(x)=x 해 · 분기조건 검증
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-여러-실력-523
+  page: 223
+  category_type: 연습
+  problem_summary: |
+    X={-3,-1,0,1,3}. X→X 함수 중 f(x)=f(-x)를 만족하는 f의 개수.
+  solution_summary: |
+    f(-3)=f(3), f(-1)=f(1). 각각 X의 5원소 중 하나 → 5·5. f(0)은 X의 5원소 중 하나 → 5.
+    총 = 5·5·5 = 125.
+  category: 짝함수 조건 · 함수 개수
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-01
+  mechanism_primary: 대칭 원소쌍 · 독립 선택
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 03 합성함수 (p.224~233)
+
+### 필수 예제 (p.227~231)
+
+```yaml
+- source: 개념원리-CM2-FN-합성-예제-09
+  page: 227
+  category_type: 대표예제
+  problem_summary: |
+    f:X→X 대응 그림(f(0)=0, f(1)=3, f(2)=3, f(3)=1). f(2)+(f∘f)(2)+(f∘f∘f)(2)의 값과 f∘f의 치역.
+  solution_summary: |
+    f(2)=3, (f∘f)(2)=f(3)=1, (f∘f∘f)(2)=f(1)=3. 합=7.
+    (f∘f)(0)=0, (f∘f)(1)=1, (f∘f)(2)=1, (f∘f)(3)=3. 치역={0,1,3}.
+  category: 합성함수 그림 · 반복
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 그림 대응 반복 추적
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-예제-10
+  page: 228
+  category_type: 대표예제
+  problem_summary: |
+    f(x)=ax+3, g(x)=-x+4에 대해 f∘g=g∘f가 성립할 때 a 구하기.
+  solution_summary: |
+    f(g(x))=a(-x+4)+3=-ax+4a+3. g(f(x))=-(ax+3)+4=-ax+1. 등식: 4a+3=1 → a=-1/2.
+  category: 교환 조건 f∘g=g∘f
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 두 합성식 동류항 비교
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-예제-11
+  page: 229
+  category_type: 대표예제
+  problem_summary: |
+    f(x)=x+2, g(x)=3x+1. (1) f∘h=g, (2) h∘f=g, (3) h∘g∘f=f 각각 만족하는 h 구하기.
+  solution_summary: |
+    (1) h(x)+2=3x+1 → h(x)=3x-1.
+    (2) h(x+2)=3x+1. t=x+2 → x=t-2, h(t)=3t-5 → h(x)=3x-5.
+    (3) h(g(f(x)))=h(g(x+2))=h(3x+7)=x+2. 3x+7=t → x=(t-7)/3. h(t)=(t-7)/3+2=(t-1)/3 → h(x)=(1/3)x-1/3.
+  category: 미지 합성 성분 h 구하기 3유형
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 치환 대입 · 새 변수 t 도입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-예제-12
+  page: 230
+  category_type: 대표예제
+  problem_summary: |
+    f(x)=x+1, f¹=f, fⁿ⁺¹=f∘fⁿ. f¹⁰(a)=30 만족하는 a.
+  solution_summary: |
+    fⁿ(x)=x+n. f¹⁰(a)=a+10=30 → a=20.
+  category: 반복 합성 fⁿ · 방정식
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 반복 합성 일반항 · 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-예제-13(발전)
+  page: 231
+  category_type: 대표예제
+  problem_summary: |
+    0≤x≤2 정의 f, g의 그래프(f는 꺾인 사다리꼴, g는 감소 직선). y=(f∘g)(x)의 그래프 그리기.
+  solution_summary: |
+    f(x)={2x (0≤x≤1), 2 (1≤x≤2)}, g(x)=-x+2 (0≤x≤2).
+    (f∘g)(x)=f(-x+2). g의 값 범위 분류: -x+2≤1 ⇔ x≥1; -x+2>1 ⇔ x<1.
+    x∈[0,1]: (f∘g)=2. x∈[1,2]: (f∘g)=2(-x+2)=-2x+4.
+  category: 합성함수 그래프 (부분별)
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 꺾인 점 기준 · 내부 함수값 범위별 분기
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (p.226~231)
+
+```yaml
+- source: 개념원리-CM2-FN-합성-유제-524
+  page: 226
+  category_type: 유제
+  problem_summary: |
+    f, g의 대응 그림(f: 4→b, 5→a, 6→d, 7→b; g: a→5, b→4, c→7, d→4).
+    (1)~(6) 여러 (g∘f), (f∘g) 함숫값 계산.
+  solution_summary: |
+    (1) (g∘f)(5)=g(a)=4. (2) g(f(6))=g(d)=4. (3) g(f(7))=g(b)=4.
+    (4) f(g(a))=f(5)=a. (5) f(g(b))=f(4)=a (원문 결과 참조). (6) f(g(c))=f(7)=b.
+    (문제·해설: (1)4, (2)7, (3)4, (4)c, (5)a, (6)a — 그림 세부 대응 확인 필요.)
+    (답 계산 대기 · 원문 그림 세부 재확인)
+  category: 합성함수 그림 대응
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 두 화살표 순차 추적
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-525
+  page: 226
+  category_type: 유제
+  problem_summary: |
+    f(x)=2x+3, g(x)=-x². (1) g∘f, (2) f∘g, (3) f∘f, (4) g∘g 구하기.
+  solution_summary: |
+    (1) g(f(x))=-(2x+3)²=-4x²-12x-9.
+    (2) f(g(x))=-2x²+3.
+    (3) f(f(x))=4x+9.
+    (4) g(g(x))=-(-x²)²=-x⁴.
+  category: 다항 합성 4유형
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 안쪽 함수 결과 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-526
+  page: 226
+  category_type: 유제
+  problem_summary: |
+    f(x)=x²-2, g(x)=-x+5, h(x)=2x-1에 대해 (1) (f∘g)∘h, (2) f∘(g∘h), (3) (g∘f)∘h, (4) f∘(h∘g) 구하기.
+  solution_summary: |
+    (1) (f∘g)(x)=(-x+5)²-2=x²-10x+23. ((f∘g)∘h)(x)=(2x-1)²-10(2x-1)+23=4x²-24x+34.
+    (2) 결합법칙 → 결과 동일: 4x²-24x+34.
+    (3) (g∘f)(x)=-x²+7. ((g∘f)∘h)(x)=-(2x-1)²+7=-4x²+4x+6.
+    (4) (h∘g)(x)=-2x+9. (f∘(h∘g))(x)=(-2x+9)²-2=4x²-36x+79.
+  category: 세 함수 합성 · 결합법칙 확인
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 순차 합성 · 결합법칙 검증
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-527
+  page: 227
+  category_type: 유제
+  problem_summary: |
+    f:X→Y, g:Y→Z 대응 그림(그림 세부). (g∘f)(x)=3 만족하는 x.
+  solution_summary: |
+    (g∘f)(x)=g(f(x))=3. g(b)=3이면 f(x)=b. 그림에서 f(x)=b인 x=-1.
+    답: x=-1.
+  category: 합성함수 · 역추적
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 결과값 → 중간값 → 정의역값 역추적
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-528
+  page: 227
+  category_type: 유제
+  problem_summary: |
+    f(x)=2x-1, g(x)={-x+3 (x≥1), 5 (x<1)}. (f∘g)(2)+(g∘f)(-1)의 값.
+  solution_summary: |
+    g(2)=1 → f(g(2))=f(1)=1. f(-1)=-3 → g(-3)=5. 합 = 6.
+  category: 두 식으로 정의된 함수 · 합성
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 부호/조건 판정 · 분기별 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-529
+  page: 227
+  category_type: 유제
+  problem_summary: |
+    X={1,2,3}에서 X→X 두 함수 f,g 모두 일대일대응. f(2)=g(1)=3, (g∘f)(2)=(f∘g)(1)=1일 때 (f∘f)(3)+(g∘f)(1).
+  solution_summary: |
+    (g∘f)(2)=g(3)=1. (f∘g)(1)=f(3)=1. f,g 모두 일대일대응 → f(1)=2, g(2)=2.
+    (f∘f)(3)=f(1)=2. (g∘f)(1)=g(2)=2. 합=4.
+  category: 일대일대응 · 조건 논리
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 일대일 성질 · 남은 값 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-530
+  page: 228
+  category_type: 유제
+  problem_summary: |
+    f(x)=2x+3, g(x)=-x+k. f∘g=g∘f일 때 g(-2)의 값.
+  solution_summary: |
+    f∘g=-2x+2k+3. g∘f=-2x-3+k. 등식: 2k+3=-3+k → k=-6.
+    g(x)=-x-6 → g(-2)=-4.
+  category: 교환 조건 · 상수 결정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 동류항 비교 · 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-531
+  page: 228
+  category_type: 유제
+  problem_summary: |
+    f(x)=ax-1, g(x)=bx+2. f∘g=g∘f, g(3)=-1일 때 ab.
+  solution_summary: |
+    g(3)=3b+2=-1 → b=-1. f∘g=-ax+2a-1. g∘f=-ax+3. 2a-1=3 → a=2. ab=-2.
+  category: 교환·조건 두 상수 결정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 값 조건 + 계수 비교
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-532
+  page: 228
+  category_type: 유제
+  problem_summary: |
+    f:X→X 그림(X={1,2,3,4}에서 f(1)=2, f(2)=3, f(3)=4, f(4)=1). g:X→X, g(1)=3, f∘g=g∘f일 때 g(2)-g(4).
+  solution_summary: |
+    f∘g=g∘f를 x=1,2,3에 적용. g(1)=3 → f(g(1))=f(3)=4. g(f(1))=g(2). 따라서 g(2)=4.
+    x=2: f(g(2))=f(4)=1. g(f(2))=g(3). g(3)=1.
+    x=3: f(g(3))=f(1)=2=g(f(3))=g(4). g(4)=2.
+    g(2)-g(4)=4-2=2.
+  category: 그림 f · 교환조건 g 결정
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 각 원소별 교환 등식 순차 적용
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-533
+  page: 229
+  category_type: 유제
+  problem_summary: |
+    f(x)=2x-1, g(x)=-3x+4. (1) f∘h=g, (2) h∘f=g, (3) h∘g∘f=g 각각 h 구하기.
+  solution_summary: |
+    (1) 2h(x)-1=-3x+4 → h(x)=(-3x+5)/2.
+    (2) h(2x-1)=-3x+4. t=2x-1 → x=(t+1)/2. h(t)=-3(t+1)/2+4=-3t/2+5/2 → h(x)=-3x/2+5/2.
+    (3) g(f(x))=-3(2x-1)+4=-6x+7. h(-6x+7)=g(x)=-3x+4. t=-6x+7 → x=(7-t)/6. h(t)=-3(7-t)/6+4=t/2+1/2 → h(x)=(1/2)x+1/2.
+  category: 미지 성분 h 구하기 3유형
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 치환 t 도입 · 역변환
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-534
+  page: 229
+  category_type: 유제
+  problem_summary: |
+    모든 실수 x에 대해 f((x+1)/2)=3x+2일 때 f((1-2x)/3) 구하기.
+  solution_summary: |
+    (x+1)/2=t → x=2t-1. f(t)=3(2t-1)+2=6t-1 → f(x)=6x-1.
+    f((1-2x)/3)=6·(1-2x)/3-1=2(1-2x)-1=-4x+1.
+  category: 함수식 결정 (치환)
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 치환 · 일반형 f(x) 확정 후 재대입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-535
+  page: 230
+  category_type: 유제
+  problem_summary: |
+    f(x)=x+2, f¹=f, fⁿ⁺¹=f∘fⁿ. f²⁰²⁵(1)의 값.
+  solution_summary: |
+    fⁿ(x)=x+2n. f²⁰²⁵(1)=1+2·2025=4051.
+  category: 반복 합성 (덧셈 이동)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: fⁿ 패턴 파악
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-536
+  page: 230
+  category_type: 유제
+  problem_summary: |
+    f(x)=x/3, f¹=f, fⁿ⁺¹=f∘fⁿ. f⁵(729)+f⁴(243)의 값.
+  solution_summary: |
+    fⁿ(x)=x/3ⁿ. f⁵(729)=729/243=3. f⁴(243)=243/81=3. 합=6.
+  category: 반복 합성 (나눗셈 스케일)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 지수 규칙
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-537
+  page: 230
+  category_type: 유제
+  problem_summary: |
+    f:X→X 그림(X={1,3,5,7}, f(1)=5, f(3)=7, f(5)=1, f(7)=3). f¹⁰⁰(1)+f¹⁰¹(3)의 값.
+  solution_summary: |
+    f(1)=5, f²(1)=f(5)=1, f³(1)=5, ... → 주기 2. f¹⁰⁰(1)=1.
+    f(3)=7, f²(3)=3, ... 주기 2. f¹⁰¹(3)=f(3)=7. 합=8.
+  category: 유한 집합 순환 반복
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 주기 판정 · 인덱스 mod
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-유제-538
+  page: 231
+  category_type: 유제
+  problem_summary: |
+    y=f(x) (0≤x≤2) 및 y=g(x) (-1≤x≤1) 그래프 주어짐. (g∘f)(x) 그래프 그리기.
+  solution_summary: |
+    (풀이 참조 · 부분별 분기)
+  category: 합성함수 그래프 (부분별)
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 내부 함수값 범위별 분기 · 조립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (p.232) — star 4 이상만
+
+```yaml
+- source: 개념원리-CM2-FN-합성-연습-539
+  page: 232
+  category_type: 연습
+  problem_summary: |
+    f(x)={-x² (x≥0), x² (x<0)}, g(x)=-x에 대해 (f∘f∘g∘g)(√2)의 값.
+  solution_summary: |
+    g(√2)=-√2. g(-√2)=√2. f(√2)=-2. f(-2)=4. 답=4.
+  category: 4중 합성 · 두 식으로 정의된 함수
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 안쪽부터 순차 · 부호별 분기
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-540
+  page: 232
+  category_type: 연습
+  problem_summary: |
+    X={2,3}. f(x)=ax-3a와 f(X)를 정의역·X를 공역으로 하는 g(x)=x²+2x+b가 있어 g∘f:X→X가 항등함수일 때 a+b.
+  solution_summary: |
+    f(2)=-a, f(3)=0. g(f(x))=x 이려면 g(-a)=2, g(0)=3.
+    g(0)=b=3 → b=3. g(-a)=a²-2a+3=2 → (a-1)²=0 → a=1.
+    a+b=4.
+  category: 합성 항등 · 조건 결합
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 두 값 조건 → 이차방정식 (중근)
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-541
+  page: 232
+  category_type: 연습
+  problem_summary: |
+    일차함수 f(x)에 대해 (f∘f)(x)=9x-4일 때 f(x) 모두 구하기.
+  solution_summary: |
+    f(x)=ax+b. (f∘f)(x)=a²x+ab+b=9x-4. a²=9, ab+b=-4.
+    (i) a=3: 4b=-4 → b=-1 → f=3x-1.
+    (ii) a=-3: -2b=-4 → b=2 → f=-3x+2.
+    답: 두 개.
+  category: 일차 · 자기합성 · 두 해
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 계수 비교 · 부호 케이스
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-542
+  page: 232
+  category_type: 연습
+  problem_summary: |
+    (f∘g)(x)=x²+4, h(x)=x-1. (f∘(g∘h))(x)=20 만족하는 x의 값의 곱.
+  solution_summary: |
+    (f∘g∘h)(x)=(f∘g)(x-1)=(x-1)²+4=20 → (x-1)²=16 → x-1=±4 → x=5, -3. 곱 = -15.
+  category: 결합법칙 · 이차 방정식
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: (f∘g)에 h(x) 대입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-543
+  page: 232
+  category_type: 연습
+  problem_summary: |
+    f(x)=-x, g(x)=2x-1. h∘g∘f=f 만족하는 일차함수 h가 h(k)=4일 때 k.
+  solution_summary: |
+    g∘f=g(-x)=-2x-1. h(-2x-1)=-x. -2x-1=t → x=-(t+1)/2. h(t)=(t+1)/2 → h(x)=(1/2)x+1/2.
+    h(k)=4: (k+1)/2=4 → k=7.
+  category: h 결정 · 상수 역산
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 치환 · h 확정 · 방정식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP2 (p.232~233)
+
+```yaml
+- source: 개념원리-CM2-FN-합성-연습-544
+  page: 232
+  category_type: 연습
+  problem_summary: |
+    정의역 자연수 전체, f(n)={n+1 (n 홀수), n/2+1 (n 짝수)}. (f∘f)(n)=5를 만족하는 모든 자연수 n의 합.
+  solution_summary: |
+    f(f(n))=5. f(n)=k라 하면 f(k)=5.
+    k 홀수: k+1=5 → k=4 (짝수, 모순).
+    k 짝수: k/2+1=5 → k=8 (짝수 O). 이때 f(n)=8.
+    n 홀수: n+1=8 → n=7. n 짝수: n/2+1=8 → n=14.
+    합 = 7+14 = 21.
+  category: 두 식으로 정의된 함수 자기합성 · 방정식
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 중간값 k 도입 · 홀짝 케이스
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-545
+  page: 233
+  category_type: 연습
+  problem_summary: |
+    X={1,2,3}, Y={3,4,5}, Z={5,6,7}. f:X→Y, g:Y→Z 모두 일대일대응. f(1)=3, g(5)=6. (g∘f)(3)=5일 때 (g∘f)(1).
+  solution_summary: |
+    (g∘f)(3)=g(f(3))=5. g는 일대일대응, g(5)=6 → f(3)=k with g(k)=5, k∈{3,4} (5는 이미 g 값이 6). k=3 or 4.
+    f(1)=3, f는 일대일 → f(3)≠3 → f(3)=4. 그러면 g(4)=5. g(5)=6, 남은 값 7은 g(3)=7.
+    (g∘f)(1)=g(f(1))=g(3)=7.
+  category: 두 일대일대응 · 논리 추적
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 일대일 성질 배제 · 값 확정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-546
+  page: 233
+  category_type: 연습
+  problem_summary: |
+    f(x)=-ax+b, g(x)=3x+4. f∘g=g∘f일 때 y=f(x) 그래프가 a 값에 관계없이 항상 지나는 점 (m,n). m+n.
+  solution_summary: |
+    f∘g=-a(3x+4)+b=-3ax-4a+b. g∘f=-3ax+3b+4.
+    -4a+b=3b+4 → -4a-2b=4 → b=-2a-2.
+    f(x)=-ax-2a-2=-a(x+2)-2. a에 관계없이 x=-2일 때 f=-2 → (-2,-2). m+n=-4.
+  category: 항등식 관점 · 고정점
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 교환조건 → b(a) 대입 → 인수분해로 고정점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-연습-547
+  page: 233
+  category_type: 연습
+  problem_summary: |
+    X={1,2,3,4,5}, f:X→X. f(x)={5 (x=1), x-1 (x>1)}. f¹=f, fⁿ⁺¹=f∘fⁿ. f²⁰²⁴(3)의 값.
+  solution_summary: |
+    f(3)=2, f²(3)=1, f³(3)=5, f⁴(3)=4, f⁵(3)=3, ... → 주기 5.
+    2024=5·404+4. f²⁰²⁴(3)=f⁴(3)=4.
+  category: 순환군형 · 주기 파악
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 처음 몇 개 나열 · 주기 · mod
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 실력UP (p.233)
+
+```yaml
+- source: 개념원리-CM2-FN-합성-실력-548
+  page: 233
+  category_type: 연습
+  problem_summary: |
+    f(x)=x-4, g(x)={-x+7 (x<0), 2x²-4ax+7 (x≥0)}. 합성함수 y=(f∘g)(x)의 치역이 {y|y≥1}일 때 a.
+  solution_summary: |
+    (f∘g)(x)={-x+3 (x<0), 2x²-4ax+3 (x≥0)}. x<0 부분의 치역: y>3.
+    x≥0 부분: 2(x-a)²-2a²+3. a≤0이면 x≥0에서 최솟값 3(a²·-2a²+3, a=0시 3) — a≤0이면 치역 {y|y≥3}.
+    a>0이면 최솟값은 -2a²+3 (x=a). 전체 치역이 {y|y≥1}이려면 -2a²+3=1 → a²=1 → a=1 (a>0).
+  category: 두 식으로 정의된 함수 합성 · 치역 조건
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 두 분기 최솟값 · 치역 하한 결정
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-실력-549
+  page: 233
+  category_type: 연습
+  problem_summary: |
+    0≤x≤4에서 f(x)={-2x+4 (0≤x<2), x-2 (2≤x≤4)}. f¹(1)+f²(1)+…+f¹⁰⁰(1)의 값.
+  solution_summary: |
+    f(1)=2, f²(1)=f(2)=0, f³(1)=f(0)=4, f⁴(1)=f(4)=2, ... → 2, 0, 4, 2, 0, 4, ... 주기 3.
+    100=3·33+1. 처음 99개 = 33·(2+0+4)=33·6=198. f¹⁰⁰(1)=f¹(1)=2. 합 = 200.
+  category: 두 식으로 정의된 함수 반복 · 주기 · 부분합
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 주기 파악 · 등비 분할
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-합성-실력-550
+  page: 233
+  category_type: 연습
+  problem_summary: |
+    0≤x≤1 정의 y=f(x)가 삼각형(꼭짓점 (0,0), (1/2,1), (1,0)). y=(f∘f)(x)의 그래프 그리기.
+  solution_summary: |
+    f(x)={2x (0≤x≤1/2), 2-2x (1/2≤x≤1)}. 4분할:
+    x∈[0,1/4]: f=2x∈[0,1/2] → (f∘f)=2·2x=4x.
+    x∈[1/4,1/2]: f=2x∈[1/2,1] → (f∘f)=2-2(2x)=2-4x.
+    x∈[1/2,3/4]: f=2-2x∈[1/2,1] → (f∘f)=2-2(2-2x)=4x-2.
+    x∈[3/4,1]: f=2-2x∈[0,1/2] → (f∘f)=2(2-2x)=4-4x.
+    그래프: [0,1] 위에 삼각형 4개(진동수 2배).
+  category: 자기합성 그래프 (텐트맵)
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 안쪽 함수값 범위 4분할
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 04 역함수 (p.234~246)
+
+### 필수 예제 (p.238~243)
+
+```yaml
+- source: 개념원리-CM2-FN-역함수-예제-14
+  page: 238
+  category_type: 대표예제
+  problem_summary: |
+    (1) f(x)=ax+b, f(-3)=-3, f⁻¹(7)=2일 때 a,b.
+    (2) f⁻¹(2)=0, f(f(0))=3일 때 f(6).
+  solution_summary: |
+    (1) f(-3)=-3a+b=-3. f(2)=7 → 2a+b=7. 연립 → a=2, b=3.
+    (2) f(0)=2, f(f(0))=f(2)=3 → 2a+b=3. b=2 → 2a+2=3 → a=1/2. f(6)=3+2=5.
+  category: 역함수 기본 관계 · 상수 결정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: f⁻¹(a)=b ⇔ f(b)=a
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-예제-15
+  page: 239
+  category_type: 대표예제
+  problem_summary: |
+    f(x)={2x (x≥1), 2(1-k)x+2k (x<1)}의 역함수가 존재하도록 하는 k의 범위.
+  solution_summary: |
+    x≥1: y=2x, y≥2. x<1: y=2(1-k)x+2k. 연속(x=1에서 2(1-k)+2k=2 O).
+    일대일대응이려면 x<1에서 기울기 양수: 2(1-k)>0 → k<1.
+  category: 두 식으로 정의된 함수 · 역함수 존재 조건
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 두 분기 단조성 일치
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-예제-16
+  page: 240
+  category_type: 대표예제
+  problem_summary: |
+    f(x)=(1/2)x+a의 역함수가 f⁻¹(x)=bx-2일 때 a+b.
+  solution_summary: |
+    y=(1/2)x+a → x=2y-2a. 교환: y=2x-2a. 따라서 b=2, -2a=-2 → a=1.
+    a+b=3.
+  category: 역함수 구하기 · 계수 결정
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: x에 대해 풀고 교환
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-예제-17
+  page: 241
+  category_type: 대표예제
+  problem_summary: |
+    f(x)=3x-1, g(x)=-2x+4. (1) (g∘f)⁻¹(2), (2) (f∘(g∘f)⁻¹)(-2).
+  solution_summary: |
+    (1) (g∘f)⁻¹=f⁻¹∘g⁻¹. g⁻¹(2)=1 (g(k)=2 → k=1). f⁻¹(1)=2/3.
+    (2) (f∘(g∘f)⁻¹)=f∘f⁻¹∘g⁻¹=g⁻¹. g⁻¹(-2)=3. 답=3.
+  category: 역함수 성질 (합성)
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: (g∘f)⁻¹=f⁻¹∘g⁻¹ · 항등함수 상쇄
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-예제-18
+  page: 242
+  category_type: 대표예제
+  problem_summary: |
+    y=f(x)의 그래프와 y=x가 그림으로 주어질 때 (f∘f)⁻¹(a)의 값.
+  solution_summary: |
+    직선 y=x로 접선 따라가며 f⁻¹(a)=k, f⁻¹(k)=? 등 그래프 추적. 답 = c (그림 라벨).
+  category: 역함수 그래프 · 값 추적
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: y=x 반사 · 계단식 추적
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-예제-19
+  page: 243
+  category_type: 대표예제
+  problem_summary: |
+    f(x)=3x+10. y=f(x)와 y=f⁻¹(x)의 그래프 교점 P라 할 때 OP의 길이.
+  solution_summary: |
+    일차함수는 y=x 위에서 교점. 3x+10=x → x=-5. P(-5,-5). OP=√(25+25)=5√2.
+  category: 역함수 · y=x 교점 (선형)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 교점 = f(x)=x의 해 (일차)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (p.237~243)
+
+```yaml
+- source: 개념원리-CM2-FN-역함수-유제-551
+  page: 237
+  category_type: 유제
+  problem_summary: |
+    네 개의 f 그림 중 역함수가 존재하는 것 고르기.
+  solution_summary: |
+    ㄴ: 원소 1,2가 모두 b에 대응 → 일대일 X.
+    ㄹ: 1,3이 모두 a에 대응 → X.
+    답: ㄱ, ㄷ.
+  category: 역함수 존재 (일대일대응 판정)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 그림 일대일대응 검사
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-552
+  page: 237
+  category_type: 유제
+  problem_summary: |
+    f(x)=-2x+3에 대해 (1) f⁻¹(5)=a, (2) f⁻¹(a)=-2를 만족하는 a.
+  solution_summary: |
+    (1) f(a)=5: -2a+3=5 → a=-1.
+    (2) f(-2)=a: -2(-2)+3=7 → a=7.
+  category: f⁻¹(a)=b ⇔ f(b)=a
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 관계 반전
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-553
+  page: 237
+  category_type: 유제
+  problem_summary: |
+    (1) y=4x-2, (2) y=-(1/2)x+3/2의 역함수 구하기.
+  solution_summary: |
+    (1) x=(y+2)/4 → y=(1/4)x+1/2.
+    (2) y=-(1/2)x+3/2 → x=-2y+3 → y=-2x+3.
+  category: 일차 역함수 구하기
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: x 풀이 · 변수 교환
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-554
+  page: 237
+  category_type: 유제
+  problem_summary: |
+    f:X→Y 그림에서 (f(1)=b, f(2)=c, f(3)=d, f(4)=a). (1) f⁻¹(b), (2) (f⁻¹)⁻¹(2), (3) (f⁻¹∘f)(4), (4) (f∘f⁻¹)(a).
+  solution_summary: |
+    (1) f⁻¹(b)=1. (2) (f⁻¹)⁻¹=f → f(2)=c. (3) f⁻¹∘f=항등 → 4. (4) f∘f⁻¹=항등 → a.
+  category: 역함수 성질 기본
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 항등함수 성질
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-555
+  page: 238
+  category_type: 유제
+  problem_summary: |
+    f(x)=-2x+6의 역함수를 g(x)라 할 때 g(8)+g⁻¹(3)의 값.
+  solution_summary: |
+    g(8)=k → f(k)=8: -2k+6=8 → k=-1. g⁻¹(3)=f(3)=0.
+    합 = -1.
+  category: 역함수 값 · 역의 역
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: g=f⁻¹, g⁻¹=f
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-556
+  page: 238
+  category_type: 유제
+  problem_summary: |
+    일차 f(x)에 대해 f⁻¹(1)=3, (f∘f)(3)=-2일 때 f(-1)의 값.
+  solution_summary: |
+    f(3)=1. (f∘f)(3)=f(f(3))=f(1)=-2. f(x)=ax+b.
+    3a+b=1, a+b=-2. → 2a=3, a=3/2, b=-7/2.
+    f(-1)=-3/2-7/2=-5.
+  category: 일차 · 두 값 조건
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 관계식 두 개 → 연립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-557
+  page: 238
+  category_type: 유제
+  problem_summary: |
+    f(2x+3)=-3x+4일 때 f(7)+f⁻¹(7)의 값.
+  solution_summary: |
+    2x+3=t → x=(t-3)/2. f(t)=-3(t-3)/2+4=-3t/2+17/2.
+    f(7)=-21/2+17/2=-2. f⁻¹(7)=k → f(k)=7: -3k/2+17/2=7 → k=1.
+    합 = -1.
+  category: 함수식 결정 · f⁻¹ 계산
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 치환 → f 확정 → 방정식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-558
+  page: 239
+  category_type: 유제
+  problem_summary: |
+    f(x)={(3k-5)x+3(k-1) (x≥-1), -x+1 (x<-1)}이 역함수 존재하려면 정수 k의 최댓값.
+  solution_summary: |
+    x<-1에서 기울기 -1<0. x≥-1에서 3k-5<0 → k<5/3. 정수 k의 최댓값 = 1.
+    (연속 조건 x=-1: (3k-5)(-1)+3(k-1)=-3k+5+3k-3=2 vs -(-1)+1=2 O.)
+  category: 두 식으로 정의된 함수 · 역함수 존재 · 정수
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 부호 일치 + 연속 검증
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-559
+  page: 239
+  category_type: 유제
+  problem_summary: |
+    X={x|0≤x≤a}, Y={y|b≤y≤5}. f(x)=3x+2의 역함수 존재할 때 a+b.
+  solution_summary: |
+    3x+2 증가. f(0)=2=b, f(a)=5=3a+2 → a=1. a+b=3.
+  category: 정의역·공역 · 역함수 존재
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 양 끝점 대응
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-560
+  page: 239
+  category_type: 유제
+  problem_summary: |
+    실수 전체에서 f(x)=ax+|x-2|+3-2a의 역함수가 존재하도록 하는 a의 범위.
+  solution_summary: |
+    x≥2: (a+1)x+1-2a. x<2: (a-1)x+5-2a.
+    두 기울기 부호 같아야: (a+1)(a-1)>0 → a<-1 또는 a>1.
+    (연속: x=2에서 두 식 모두 2a+1-2a=1 값 일치 O.)
+  category: 절댓값 · 역함수 존재
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 부분별 기울기 부호 일치
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-561
+  page: 240
+  category_type: 유제
+  problem_summary: |
+    y=ax+b의 역함수가 y=(1/3)x+2일 때 ab.
+  solution_summary: |
+    y=ax+b → x=(y-b)/a. 교환 y=(1/a)x-b/a. 따라서 1/a=1/3 → a=3. -b/a=2 → b=-6.
+    ab=-18.
+  category: 역함수 계수 비교
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 계수 대조
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-562
+  page: 240
+  category_type: 유제
+  problem_summary: |
+    f(x)=-3x+1, g(x)=x-2. h(x)=(g∘f)(x)일 때 h⁻¹(x).
+  solution_summary: |
+    h(x)=g(f(x))=(-3x+1)-2=-3x-1. y=-3x-1 → x=-(y+1)/3. h⁻¹(x)=-(x+1)/3=-x/3-1/3.
+  category: 합성 후 역함수
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 합성식 → 역
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-563
+  page: 240
+  category_type: 유제
+  problem_summary: |
+    f(3x-2)=6x+1. f⁻¹(x)=ax+b일 때 a, b.
+  solution_summary: |
+    3x-2=t → x=(t+2)/3. f(t)=6(t+2)/3+1=2t+5 → f(x)=2x+5.
+    y=2x+5 → x=(y-5)/2. f⁻¹(x)=(x-5)/2=(1/2)x-5/2. a=1/2, b=-5/2.
+  category: 치환 · 역함수 계수
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: f 확정 → 역함수 구하기
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-564
+  page: 241
+  category_type: 유제
+  problem_summary: |
+    f(x)=2x-1, g(x)=(1/2)x-1. (f⁻¹∘g)⁻¹(3)의 값.
+  solution_summary: |
+    (f⁻¹∘g)⁻¹=g⁻¹∘f. g⁻¹(5)=k: (1/2)k-1=5 → k=12. f(3)=5 → (g⁻¹∘f)(3)=g⁻¹(5)=12.
+  category: 역함수 성질 · 합성
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: (a∘b)⁻¹=b⁻¹∘a⁻¹
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-565
+  page: 241
+  category_type: 유제
+  problem_summary: |
+    f(x)=-2x+1, g(x)=x+4. (f∘(g∘f)⁻¹∘f)(x)=ax+b일 때 a, b.
+  solution_summary: |
+    (g∘f)⁻¹=f⁻¹∘g⁻¹. 원식 = f∘f⁻¹∘g⁻¹∘f = g⁻¹∘f.
+    g⁻¹(x)=x-4. (g⁻¹∘f)(x)=g⁻¹(-2x+1)=-2x+1-4=-2x-3. a=-2, b=-3.
+  category: 4중 합성 · 역함수 상쇄
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 항등함수 상쇄 → 최종식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-566
+  page: 241
+  category_type: 유제
+  problem_summary: |
+    f(x)=2x+1, g(x)=-(1/3)x+4. ((f⁻¹∘g⁻¹)∘f)(a)=1 만족하는 a.
+  solution_summary: |
+    f⁻¹∘g⁻¹=(g∘f)⁻¹. ((g∘f)⁻¹∘f)(a)=1 → f(a)=(g∘f)(1)=g(f(1))=g(3)=-1+4=3.
+    f(a)=3 → 2a+1=3 → a=1.
+  category: 역함수 성질 · 역추적
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: (g∘f)⁻¹ 정리 · 결과 → 원인
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-567
+  page: 242
+  category_type: 유제
+  problem_summary: |
+    y=f(x)와 y=x 그래프. (f∘f)⁻¹(x₃)의 값.
+  solution_summary: |
+    (f∘f)⁻¹=f⁻¹∘f⁻¹. f⁻¹(x₃)=x₄ (그래프에서 y=x 이용 다음 x좌표). f⁻¹(x₄)=x₅.
+    답: x₅.
+  category: 역함수 그래프 · 반복
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: y=x 반사 반복
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-568
+  page: 242
+  category_type: 유제
+  problem_summary: |
+    y=f(x), y=g(x)와 y=x 그래프. (f∘g)⁻¹(c)의 값.
+  solution_summary: |
+    (f∘g)⁻¹=g⁻¹∘f⁻¹. f⁻¹(c)=k=b (그래프). g⁻¹(b)=l=a. 답: b (원문 해설 참조).
+  category: 두 함수 · 역합성 그래프
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: y=x 이용 순차 반사
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-569
+  page: 243
+  category_type: 유제
+  problem_summary: |
+    f(x)=-3x+8. y=f(x)와 y=f⁻¹(x)의 교점 (p,q)일 때 pq.
+  solution_summary: |
+    f(x)=x: -3x+8=x → x=2. p=q=2. pq=4.
+  category: 역함수 교점 (선형)
+  tier: star_3
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: f(x)=x
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-유제-570
+  page: 243
+  category_type: 유제
+  problem_summary: |
+    f(x)=(1/2)(x-2)²+2 (x≥2). y=f(x)와 y=f⁻¹(x)는 서로 다른 두 점에서 만난다. 두 점 사이 거리.
+  solution_summary: |
+    f(x)=x: (1/2)(x-2)²+2=x → (x-2)²=2x-4 → x²-6x+8=0 → (x-2)(x-4)=0.
+    두 교점 (2,2), (4,4). 거리 = √(4+4) = 2√2.
+  category: 이차·정의역 제한 · 두 교점
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: f(x)=x · 정의역 조건 · 거리
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (p.244) — star 4 이상만
+
+```yaml
+- source: 개념원리-CM2-FN-역함수-연습-571
+  page: 244
+  category_type: 연습
+  problem_summary: |
+    일차 f(x)와 f⁻¹에 대해 y=f(x)와 y=f⁻¹(x) 그래프가 모두 (-2, 5)를 지날 때 f(1)+f⁻¹(-1).
+  solution_summary: |
+    f(-2)=5, f⁻¹(-2)=5 → f(5)=-2. f(x)=ax+b. -2a+b=5, 5a+b=-2. 연립 → a=-1, b=3.
+    f(1)=2. f⁻¹(-1)=k → f(k)=-1: -k+3=-1 → k=4. 합 = 6.
+  category: 일차·역함수 · 두 점 조건
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 두 관계 연립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-572
+  page: 244
+  category_type: 연습
+  problem_summary: |
+    일차 f(x)=ax+1. f=f⁻¹일 때 a의 값.
+  solution_summary: |
+    f⁻¹(x)=(x-1)/a. f=f⁻¹: ax+1=x/a-1/a. a=1/a and 1=-1/a. a²=1, a=-1 → 1=1 O.
+    답: a=-1.
+  category: 자기역함수
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 항등식 · 계수 비교
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-573
+  page: 244
+  category_type: 연습
+  problem_summary: |
+    f(x)=4x+k. f⁻¹(2)=1일 때 (f∘(f∘f)⁻¹)(4)의 값.
+  solution_summary: |
+    f(1)=2 → 4+k=2 → k=-2. f(x)=4x-2.
+    (f∘(f∘f)⁻¹)=f∘f⁻¹∘f⁻¹=f⁻¹. f⁻¹(4)=(4+2)/4=3/2.
+  category: 역함수 성질 · 값
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 항등함수 상쇄 · f⁻¹
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-574
+  page: 244
+  category_type: 연습
+  problem_summary: |
+    f(x)={x²+1 (x≥0), x+1 (x<0)}, g(x)=x+1에 대해 ((f⁻¹∘g)⁻¹∘f)(-2)의 값.
+  solution_summary: |
+    ((f⁻¹∘g)⁻¹∘f)=(g⁻¹∘f)∘f=g⁻¹∘(f∘f).
+    f(-2)=-1 (x<0), f(-1)=0 (x<0). 따라서 f∘f(-2)=0.
+    g⁻¹(0)=-1.
+  category: 두 식으로 정의된 함수 · 역함수 성질
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 역함수 성질 · 부분별 값
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-575
+  page: 244
+  category_type: 연습
+  problem_summary: |
+    세 함수 y=f(x), y=g(x), y=x 그래프. (g∘f⁻¹)(6)+(f⁻¹∘g)(5)의 값.
+  solution_summary: |
+    f⁻¹(6)=k, f(k)=6, 그래프에서 k=5. (g∘f⁻¹)(6)=g(5)=3 (그래프).
+    (f⁻¹∘g)(5)=f⁻¹(g(5))=f⁻¹(3)=1 (그래프에서 f(1)=3).
+    합 = 3+1 = 4.
+  category: 그래프 · 역합성 값 추적
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: y=x 이용 · 두 함수 값 추적
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP2 (p.244~245)
+
+```yaml
+- source: 개념원리-CM2-FN-역함수-연습-576
+  page: 244
+  category_type: 연습
+  problem_summary: |
+    f(x)={3x (x≥2), -x²+5x (x<2)}. (f∘f)(3)+f⁻¹(-6)의 값.
+  solution_summary: |
+    f(3)=9 → f(9)=27. (f∘f)(3)=27.
+    f⁻¹(-6)=a: (i) a≥2: 3a=-6 → a=-2 모순.
+    (ii) a<2: -a²+5a=-6 → a²-5a-6=0 → (a+1)(a-6)=0 → a=-1.
+    합 = 27-1 = 26.
+  category: 두 식으로 정의된 함수 · 역상 계산
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 각 분기 대입 · 조건 만족 근
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-577
+  page: 245
+  category_type: 연습
+  problem_summary: |
+    X={1,2,3,4,5}. X→X f의 역함수 존재. f(1)+2f(3)=12, f⁻¹(1)-f⁻¹(3)=2. f(4)+f⁻¹(4)의 값.
+  solution_summary: |
+    일대일대응이므로 {f(1),...,f(5)}={1,...,5}. f(1)+2f(3)=12: (f(1),f(3))=(2,5) 또는 (4,4). 후자 불가 → f(1)=2, f(3)=5.
+    f⁻¹(1)-f⁻¹(3)=2: 즉 f(a)=1, f(b)=3, a-b=2. 가능한 {a,b}⊂{2,4,5}. (a,b)=(4,2) → f(4)=1, f(2)=3. 그러면 f(5)=4.
+    f(4)+f⁻¹(4)=1+f⁻¹(4). f⁻¹(4)=5. 합=6.
+  category: 일대일대응 · 값 배치 논리
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 조건 정수 분해 · 사례 배제
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-578
+  page: 245
+  category_type: 연습
+  problem_summary: |
+    f(x)=ax+b, g(x)=x+c. (f∘g)⁻¹(2x+1)=x. f⁻¹(3)=-1일 때 a+b+c.
+  solution_summary: |
+    f(-1)=3: -a+b=3.
+    (f∘g)⁻¹(2x+1)=x ⇔ (f∘g)(x)=2x+1: f(x+c)=a(x+c)+b=ax+(ac+b)=2x+1 → a=2, ac+b=1.
+    a=2 → b=5 → 2c+5=1 → c=-2. 합 = 5.
+  category: 합성역함수 · 계수 결정
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 역함수 관계 → 합성식 → 계수
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-579
+  page: 245
+  category_type: 연습
+  problem_summary: |
+    일대일대응 f,g,h. (f∘g)(x)=2x-3, h(x)=x+1. (h⁻¹∘g⁻¹∘f⁻¹)(1)의 값.
+  solution_summary: |
+    h⁻¹∘g⁻¹∘f⁻¹ = h⁻¹∘(f∘g)⁻¹. (f∘g)⁻¹(1)=k: 2k-3=1 → k=2. h⁻¹(2)=1 (h(1)=2).
+    답: 1.
+  category: 역함수 성질 · 세 함수 합성
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: (a∘b∘c)⁻¹=c⁻¹∘b⁻¹∘a⁻¹
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-580
+  page: 245
+  category_type: 연습
+  problem_summary: |
+    f(x)=-x|x|+k. f⁻¹(2)=1이고 g(x)=2x+1. (g⁻¹∘f)⁻¹(2)의 값.
+  solution_summary: |
+    f(1)=2 → -1+k=2 → k=3. f(x)=-x|x|+3.
+    (g⁻¹∘f)⁻¹=f⁻¹∘g. g(2)=5. f⁻¹(5)=a: -a|a|+3=5 → -a|a|=2.
+    a<0: -a·(-a)=a²=2 → a=-√2. a≥0: -a²=2 (해 없음).
+    답: -√2.
+  category: 절댓값 · 역함수 · 합성
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 부호 분류 · 역함수 성질
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-581
+  page: 245
+  category_type: 연습
+  problem_summary: |
+    A={x|0≤x≤1}. A→A y=f(x) 그래프 주어짐 (라벨 a,b,c,d,1과 축 참조). g=f⁻¹일 때 (g∘g)(1/2)의 값.
+  solution_summary: |
+    g(1/2)=f⁻¹(1/2). 그래프에서 f(b)=1/2 → g(1/2)=b. g(b)=f⁻¹(b). f(a)=b → g(b)=a.
+    답: a.
+  category: 그래프 · 역함수 반복
+  tier: star_4
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: y축 반사 → x축 좌표 추적
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-연습-582
+  page: 245
+  category_type: 연습
+  problem_summary: |
+    f(x)=(1/2)x²+a (x≥0)과 그 역함수 g에 대해 f(x)=g(x)가 실근 갖도록 하는 a의 범위.
+  solution_summary: |
+    f=g의 실근 ⇔ f(x)=x 실근 (일대일 정의역 조건). (1/2)x²+a=x → x²-2x+2a=0.
+    판별식 D/4=1-2a≥0 → a≤1/2.
+  category: 자기역함수 교점 · 이차 판별식
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: f=g ⇔ f=x · 판별식
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 실력UP (p.246)
+
+```yaml
+- source: 개념원리-CM2-FN-역함수-실력-583
+  page: 246
+  category_type: 연습
+  problem_summary: |
+    f(x)의 역함수를 g(x)라 할 때 f(3x+1)의 역함수가 ag(x)+b일 때 ab.
+  solution_summary: |
+    h(x)=3x+1이라 두면 f∘h의 역함수 = h⁻¹∘f⁻¹ = h⁻¹∘g.
+    h⁻¹(x)=(x-1)/3. (h⁻¹∘g)(x)=(g(x)-1)/3=(1/3)g(x)-1/3.
+    a=1/3, b=-1/3. ab=-1/9.
+  category: 합성함수 · 역함수 · 표현식 계수
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: (f∘h)⁻¹=h⁻¹∘f⁻¹ · 대응
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-실력-584
+  page: 246
+  category_type: 연습
+  problem_summary: |
+    X={1,2,3,4}, Y={2,3,4,5}, Z={3,4,5}. f:X→Y, g:Y→Z. (가) f는 일대일대응. (나) x∈X∩Y이면 g(x)-f(x)=1. 옳은 것: ㄱ. g∘f 치역 = Z. ㄴ. f⁻¹(5)≥2. ㄷ. f(3)<g(2)<f(1)이면 f(4)+g(2)=6.
+  solution_summary: |
+    X∩Y={2,3,4}. (나): g(x)=f(x)+1 for x∈{2,3,4}. g의 치역⊂Z={3,4,5}.
+    ㄱ. f는 X→Y 일대일대응 → {f(2),f(3),f(4)}={2,3,4} 중 3개, f(1)은 나머지. g(f(x))의 치역 검토 → 참.
+    ㄴ. f(1)=5 가능 → f⁻¹(5)=1. → 거짓.
+    ㄷ. 배제 논리로 f(4)+g(2)=8 (거짓).
+    답: ㄱ.
+  category: 두 함수 · 조건 논리 · 진위
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 조건 결합 · 사례 배제
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-실력-585
+  page: 246
+  category_type: 연습
+  problem_summary: |
+    f(x)=x²-4x+a (x≥2). y=f(x)와 y=f⁻¹(x)의 그래프가 서로 다른 두 점에서 만나고 거리 √2일 때 a.
+  solution_summary: |
+    두 교점 y=x 위. x²-4x+a=x → x²-5x+a=0. 근 α,β. 두 점 (α,α), (β,β).
+    거리² = 2(α-β)² = 2. (α-β)²=1. (α+β)²-4αβ=25-4a=1 → a=6.
+  category: 이차 · y=x 교점 두 개 · 거리
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 근과 계수 · 거리 조건
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-FN-역함수-실력-586
+  page: 246
+  category_type: 연습
+  problem_summary: |
+    f(x)={2x-3 (x≥1), (1/2)x-3/2 (x<1)}. y=f(x)와 y=f⁻¹(x)의 그래프로 둘러싸인 도형의 넓이.
+  solution_summary: |
+    y=x 교점: x≥1: 2x-3=x → x=3. x<1: (1/2)x-3/2=x → x=-3.
+    A(3,3), C(-3,-3). AC=6√2.
+    두 그래프의 다른 두 교점 B, D는 y=x 밖 (f와 f⁻¹의 교점). f의 꺾인 점 (1,-1), 대칭점 (-1,1). B(-1,1), D(1,-1). BD=√(4+4)=2√2.
+    사각형 ABCD는 대각선 수직 이등분 → 마름모. 넓이 = (1/2)·6√2·2√2 = 12.
+  category: 두 식으로 정의된 함수·역함수 도형 넓이
+  tier: star_5
+  unit_code: CM2-FN
+  standard: 10수07-02
+  mechanism_primary: 자기역·y=x 대칭 교점 · 마름모 넓이
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 정독 요약
+
+- **정독 총 문항**: 90문항
+  - 필수 예제: 19문 (01: 5, 02: 3, 03: 5, 04: 6)
+  - 확인체크(유제): 47문 (01: 12, 02: 6, 03: 15, 04: 20 중 유제 20)
+  - 연습(STEP1 star 4~ · STEP2 · 실력UP): 24문
+- **답 미검증 (`답 계산 대기`)**: 1문
+  - 개념원리-CM2-FN-함수-유제-524 (개념원리 원문 대응 그림 세부 확인 필요, (2)·(5) 답이 원문 해설과 차이 확인)
+- **tier 분포**:
+  - star 3: 대략 45문 (필수 대부분, 유제 다수)
+  - star 4: 대략 30문 (유제 심화·연습 STEP1·2)
+  - star 5: 대략 15문 (실력UP·최종 연습)
+- **핵심 mechanism 커버리지** (CM2-FN):
+  - 함수 판정, 서로 같은 함수, 그래프 판정
+  - 일대일함수·일대일대응·항등·상수·함수 개수 공식
+  - 합성함수 계산·교환조건·미지 성분 h·반복 fⁿ·부분별 그래프
+  - 역함수 존재 조건·구하기·(합성)⁻¹ 성질·y=x 교점·y=x 대칭
+- **정리편·유형편·연습편 활용도**: star 3~4 핵심 예제 다수 → **정리편 예제·유제 원본 은행**으로 즉시 활용 가능. star 5 실력UP 6문은 **★ 5 슬롯 앵커 후보**.
