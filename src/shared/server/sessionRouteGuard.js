@@ -23,7 +23,10 @@ export function timingSafeEqualText(left = "", right = "") {
  */
 export function createSessionRouteGuard({ getRequestHeader, getSecret, getOpsSecret, now = () => Date.now() }) {
   const resolveOpsSecret = getOpsSecret || getSecret;
-  const OPS_SCOPES = ["read", "cas-write", "highrisk"];
+  // bank-write 는 문제은행(교재 등록·폴더·이미지) 전용이다. 수업일지·학생·알림에는 닿지 않는다.
+  // 교재 패키지 작업은 사람이 매번 교사 토큰을 넘기지 않아도 되게 수명을 길게 잡는 용도라,
+  // 권한 범위를 problem-bank route 안으로 좁혀 둔다(apiAccessPolicy 의 ops 분기 참고).
+  const OPS_SCOPES = ["read", "bank-write", "cas-write", "highrisk"];
 
   function encodeBase64Url(value) {
     return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -70,7 +73,11 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, getOpsSec
   function createOpsSessionToken({ scope, tenantId = null, crossTenant = false, label = "", ttlMs } = {}) {
     if (!OPS_SCOPES.includes(scope)) throw new Error(`잘못된 ops scope: ${scope}`);
     if (!tenantId && !crossTenant) throw new Error("ops 토큰에는 tenantId 또는 crossTenant:true 가 필요합니다.");
-    const defaultTtl = scope === "read" ? 1000 * 60 * 60 * 2 : scope === "cas-write" ? 1000 * 60 * 30 : 1000 * 60 * 15;
+    const defaultTtl = scope === "read"
+      ? 1000 * 60 * 60 * 2
+      : scope === "bank-write"
+        ? 1000 * 60 * 60 * 24 * 30
+        : scope === "cas-write" ? 1000 * 60 * 30 : 1000 * 60 * 15;
     const payload = encodeBase64Url({
       role: "ops",
       scope,

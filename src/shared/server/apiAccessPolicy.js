@@ -133,6 +133,17 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   // 읽는 것뿐이고, 부트스트랩이 부른다.
 ]);
 
+// ops bank-write 스코프 전용. 문제은행 교재 등록·폴더·이미지만 건드린다.
+// 이 스코프는 problem-bank 밖으로는 읽기도 못 한다(아래 ops 분기에서 경로를 먼저 본다).
+// 교재 삭제(DELETE)는 넣지 않는다 — 문항·학생 기록·이미지가 함께 지워지므로 사람이 화면에서 한다.
+const OPS_BANKWRITE_PREFIX = "/api/problem-bank/";
+const OPS_BANKWRITE_POST = new Set([
+  "POST /api/problem-bank/import",
+  "POST /api/problem-bank/import-answers",
+  "POST /api/problem-bank/images",
+  "POST /api/problem-bank/book"
+]);
+
 // ops cas-write 스코프가 호출 가능한 POST (그 외 POST/DELETE 는 highrisk 만).
 const OPS_CASWRITE_POST = new Set([
   "POST /api/lesson-journal/rows/save",
@@ -280,6 +291,14 @@ export function evaluateApiAccess({ method, pathname, auth = { kind: "none" } })
 
   if (auth.kind === "ops") {
     if (auth.opsScope === "highrisk") return { ok: true, status: 200 };
+    // bank-write 는 다른 스코프보다 먼저 본다. GET 도 problem-bank 밖은 막아야 하므로
+    // 아래의 "모든 ops 는 GET 허용" 규칙에 걸리기 전에 경로를 먼저 판정한다.
+    if (auth.opsScope === "bank-write") {
+      if (!pathname.startsWith(OPS_BANKWRITE_PREFIX)) return { ok: false, status: 403, code: "scope_forbidden" };
+      if (method === "GET") return { ok: true, status: 200 };
+      if (OPS_BANKWRITE_POST.has(`${method} ${pathname}`)) return { ok: true, status: 200 };
+      return { ok: false, status: 403, code: "scope_forbidden" };
+    }
     if (method === "GET") return { ok: true, status: 200 };
     if (auth.opsScope === "read") return { ok: false, status: 403, code: "scope_forbidden" };
     // cas-write
