@@ -31,6 +31,10 @@ assert.equal(guard.verifyOpsSessionToken(guard.createTeacherSessionToken({ teach
 assert.throws(() => guard.createOpsSessionToken({ scope: "admin", tenantId: "tenant_abc" }), /잘못된 ops scope/);
 // tenantId 도 crossTenant 도 없으면 거부
 assert.throws(() => guard.createOpsSessionToken({ scope: "read" }), /tenantId 또는 crossTenant/);
+// bank-write 토큰은 기본 수명이 길다(사람이 매번 넘기지 않아도 되게). 30일.
+const bankToken = guard.createOpsSessionToken({ scope: "bank-write", tenantId: "tenant_abc", label: "claude-problem-bank" });
+assert.equal(guard.verifyOpsSessionToken(bankToken).scope, "bank-write");
+assert.equal(guard.verifyOpsSessionToken(bankToken).exp - clock, 1000 * 60 * 60 * 24 * 30);
 // crossTenant 토큰
 const crossToken = guard.createOpsSessionToken({ scope: "highrisk", crossTenant: true, label: "operator" });
 assert.equal(guard.verifyOpsSessionToken(crossToken).tenantId, null);
@@ -148,6 +152,27 @@ assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "ops", 
 assert.equal(A("POST", "/api/notification-jobs/reserve", { kind: "ops", opsScope: "cas-write" }).status, 403);
 assert.equal(A("POST", "/api/ai/comment-polish", { kind: "ops", opsScope: "cas-write" }).status, 403);
 
+// ops bank-write → 문제은행 route 안에서만. 교재 등록·폴더·이미지는 되고 삭제는 안 된다.
+const bank = { kind: "ops", opsScope: "bank-write" };
+assert.equal(A("GET", "/api/problem-bank/books", bank).ok, true);
+assert.equal(A("GET", "/api/problem-bank/book-audit", bank).ok, true);
+assert.equal(A("POST", "/api/problem-bank/import", bank).ok, true);
+assert.equal(A("POST", "/api/problem-bank/import-answers", bank).ok, true);
+assert.equal(A("POST", "/api/problem-bank/images", bank).ok, true);
+assert.equal(A("POST", "/api/problem-bank/book", bank).ok, true);
+// 교재 삭제는 문항·학생 기록·이미지가 함께 지워지므로 이 토큰으로는 못 한다.
+assert.deepEqual(A("DELETE", "/api/problem-bank/book", bank), { ok: false, status: 403, code: "scope_forbidden" });
+// 목록에 없는 problem-bank POST 도 막는다.
+assert.equal(A("POST", "/api/problem-bank/attempts", bank).status, 403);
+// problem-bank 밖은 읽기조차 막는다 — 다른 ops 스코프의 "모든 GET 허용"이 적용되면 안 된다.
+assert.deepEqual(A("GET", "/api/students", bank), { ok: false, status: 403, code: "scope_forbidden" });
+assert.equal(A("GET", "/api/lessons", bank).status, 403);
+assert.equal(A("GET", "/api/notification-jobs", bank).status, 403);
+assert.equal(A("POST", "/api/students", bank).status, 403);
+assert.equal(A("POST", "/api/notifications/attendance-alimtalk", bank).status, 403);
+// CAS 버전 검사는 bank-write 에 걸리지 않는다(문제은행 저장에는 version 필드가 없다).
+assert.equal(A("POST", "/api/problem-bank/import", { ...bank, hasVersionField: false }).ok, true);
+
 // ops highrisk → 전부
 assert.equal(A("DELETE", "/api/lessons", { kind: "ops", opsScope: "highrisk" }).ok, true);
 assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "ops", opsScope: "highrisk" }).ok, true);
@@ -165,4 +190,4 @@ assert.equal(A("POST", "/api/lesson-records", { kind: "kiosk" }).status, 403);
 assert.equal(A("GET", "/", { kind: "none" }).ok, true);
 assert.equal(A("HEAD", "/", { kind: "none" }).ok, true);
 
-console.log("api access policy: ops token, public/dispatch, teacher owner/assistant, ops read/cas-write/highrisk, kiosk contracts passed");
+console.log("api access policy: ops token, public/dispatch, teacher owner/assistant, ops read/bank-write/cas-write/highrisk, kiosk contracts passed");
