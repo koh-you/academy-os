@@ -77,7 +77,12 @@ test("exam prep rows consolidate review and management actions into the detail m
 
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   await expect(detailDialog.getByRole("button", { name: "시험 후 총평 작성" })).toBeVisible();
-  await expect(detailDialog.getByRole("button", { name: "시험정보 삭제" })).toBeVisible();
+  // 2026-09-19 · 시험정보 삭제는 푸터 왼쪽 끝 ⋯ 메뉴(… 추가 작업)로 접었다. 항목만 확인하고 Esc 로 메뉴만 닫는다.
+  await detailDialog.getByRole("button", { name: "안전고 추가 작업" }).click();
+  await expect(detailDialog.getByRole("menuitem", { name: "시험정보 삭제" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(detailDialog.getByRole("menuitem", { name: "시험정보 삭제" })).toBeHidden();
+  await expect(detailDialog).toBeVisible();
   await detailDialog.getByRole("button", { name: "시험 후 총평 작성" }).click();
   await expect(page.getByRole("dialog", { name: "안전고 시험 후 총평" })).toBeVisible();
   expect(pageErrors).toEqual([]);
@@ -154,7 +159,15 @@ test("exam prep closes an unsaved draft without changing the server source", asy
   captureRequests = true;
   await scopeInput.fill("저장하지 않고 닫을 초안");
   await expect(detailDialog.getByText("시험정보 · 변경됨")).toBeVisible();
+  // 2026-09-19 · U10: 초안이 있는 채로 닫으면 window.confirm 이 한 번 뜬다. 수락해야 초안을 버리고 닫힌다.
+  const dialogMessages = [];
+  page.once("dialog", (dialog) => {
+    dialogMessages.push(dialog.message());
+    dialog.accept();
+  });
   await detailDialog.getByRole("button", { name: "닫기", exact: true }).click();
+  await expect(detailDialog).toBeHidden();
+  expect(dialogMessages).toEqual(["저장하지 않은 변경이 있습니다. 닫을까요?"]);
   expect(requests).toHaveLength(0);
 
   const persistedResponse = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
@@ -360,10 +373,11 @@ test("exam prep calendar exposes every school and switches the daily roster betw
   await examPrepPill.click();
 
   const dialog = page.getByRole("dialog", { name: "시험대비" });
-  await expect(dialog.getByRole("button", { name: "시간순" })).toHaveAttribute("aria-pressed", "true");
+  // 2026-09-19 · 명단 정렬은 탭(role=tab/aria-selected)이다. aria-pressed 토글 의미를 걷어냈다.
+  await expect(dialog.getByRole("tab", { name: "시간순" })).toHaveAttribute("aria-selected", "true");
   await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["13:30-15:00", "15:00-18:00"]);
   await expect(dialog.locator(".examPrepRosterRow > div > strong")).toHaveText(["박나래", "김가람", "이도윤"]);
-  await dialog.getByRole("button", { name: "학교별" }).click();
+  await dialog.getByRole("tab", { name: "학교별" }).click();
   await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["상계중", "자운고", "정의여고"]);
 
   await page.setViewportSize({ height: 844, width: 390 });

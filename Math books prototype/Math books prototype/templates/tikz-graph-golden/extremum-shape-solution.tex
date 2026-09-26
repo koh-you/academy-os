@@ -1,0 +1,65 @@
+% 골든 · 유형 2 함수 최댓값·최솟값 (해설용 · 풍부)
+% 세션 75 신설 · 와부고 스타일 도입
+% [[feedback_wabuko_graph_standard]] 5대 원칙 준수
+%
+% 목적 : 폐구간·개구간 위에서 함수의 최댓값·최솟값 풀이 (답지)
+%   - 해설용 : 문제용 + 눈금·점선 grid·최댓값·최솟값 표시
+%   - 학생이 풀이 이해 위한 시각 정보 풍부
+%
+% 문제용 대비 추가 요소 :
+%   1. x·y축 눈금 숫자
+%   2. 점선 grid (경계점에서 축까지)
+%   3. 최댓값·최솟값 dm-accent 강조점
+%   4. 극값 좌표 라벨
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (4.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 4) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {$\mathrm{O}$};
+
+  % ── 축 눈금 라벨 (해설용 신규 · 특징적 값 표시)
+  \node[font=\tiny, below] at (-0.3, -0.02) {$-2$};    % 정의역 왼쪽 (예시)
+  \node[font=\tiny, below] at (3, -0.02) {$1$};        % 정의역 오른쪽 (예시)
+  \node[font=\tiny, left] at (-0.02, 3) {$3$};         % 최댓값 (예시)
+  \node[font=\tiny, left] at (-0.02, {-sqrt(-2*(-0.3 - 3)) + 3}) {$b$};  % 최솟값 (예시)
+
+  % ── 점선 grid (해설용 신규 · 눈금에서 곡선까지)
+  \draw[gray, line width=0.3pt, dash pattern=on 1pt off 1pt]
+    (-0.3, 0) -- (-0.3, {-sqrt(-2*(-0.3 - 3)) + 3})
+    (0, {-sqrt(-2*(-0.3 - 3)) + 3}) -- (-0.3, {-sqrt(-2*(-0.3 - 3)) + 3})
+    (3, 0) -- (3, 3)
+    (0, 3) -- (3, 3);
+
+  % ── 곡선 · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=-0.3:3, samples=80]
+    plot (\x, {-sqrt(-2*(\x - 3)) + 3});
+
+  % ── 정의역 경계점 (해설용은 최댓값·최솟값 강조)
+  \filldraw[dm-accent] (-0.3, {-sqrt(-2*(-0.3 - 3)) + 3}) circle (0.8pt);   % 최솟값 (예시)
+  \filldraw[dm-accent] (3, 3) circle (0.8pt);                                % 최댓값 (예시)
+
+  % ── 곡선 라벨
+  \node[font=\scriptsize, anchor=west] at (2.5, 1.7) {$y=f(x)$};
+\end{tikzpicture}
+\end{center}
+
+% === 문제용 대비 추가 요소 ===
+% 1. 축 눈금 숫자 : \node[font=\tiny, below/left] 로 특징 좌표값 표시
+% 2. 점선 grid : gray line width=0.3pt · dash pattern=on 1pt off 1pt · 눈금에서 곡선까지
+% 3. 극값 강조 : filldraw[dm-accent] 로 정점 표시
+% 4. 좌표 라벨 : 극값·정의역 경계 등
+%
+% === 사용 시 교체 대상 ===
+% 1. 곡선 방정식·domain
+% 2. 정의역 경계 좌표·최댓값·최솟값 좌표
+% 3. 축 눈금 라벨 (특징 좌표값 · 예 : 정의역 끝점·극값 y좌표)
+% 4. 점선 grid 라인 (각 특징점에서 축까지)
+% 5. dm-accent 강조점 위치 (최댓값·최솟값)
+%
+% === 유지 대상 ===
+% - scale=1.0
+% - line width 표준
+% - grid 점선 두께 0.3pt (얇게 · 곡선 시야 방해 X)
+% - dm-accent 파생점 강조 (문제용에는 검정 · 해설용에는 dm-accent)

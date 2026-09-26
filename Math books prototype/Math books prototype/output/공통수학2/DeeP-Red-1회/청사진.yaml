@@ -1,0 +1,289 @@
+# 내신대비 [공통수학2] DeeP Red 1회 청사진
+# 방안 F 첫 실전 시범 (2026-07-15 세션 44)
+# 청사진 v6.0 (source·tier·variation_type 필수 · Agent 자체 판정 필드 완전 폐기)
+#
+# 정책 준수 (4대):
+#   - policy-star-5-only: 전 슬롯 tier ≥ star_5 · star_premium 3문
+#   - policy-no-textbook-recap: 정의박스 교과 회고 절대 금지
+#   - policy-no-structure-repetition: 신규 시리즈 (자기복제 대상 없음)
+#   - policy-slot-size-uniform: pair×2 페이지 슬롯 편차 σ ≤ 10mm
+#
+# 방안 F 원칙 (v1.7 재편 · 세션 44 확립):
+#   - 원본 = 정독 파일 18개 · 마스터가 이미 tier 라벨링 완료
+#   - Agent 자체 창작 완전 배제 · 최소 변형 (숫자 or 동등)만
+#   - source-filter 결정적 정렬 · usage_count 0 (첫 실전 · 자기복제 없음)
+
+meta:
+  series: 내신대비 [공통수학2] DeeP Red
+  round: 1
+  curriculum: 2022 개정 공통수학2
+  scope: 2학기-중간 (CM2-GM + CM2-ST)
+  date_prepared: 2026-07-15
+  target_audience: 최상위권 정점 훈련
+  scoring_version: v6.0 (방안 F · source 기반)
+  agent: problem-author v1.7
+  policy_compliance:
+    policy_star_5_only: true
+    policy_no_textbook_recap: true
+    policy_no_structure_repetition: true
+    policy_slot_size_uniform: true
+
+range:
+  units: [CM2-GM, CM2-ST]
+  sub_units_included:
+    CM2-GM:
+      - G01 평면좌표 (거리·내분점·외분점·무게중심)
+      - G02 직선의 방정식 (기울기·수직·정점·평행)
+      - G03 원의 방정식 (표준형·접선·근축·자취)
+      - G04 도형의 이동 (평행이동·대칭이동)
+    CM2-ST:
+      - S01 집합의 표현·부분집합
+      - S02 집합의 연산 (합·교·차·여집합·드모르간)
+      - S03 명제와 조건 (참·거짓·대우·필충·반례)
+
+structure:
+  total_slots: 17
+  total_points: 100
+  layout:
+    - {section: 선택형, slots: 12, points: 65}
+    - {section: 서술형, slots: 5, points: 35}
+
+# 정점 3문 (모두 star_5_premium 원본)
+premium_targets:
+  count: 3
+  positions: ['#14', '#16', '#17']
+
+# Chapter 분포 (다양성 확보)
+chapter_distribution:
+  CH01 평면좌표: 2 slots (#1, #2)
+  CH02 직선: 2 slots (#3, #8)
+  CH03 원: 3 slots (#7, #9, #14, #17)  # #14·#17 premium
+  CH04 도형이동: 2 slots (#12, #15)
+  CH05 집합: 5 slots (#4, #5, #6, #11, #13, #16)  # #16 premium
+  CH06 명제: 1 slot (#10)
+
+# 🔴 방안 F 원본 지정 (17 슬롯 · Agent 자동 pick · 마스터 검토 대상)
+slots:
+  # === 선택형 (12문 · 65점) ===
+  - n: 1
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH01-STEP2-#019
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "M1 절댓값 부등식·구간 분할. 계수·상수만 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 62
+
+  - n: 2
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH01-STEP2-#025
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "M17 무게중심 2:1 성질. 좌표값·비율 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 62
+
+  - n: 3
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH02-STEP2-#073
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "일차방정식 계수 부호↔그래프 개형 대응. 계수 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 68
+
+  - n: 4
+    section: 선택형
+    points: 5
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#300
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "조건제시법 → 원소나열법 · 함수 image. 나머지 함수 형태 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 65
+
+  - n: 5
+    section: 선택형
+    points: 5
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#306
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "구간 부분집합 조건 · 양 끝 부등호 분리. 구간 값 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 60
+
+  - n: 6
+    section: 선택형
+    points: 5
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#312
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "배수집합 A_k의 포함관계 (A_p⊂A_q ⇔ q|p). 숫자 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 60
+
+  - n: 7
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP2-#145
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "원의 넓이와 직사각형 넓이 동시 이등분 직선 (중심 통과). 값 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 65
+
+  - n: 8
+    section: 선택형
+    points: 6
+    unit: CM2-GM
+    source: 고쟁이-CH02-STEP2-#075
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "정점 통과 직선족 · 매개변수 k에 대해 정리. 계수 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 70
+
+  - n: 9
+    section: 선택형
+    points: 6
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP2-#152
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "원 위의 점 → y² 소거 → x 함수 최적화. 원 방정식 값 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 68
+
+  - n: 10
+    section: 선택형
+    points: 6
+    unit: CM2-ST
+    source: 고쟁이-CH06-STEP2-#403
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "5명제 개별 참·거짓 판별. 명제 조건 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 75
+
+  - n: 11
+    section: 선택형
+    points: 6
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#320
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "교집합 3-case 분기 · 약수 후보 열거 · 홀수 필터. 값 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 72
+
+  - n: 12
+    section: 선택형
+    points: 6
+    unit: CM2-GM
+    source: 고쟁이-CH04-STEP2-#220
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "이동 규칙 반복 (iterative rule). 이동 벡터·횟수 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 70
+
+  # === 서술형 (5문 · 35점) ===
+  - n: 13
+    section: 서술형
+    points: 6
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#329
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "3집합 벤 다이어그램 · 포함배제로 정확히 1집합에 속하는 원소 개수. 값 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 100
+
+  - n: 14
+    section: 서술형
+    points: 7
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP3-#186
+    tier: star_5_premium         # 🌟 정점 1
+    variation_type: number_only
+    variation_notes: "원 위 점 삼각형 넓이 자연수 조건 (연속 조건 → 이산 개수). 원·값 교체."
+    similarity_target: 0.55
+    layout_hint: probpairfillpage
+    estimated_mm: 180
+
+  - n: 15
+    section: 서술형
+    points: 7
+    unit: CM2-GM
+    source: 고쟁이-CH04-STEP2-#221
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "평행이동 후 원-직선 접선 조건. 원·이동 벡터 교체."
+    similarity_target: 0.55
+    layout_hint: probpair
+    estimated_mm: 110
+
+  - n: 16
+    section: 서술형
+    points: 7
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP3-#360
+    tier: star_5_premium         # 🌟 정점 2
+    variation_type: number_only
+    variation_notes: "A∪C=B∪C ⇔ A△B⊂C 항등 + n(A△B)로 C 개수 결정 → (a,b) case. 원소·값 교체."
+    similarity_target: 0.55
+    layout_hint: probpairfillpage
+    estimated_mm: 175
+
+  - n: 17
+    section: 서술형
+    points: 8
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP3-#193
+    tier: star_5_premium         # 🌟 정점 3
+    variation_type: number_only
+    variation_notes: "두 원 교점 현 길이 조건 → 두 케이스 (중심-현 상대 위치). 원·현 값 교체."
+    similarity_target: 0.55
+    layout_hint: probpairfillpage
+    estimated_mm: 200
+
+# usage-log append 대상 (회차 완성 후)
+usage_log_pending:
+  round: 1
+  series: 내신대비-CM2-DeeP-Red
+  slots_to_log: 17
+
+# 다음 단계
+next_actions:
+  - 마스터 슬롯별 원본·변형 방향 검토
+  - problem-author v1.7 · 원본 조회 (source-filter --source per slot)
+  - 원본 PDF 발문 확보 (참고자료/공통수학2/[고등1-2] 고쟁이 공통수학2 (2022개정).pdf)
+  - 최소 변형 (숫자 교체) 설계
+  - tex 조판 (골든 템플릿)
+  - copyright-similarity-check per slot (0.30~0.85 GREEN 도달)
+  - solution-author 답지 작성
+  - 검수 3종 (problem-review · solution-review · exam-review)
+  - usage-log append

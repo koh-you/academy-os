@@ -1,0 +1,193 @@
+/* 2026-09-26 · 수업 등록/수정 모달 가로 2열 레이아웃.
+   여기 있는 셀렉터는 App.css 에서 지우고 옮겨 왔다 — 같은 셀렉터를 두 파일에 두지 않는다(test-ui-css-hygiene).
+   공용 typeTabs·lessonColorPalette·lessonStudentChip 의 기본형은 App.css 에 그대로 두고,
+   이 모달에서만 달라지는 것은 `.lessonModal` 아래로 범위를 한정한다. */
+
+.modalCard.lessonModal {
+  gap: 16px;
+  /* 배경 패딩(56px × 2)을 빼서 1440×950 에서도 페이지가 세로로 넘치지 않게 한다. */
+  max-height: calc(100dvh - 112px);
+  max-width: 1040px;
+  padding: 24px 26px;
+  width: min(1040px, calc(100vw - 48px));
+}
+
+.lessonModalLayout {
+  align-items: start;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+.lessonModalFormColumn,
+.lessonModalRosterColumn {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.lessonModalRosterColumn {
+  align-content: start;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+/* 2026-09-26(검증 반영) · 이 두 블록은 App.css 에서 옮겨 온 것이라 범위가 없으면
+   같은 클래스를 쓰는 반 개설/수정 모달(ClassTemplateEditorModal)까지 바꾼다. `.lessonModal` 아래로 한정한다. */
+.lessonModal .lessonModalSection {
+  gap: 10px;
+}
+
+/* 유형 8개를 3줄(176px)에서 2줄로 줄인다. 버튼은 그대로 8개다. */
+.lessonModal .typeTabs {
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lessonModal .typeTabs button {
+  font-size: 14px;
+  line-height: 1.2;
+  min-height: var(--academy-touch-target, 44px);
+  padding: 6px 4px;
+}
+
+/* App.css 의 `.fieldGrid.two` 는 1100px 이하에서 1열로 접는다. 이 모달은 1열 구간에서도 2열을 지키므로
+   그 media 규칙(0,2,0)보다 높은 `.modalCard.lessonModal`(0,3,0) 로 적어 로드 순서에 기대지 않는다. */
+.modalCard.lessonModal .lessonModalFields {
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* 수업명·날짜는 한 줄씩, 시작·종료는 나란히 둔다 — 시작을 바꿀 때 종료가 따라가는 것이 한 눈에 보여야 한다. */
+.modalCard.lessonModal .lessonModalFields > label:nth-child(-n + 2) {
+  grid-column: 1 / -1;
+}
+
+.lessonModalFieldHint {
+  color: var(--academy-muted, #64748b);
+  font-weight: 700;
+}
+
+.lessonStudentPicker {
+  gap: 10px;
+}
+
+/* 2026-09-26(검증 반영) · 공용 SectionHeader 의 aside 는 `flex: 0 0 auto` 라 헤더 액션 줄
+   (반 불러오기 select + HelpTip + 전체 선택)이 오른쪽 열 content box 보다 넓어도 줄지 않는다
+   (1440 에서 992 vs 988). 그래서 모달 본문이 가로로 스크롤됐고, 옆으로 밀면 왼쪽 열 라벨이 잘렸다("수업 유형" -> "업 유형").
+   flex-wrap + `flex-basis: 100%` 만으로는 부족하다 — 퍼센트 flex-basis 는 컨테이너 main 크기가 미정인 채로
+   배치될 때 content 로 되돌아가서, 좁은 폭(390px)에서는 제목 옆에 그대로 남았다(실측 확인).
+   그래서 이 헤더만 1열 grid 로 둔다. 제목 한 줄 + 액션 한 줄이 열 폭 안에서 확정된다. */
+.lessonStudentPicker .sectionHeader {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 0;
+}
+
+/* 위 grid 의 두 번째 행. 열 폭 안에서 줄어들 수 있어야 안쪽 액션들이 줄바꿈된다. */
+.lessonStudentPicker .sectionHeaderAside {
+  justify-content: flex-start;
+  margin-left: 0;
+  min-width: 0;
+}
+
+.lessonRosterHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lessonRosterTemplatePicker {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lessonRosterTemplatePicker select {
+  max-width: 160px;
+  min-height: 36px;
+  min-width: 0;
+}
+
+.lessonStudentSearchRow {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+/* 학생이 22명이어도 모달 높이가 늘지 않도록 오른쪽 열 명단만 스크롤한다. */
+.lessonStudentGroups {
+  display: grid;
+  gap: 12px;
+  max-height: min(40dvh, 340px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+}
+
+.lessonStudentGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.lessonStudentGroup > div:first-child {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+}
+
+/* 1100px 이하(태블릿 레일 구간)에서는 한 열로 접는다 — docs/ui-principles.md §11. */
+@media (max-width: 1100px) {
+  /* 2026-09-26(검증 반영) · 1열 전환점(1100px)과 카드 폭 상한(1040px)이 맞물리지 않아
+     640~1100px 에서 입력 하나가 900~970px 까지 늘어났다. 1열에서는 카드를 좁히고
+     수업명·날짜도 시작·종료와 같은 2열에 둔다(입력 폭 500px 이하). */
+  .modalCard.lessonModal {
+    max-width: 760px;
+    width: min(760px, calc(100vw - 48px));
+  }
+
+  .lessonModalLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modalCard.lessonModal .lessonModalFields > label:nth-child(-n + 2) {
+    grid-column: auto;
+  }
+
+  .lessonStudentGroups {
+    max-height: min(34dvh, 300px);
+  }
+}
+
+@media (max-width: 640px) {
+  .modalCard.lessonModal {
+    padding: 18px 16px;
+    width: min(760px, calc(100vw - 20px));
+  }
+
+  /* 390px 에서는 수업명·날짜를 다시 한 줄씩 쓴다(시작·종료만 나란히). */
+  .modalCard.lessonModal .lessonModalFields > label:nth-child(-n + 2) {
+    grid-column: 1 / -1;
+  }
+
+  .lessonModal .typeTabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lessonStudentSearchRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lessonRosterTemplatePicker select {
+    max-width: none;
+  }
+}

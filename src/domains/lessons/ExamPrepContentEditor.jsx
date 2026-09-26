@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import {
   createExamPrepStudentContentDrafts,
   createExamPrepStudentContentSaveItems,
@@ -48,9 +49,12 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
   return (
     <div className="examPrepLessonContentEditor">
       <div className="examPrepStudentContentHeading">
-        <div>
+        <div className="helpTipTitleRow">
           <strong>학생별 오늘 진행한 내용</strong>
-          <p>학생마다 별도의 칸에 적고 각각의 수업기록으로 저장합니다.</p>
+          <HelpTip
+            label="학생별 오늘 진행한 내용"
+            text="학생마다 별도의 칸에 적고 각각의 수업기록으로 저장합니다."
+          />
         </div>
         <span>{studentRows.length}명</span>
       </div>

@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 export function createSupplementSchedulePersistencePlan({
   addMinutes,
   createLessonId,
@@ -47,7 +48,7 @@ export function createSupplementSchedulePersistencePlan({
     startTime: task.scheduledTime,
     endTime: addMinutes(task.scheduledTime, 60),
     color: getLessonColor(task.taskType),
-    teacherId: "instructor_owner_001",
+    teacherId: getSessionTeacherId(),
     studentIds: [student.studentId],
     status: "scheduled",
     lessonTopic: `${followUpTypeLabel(task.taskType)} 일정`,

@@ -3,13 +3,14 @@ import "./settingsCenter.css";
 import { useEffect, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { defaultAttendanceSettings } from "../lessons/attendanceSettings.js";
+import { defaultTenantSettings, normalizeTenantSettings } from "./tenantSettings.js";
+import "./tenantSettings.css";
 import { getNotificationJobLabel } from "../notifications/notificationCenterConfig.js";
 import { notificationTemplateRows } from "./notificationTemplateSettingsCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
-import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 
 const aiProviderModels = {
@@ -114,9 +115,9 @@ function NotificationSettingsSection({ integrationStatus, runtime }) {
   return (
     <section className="panel settingsCard">
       <div className="sectionTitle">
-        <div>
+        <div className="helpTipTitleRow">
           <h2>알림톡 설정</h2>
-          <p>솔라피 연결, 실제번호 잠금, 템플릿 테스트를 확인합니다.</p>
+          <HelpTip label="알림톡 설정" text="솔라피 연결, 실제번호 잠금, 템플릿 테스트를 확인합니다." />
         </div>
         <span className={notificationStatus?.missing?.length ? "statusPill status-failed" : "statusPill status-sent"}>
           {notificationStatus?.missing?.length ? "확인 필요" : "준비됨"}
@@ -201,6 +202,9 @@ export function SettingsCenter({
   aiSettings,
   appStateSaveState = "idle",
   attendanceSettings = defaultAttendanceSettings,
+  classTemplates = [],
+  onUpdateTenantSettings,
+  tenantSettings = defaultTenantSettings,
   integrationStatus,
   onUpdateAiSettings,
   onUpdateAttendanceSettings,
@@ -285,8 +289,13 @@ export function SettingsCenter({
     { id: "notificationTemplates", label: "알림톡 문구" },
     { id: "ai", label: "AI 모델" },
     { id: "prompts", label: "AI 프롬프트" },
-    { id: "attendance", label: "출결" }
-  ] : [{ id: "account", label: "계정" }];
+    { id: "attendance", label: "출결" },
+    { id: "tenant", label: "운영 설정" }
+  ] : [
+    { id: "account", label: "계정" },
+    // tenant 설정은 자기 tenant 의 app_state 에만 저장되므로 협력 교사도 자기 것을 정한다.
+    { id: "tenant", label: "운영 설정" }
+  ];
 
   useEffect(() => {
     setAccountForm((current) => ({
@@ -294,6 +303,19 @@ export function SettingsCenter({
       loginId: account.loginId
     }));
   }, [account.loginId]);
+
+  // 지각 유예시간은 키 입력마다 최소 5분으로 클램프하면 '10'을 칠 수 없다('1' → 5 → '50').
+  // 입력 중에는 로컬 draft 만 바꾸고, 포커스가 빠지거나 Enter 를 눌렀을 때 정규화해 저장한다(2026-09-19).
+  const [graceDraft, setGraceDraft] = useState(String(attendance.lateGraceMinutes));
+  useEffect(() => {
+    setGraceDraft(String(attendance.lateGraceMinutes));
+  }, [attendance.lateGraceMinutes]);
+
+  function commitGraceDraft() {
+    const normalized = Math.max(5, Number(graceDraft) || 5);
+    setGraceDraft(String(normalized));
+    if (normalized !== attendance.lateGraceMinutes) updateAttendanceSetting("lateGraceMinutes", normalized);
+  }
 
   function updateProvider(row, provider) {
     const models = row.modelOptions?.[provider] ?? aiProviderModels[provider] ?? aiProviderModels.auto;
@@ -355,6 +377,17 @@ export function SettingsCenter({
     }));
   }
 
+  const tenant = normalizeTenantSettings(tenantSettings);
+  function updateTenantSetting(field, value) {
+    onUpdateTenantSettings?.((current) => ({ ...normalizeTenantSettings(current), [field]: value }));
+  }
+  function toggleExamPrepAutoRowClass(classTemplateId) {
+    const current = new Set(tenant.examPrepAutoRowClassTemplateIds);
+    if (current.has(classTemplateId)) current.delete(classTemplateId);
+    else current.add(classTemplateId);
+    updateTenantSetting("examPrepAutoRowClassTemplateIds", classTemplates.map((template) => template.classTemplateId).filter((id) => current.has(id)));
+  }
+
   function updateAccountForm(field, value) {
     setAccountForm((current) => ({ ...current, [field]: value }));
     setAccountMessage("");
@@ -410,14 +443,13 @@ export function SettingsCenter({
       <PageHeader
         actions={<InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />}
         className="settingsHero"
-        description="AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다."
-        eyebrow="SETTINGS"
         title="설정"
+        titleAdornment={<HelpTip label="설정" text="AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다." />}
       />
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
-      <WorkspaceTabs className="settingsSectionTabs" label="설정 항목 선택" variant="secondary">
+      <WorkspaceTabs className="settingsSectionTabs" label="설정 항목 선택">
         {settingsSections.map((section) => (
           <button
             aria-selected={activeSettingsSection === section.id}
@@ -435,9 +467,9 @@ export function SettingsCenter({
       {activeSettingsSection === "account" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
+          <div className="helpTipTitleRow">
             <h2>계정 설정</h2>
-            <p>선생님 로그인 아이디와 비밀번호를 관리합니다.</p>
+            <HelpTip label="계정 설정" text="선생님 로그인 아이디와 비밀번호를 관리합니다." />
           </div>
         </div>
         <form className="accountSettingsGrid" onSubmit={saveTeacherAccount}>
@@ -490,8 +522,12 @@ export function SettingsCenter({
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
-            <h2>알림톡 템플릿 문구</h2>
-            <p>보충 알림톡과 일반 공지·특강 안내 초안이 읽는 문구 원천입니다. 교사가 저장한 기존 최종본은 바꾸지 않습니다.</p>
+            <div className="helpTipTitleRow">
+              <h2>알림톡 템플릿 문구</h2>
+              <HelpTip label="알림톡 템플릿 문구" text="보충 알림톡과 일반 공지·특강 안내 초안이 읽는 문구 원천입니다." />
+            </div>
+            {/* 2026-09-26 · 무엇을 덮어쓰지 않는지는 저장 경계 고지라 고치는 그 자리에 남긴다. */}
+            <p>여기서 문구를 고쳐도 교사가 이미 저장한 최종본은 바뀌지 않습니다.</p>
           </div>
         </div>
         <div className="notificationTemplateSettingsGrid">
@@ -535,9 +571,9 @@ export function SettingsCenter({
       {activeSettingsSection === "ai" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
+          <div className="helpTipTitleRow">
             <h2>AI 설정</h2>
-            <p>기능별 기본 AI 제공자와 모델을 관리합니다.</p>
+            <HelpTip label="AI 설정" text="기능별 기본 AI 제공자와 모델을 관리합니다." />
           </div>
         </div>
         <div className="settingsRows">
@@ -548,8 +584,10 @@ export function SettingsCenter({
             return (
               <div className="settingsRow" key={row.providerKey}>
                 <div>
-                  <strong>{row.title}</strong>
-                  <span className="muted">{row.description}</span>
+                  <span className="helpTipTitleRow">
+                    <strong>{row.title}</strong>
+                    <HelpTip label={row.title} text={row.description} />
+                  </span>
                 </div>
                 <select aria-label={`${row.title} AI 제공자`} value={provider} onChange={(event) => updateProvider(row, event.target.value)}>
                   <option value="auto">자동 선택</option>
@@ -572,9 +610,9 @@ export function SettingsCenter({
       {activeSettingsSection === "prompts" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
+          <div className="helpTipTitleRow">
             <h2>AI 프롬프트</h2>
-            <p>웹앱에서 AI 호출이 있는 기능의 기본 지시문을 확인하고 수정합니다.</p>
+            <HelpTip label="AI 프롬프트" text="웹앱에서 AI 호출이 있는 기능의 기본 지시문을 확인하고 수정합니다." />
           </div>
           <button className="softButton" onClick={() => resetPrompt(activePrompt.key)} type="button">
             기본값 복원
@@ -636,38 +674,93 @@ export function SettingsCenter({
       {activeSettingsSection === "attendance" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
-            <h2>출결 설정</h2>
-            <p>태블릿 출결 전용 화면과 자동 지각 판정 기준을 관리합니다.</p>
-          </div>
+          {/* 2026-09-26 · 부제는 아래 두 행 제목('태블릿 전용 화면'·'지각 유예시간')을 되풀이할 뿐이라 지웠다. */}
+          <h2>출결 설정</h2>
         </div>
         <div className="settingsRows">
           <div className="settingsRow">
             <div>
-              <strong>태블릿 전용 화면</strong>
-              <span className="muted">학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다.</span>
+              <span className="helpTipTitleRow">
+                <strong>태블릿 전용 화면</strong>
+                <HelpTip label="태블릿 전용 화면" text="학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다." />
+              </span>
             </div>
             <input aria-label="태블릿 출결 화면 주소" readOnly value={attendanceUrl} />
-            <a className="softButton linkButton" href={attendanceUrl} target="_blank" rel="noreferrer">
+            <a className="ghostButton link" href={attendanceUrl} target="_blank" rel="noreferrer">
               새 창 열기
             </a>
           </div>
           <div className="settingsRow compact">
             <div>
-              <strong>지각 유예시간</strong>
-              <span className="muted">수업 정각 이후 이 시간까지는 등원으로 처리합니다.</span>
+              <span className="helpTipTitleRow">
+                <strong>지각 유예시간</strong>
+                <HelpTip label="지각 유예시간" text="수업 정각 이후 이 시간까지는 등원으로 처리합니다." />
+              </span>
             </div>
             <input
               aria-label="지각 유예시간 분"
               inputMode="numeric"
               min="5"
               type="number"
-              value={attendance.lateGraceMinutes}
-              onChange={(event) =>
-                updateAttendanceSetting("lateGraceMinutes", Math.max(5, Number(event.target.value) || 5))
-              }
+              value={graceDraft}
+              onBlur={commitGraceDraft}
+              onChange={(event) => setGraceDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitGraceDraft();
+                }
+              }}
             />
             <span className="aiSettingBadge fieldBadge">분 단위</span>
+          </div>
+        </div>
+      </section>
+      ) : null}
+      {activeSettingsSection === "tenant" ? (
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>운영 설정</h2>
+            <p>이 계정(선생님)에만 적용되는 기본값입니다. 예전에는 원장 반이 코드에 고정돼 있었습니다.</p>
+          </div>
+        </div>
+        <div className="settingsRows">
+          <div className="settingsRow">
+            <div>
+              <strong>시험관리 자동 생성 대상 반</strong>
+              <span className="muted">학생을 등록하면 이 반 학생의 학교·학년 시험정보가 자동으로 생깁니다. 하나도 고르지 않으면 모든 반이 대상입니다.</span>
+            </div>
+            <div aria-label="시험관리 자동 생성 대상 반" className="tenantSettingChoices" role="group">
+              {classTemplates.length === 0 ? <span className="muted">아직 개설된 반이 없습니다.</span> : null}
+              {classTemplates.map((template) => (
+                <label className="tenantSettingChoice" key={template.classTemplateId}>
+                  <input
+                    checked={tenant.examPrepAutoRowClassTemplateIds.includes(template.classTemplateId)}
+                    onChange={() => toggleExamPrepAutoRowClass(template.classTemplateId)}
+                    type="checkbox"
+                  />
+                  <span>{template.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="settingsRow compact">
+            <div>
+              <strong>처음 선택되는 반</strong>
+              <span className="muted">학생관리 "반별" 탭과 시험관리에서 처음 보여줄 반입니다. 비우면 첫 반.</span>
+            </div>
+            <select
+              aria-label="처음 선택되는 반"
+              className="studentClassSelect"
+              onChange={(event) => updateTenantSetting("defaultClassTemplateId", event.target.value)}
+              value={tenant.defaultClassTemplateId}
+            >
+              <option value="">첫 반</option>
+              {classTemplates.map((template) => (
+                <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+              ))}
+            </select>
           </div>
         </div>
       </section>

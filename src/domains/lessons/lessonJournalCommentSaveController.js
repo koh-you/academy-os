@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 export async function saveLessonJournalCommentDraft({
   createEmptyRecord,
   createRecordId,
@@ -8,7 +9,7 @@ export async function saveLessonJournalCommentDraft({
   record = {},
   saveRecord,
   student,
-  updatedBy = "instructor_owner_001"
+  updatedBy = getSessionTeacherId()
 }) {
   const recordId = createRecordId(lesson.lessonId, student.studentId);
   const recordToSave = {

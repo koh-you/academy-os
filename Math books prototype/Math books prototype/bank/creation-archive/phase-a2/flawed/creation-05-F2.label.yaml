@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-05-F2
+source: bank/creation-archive/phase-a2/creations/creation-05.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-05-F2.tex
+flaw_type: F2
+flaw_name: 자연어 부자연
+expected_verdict: PENDING
+ground_truth: flawed
+seed: false
+injection:
+  method: replace
+  find: "두 접선이 이루는 각을 이등분하는 직선의 방정식을 모두 구하시오."
+  replace: "그어진 두 개의 접선들에 의해 만들어지게 되는 각도를 반으로 나누는 것을 수행하는 직선의 방정식들을 전부 다 구하는 것을 하시오."
+note: "직역체·번역투 · 부자연 한국어"
+date: 2026-07-28

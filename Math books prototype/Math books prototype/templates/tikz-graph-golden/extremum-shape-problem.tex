@@ -1,0 +1,47 @@
+% 골든 · 유형 2 함수 최댓값·최솟값 (문제용 · 미니멀)
+% 세션 75 신설 · 와부고 스타일 도입
+% [[feedback_wabuko_graph_standard]] 5대 원칙 준수
+%
+% 목적 : 폐구간·개구간 위에서 함수의 최댓값·최솟값을 요구하는 문항 (본편)
+%   - 문제용 : 곡선 개형만 · 극값 표시 없음 (학생이 문제 이해)
+%   - 좌표평면 안에 곡선 자연 배치
+%   - 축 라벨 · 곡선 방정식 라벨만
+%
+% 규약 준수 :
+%   - scale=1.0 통일
+%   - 곡선 bbox ⊆ 축 프레임 (Check 6)
+%   - 곡선 활용률 30~90% (Check 8)
+%   - 실효 두께 : 축 0.7pt · 곡선 0.5pt
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (4.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 4) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {$\mathrm{O}$};
+
+  % ── 곡선 (예시 : y = -√(-2(x-3)) + 3 · 무리함수 감소) · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=-0.3:3, samples=80]
+    plot (\x, {-sqrt(-2*(\x - 3)) + 3});
+
+  % ── 정의역 경계 (문제용은 표시 필수)
+  \filldraw[black] (-0.3, {-sqrt(-2*(-0.3 - 3)) + 3}) circle (0.8pt);
+  \filldraw[black] (3, 3) circle (0.8pt);
+
+  % ── 곡선 라벨 · 곡선 옆 자연 배치 (프레임 안)
+  \node[font=\scriptsize, anchor=west] at (2.5, 2) {$y=f(x)$};
+\end{tikzpicture}
+\end{center}
+
+% === 사용 시 교체 대상 ===
+% 1. 곡선 방정식·domain (문제 함수에 맞춰 · plot 명령)
+% 2. 정의역 경계점 좌표 (폐구간·개구간에 따라 filldraw · 개구간이면 fill=white)
+% 3. 축 범위 · 곡선 라벨 위치
+% 4. 좌표 압축 factor 필요 시 계산 (원 좌표 × factor · 곡선 방정식 재도출)
+%
+% === 유지 대상 ===
+% - scale=1.0
+% - line width 표준
+% - 곡선이 축 프레임 안에 자연 배치
+% - 라벨은 프레임 안 · 곡선 옆
+% - 최댓값·최솟값 표시 없음 (문제용)

@@ -6,8 +6,9 @@ import {
   getTallyStudentReplacementChanges
 } from "./tallyStudentMerge.js";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import "./studentModal.css";
@@ -238,14 +239,13 @@ export function StudentModal({
       className="studentAddModal"
       closeDisabled={singleSaveState === "saving"}
       title="학생 추가"
-      subtitle="한 명씩 등록하거나 엑셀에서 복사한 목록을 일괄 등록합니다."
       onClose={onClose}
       scrollable
     >
       <WorkspaceTabs label="학생 추가 방식" variant="primary">
-        <button className={mode === "single" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("single")} type="button">한 명씩</button>
-        <button className={mode === "bulk" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
-        <button className={mode === "intake" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("intake")} type="button">Tally 접수</button>
+        <button aria-selected={mode === "single"} className={mode === "single" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("single")} role="tab" type="button">한 명씩</button>
+        <button aria-selected={mode === "bulk"} className={mode === "bulk" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("bulk")} role="tab" type="button">엑셀 일괄 등록</button>
+        <button aria-selected={mode === "intake"} className={mode === "intake" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("intake")} role="tab" type="button">Tally 접수</button>
       </WorkspaceTabs>
 
       {mode === "single" ? (
@@ -276,23 +276,31 @@ export function StudentModal({
           </div>
           {singleSaveState !== "idle" ? <InlineSaveStatus label="신규 학생" saveState={singleSaveState} /> : null}
           {singleSaveError ? <p className="profileSaveError" role="alert">학생 저장 실패 · {singleSaveError}</p> : null}
-          <button className="primaryButton full studentAddSubmit" disabled={singleSaveState === "saving"} onClick={saveSingleStudent} type="button">
-            {singleSaveState === "saving" ? "학생 저장 중" : "학생 저장"}
-          </button>
+          {/* 2026-09-19 · UI U8: 데스크톱 모달이라 전체 너비 primary 대신 공용 푸터 [취소][학생 저장]. 저장 함수·라벨은 그대로. */}
+          <ModalFooter>
+            <button className="softButton" disabled={singleSaveState === "saving"} onClick={onClose} type="button">취소</button>
+            <button className="primaryButton" disabled={singleSaveState === "saving"} onClick={saveSingleStudent} type="button">
+              {singleSaveState === "saving" ? "학생 저장 중" : "학생 저장"}
+            </button>
+          </ModalFooter>
         </>
       ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">
+          {/* 2026-09-26 · 준비 중 패널에는 물음표를 두지 않는다. 붙여넣기 순서는 빈 상태 설명에 합쳤다. */}
           <strong>엑셀 일괄 등록</strong>
-          <p className="muted">이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다.</p>
           <textarea aria-label="학생 엑셀 일괄 등록 원본" placeholder={"홍길동\t2010\t○○고등학교\t1234"} rows="6" />
-          <button className="primaryButton full" disabled type="button">일괄 등록 준비 중</button>
+          <EmptyState className="emptyState" description="이름, 출생연도, 학교, PIN 순서로 복사한 목록을 한 번에 등록하는 기능은 아직 준비 중입니다. 지금은 한 명씩 탭에서 등록하세요." title="엑셀 일괄 등록 준비 중" />
         </div>
       ) : (
         <div className="studentIntakePanel">
+          {/* 2026-09-19 · UI U8: 이 탭은 입력마다 후보(접수정보)가 자동 저장되고, 정식 등록만 버튼이다 — 그 경계를 한 줄로 알린다. */}
+          <p className="studentIntakeAutosaveNote" role="note">후보 정보는 입력 즉시 저장됩니다 · 정식 등록은 버튼으로</p>
           <div className="intakeEndpointBox">
-            <strong>Tally 웹훅 연결 주소</strong>
+            <div className="helpTipTitleRow">
+              <strong>Tally 웹훅 연결 주소</strong>
+              <HelpTip label="Tally 웹훅 연결 주소" text="Tally 제출은 정식 학생이 아니라 입학 후보로 먼저 저장됩니다. 확인 후 정식 등록하세요." />
+            </div>
             <code>https://koh-you-math-academy-os-api.onrender.com/api/intake/tally</code>
-            <p className="muted">Tally 제출은 정식 학생이 아니라 입학 후보로 먼저 저장됩니다. 확인 후 정식 등록하세요.</p>
           </div>
           <div className="studentIntakeSummary">
             <span>확인 필요 {activeApplicants.length}명</span>
@@ -349,38 +357,37 @@ export function StudentModal({
                   {applicantSaveStates[applicant.applicantId] ? (
                     <InlineSaveStatus label="접수정보" saveState={applicantSaveStates[applicant.applicantId]} />
                   ) : null}
-                  {getApplicantTargetStudent(applicant) ? (
+                  {!applicant.name ? (
+                    <small>이름을 입력하면 등록할 수 있습니다</small>
+                  ) : getApplicantTargetStudent(applicant) ? (
                     <div className="studentIntakeActionButtons">
                       {applicantRegistrationStates[applicant.applicantId] === "saving" ? (
                         <InlineSaveStatus label="Tally 반영" saveState="saving" />
                       ) : (
                         <>
                           <button
-                            className="softButton"
-                            disabled={!applicant.name}
+                            className="softButton compact"
                             onClick={() => registerApplicant(applicant)}
                             type="button"
                           >
                             기존 정보에 Tally 내용 추가
                           </button>
                           <OverflowMenu
-                            items={applicant.name
-                              ? [{
-                                  key: "replace",
-                                  label: "Tally 내용으로 기본정보 교체",
-                                  onSelect: () => registerApplicant(applicant, { replaceExisting: true }),
-                                  tone: "danger"
-                                }]
-                              : []}
-                            label={`${applicant.name || "접수"} 추가 작업`}
+                            items={[{
+                              key: "replace",
+                              label: "Tally 내용으로 기본정보 교체",
+                              onSelect: () => registerApplicant(applicant, { replaceExisting: true }),
+                              tone: "danger"
+                            }]}
+                            label={`${applicant.name} 추가 작업`}
                           />
                         </>
                       )}
                     </div>
                   ) : (
                     <button
-                      className="primaryButton"
-                      disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
+                      className="softButton compact"
+                      disabled={applicantRegistrationStates[applicant.applicantId] === "saving"}
                       onClick={() => registerApplicant(applicant)}
                       type="button"
                     >
@@ -440,14 +447,18 @@ export function StudentModal({
                               ))}
                             </select>
                           </label>
-                          <button
-                            className="primaryButton"
-                            disabled={registrationState === "saving"}
-                            onClick={() => registerApplicant(applicant)}
-                            type="button"
-                          >
-                            {registrationState === "saving" ? "학생명단 반영 중" : "학생명단에 반영"}
-                          </button>
+                          {!applicant.name ? (
+                            <small>이름을 입력하면 등록할 수 있습니다</small>
+                          ) : (
+                            <button
+                              className="softButton compact"
+                              disabled={registrationState === "saving"}
+                              onClick={() => registerApplicant(applicant)}
+                              type="button"
+                            >
+                              {registrationState === "saving" ? "학생명단 반영 중" : "학생명단에 반영"}
+                            </button>
+                          )}
                         </div>
                       ) : null}
                       {registrationState ? (

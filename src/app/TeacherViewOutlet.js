@@ -178,6 +178,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     students: {
       Component: components.StudentManager,
       props: {
+        tenantSettings: models.tenantSettings,
         academyReminders: models.academyReminders,
         academyTests: models.academyTests,
         academyTestSaveState: models.academyTestSaveState,
@@ -215,6 +216,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
       Component: components.ExamPrepCenter,
       props: {
         runtime: runtimeBindings.examPrepCenter,
+        academyName: models.sessionBrandName,
         aiSettings: models.aiSettings,
         examPostConfirmSaveStates: models.examPostConfirmSaveStates,
         examPostSubmissions: models.examPostSubmissions,
@@ -319,9 +321,12 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         aiSettings: models.aiSettings,
         appStateSaveState: models.appStateSaveState,
         attendanceSettings: models.attendanceSettings,
+        classTemplates: models.classTemplates,
         integrationStatus: models.integrationStatus,
         onUpdateAiSettings: actions.setAiSettings,
         onUpdateAttendanceSettings: actions.setAttendanceSettings,
+        onUpdateTenantSettings: actions.setTenantSettings,
+        tenantSettings: models.tenantSettings,
         teacherAccountSettings: models.teacherAccountSettings,
         onUpdateTeacherAccountSettings: actions.setTeacherAccountSettings
       }

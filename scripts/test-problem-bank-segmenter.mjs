@@ -14,6 +14,7 @@ import {
   printWidthMm,
   computeBoardMetrics,
   computeItemStats,
+  countBooksInFolder,
   rectWithin,
   studentItemState,
   studentWrongItemIds,
@@ -95,6 +96,10 @@ const tree = buildFolderTree([
 assert.deepEqual([...tree.folders.keys()], ["중3"]);
 assert.deepEqual(tree.books.map((book) => book.bookId), ["c"]);
 assert.deepEqual([...tree.folders.get("중3").folders.keys()], ["RPM"]);
+// 폴더가 보여주는 교재 수는 하위 폴더까지 합친 값이다(오답관리·교재관리가 같은 수를 써야 한다).
+assert.equal(countBooksInFolder(tree.folders.get("중3")), 2);
+assert.equal(countBooksInFolder(tree.folders.get("중3").folders.get("RPM")), 1);
+assert.equal(countBooksInFolder(tree), 3);
 
 assert.equal(studentItemState(attempts, "s1", "i1"), "recovered");
 assert.equal(studentItemState(attempts, "s1", "i2"), "wrong");

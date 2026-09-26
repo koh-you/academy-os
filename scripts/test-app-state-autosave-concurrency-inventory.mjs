@@ -38,6 +38,8 @@ const sharedStateKeys = [...sharedStateObjectSource.matchAll(/^    ([A-Za-z][A-Z
 assert.deepEqual(sharedStateKeys, [
   "aiSettings",
   "attendanceSettings",
+  // tenant 별 운영 설정(2026-09-19 #384). 다른 자동저장 키와 같은 CAS 경로를 탄다.
+  "tenantSettings",
   "deletedLessonBundles",
   "generatedLessonControls",
   "lessonNotificationPlans",
@@ -68,7 +70,7 @@ for (const boundary of [
   "pendingByKey",
   "updatedAtByKey",
   "await write({",
-  "const verification = await read()",
+  "const verification = await read({ key })",
   'verification.source !== "supabase"',
   "onPersisted({ key, updatedAt: verifiedRow.updatedAt"
 ]) {
@@ -77,10 +79,13 @@ for (const boundary of [
 
 const listSource = sourceBetween(
   coreDataSource,
-  "export async function listAppState()",
+  "export async function listAppState({ keys = null } = {})",
   "export async function upsertAppState(states, { expectedUpdatedAt = null } = {})"
 );
 assert.ok(listSource.includes("stateRows: rows.map(fromAppStateRow)"));
+// 2026-09-19: 저장 뒤 재조회는 keys 로 범위를 좁힌다. 숨은 키는 keys 로 요청해도 돌려주지 않는다.
+assert.ok(listSource.includes("state_key=in.("));
+assert.ok(listSource.includes("!hiddenAppStateKeys.has(key)"));
 assert.ok(coreDataSource.includes('from "../../src/shared/persistence/platformSourceRowMappers.js"'));
 assert.ok(platformMapperSource.includes("export function fromAppStateRow(row)"));
 assert.ok(platformMapperSource.includes("updatedAt: row.updated_at"));

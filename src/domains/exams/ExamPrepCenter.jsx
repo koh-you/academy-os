@@ -17,6 +17,7 @@ import { buildExamPeriodSundayScheduleModel, hasExamPeriodSundaySchedule, openEx
 
 export function ExamPrepCenter({
   runtime,
+  academyName = "",
   aiSettings = runtime.defaultAiSettings,
   examPostConfirmSaveStates = {},
   examPostSubmissions = [],
@@ -76,6 +77,9 @@ export function ExamPrepCenter({
   const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
   const [pastPaperLoadState, setPastPaperLoadState] = useState("loading");
   const ensuredExamCycleScopesRef = useRef(new Set());
+  // 시험정보 탭에서 '전체 반' 을 보다가 다른 탭(첫 반으로 자동 선택)에 갔다 돌아오면 이전 선택을 되돌린다.
+  // 다른 탭에서 반을 직접 고르면(changeClassTemplate) 그 선택을 존중하고 복원하지 않는다(2026-09-19 U10 · exams-06).
+  const infoTabClassTemplateIdRef = useRef(null);
   const setTallySubmissions = onSetTallySubmissions ?? (() => {});
   const setTallySummaries = onSetTallySummaries ?? (() => {});
   const pastPaperArchiveUrl =
@@ -155,7 +159,11 @@ export function ExamPrepCenter({
 
   function setActiveTab(tabId) {
     if (tabId !== "info" && !selectedClassTemplateId) {
-      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "template_mwf_7_10");
+      if (activeTab === "info") infoTabClassTemplateIdRef.current = selectedClassTemplateId;
+      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "");
+    } else if (tabId === "info" && infoTabClassTemplateIdRef.current !== null) {
+      setSelectedClassTemplateId(infoTabClassTemplateIdRef.current);
+      infoTabClassTemplateIdRef.current = null;
     }
     setActiveTabState(tabId);
   }
@@ -166,6 +174,7 @@ export function ExamPrepCenter({
   }
 
   function changeClassTemplate(classTemplateId) {
+    infoTabClassTemplateIdRef.current = null;
     setSelectedClassTemplateId(classTemplateId);
     ensureExamCycleRows(selectedExamCycle, classTemplateId);
   }
@@ -297,7 +306,7 @@ export function ExamPrepCenter({
               className="softButton compact"
               onClick={() => openExamPeriodSundaySchedulePdf(
                 buildExamPeriodSundayScheduleModel({ lessons: sundayScheduleLessons, students }),
-                { title: "고태영T 일요시험대비 일정표" }
+                { title: `${academyName} 일요시험대비 일정표` }
               )}
               type="button"
             >
@@ -516,7 +525,6 @@ export function ExamPrepCenter({
                 action={query.trim() ? (
                   <button className="softButton compact" onClick={() => setQuery("")} type="button">검색어 지우기</button>
                 ) : null}
-                className="examPrepEmptyState"
                 description={query.trim()
                   ? "학교·과목·출판사를 다시 확인하세요."
                   : "조회 범위 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}

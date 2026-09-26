@@ -57,14 +57,22 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "GET /api/classes",
   "GET /api/school-events",
   "GET /api/app-state",
+  // app_state 저장(2026-09-19). tenant 별 행이고 CAS(expectedUpdatedAt)라 안전하다. 닫혀 있던
+  // 동안 협력 교사는 메모·성적·상담·학원테스트 "저장 실패", 예약 설정 되돌아감, 삭제한 자동
+  // 수업 부활을 겪었고, 빈 tenant 의 초기 저장이 403 이라 isAppStateReady 가 영영 안 켜져
+  // 알림 예약 목록·실시간 출결·자동 동기화가 조용히 꺼져 있었다.
+  "POST /api/app-state",
   "GET /api/integrations/status",
   "GET /api/notification-jobs",
   "GET /api/makeup-tasks",
   // 수업일지의 "지난 숙제 / 다음 숙제" 칸이 읽는다. POST 만 열려 있어서 숙제를 만들 수는
   // 있는데 읽지는 못하는 상태였다(2026-09-08 발견).
   "GET /api/homeworks",
-  // 수업일지 상단 "운영 알림 원본" 패널이 읽는다. tenant 스코핑으로 자기 것만 보인다.
+  // 수업일지 상단 "운영 알림 원본" 패널과 학생 프로필이 읽고 **쓴다**(추가·완료·삭제 버튼이
+  // 전부 노출돼 있다). tenant 스코핑으로 자기 것만 보고 쓴다(2026-09-19 POST/DELETE 개방).
   "GET /api/academy-reminders",
+  "POST /api/academy-reminders",
+  "DELETE /api/academy-reminders",
   // 반관리 · 시험관리 · 학사일정 화면(2026-09-09 협력 교사에게 개방).
   // 전부 tenant 스코핑 대상이라 각자 자기 것만 보고 쓴다.
   "POST /api/class-rosters/save",
@@ -123,6 +131,17 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "POST /api/notification-jobs/reconcile-solapi",
   // GET /api/notification-jobs 는 남겨둔다 — 자기 테넌트의 (비어 있는) 발송 기록을
   // 읽는 것뿐이고, 부트스트랩이 부른다.
+]);
+
+// ops bank-write 스코프 전용. 문제은행 교재 등록·폴더·이미지만 건드린다.
+// 이 스코프는 problem-bank 밖으로는 읽기도 못 한다(아래 ops 분기에서 경로를 먼저 본다).
+// 교재 삭제(DELETE)는 넣지 않는다 — 문항·학생 기록·이미지가 함께 지워지므로 사람이 화면에서 한다.
+const OPS_BANKWRITE_PREFIX = "/api/problem-bank/";
+const OPS_BANKWRITE_POST = new Set([
+  "POST /api/problem-bank/import",
+  "POST /api/problem-bank/import-answers",
+  "POST /api/problem-bank/images",
+  "POST /api/problem-bank/book"
 ]);
 
 // ops cas-write 스코프가 호출 가능한 POST (그 외 POST/DELETE 는 highrisk 만).
@@ -252,6 +271,8 @@ export function evaluateApiAccess({ method, pathname, auth = { kind: "none" } })
 
   if (auth.kind === "none") return { ok: false, status: 401, code: "auth_required" };
   if (auth.kind === "dispatch") return { ok: false, status: 403, code: "dispatch_scope" };
+  // 포털 토큰은 공개 경로(/api/portal-*)만 부른다. 그 밖의 경로는 교사 세션이 아니므로 401.
+  if (auth.kind === "portal") return { ok: false, status: 401, code: "auth_required" };
 
   if (auth.kind === "kiosk") {
     return isKioskAllowed(method, pathname)
@@ -270,6 +291,14 @@ export function evaluateApiAccess({ method, pathname, auth = { kind: "none" } })
 
   if (auth.kind === "ops") {
     if (auth.opsScope === "highrisk") return { ok: true, status: 200 };
+    // bank-write 는 다른 스코프보다 먼저 본다. GET 도 problem-bank 밖은 막아야 하므로
+    // 아래의 "모든 ops 는 GET 허용" 규칙에 걸리기 전에 경로를 먼저 판정한다.
+    if (auth.opsScope === "bank-write") {
+      if (!pathname.startsWith(OPS_BANKWRITE_PREFIX)) return { ok: false, status: 403, code: "scope_forbidden" };
+      if (method === "GET") return { ok: true, status: 200 };
+      if (OPS_BANKWRITE_POST.has(`${method} ${pathname}`)) return { ok: true, status: 200 };
+      return { ok: false, status: 403, code: "scope_forbidden" };
+    }
     if (method === "GET") return { ok: true, status: 200 };
     if (auth.opsScope === "read") return { ok: false, status: 403, code: "scope_forbidden" };
     // cas-write

@@ -1,5 +1,5 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
-import { normalizeSchoolName } from "../../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { createExamPrepCalendarCluster } from "../../src/domains/exams/examPrepCalendarCluster.js";
 import { getKoreaDateString } from "../../src/shared/utils/koreaDate.js";
 import {
   getSpecialLectureStudentSyncOperation,
@@ -104,10 +104,7 @@ import {
   fromSpecialLectureEnrollmentRow,
   fromStudentIntakeApplicantRow,
   normalizeSpecialLectureApplicationStatus,
-  normalizeSpecialLectureEnrollmentSessionIds,
-  normalizeSpecialLectureEnrollmentSessionPlans,
   normalizeSpecialLectureEnrollmentStatus,
-  normalizeSpecialLectureRequestedSessionPlans,
   toSpecialLectureApplicationRow,
   toSpecialLectureEnrollmentRow,
   toStudentIntakeApplicantRow
@@ -131,7 +128,6 @@ import {
   fromSchoolEventRow,
   fromTestAttemptRow,
   fromTestSessionRow,
-  getDefaultExamCycleForDate,
   normalizeAcademyReminderStatus,
   toAcademyReminderRow,
   toExamPrepRow,
@@ -212,10 +208,6 @@ function hasMeaningfulValue(value) {
   return Boolean(String(value ?? "").trim());
 }
 
-function compactExamPrepKeyPart(value = "") {
-  return String(value || "").replace(/\s+/g, "");
-}
-
 function normalizeExamEntries(row = {}) {
   return Array.isArray(row.mathExamDates) ? row.mathExamDates : [];
 }
@@ -256,52 +248,15 @@ async function getExistingExamPrepRowMap(examPrepIds = []) {
   );
 }
 
-function getExamPrepLogicalKey(row = {}) {
-  return [
-    row.examCycle || getDefaultExamCycleForDate(),
-    normalizeSchoolName(row.schoolName || "") || compactExamPrepKeyPart(row.schoolName || "학교 미입력"),
-    compactExamPrepKeyPart(row.grade || "학년 미입력"),
-    compactExamPrepKeyPart(row.subject || "공통수학1")
-  ].join("|");
-}
-
-function getExamPrepRowCompleteness(row = {}) {
-  return [
-    row.publisher,
-    row.examPeriod,
-    row.mathExamDate,
-    row.scope,
-    row.subTextbook,
-    row.review,
-    row.revisedReview,
-    row.specialNote,
-    row.memo,
-    ...normalizeExamEntries(row).flatMap((entry) => [entry.date, entry.subject, entry.label])
-  ].filter((value) => String(value ?? "").trim()).length;
-}
-
-function isPlaceholderExamPrepRow(row = {}) {
-  return String(row.examPrepId || "").endsWith("_textbook") || !String(row.publisher || "").trim();
-}
-
-function chooseRepresentativeExamPrepRow(currentRow, candidateRow) {
-  const currentScore = getExamPrepRowCompleteness(currentRow);
-  const candidateScore = getExamPrepRowCompleteness(candidateRow);
-  if (candidateScore !== currentScore) return candidateScore > currentScore ? candidateRow : currentRow;
-  const currentPlaceholder = isPlaceholderExamPrepRow(currentRow);
-  const candidatePlaceholder = isPlaceholderExamPrepRow(candidateRow);
-  if (currentPlaceholder !== candidatePlaceholder) return candidatePlaceholder ? currentRow : candidateRow;
-  return String(candidateRow.updatedAt || "") > String(currentRow.updatedAt || "") ? candidateRow : currentRow;
-}
-
-function findDuplicateExamPrepRows(rows = []) {
-  const grouped = new Map();
-  rows.forEach((row) => {
-    const key = getExamPrepLogicalKey(row);
-    const previous = grouped.get(key);
-    grouped.set(key, previous ? chooseRepresentativeExamPrepRow(previous, row) : row);
-  });
-  const representativeIds = new Set([...grouped.values()].map((row) => row.examPrepId));
+// 중복 정리의 대표 행 선택은 화면(examPrepCenterModel → dedupeExamPrepRowsForDisplay, includeExcluded)과 같은
+// 규칙을 써야 한다(docs 계약: "서버가 화면 표시와 같은 대표 행 선택 기준으로 삭제 후보를 계산"). 예전에는
+// 논리 키·완성도·대표 행 선택 함수의 사본이 여기 있었고, 2026-08-11 화면 쪽에만 isExcluded 우선 규칙이 붙어
+// 서버 정리가 사용자가 제외한 행을 지우고 보이는 행을 남길 수 있었다. 사본을 지우고 같은 모듈을 쓴다(2026-09-19).
+export function findDuplicateExamPrepRows(rows = [], today = getKoreaDateString()) {
+  const { dedupeExamPrepRowsForDisplay } = createExamPrepCalendarCluster(today);
+  const representativeIds = new Set(
+    dedupeExamPrepRowsForDisplay(rows, { includeExcluded: true }).map((row) => row.examPrepId)
+  );
   return rows.filter((row) => !representativeIds.has(row.examPrepId));
 }
 
@@ -378,6 +333,50 @@ async function deleteLessonStudentRecordsForRemovedLessonStudents(lesson = {}) {
     );
   }
   return removedRows.map((row) => row.lesson_student_record_id).filter(Boolean);
+}
+
+// 위 두 정리를 여러 수업에 한 번에. POST /api/lessons/bulk 은 수업을 한 번의 upsert 로 저장하고도
+// 수업마다 (예약 조회 + 기록 조회) 를 순차로 돌려 N 수업에 2N 왕복이 들었다(9월 정규수업 52개면
+// 105 왕복). 판정 규칙은 수업별 함수와 같다: 저장된 명단에 없는 학생의 대기 예약만 취소하고,
+// 그 학생의 기록만 지운다. 필터는 in.() 으로 묶되, 취소 사유·상태 집합은 그대로다.
+async function cleanupRemovedLessonStudentsForLessons(lessons = [], reason = "수업 명단에서 제외됨") {
+  const targets = lessons.filter((lesson) => lesson?.lessonId);
+  if (targets.length === 0 || !isSupabaseConfigured({ requireServiceRole: true })) {
+    return { canceledNotificationJobIds: [], deletedLessonStudentRecordIds: [] };
+  }
+  const allowedStudentIdsByLesson = new Map(
+    targets.map((lesson) => [lesson.lessonId, new Set(Array.isArray(lesson.studentIds) ? lesson.studentIds : [])])
+  );
+  const lessonIdFilter = [...allowedStudentIdsByLesson.keys()].map((lessonId) => encodeURIComponent(lessonId)).join(",");
+  const statusFilter = pendingNotificationJobStatuses.join(",");
+  const isRemoved = (row) => Boolean(row.lesson_id) && !allowedStudentIdsByLesson.get(row.lesson_id)?.has(row.student_id);
+  const [jobRows, recordRows] = await Promise.all([
+    listRows(
+      "notification_jobs",
+      `select=notification_job_id,student_id,lesson_id&lesson_id=in.(${lessonIdFilter})&status=in.(${statusFilter})`,
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "lesson_student_records",
+      `select=lesson_student_record_id,student_id,lesson_id&lesson_id=in.(${lessonIdFilter})`,
+      { requireServiceRole: true }
+    )
+  ]);
+  const canceledNotificationJobIds = jobRows.filter((row) => row.notification_job_id && isRemoved(row)).map((row) => row.notification_job_id);
+  const deletedLessonStudentRecordIds = recordRows.filter((row) => row.lesson_student_record_id && isRemoved(row)).map((row) => row.lesson_student_record_id);
+  if (canceledNotificationJobIds.length) {
+    const jobIdFilter = canceledNotificationJobIds.map((id) => encodeURIComponent(id)).join(",");
+    await patchRows(
+      "notification_jobs",
+      `notification_job_id=in.(${jobIdFilter})&status=in.(${statusFilter})`,
+      { error: reason, status: "canceled", updated_at: new Date().toISOString() }
+    );
+  }
+  if (deletedLessonStudentRecordIds.length) {
+    const recordIdFilter = deletedLessonStudentRecordIds.map((id) => encodeURIComponent(id)).join(",");
+    await deleteRows("lesson_student_records", `lesson_student_record_id=in.(${recordIdFilter})`);
+  }
+  return { canceledNotificationJobIds, deletedLessonStudentRecordIds };
 }
 
 function filterLessonRecordsToCurrentRosters(records = [], lessons = []) {
@@ -831,7 +830,8 @@ export async function listLessons({ date, includeCanceled = false } = {}) {
     return { source: fallbackSource, lessons };
   }
 
-  await deleteExpiredCanceledLessons();
+  // 만료된 취소 수업 정리(deleteExpiredCanceledLessons)는 여기가 아니라 서버 주기 작업이 한다
+  // (canceledLessonRetentionSweep.js) — 조회마다 돌리면 폴링마다 SELECT 가 늘고 삭제로 조회가 멈춘다.
   const statusFilter = includeCanceled ? "" : "&status=neq.canceled";
   const query = date
     ? `select=*${statusFilter}&lesson_date=eq.${encodeURIComponent(date)}&order=lesson_date.asc,start_time.asc`
@@ -2713,7 +2713,7 @@ export async function upsertLesson(lesson) {
   await assertLessonClosureConversionAllowed(lesson);
   let row;
   try {
-    [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
+    [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "tenant_id,lesson_id" });
   } catch (error) {
     if (
       isSpecialLectureTrackedLesson(lesson) &&
@@ -2722,7 +2722,7 @@ export async function upsertLesson(lesson) {
       throwSpecialLectureLessonTrackSchemaError();
     }
     if (!errorMentionsAnyColumn(error, lessonScheduleMetadataColumns)) throw error;
-    [row] = await upsertRows("lessons", [toLessonRow(lesson, { includeScheduleMetadata: false })], { onConflict: "lesson_id" });
+    [row] = await upsertRows("lessons", [toLessonRow(lesson, { includeScheduleMetadata: false })], { onConflict: "tenant_id,lesson_id" });
   }
   const savedLesson = fromLessonRow(row);
   await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
@@ -2743,7 +2743,7 @@ export async function upsertLessons(lessons) {
   }
   let rows;
   try {
-    rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "lesson_id" });
+    rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "tenant_id,lesson_id" });
   } catch (error) {
     if (
       lessons.some(isSpecialLectureTrackedLesson) &&
@@ -2755,14 +2755,12 @@ export async function upsertLessons(lessons) {
     rows = await upsertRows(
       "lessons",
       lessons.map((lesson) => toLessonRow(lesson, { includeScheduleMetadata: false })),
-      { onConflict: "lesson_id" }
+      { onConflict: "tenant_id,lesson_id" }
     );
   }
   const savedLessons = rows.map(fromLessonRow);
-  for (const savedLesson of savedLessons) {
-    await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
-    await deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson);
-  }
+  // 수업별 순차 정리(2N 왕복)를 한 번의 묶음 정리로. 규칙은 upsertLesson 의 수업별 정리와 같다.
+  await cleanupRemovedLessonStudentsForLessons(savedLessons, "수업 명단에서 제외됨");
   return { source: databaseSource, lessons: savedLessons };
 }
 
@@ -2994,7 +2992,7 @@ export async function deleteExamPrepLessonForReconcile(lessonId, { auditId = "" 
         audit.rollback.attempted = missingRows.length > 0;
         if (missingRows.length > 0) {
           audit.stage = "rollback-restore";
-          await upsertRows("lessons", missingRows, { onConflict: "lesson_id" });
+          await upsertRows("lessons", missingRows, { onConflict: "tenant_id,lesson_id" });
           audit.rollback.restoredLessonIds = missingRows.map((row) => row.lesson_id);
         }
         audit.stage = "rollback-verify";
@@ -3707,7 +3705,7 @@ export async function deleteExamPrepRow(examPrepId, { auditId = "" } = {}) {
     restoreRows: (rows) => upsertRows(
       "exam_prep_rows",
       rows,
-      { onConflict: "exam_prep_id" }
+      { onConflict: "tenant_id,exam_prep_id" }
     )
   });
   return { source: databaseSource, ...result };
@@ -3890,7 +3888,7 @@ export async function upsertTestSessionWithAttempts(session, attempts = []) {
 
   let savedSessionRows;
   try {
-    savedSessionRows = await upsertRows("test_sessions", [toTestSessionRow(session)], { onConflict: "test_session_id" });
+    savedSessionRows = await upsertRows("test_sessions", [toTestSessionRow(session)], { onConflict: "tenant_id,test_session_id" });
   } catch (error) {
     throw new Error(`Supabase 테스트 응시 기록 SQL이 필요합니다. supabase/20260713_test_sessions.sql을 실행한 뒤 다시 저장하세요. (${error.message})`);
   }
@@ -4092,12 +4090,24 @@ export async function deleteAcademyReminder(reminderId) {
   return { source: databaseSource, academyReminderId: reminderId };
 }
 
-export async function listAppState() {
+// keys 를 주면 그 키만 읽는다(저장 뒤 재조회용). app_state 는 알림 기록·성적·보고서 스냅샷 같은
+// 큰 값을 여러 키에 들고 있어, 한 키를 저장하고 표 전체를 다시 받는 것이 저장 시간의 대부분이었다.
+// 재조회 자체(Supabase 원천 대조)는 그대로다 — 범위만 좁힌다. 숨은 키는 어느 경우에도 돌려주지 않는다.
+export async function listAppState({ keys = null } = {}) {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, states: {} };
   }
 
-  const rows = (await listRows("app_state", "select=*&order=state_key.asc", { requireServiceRole: true }))
+  const requestedKeys = Array.isArray(keys)
+    ? [...new Set(keys.map((key) => String(key ?? "").trim()).filter((key) => key && !hiddenAppStateKeys.has(key)))]
+    : null;
+  if (requestedKeys && requestedKeys.length === 0) {
+    return { source: databaseSource, states: {}, stateRows: [] };
+  }
+  const keyFilter = requestedKeys
+    ? `&state_key=in.(${requestedKeys.map((key) => `"${encodeURIComponent(key)}"`).join(",")})`
+    : "";
+  const rows = (await listRows("app_state", `select=*${keyFilter}&order=state_key.asc`, { requireServiceRole: true }))
     .filter((row) => !hiddenAppStateKeys.has(row.state_key));
   return {
     source: databaseSource,

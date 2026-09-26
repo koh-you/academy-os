@@ -1,13 +1,16 @@
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import "./testManagerPanels.css";
 
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   return (
-    <WorkspaceTabs className="localTabs materialTabs" label="테스트 관리 항목" variant="secondary">
+    <WorkspaceTabs label="테스트 관리 항목">
       <button
         aria-selected={activeTab === "attempts"}
         className={activeTab === "attempts" ? "active" : ""}
@@ -48,13 +51,14 @@ export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   );
 }
 
+// 2026-09-26 · 무엇을 기록하는 자리인지는 물음표로, 저장 부작용(같은 날짜 수업 알림톡 반영)은 저장하는 그 자리에 남긴다.
 export function TestAttemptPanelHeader({ testResultSaveState = "idle" }) {
   return (
     <SectionHeader
-      description="오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다. 저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다."
+      description="저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다."
       meta={<InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />}
       title="응시 기록"
-      titleAs="h1"
+      titleAdornment={<HelpTip label="응시 기록" text="오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다." />}
     />
   );
 }
@@ -178,7 +182,6 @@ export function TestAttemptTable({
   if (!students.length) {
     return (
       <EmptyState
-        className="examPrepEmptyState"
         description="반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요."
         title="대상 학생이 없습니다."
       />
@@ -251,13 +254,16 @@ export function TestAttemptActions({
 }) {
   return (
     <div className="testAttemptActions">
+      {/* 파괴적 액션(회차 삭제)은 왼쪽 끝 ⋯ 메뉴로, 확인은 App.jsx 의 onDeleteTestSession 이 그대로 맡는다(2026-09-19). */}
+      {currentTestSession ? (
+        <OverflowMenu
+          className="overflowMenu-start testAttemptSessionMenu"
+          items={[{ key: "delete", label: "이 회차 삭제", onSelect: () => onDeleteTestSession?.(currentTestSession.testSessionId), tone: "danger" }]}
+          label="응시 회차 추가 작업"
+        />
+      ) : null}
       {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
       <button className="softButton" onClick={onResetAttemptForm} type="button">새 회차 입력</button>
-      {currentTestSession ? (
-        <button className="dangerSoftButton" onClick={() => onDeleteTestSession?.(currentTestSession.testSessionId)} type="button">
-          이 회차 삭제
-        </button>
-      ) : null}
       <button className="primaryButton" disabled={!canSave || isSaving} onClick={onSaveAttemptSession} type="button">
         {isSaving ? "저장 중" : "응시 기록 저장"}
       </button>
@@ -273,9 +279,9 @@ export function RecentTestSessionList({
 }) {
   return (
     <section className="testSessionList">
+      {/* 2026-09-26 · 같은 안내가 위 '응시 기록' 헤더에 남아 있어 여기서는 지웠다. */}
       <SectionHeader
         density="slim"
-        description="수업일지 알림톡은 같은 날짜와 학생의 기록을 자동으로 읽습니다."
         meta={<span className="countBadge">{totalCount}건</span>}
         title="최근 응시 회차"
       />
@@ -303,6 +309,7 @@ export function StudentTestHistoryPanel({
 }) {
   return (
     <section className="panel materialPanel testHistoryPanel">
+      {/* 2026-09-26 · 부제에서 제목을 되풀이하는 부분은 지우고, 제목에 없는 '데일리·단원·누적' 만 물음표로 남겼다. */}
       <SectionHeader
         actions={(
           <select aria-label="테스트 이력 학생 선택" value={selectedStudentId} onChange={(event) => onStudentChange?.(event.target.value)}>
@@ -311,9 +318,8 @@ export function StudentTestHistoryPanel({
             ))}
           </select>
         )}
-        description="학생이 지금까지 본 데일리/단원/누적 테스트 결과를 한곳에서 확인합니다."
         title="학생별 테스트 이력"
-        titleAs="h1"
+        titleAdornment={<HelpTip label="학생별 테스트 이력" text="데일리·단원·누적 테스트 결과를 학생별로 모아 봅니다." />}
       />
       <div className="testHistoryList">
         {rows.map(({ session, attempt }) => (
@@ -335,7 +341,6 @@ export function StudentTestHistoryPanel({
         ))}
         {!rows.length ? (
           <EmptyState
-            className="examPrepEmptyState"
             description="응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다."
             title="테스트 이력이 없습니다."
           />

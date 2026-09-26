@@ -1,3 +1,5 @@
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
+
 export function SupplementTaskSourceContext({
   absenceLessonContent,
   absenceLessonMaterial,
@@ -21,9 +23,11 @@ export function SupplementTaskSourceContext({
             {sourceDueDate ? <small>마감/검사일 {sourceDueDate}</small> : null}
           </div>
           <div>
-            <span>그날까지 해야 했던 숙제</span>
+            <div className="helpTipTitleRow">
+              <span>그날까지 해야 했던 숙제</span>
+              <HelpTip label="그날까지 해야 했던 숙제" text="원 숙제 기록을 아래 확인 카드에 그대로 사용합니다." />
+            </div>
             <strong>{sourceHomeworkTitle}</strong>
-            <small>원 숙제 기록을 아래 확인 카드에 그대로 사용합니다.</small>
           </div>
         </div>
       ) : null}
@@ -40,14 +44,18 @@ export function SupplementTaskSourceContext({
             <small>{absenceLessonMaterial ? `교재: ${absenceLessonMaterial}` : "교재 기록 없음"}</small>
           </div>
           <div>
-            <span>그날 확인할 지난 숙제</span>
+            <div className="helpTipTitleRow">
+              <span>그날 확인할 지난 숙제</span>
+              <HelpTip label="그날 확인할 지난 숙제" text="지난 숙제가 있으면 아래 확인 카드와 알림톡 초안에 자동 반영합니다." />
+            </div>
             <strong>{absencePreviousHomework || "기록 없음"}</strong>
-            <small>지난 숙제가 있으면 아래 확인 카드와 알림톡 초안에 자동 반영합니다.</small>
           </div>
           <div>
-            <span>그날 새로 나간 숙제</span>
+            <div className="helpTipTitleRow">
+              <span>그날 새로 나간 숙제</span>
+              <HelpTip label="그날 새로 나간 숙제" text="보강 후 이어갈 숙제 맥락입니다." />
+            </div>
             <strong>{absenceNextHomework || "기록 없음"}</strong>
-            <small>보강 후 이어갈 숙제 맥락입니다.</small>
           </div>
         </div>
       ) : null}

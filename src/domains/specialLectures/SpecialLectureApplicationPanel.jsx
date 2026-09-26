@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
+import { AsyncOperationStatus } from "../../shared/components/AsyncOperationStatus.jsx";
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
@@ -34,6 +36,7 @@ import {
   normalizeSpecialLectureGuides,
   specialLectureApplicationStatusOptions
 } from "./specialLectureGuideUtils.js";
+import "./specialLectureApplicationPanel.css";
 
 function normalizePhoneNumber(value = "") {
   return String(value ?? "").replaceAll(/\D/g, "");
@@ -413,7 +416,10 @@ export function SpecialLectureApplicationPanel({
   selectedGuide = null,
   students = []
 }) {
-  const [panelMessage, setPanelMessage] = useState("");
+  // 2026-09-19 · U12(ops-15): 상태 알림 문구는 {message, state} 로 들고 AsyncOperationStatus 가 그린다.
+  // state 는 메시지를 만든 자리에서 정한다(success/partial/error). 문자열에 '실패' 가 들었는지로 색을 정하지 않는다.
+  const [panelFeedback, setPanelFeedbackState] = useState({ message: "", state: "idle" });
+  const panelMessage = panelFeedback.message;
   const [enrollmentDrafts, setEnrollmentDrafts] = useState({});
   const [lessonCreateState, setLessonCreateState] = useState({ state: "idle", message: "" });
   const [savingEnrollmentId, setSavingEnrollmentId] = useState("");
@@ -432,7 +438,8 @@ export function SpecialLectureApplicationPanel({
   const [editingSessionOverrideId, setEditingSessionOverrideId] = useState("");
   const [selectedPlanProgressSessionId, setSelectedPlanProgressSessionId] = useState("");
   const [progressModalEnrollment, setProgressModalEnrollment] = useState(null);
-  const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(false);
+  // 2026-09-19 · U12(ops-16): 명단은 기본 펼침. 수업일지 반영은 반영할 초안이 생기면(아래 useEffect) 펼친다.
+  const [isEnrollmentPanelOpen, setIsEnrollmentPanelOpen] = useState(true);
   const [isLessonPreviewOpen, setIsLessonPreviewOpen] = useState(false);
   const [hasDismissedNoLessonChanges, setHasDismissedNoLessonChanges] = useState(false);
 
@@ -443,6 +450,11 @@ export function SpecialLectureApplicationPanel({
   useEffect(() => {
     setHasDismissedNoLessonChanges(false);
   }, [selectedGuide?.specialLectureGuideId]);
+
+  // state: AsyncOperationStatus 의 idle/loading/success/partial/error. 빈 메시지는 항상 idle 로 지운다.
+  function setPanelFeedback(message, state = "idle") {
+    setPanelFeedbackState({ message: String(message ?? ""), state: message ? state : "idle" });
+  }
 
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
   const normalizedApplications = useMemo(
@@ -583,9 +595,16 @@ export function SpecialLectureApplicationPanel({
   });
   const protectedLockedLessonRows = lockedLessonRows.filter((row) => !additiveLockedLessonRows.some((candidate) => candidate.lessonId === row.lessonId));
   const lessonSyncDrafts = [...newLessonDrafts, ...syncableChangedRows];
+  const hasLessonSyncDrafts = lessonSyncDrafts.length > 0;
   const canCreateLessons = Boolean(
     isGuideSaved && selectedGuide && guideSessions.length && lessonSyncDrafts.length && !invalidPlanRows.length && !duplicateEnrollmentIdentityRows.length
   );
+
+  // 2026-09-19 · U12(ops-16): 반영할 수업일지 초안이 생기면(또는 초안이 있는 특강으로 바꾸면) 수업일지 반영 섹션을 펼친다.
+  // 사용자가 접은 뒤에는 초안 유무가 바뀌거나 특강을 바꿀 때까지 다시 펼치지 않는다.
+  useEffect(() => {
+    if (hasLessonSyncDrafts) setIsLessonPreviewOpen(true);
+  }, [hasLessonSyncDrafts, selectedGuide?.specialLectureGuideId]);
   const availableManualStudents = students
     .filter(isActiveRosterStudent)
     .filter((student) => !enrollmentByStudentId.has(student.studentId))
@@ -631,21 +650,21 @@ export function SpecialLectureApplicationPanel({
   const webhookUrl = apiUrl("/api/special-lecture-applications/tally");
 
   async function copyWebhookUrl() {
-    setPanelMessage("");
+    setPanelFeedback("");
     const copied = await copyTextToClipboard(webhookUrl);
-    setPanelMessage(copied ? "Tally 웹훅 URL을 복사했습니다." : "웹훅 URL 복사에 실패했습니다.");
+    setPanelFeedback(copied ? "Tally 웹훅 URL을 복사했습니다." : "웹훅 URL 복사에 실패했습니다.", copied ? "success" : "error");
   }
 
   async function updateApplicationStatus(application, status) {
     if (!onUpdateApplication || !application.applicationId) return;
-    setPanelMessage("");
+    setPanelFeedback("");
     setUpdatingApplicationId(application.applicationId);
     try {
       const savedApplication = await onUpdateApplication(application.applicationId, { status });
-      setPanelMessage(`${application.studentName || "신청자"} 상태를 ${getSpecialLectureApplicationStatusLabel(status)}(으)로 저장했습니다.`);
+      setPanelFeedback(`${application.studentName || "신청자"} 상태를 ${getSpecialLectureApplicationStatusLabel(status)}(으)로 저장했습니다.`, "success");
       return savedApplication ?? { ...application, status };
     } catch (error) {
-      setPanelMessage(`신청자 상태 저장 실패: ${error.message}`);
+      setPanelFeedback(`신청자 상태 저장 실패: ${error.message}`, "error");
     } finally {
       setUpdatingApplicationId("");
     }
@@ -655,11 +674,11 @@ export function SpecialLectureApplicationPanel({
     if (!onUpdateApplication || !onSaveEnrollment || !selectedGuide || !isGuideSaved) return;
     const existingEnrollment = enrollmentByStudentId.get(student.studentId);
     if (existingEnrollment?.applicationId && existingEnrollment.applicationId !== application.applicationId) {
-      setPanelMessage(`${student.name} 학생은 이미 다른 신청 원본으로 이 특강 명단에 연결되어 있습니다.`);
+      setPanelFeedback(`${student.name} 학생은 이미 다른 신청 원본으로 이 특강 명단에 연결되어 있습니다.`, "partial");
       return;
     }
     setUpdatingApplicationId(application.applicationId);
-    setPanelMessage("");
+    setPanelFeedback("");
     let studentReplacementSaved = false;
     try {
       const confirmedStudent = options.replaceTallyData
@@ -681,14 +700,18 @@ export function SpecialLectureApplicationPanel({
       setMatchApplication(null);
       setMatchSearchText("");
       setMatchStudentId("");
-      setPanelMessage(
+      setPanelFeedback(
         `${confirmedStudent.name} 학생${studentReplacementSaved ? "의 기본정보를 Tally 제출값으로 교체하고 기존 특강 회차·수업기록을 유지한 채" : "을"} 확정 명단에 연결했습니다. 모달에서 회차와 시간을 확인해 주세요.`
+,
+        "success"
       );
     } catch (error) {
-      setPanelMessage(
+      setPanelFeedback(
         studentReplacementSaved
           ? `학생 Tally 기본정보는 교체됐지만 특강 신청 연결 저장에 실패했습니다: ${error.message}`
           : `특강 확정 준비 실패: ${error.message}`
+,
+        "error"
       );
     } finally {
       setUpdatingApplicationId("");
@@ -707,7 +730,7 @@ export function SpecialLectureApplicationPanel({
         setMatchApplication(application);
         setMatchStudentId(match.student.studentId);
         setMatchSearchText(application.studentName || "");
-        setPanelMessage(`${application.studentName || "신청자"}의 기존 학생을 확인했습니다. Tally 정보 덮어쓰기 여부를 선택해 주세요.`);
+        setPanelFeedback(`${application.studentName || "신청자"}의 기존 학생을 확인했습니다. Tally 정보 덮어쓰기 여부를 선택해 주세요.`, "partial");
         return;
       }
       await confirmApplicationWithStudent(application, match.student);
@@ -716,14 +739,14 @@ export function SpecialLectureApplicationPanel({
     setMatchApplication(application);
     setMatchStudentId(match.candidates?.length === 1 ? match.candidates[0].studentId : "");
     setMatchSearchText(application.studentName || "");
-    setPanelMessage(`${application.studentName || "신청자"} 학생을 전체 학생 명단에서 직접 선택하거나 특강 전용 학생으로 등록해 주세요.`);
+    setPanelFeedback(`${application.studentName || "신청자"} 학생을 전체 학생 명단에서 직접 선택하거나 특강 전용 학생으로 등록해 주세요.`, "partial");
   }
 
   async function confirmManualStudentMatch({ replaceTallyData = false } = {}) {
     if (!matchApplication || !matchStudentId) return;
     const student = students.find((item) => item.studentId === matchStudentId);
     if (!student) {
-      setPanelMessage("연결할 학생을 찾지 못했습니다.");
+      setPanelFeedback("연결할 학생을 찾지 못했습니다.", "error");
       return;
     }
     if (replaceTallyData) {
@@ -746,7 +769,7 @@ export function SpecialLectureApplicationPanel({
     const application = applications.find((item) => item.applicationId === enrollment.applicationId);
     const student = students.find((item) => item.studentId === enrollment.studentId);
     if (!application || application.source !== "tally" || !student) {
-      setPanelMessage("연결된 Tally 신청 원본 또는 학생을 찾지 못했습니다.");
+      setPanelFeedback("연결된 Tally 신청 원본 또는 학생을 찾지 못했습니다.", "error");
       return;
     }
     const replacementChanges = getTallyStudentReplacementChanges(student, application, {
@@ -771,7 +794,7 @@ export function SpecialLectureApplicationPanel({
     );
     if (!confirmed) return;
     setDeletingApplicationId(application.applicationId);
-    setPanelMessage("");
+    setPanelFeedback("");
     try {
       await onDeleteApplication(application.applicationId);
       if (matchApplication?.applicationId === application.applicationId) {
@@ -779,9 +802,9 @@ export function SpecialLectureApplicationPanel({
         setMatchSearchText("");
         setMatchStudentId("");
       }
-      setPanelMessage(`${studentName}의 오류 신청 원본을 Supabase에서 삭제하고 재조회로 확인했습니다.`);
+      setPanelFeedback(`${studentName}의 오류 신청 원본을 Supabase에서 삭제하고 재조회로 확인했습니다.`, "success");
     } catch (error) {
-      setPanelMessage(`특강 신청 원본 삭제 실패: ${error.message}`);
+      setPanelFeedback(`특강 신청 원본 삭제 실패: ${error.message}`, "error");
     } finally {
       setDeletingApplicationId("");
     }
@@ -790,12 +813,12 @@ export function SpecialLectureApplicationPanel({
   async function registerSpecialLectureStudent() {
     if (!matchApplication || !onCreateStudent) return;
     setUpdatingApplicationId(matchApplication.applicationId);
-    setPanelMessage("");
+    setPanelFeedback("");
     try {
       const student = await onCreateStudent(matchApplication);
       await confirmApplicationWithStudent(matchApplication, student);
     } catch (error) {
-      setPanelMessage(`특강 전용 학생 등록 실패: ${error.message}`);
+      setPanelFeedback(`특강 전용 학생 등록 실패: ${error.message}`, "error");
     } finally {
       setUpdatingApplicationId("");
     }
@@ -805,13 +828,13 @@ export function SpecialLectureApplicationPanel({
     if (!onUpdateApplication || !application.applicationId || !targetGuide) return;
     const linkedEnrollment = normalizedEnrollments.find((enrollment) => enrollment.applicationId === application.applicationId);
     if (linkedEnrollment) {
-      setPanelMessage(`${application.studentName || "신청자"} 신청은 이미 확정 명단에 추가되어 연결을 자동 변경할 수 없습니다. 수업일지·출결·알림톡 영향을 먼저 확인해 주세요.`);
+      setPanelFeedback(`${application.studentName || "신청자"} 신청은 이미 확정 명단에 추가되어 연결을 자동 변경할 수 없습니다. 수업일지·출결·알림톡 영향을 먼저 확인해 주세요.`, "partial");
       return;
     }
     const guideId = String(targetGuide.specialLectureGuideId ?? "").trim();
     const guideSlug = getSpecialLectureGuideSlug(targetGuide);
     if (!guideId || !guideSlug) {
-      setPanelMessage("연결할 특강의 저장 식별자를 확인할 수 없습니다.");
+      setPanelFeedback("연결할 특강의 저장 식별자를 확인할 수 없습니다.", "error");
       return;
     }
     const campaign = [
@@ -819,7 +842,7 @@ export function SpecialLectureApplicationPanel({
       targetGuide.season,
       targetGuide.title
     ].filter(Boolean).join("_").replace(/\s+/g, "_") || application.campaign || "special_lecture";
-    setPanelMessage("");
+    setPanelFeedback("");
     setUpdatingApplicationId(application.applicationId);
     try {
       await onUpdateApplication(application.applicationId, {
@@ -832,9 +855,9 @@ export function SpecialLectureApplicationPanel({
         delete next[application.applicationId];
         return next;
       });
-      setPanelMessage(`${application.studentName || "신청자"} 신청을 '${targetGuide.title || guideSlug}' 특강으로 수정했습니다.`);
+      setPanelFeedback(`${application.studentName || "신청자"} 신청을 '${targetGuide.title || guideSlug}' 특강으로 수정했습니다.`, "success");
     } catch (error) {
-      setPanelMessage(`신청 특강 연결 수정 실패: ${error.message}`);
+      setPanelFeedback(`신청 특강 연결 수정 실패: ${error.message}`, "error");
     } finally {
       setUpdatingApplicationId("");
     }
@@ -1060,19 +1083,19 @@ export function SpecialLectureApplicationPanel({
       setMatchApplication(firstTallyRow.application);
       setMatchStudentId(firstTallyRow.student?.studentId ?? "");
       setMatchSearchText(firstTallyRow.application.studentName || "");
-      setPanelMessage(`${firstTallyRow.application.studentName || "신청자"}의 Tally 정보와 기존 학생을 먼저 확인해 주세요.`);
+      setPanelFeedback(`${firstTallyRow.application.studentName || "신청자"}의 Tally 정보와 기존 학생을 먼저 확인해 주세요.`, "partial");
       return;
     }
-    setPanelMessage("");
+    setPanelFeedback("");
     setSavingEnrollmentId("bulk");
     try {
       const nextEnrollments = missingEnrollmentRows.map((row) =>
         buildEnrollmentFromMatchRow(row, selectedGuide, guideSessions)
       );
       await onSaveEnrollments(nextEnrollments);
-      setPanelMessage(`확정 수강명단 ${nextEnrollments.length}건을 저장했습니다. 학생별 회차를 확인한 뒤 수업일지를 생성하세요.`);
+      setPanelFeedback(`확정 수강명단 ${nextEnrollments.length}건을 저장했습니다. 학생별 회차를 확인한 뒤 수업일지를 생성하세요.`, "success");
     } catch (error) {
-      setPanelMessage(`확정 수강명단 저장 실패: ${error.message}`);
+      setPanelFeedback(`확정 수강명단 저장 실패: ${error.message}`, "error");
     } finally {
       setSavingEnrollmentId("");
     }
@@ -1104,16 +1127,16 @@ export function SpecialLectureApplicationPanel({
       updatedAt: nowIso
     }));
     setSavingEnrollmentId("manual");
-    setPanelMessage("");
+    setPanelFeedback("");
     try {
       const savedEnrollments = await onSaveEnrollments(enrollmentsToSave);
       const firstEnrollment = savedEnrollments?.[0] ?? enrollmentsToSave[0];
       setManualSelectedStudentIds([]);
       setManualPickerOpen(false);
       openPlanModal(firstEnrollment);
-      setPanelMessage(`수동 접수 ${enrollmentsToSave.length}명을 추가했습니다. 학생별 회차 설정을 저장해 주세요.`);
+      setPanelFeedback(`수동 접수 ${enrollmentsToSave.length}명을 추가했습니다. 학생별 회차 설정을 저장해 주세요.`, "success");
     } catch (error) {
-      setPanelMessage(`수동 접수 저장 실패: ${error.message}`);
+      setPanelFeedback(`수동 접수 저장 실패: ${error.message}`, "error");
     } finally {
       setSavingEnrollmentId("");
     }
@@ -1128,7 +1151,7 @@ export function SpecialLectureApplicationPanel({
     ));
     if (invalidPlan) {
       const message = `특강 회차 계획 저장 실패: ${getSpecialLectureSessionPlanError(invalidPlan, guideSessions.find((session) => session.sessionId === invalidPlan.sessionId))}`;
-      setPanelMessage(message);
+      setPanelFeedback(message, "error");
       setPlanSaveState({ message, state: "failed" });
       return;
     }
@@ -1140,7 +1163,7 @@ export function SpecialLectureApplicationPanel({
       planReviewedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
-    setPanelMessage("");
+    setPanelFeedback("");
     setSavingEnrollmentId(enrollment.enrollmentId);
     setPlanSaveState({ message: "1/2 · Supabase에 회차 계획을 저장하고 있습니다.", state: "saving" });
     let enrollmentSaved = false;
@@ -1186,7 +1209,7 @@ export function SpecialLectureApplicationPanel({
           `${Number(draft.specialLectureSessionIndex ?? 0) + 1}회차(${reasons.join("·")})`
         ).join(", ");
         const message = `회차 계획은 저장했지만 ${blockedSummary}는 자동 반영하지 않았습니다. 표시된 보호 사유를 먼저 확인해 주세요.`;
-        setPanelMessage(message);
+        setPanelFeedback(message, "partial");
         setPlanSaveState({ message, state: "failed" });
         return;
       }
@@ -1194,7 +1217,7 @@ export function SpecialLectureApplicationPanel({
       const message = safeDrafts.length
         ? `${studentName} 회차 계획과 미래 수업일지 ${safeDrafts.length}개를 Supabase 재조회로 확인했습니다.`
         : `${studentName} 회차 계획을 저장했습니다. 수업일지에 새로 반영할 변경은 없습니다.`;
-      setPanelMessage(message);
+      setPanelFeedback(message, "success");
       setPlanSaveState({ message, state: "saved" });
     } catch (error) {
       const message = enrollmentSaved
@@ -1202,7 +1225,7 @@ export function SpecialLectureApplicationPanel({
         : error?.specialLectureEnrollmentPostSucceeded
           ? `1/2 Supabase 저장 요청은 성공했지만 재조회 확인을 끝내지 못해 2/2 수업일지는 실행하지 않았습니다. 다시 누르면 Supabase 저장값부터 재확인합니다: ${error.message}`
         : `특강 회차 계획 저장 실패: ${error.message}`;
-      setPanelMessage(message);
+      setPanelFeedback(message, "error");
       setPlanSaveState({ message, state: "failed" });
     } finally {
       setSavingEnrollmentId("");
@@ -1235,12 +1258,12 @@ export function SpecialLectureApplicationPanel({
       updatedAt: new Date().toISOString()
     });
     setSavingEnrollmentId(enrollment.enrollmentId);
-    setPanelMessage("");
+    setPanelFeedback("");
     try {
       await onSaveEnrollment(nextEnrollment);
-      setPanelMessage(`${studentName}의 남은 회차 취소를 저장했습니다. 1/2 완료 · 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해 주세요.`);
+      setPanelFeedback(`${studentName}의 남은 회차 취소를 저장했습니다. 1/2 완료 · 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해 주세요.`, "success");
     } catch (error) {
-      setPanelMessage(`남은 회차 취소 저장 실패: ${error.message}`);
+      setPanelFeedback(`남은 회차 취소 저장 실패: ${error.message}`, "error");
     } finally {
       setSavingEnrollmentId("");
     }
@@ -1260,7 +1283,7 @@ export function SpecialLectureApplicationPanel({
       updatedAt: new Date().toISOString()
     });
     setSavingEnrollmentId(enrollment.enrollmentId);
-    setPanelMessage("");
+    setPanelFeedback("");
     try {
       await onSaveEnrollment(nextEnrollment);
       setEnrollmentDrafts((current) => {
@@ -1269,9 +1292,9 @@ export function SpecialLectureApplicationPanel({
         return nextDrafts;
       });
       if (planModalEnrollment?.enrollmentId === enrollment.enrollmentId) closePlanModal();
-      setPanelMessage(`${studentName}의 특강 신청 취소를 Supabase 재조회로 확인했습니다. 1/2 완료 · 취소 기록은 보존되며, 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해 주세요.`);
+      setPanelFeedback(`${studentName}의 특강 신청 취소를 Supabase 재조회로 확인했습니다. 1/2 완료 · 취소 기록은 보존되며, 아래 특강 수업일지 반영에서 미래 명단 변경을 확인해 주세요.`, "success");
     } catch (error) {
-      setPanelMessage(`특강 신청 취소 저장 실패: ${error.message}`);
+      setPanelFeedback(`특강 신청 취소 저장 실패: ${error.message}`, "error");
     } finally {
       setSavingEnrollmentId("");
     }
@@ -1332,11 +1355,17 @@ export function SpecialLectureApplicationPanel({
             <strong>특강 상태 알림</strong>
             <span>Tally 신청, 학생 연결, 회차 설정과 수업일지 반영 상태를 먼저 확인해 주세요.</span>
           </div>
+          {!isGuideSaved ? (
+            <small className="specialLectureAttentionGuideHint">학생 연결·회차 설정은 안내문이 저장된 특강에서만 진행할 수 있습니다. `안내문 저장` 후 버튼이 표시됩니다.</small>
+          ) : null}
           {panelMessage ? (
-            <div className="specialLectureDismissibleNotice">
-              <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p>
-              <button className="softButton compact" onClick={() => setPanelMessage("")} type="button">확인</button>
-            </div>
+            <AsyncOperationStatus
+              action={<button className="softButton compact" onClick={() => setPanelFeedback("")} type="button">확인</button>}
+              className="specialLecturePanelFeedback"
+              description={panelMessage}
+              label="특강 수업"
+              state={panelFeedback.state}
+            />
           ) : null}
           {attentionApplicationRows.length ? (
             <div className="specialLectureAttentionList">
@@ -1347,24 +1376,31 @@ export function SpecialLectureApplicationPanel({
                     <span>{[row.application.schoolName, row.application.grade, row.reason, row.application.source === "tally" ? "Tally 신청" : "신청 원본"].filter(Boolean).join(" · ")}</span>
                   </div>
                   <div className="specialLectureAttentionActions">
-                    {row.attentionType === "student_match" ? (
+                    {row.attentionType === "student_match" && isGuideSaved ? (
                       <button
-                        className="primaryButton compact"
-                        disabled={!isGuideSaved || updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
+                        className="softButton compact"
+                        disabled={updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
                         onClick={() => confirmApplicationAndOpenPlan(row.application)}
                         type="button"
                       >
                         학생 연결
                       </button>
                     ) : null}
-                    <button
-                      className="dangerSoftButton compact"
-                      disabled={!onDeleteApplication || updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
-                      onClick={() => deleteErrorApplication(row.application)}
-                      type="button"
-                    >
-                      {deletingApplicationId === row.application.applicationId ? "삭제 확인 중" : "오류 신청 삭제"}
-                    </button>
+                    {deletingApplicationId === row.application.applicationId ? (
+                      <small>삭제 확인 중</small>
+                    ) : (
+                      <OverflowMenu
+                        items={onDeleteApplication && updatingApplicationId !== row.application.applicationId
+                          ? [{
+                              key: "deleteErrorApplication",
+                              label: `${row.application.studentName || "이름 미입력 신청자"} 오류 신청 삭제`,
+                              onSelect: () => deleteErrorApplication(row.application),
+                              tone: "danger"
+                            }]
+                          : []}
+                        label={`${row.application.studentName || "이름 미입력 신청자"} 추가 작업`}
+                      />
+                    )}
                   </div>
                 </div>
               ))}
@@ -1378,7 +1414,9 @@ export function SpecialLectureApplicationPanel({
                   <strong>{student?.name || enrollment.studentId || "학생 미확인"}</strong>
                   <span>회차 미확정 · 수업일지 명단 반영 대상에서 제외됨</span>
                 </div>
-                <button className="primaryButton compact" disabled={!isGuideSaved} onClick={() => openPlanModal(enrollment)} type="button">회차 설정</button>
+                {isGuideSaved ? (
+                  <button className="softButton compact" onClick={() => openPlanModal(enrollment)} type="button">회차 설정</button>
+                ) : null}
               </div>
             );
           })}
@@ -1395,10 +1433,10 @@ export function SpecialLectureApplicationPanel({
           {protectedLockedLessonRows.length ? <p className="inlineNotice danger">완료 수업, 기존 학생의 시간·명단 변경 또는 알림 예약이 포함된 {protectedLockedLessonRows.length}건은 자동 반영하지 않습니다.</p> : null}
           {pastMissingLessonRows.length ? <p className="inlineNotice danger">이미 지난 공식 회차 중 수업일지가 없는 {pastMissingLessonRows.length}건은 자동 생성하지 않습니다.</p> : null}
           {staleLessonRows.length ? <p className="inlineNotice danger">현재 공식 회차에서 빠졌지만 기존 달력에 남아 있는 특강 수업이 {staleLessonRows.length}건 있습니다.</p> : null}
+          {/* 2026-09-19 · U12(ops-15): 수업일지 반영 결과도 같은 AsyncOperationStatus(saving→loading, saved→success, failed→error). */}
           {lessonCreateState.message ? (
-            <div className="specialLectureDismissibleNotice">
-              <p className={lessonCreateState.state === "failed" ? "inlineNotice danger" : "inlineNotice"}>{lessonCreateState.message}</p>
-              {lessonCreateState.state !== "saving" ? (
+            <AsyncOperationStatus
+              action={lessonCreateState.state !== "saving" ? (
                 <button
                   className="softButton compact"
                   onClick={() => setLessonCreateState({ state: "idle", message: "" })}
@@ -1407,7 +1445,11 @@ export function SpecialLectureApplicationPanel({
                   확인
                 </button>
               ) : null}
-            </div>
+              className="specialLecturePanelFeedback"
+              description={lessonCreateState.message}
+              label="수업일지 반영"
+              state={{ failed: "error", saved: "success", saving: "loading" }[lessonCreateState.state] ?? "idle"}
+            />
           ) : null}
           {showNoLessonChangesNotice ? (
             <div className="specialLectureDismissibleNotice">
@@ -1418,29 +1460,30 @@ export function SpecialLectureApplicationPanel({
         </div>
       ) : null}
       <div className="specialLectureEnrollmentPanel">
-        <div className="specialLectureGateHeader">
-          <div>
+        {/* 2026-09-19 · U12(ops-16): 접기 헤더 전체가 하나의 토글 버튼이다(통계는 라벨 영역, 별도 접기/펼치기 버튼 없음). */}
+        <button
+          aria-controls="special-lecture-enrollment-panel"
+          aria-expanded={isEnrollmentPanelOpen}
+          className="specialLectureGateHeader"
+          onClick={() => setIsEnrollmentPanelOpen((current) => !current)}
+          type="button"
+        >
+          <span className="specialLectureGateCopy">
             <strong>특강 명단 · 학생별 회차 관리</strong>
             <span>Tally 접수와 수동 접수를 하나의 확정 명단으로 관리합니다. 학생별 회차 설정 저장본이 미래 특강 수업 명단의 기준입니다.</span>
-          </div>
-          <div className="specialLectureGateStats">
+          </span>
+          <span className="specialLectureGateStats">
             <span>수강 {activeEnrollments.length}</span>
             <span>취소 {canceledEnrollments.length}</span>
             <span>추가 필요 {missingEnrollmentRows.length}</span>
             <span className={needsReviewRows.length ? "danger" : ""}>연결 필요 {needsReviewRows.length}</span>
             <span>회차 {guideSessions.length}</span>
-            <button
-              aria-controls="special-lecture-enrollment-panel"
-              aria-expanded={isEnrollmentPanelOpen}
-              className="softButton compact"
-              onClick={() => setIsEnrollmentPanelOpen((current) => !current)}
-              type="button"
-            >
-              {isEnrollmentPanelOpen ? "접기" : "펼치기"}
-              <DisclosureChevron open={isEnrollmentPanelOpen} />
-            </button>
-          </div>
-        </div>
+          </span>
+          <span className="specialLectureGateToggle">
+            {isEnrollmentPanelOpen ? "접기" : "펼치기"}
+            <DisclosureChevron open={isEnrollmentPanelOpen} />
+          </span>
+        </button>
         <Disclosure hideTrigger id="special-lecture-enrollment-panel" open={isEnrollmentPanelOpen} onToggle={setIsEnrollmentPanelOpen}>
         {!isGuideSaved ? (
           <p className="inlineNotice danger">현재 특강 안내문에 저장하지 않은 변경이 있습니다. `안내문 저장` 후 학생별 수강계획을 수정하세요.</p>
@@ -1449,7 +1492,7 @@ export function SpecialLectureApplicationPanel({
           <div className="specialLectureEnrollmentSync">
             <span>기존 학생과 매칭된 확정 신청자 {missingEnrollmentRows.length}명을 아직 수강명단에 저장하지 않았습니다.</span>
             <button
-              className="primaryButton compact"
+              className="softButton compact"
               disabled={!onSaveEnrollments || !isGuideSaved || savingEnrollmentId === "bulk" || !guideSessionIds.length}
               onClick={addMatchedRowsToEnrollmentSource}
               type="button"
@@ -1501,14 +1544,15 @@ export function SpecialLectureApplicationPanel({
                       || (enrollment.applicationId && updatingApplicationId === enrollment.applicationId) ? (
                       <InlineSaveStatus label={student?.name || "수강생"} saveState="saving" />
                     ) : null}
-                    <button
-                      className="primaryButton compact"
-                      disabled={!isGuideSaved}
-                      onClick={() => openPlanModal(enrollment)}
-                      type="button"
-                    >
-                      {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
-                    </button>
+                    {isGuideSaved ? (
+                      <button
+                        className="softButton compact"
+                        onClick={() => openPlanModal(enrollment)}
+                        type="button"
+                      >
+                        {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
+                      </button>
+                    ) : null}
                     <OverflowMenu
                       items={[
                         ...(enrollment.applicationId
@@ -1532,7 +1576,7 @@ export function SpecialLectureApplicationPanel({
             })}
           </div>
         ) : (
-          <p className="specialLectureGateEmpty">현재 활성 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
+          <EmptyState density="compact" description="확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요." title="현재 활성 수강명단이 없습니다." />
         )}
         {canceledEnrollments.length ? (
           <Disclosure className="specialLectureCanceledEnrollments" trigger={`취소·오입력 기록 ${canceledEnrollments.length}건`}>
@@ -1560,12 +1604,18 @@ export function SpecialLectureApplicationPanel({
       </div>
 
       <div className="specialLectureLessonPreviewGate">
-        <div className="specialLectureGateHeader">
-          <div>
+        <button
+          aria-controls="special-lecture-lesson-preview-panel"
+          aria-expanded={isLessonPreviewOpen}
+          className="specialLectureGateHeader"
+          onClick={() => setIsLessonPreviewOpen((current) => !current)}
+          type="button"
+        >
+          <span className="specialLectureGateCopy">
             <strong>특강 수업일지 반영</strong>
             <span>학생이 없어도 공식 회차별 특강 수업을 먼저 개설합니다. 이후 저장한 학생별 계획은 안전한 미래 회차에만 반영합니다.</span>
-          </div>
-          <div className="specialLectureGateStats">
+          </span>
+          <span className="specialLectureGateStats">
             <span>신규 {newLessonDrafts.length}</span>
             <span>미래 변경 {syncableChangedRows.length}</span>
             <span className={additiveLockedLessonRows.length ? "danger" : ""}>확인 후 추가 {additiveLockedLessonRows.length}</span>
@@ -1573,18 +1623,12 @@ export function SpecialLectureApplicationPanel({
             <span className={emptySessionCount ? "danger" : ""}>빈 회차 {emptySessionCount}</span>
             <span className={unreviewedEnrollmentRows.length ? "danger" : ""}>미검토 {unreviewedEnrollmentRows.length}</span>
             <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
-            <button
-              aria-controls="special-lecture-lesson-preview-panel"
-              aria-expanded={isLessonPreviewOpen}
-              className="softButton compact"
-              onClick={() => setIsLessonPreviewOpen((current) => !current)}
-              type="button"
-            >
-              {isLessonPreviewOpen ? "접기" : "펼치기"}
-              <DisclosureChevron open={isLessonPreviewOpen} />
-            </button>
-          </div>
-        </div>
+          </span>
+          <span className="specialLectureGateToggle">
+            {isLessonPreviewOpen ? "접기" : "펼치기"}
+            <DisclosureChevron open={isLessonPreviewOpen} />
+          </span>
+        </button>
         <Disclosure hideTrigger id="special-lecture-lesson-preview-panel" open={isLessonPreviewOpen} onToggle={setIsLessonPreviewOpen}>
         {lessonPreviewRows.length ? (
           <div className="specialLectureLessonPreviewList">
@@ -1611,7 +1655,7 @@ export function SpecialLectureApplicationPanel({
             ))}
           </div>
         ) : (
-          <p className="specialLectureGateEmpty">회차별 계획을 먼저 저장해 주세요.</p>
+          <EmptyState density="compact" title="회차별 계획을 먼저 저장해 주세요." />
         )}
         <div className="specialLectureLessonCreateActions">
           <button
@@ -1647,10 +1691,15 @@ export function SpecialLectureApplicationPanel({
           scrollable
           subtitle={`${matchApplication.studentName || "신청자"} · ${matchApplication.schoolName || "학교 미입력"} ${matchApplication.grade || ""}`}
           title="특강 신청 학생 연결"
+          titleAdornment={(
+            <HelpTip
+              label="특강 신청 학생 연결"
+              text="정규반 미배정 학생과 다른 반 학생도 연결할 수 있습니다."
+            />
+          )}
         >
           <div className="specialLectureModalBody">
             <div className="noticeBox specialLectureNoticeBox">
-              <strong>정규반 미배정 학생과 다른 반 학생도 연결할 수 있습니다.</strong>
               <p>정규반 배정 여부와 관계없이 Academy OS의 모든 재원 학생에서 선택합니다. 이름만 먼저 등록한 학생이라면 Tally 기본정보를 같은 학생 ID에 덮어쓴 뒤 연결할 수 있습니다.</p>
             </div>
             <div className="specialLectureRosterSearch">
@@ -1690,7 +1739,6 @@ export function SpecialLectureApplicationPanel({
                   action={matchSearchText.trim() ? (
                     <button className="softButton compact" onClick={() => setMatchSearchText("")} type="button">검색어 지우기</button>
                   ) : null}
-                  className="specialLectureGateEmpty"
                   description={matchSearchText.trim()
                     ? "이름·학교·학년·반을 다시 확인하세요."
                     : "신청자를 특강 전용 학생으로 등록할 수 있습니다."}
@@ -1792,7 +1840,6 @@ export function SpecialLectureApplicationPanel({
                   action={manualSearchText.trim() ? (
                     <button className="softButton compact" onClick={() => setManualSearchText("")} type="button">검색어 지우기</button>
                   ) : null}
-                  className="specialLectureGateEmpty"
                   description={manualSearchText.trim() ? "이름·학교·학년·반을 다시 확인하세요." : "이미 등록된 학생은 목록에서 제외됩니다."}
                   title={manualSearchText.trim() ? "검색 결과가 없습니다." : "추가할 수 있는 학생이 없습니다."}
                 />

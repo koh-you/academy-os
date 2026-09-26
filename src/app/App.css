@@ -692,24 +692,11 @@ summary:focus-visible {
   margin: 0;
 }
 
-.inlineNotice.analysisRunNotice,
-.inlineNotice.noticeDispatchMessage {
+.inlineNotice.analysisRunNotice {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin-top: 8px;
-}
-
-.inlineNotice.noticeDispatchMessage {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  border-left: 4px solid var(--academy-focus-ring, #2563eb);
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 1.45;
-  margin-top: 12px;
-  padding: 12px 14px;
 }
 
 .inlineNotice.analysisRunNotice small {
@@ -933,19 +920,9 @@ summary:focus-visible {
   padding: 10px 12px;
 }
 
-.academyReminderEditBanner div {
-  display: grid;
-  gap: 3px;
-}
-
 .academyReminderEditBanner strong {
   color: var(--status-pending-text, #c2410c);
   font-size: 14px;
-}
-
-.academyReminderEditBanner span {
-  font-size: 13px;
-  font-weight: 800;
 }
 
 .academyReminderForm textarea {
@@ -961,8 +938,7 @@ summary:focus-visible {
   width: 100%;
 }
 
-.academyReminderSlackToggle,
-.studentReminderSlackToggle {
+.academyReminderSlackToggle {
   align-items: center;
   background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border-strong, #cbd8ee);
@@ -978,8 +954,7 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
-.academyReminderSlackToggle input,
-.studentReminderSlackToggle input {
+.academyReminderSlackToggle input {
   flex: 0 0 16px;
   height: 16px;
   margin: 0;
@@ -1007,8 +982,7 @@ summary:focus-visible {
   font-weight: 800;
 }
 
-.academyReminderList,
-.studentReminderList {
+.academyReminderList {
   display: grid;
   gap: 8px;
 }
@@ -1023,8 +997,7 @@ summary:focus-visible {
   padding: 10px 12px;
 }
 
-.academyReminderItem,
-.studentReminderItem {
+.academyReminderItem {
   background: var(--academy-surface, #ffffff);
   border: 1px solid var(--status-info-bg, #eff6ff);
   border-left: 4px solid var(--status-success-text, #047857);
@@ -1035,13 +1008,11 @@ summary:focus-visible {
   padding: 12px;
 }
 
-.academyReminderItem.priority-high,
-.studentReminderItem.priority-high {
+.academyReminderItem.priority-high {
   border-left-color: var(--status-destructive-text, #dc2626);
 }
 
-.academyReminderItem.status-done,
-.studentReminderItem.status-done {
+.academyReminderItem.status-done {
   opacity: 0.72;
 }
 
@@ -1053,8 +1024,7 @@ summary:focus-visible {
   gap: 8px;
 }
 
-.academyReminderItemTop strong,
-.studentReminderItem strong {
+.academyReminderItemTop strong {
   color: var(--academy-text, #0f172a);
 }
 
@@ -1074,15 +1044,13 @@ summary:focus-visible {
   font-weight: 800;
 }
 
-.academyReminderItem p,
-.studentReminderItem p {
+.academyReminderItem p {
   color: var(--academy-text-strong, #475569);
   margin: 4px 0 0;
   white-space: pre-wrap;
 }
 
-.academyReminderActions,
-.studentProfileRowActions {
+.academyReminderActions {
   align-items: center;
   display: flex;
   gap: 6px;
@@ -1095,26 +1063,6 @@ summary:focus-visible {
 
 .lessonReminderPanel .academyReminderItem {
   grid-template-columns: minmax(0, 1fr);
-}
-
-.studentReminderComposer {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-
-.studentReminderControls {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 160px 150px 110px 95px 140px 130px;
-}
-
-.studentReminderComposer textarea {
-  min-height: 90px;
-  resize: vertical;
 }
 
 .schoolEventPill.event-reminder {
@@ -1516,39 +1464,6 @@ summary:focus-visible {
   margin: 0 0 4px;
 }
 
-.linkTitleButton {
-  background: transparent;
-  border: 0;
-  color: var(--academy-text, #0f172a);
-  cursor: pointer;
-  font-size: 24px;
-  font-weight: 900;
-  letter-spacing: 0;
-  min-height: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.linkTitleButton:hover {
-  color: var(--academy-focus-ring, #2563eb);
-}
-
-.textLinkButton {
-  background: transparent;
-  border: 0;
-  color: var(--academy-text, #0f172a);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 900;
-  padding: 0;
-  text-align: left;
-}
-
-.textLinkButton:hover {
-  color: var(--academy-accent-text, #4f46e5);
-  text-decoration: underline;
-}
-
 .lessonJournalHeader p {
   margin: 0;
 }
@@ -1588,179 +1503,6 @@ summary:focus-visible {
 
 .homeworkMakeupHeader {
   align-items: center;
-}
-
-.homeworkMakeupModalBody {
-  display: grid;
-  gap: 16px;
-}
-
-.homeworkMakeupSummary {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.homeworkMakeupSummary > div {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-  padding: 14px;
-}
-
-.homeworkMakeupSummary span,
-.homeworkMakeupSummary small {
-  color: var(--academy-muted, #64748b);
-  font-weight: 800;
-}
-
-.homeworkMakeupSummary strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 18px;
-  font-weight: 900;
-  overflow-wrap: anywhere;
-}
-
-.homeworkMakeupModalActions {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.homeworkMakeupModalActions > div {
-  display: flex;
-  gap: 8px;
-}
-
-.homeworkMakeupScheduleEditor {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-}
-
-.homeworkMakeupScheduleEditor > div:first-child {
-  display: grid;
-  gap: 5px;
-}
-
-.homeworkMakeupScheduleEditor > div:first-child strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 16px;
-  font-weight: 900;
-}
-
-.homeworkMakeupScheduleEditor > div:first-child span {
-  color: var(--academy-text-muted, #52647c);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.5;
-}
-
-.homeworkMakeupScheduleEditor label {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 8px;
-  padding: 10px;
-}
-
-.homeworkMakeupScheduleEditor label strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.homeworkMakeupScheduleTextField textarea {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font: inherit;
-  line-height: 1.5;
-  min-height: 82px;
-  padding: 10px;
-  resize: vertical;
-}
-
-.homeworkMakeupScheduleTextField textarea:focus {
-  border-color: var(--academy-focus-ring, #2563eb);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 12%, transparent);
-  outline: none;
-}
-
-.homeworkMakeupScheduleState {
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 1.45;
-  margin: 0;
-  padding: 10px 12px;
-}
-
-.homeworkMakeupScheduleState.saving {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.homeworkMakeupScheduleState.saved {
-  background: var(--status-success-bg, #ecfdf5);
-  border: 1px solid var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.homeworkMakeupScheduleState.failed {
-  background: var(--status-danger-bg, #fef2f2);
-  border: 1px solid var(--status-danger-border, #fecaca);
-  color: var(--status-danger-text, #b91c1c);
-}
-
-.homeworkMakeupPassState {
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 1.45;
-  margin: 0;
-  padding: 10px 12px;
-}
-
-.homeworkMakeupPassState.saving {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.homeworkMakeupPassState.saved {
-  background: var(--status-success-bg, #ecfdf5);
-  border: 1px solid var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.homeworkMakeupPassState.failed {
-  background: var(--status-danger-bg, #fef2f2);
-  border: 1px solid var(--status-danger-border, #fecaca);
-  color: var(--status-danger-text, #b91c1c);
-}
-
-.homeworkMakeupPassState.modalState {
-  margin-top: 10px;
-}
-
-.supplementScheduleActionHint {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.5;
-  margin: -4px 0 0;
-  text-align: right;
 }
 
 .examPrepLessonBody {
@@ -1835,250 +1577,6 @@ summary:focus-visible {
   font-size: 13px;
   font-weight: 800;
   padding: 6px 12px;
-}
-
-.makeupOriginalHomework {
-  color: var(--academy-muted, #64748b);
-  display: block;
-  font-weight: 800;
-  margin-top: 8px;
-}
-
-.homeworkMakeupHero {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
-}
-
-.homeworkMakeupNotice,
-.homeworkMakeupProcess {
-  align-content: start;
-  border-radius: 8px;
-  display: grid;
-  gap: 12px;
-}
-
-.homeworkMakeupNotice h3,
-.homeworkMakeupProcess h3 {
-  font-size: 22px;
-  margin: 4px 0 10px;
-}
-
-.homeworkMakeupNotice p {
-  color: var(--academy-text-strong, #475569);
-  line-height: 1.7;
-}
-
-.makeupLinkedBox {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  margin-top: 16px;
-  padding: 14px;
-}
-
-.makeupLinkedBox span,
-.makeupLinkedBox small {
-  color: var(--academy-muted, #64748b);
-  display: block;
-}
-
-.makeupLinkedBox strong {
-  display: block;
-  font-size: 18px;
-  margin: 5px 0;
-}
-
-.supplementAttendanceBox {
-  align-items: stretch;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(0, 1fr) minmax(168px, 0.48fr);
-  margin-top: 12px;
-  padding: 14px;
-}
-
-.supplementAttendanceBox > div {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.supplementAttendanceBox > div span,
-.supplementAttendanceBox > div small {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.supplementAttendanceBox strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 15px;
-  font-weight: 900;
-}
-
-.supplementAttendanceBox .attendanceBadge {
-  border-width: 2px;
-  cursor: pointer;
-  font-size: 18px;
-  gap: 5px;
-  min-height: 84px;
-  padding: 12px 14px;
-  width: 100%;
-}
-
-.supplementAttendanceBox .attendanceBadge span {
-  color: inherit;
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.supplementAttendanceBox .attendanceBadge small {
-  color: inherit;
-  font-size: 13px;
-  line-height: 1.25;
-}
-
-.supplementAttendanceBox .attendanceBadge:disabled {
-  cursor: not-allowed;
-  opacity: 0.72;
-}
-
-.absenceSourceJournalBox {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
-  padding: 14px;
-}
-
-.absenceSourceJournalBox.compact h4 {
-  color: var(--academy-primary, #17213d);
-  font-size: 16px;
-  margin: 0;
-}
-
-.absenceSourceJournalBox.compact p {
-  margin: 0;
-}
-
-.absenceSourceJournalGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.absenceSourceJournalGrid.compact {
-  grid-template-columns: 1fr;
-}
-
-.absenceSourceJournalGrid > div {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  min-height: 92px;
-  padding: 12px;
-}
-
-.absenceSourceJournalGrid span {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.absenceSourceJournalGrid strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 14px;
-  line-height: 1.55;
-  white-space: pre-wrap;
-}
-
-.makeupProcessStatusGrid {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 6px;
-}
-
-.makeupProcessStatusGrid button {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  cursor: pointer;
-  display: grid;
-  gap: 4px;
-  min-height: 76px;
-  padding: 10px;
-  text-align: left;
-}
-
-.makeupProcessStatusGrid button.active {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--status-closure-border, #6366f1);
-}
-
-.makeupProcessStatusGrid strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.makeupProcessStatusGrid span {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.4;
-}
-
-.makeupProcessFormGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  margin-top: 10px;
-}
-
-.makeupProcessField {
-  color: var(--academy-primary, #17213d);
-  display: grid;
-  font-weight: 900;
-  gap: 8px;
-}
-
-.makeupProcessField textarea {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font: inherit;
-  line-height: 1.5;
-  min-height: 78px;
-  padding: 12px 14px;
-  resize: vertical;
-}
-
-.makeupProcessField textarea:focus {
-  border-color: var(--academy-focus-ring, #2563eb);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 16%, transparent);
-  outline: none;
-}
-
-.makeupProcessActions {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 10px;
-}
-
-.makeupProcessActions button {
-  min-height: 52px;
-  width: 100%;
 }
 
 .lessonNotificationStatusRow {
@@ -2245,10 +1743,6 @@ summary:focus-visible {
 }
 
 .lessonJournalStickySaveBar {
-  margin-inline: 2px;
-}
-
-.studentProfileStickySaveBar {
   margin-inline: 2px;
 }
 
@@ -3035,11 +2529,6 @@ summary:focus-visible {
   font-weight: 900;
 }
 
-.managementRow.scoreRow {
-  grid-template-columns: 160px 130px 150px 140px 100px 100px minmax(220px, 1fr);
-  min-width: 1040px;
-}
-
 .managementRow.testRow {
   grid-template-columns: 150px 220px 260px 110px minmax(260px, 1fr);
   min-width: 940px;
@@ -3315,38 +2804,6 @@ summary:focus-visible {
   padding: 7px 10px;
 }
 
-.examPrepDetailButton {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  gap: 4px;
-  min-height: 58px;
-  padding: 9px 10px;
-  text-align: left;
-}
-
-.examPrepDetailButton.filled {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.examPrepDetailButton strong {
-  font-size: 14px;
-}
-
-.examPrepDetailButton span {
-  color: inherit;
-  display: -webkit-box;
-  font-size: 12px;
-  line-height: 1.35;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
 .examPrepEditForm {
   display: grid;
   gap: 18px;
@@ -3440,66 +2897,16 @@ summary:focus-visible {
 }
 
 .examManagementTabs {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  display: inline-flex;
-  gap: 4px;
-  max-width: 100%;
-  overflow-x: auto;
   overscroll-behavior-inline: contain;
-  padding: 4px;
   scroll-padding-inline: 4px;
-  scrollbar-width: thin;
   touch-action: pan-x pan-y;
-  width: fit-content;
   -webkit-overflow-scrolling: touch;
-}
-
-.examManagementTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  font-weight: 900;
-  min-height: 38px;
-  padding: 0 18px;
-  text-align: center;
-}
-
-.examManagementTabs button.active {
-  background: var(--academy-primary, #17213d);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--academy-primary, #17213d) 16%, transparent);
-  color: var(--academy-surface, #fff);
 }
 
 .examTabCaption {
   color: var(--academy-muted, #64748b);
   font-size: 14px;
   margin: -6px 0 2px;
-}
-
-.examPrepEmptyState {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  display: grid;
-  font-size: 14px;
-  font-weight: 800;
-  gap: 6px;
-  line-height: 1.5;
-  margin: 0;
-  padding: 28px;
-  text-align: center;
-}
-
-.examPrepEmptyState strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 18px;
 }
 
 .linkedExamInfoBox {
@@ -3560,20 +2967,6 @@ summary:focus-visible {
 .tallySummaryPanel {
   display: grid;
   gap: 12px;
-}
-
-.fileImportButton {
-  cursor: pointer;
-  display: inline-flex;
-  position: relative;
-}
-
-.fileImportButton input {
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  width: 1px;
 }
 
 .tallyDropZone {
@@ -4031,13 +3424,6 @@ summary:focus-visible {
   font-size: 15px;
 }
 
-.examPrepStudentContentHeading p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 4px 0 0;
-}
-
 .examPrepStudentContentHeading > span {
   background: var(--status-info-bg, #eff6ff);
   border-radius: 999px;
@@ -4295,20 +3681,6 @@ summary:focus-visible {
   display: grid;
   gap: 12px;
   padding: 0;
-}
-
-.schoolEventFormActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.schoolEventFormActions .primaryButton,
-.schoolEventFormActions .dangerSoftButton {
-  min-height: 42px;
-  min-width: 132px;
 }
 
 .modalCard.schoolEventFormModal {
@@ -4728,10 +4100,6 @@ summary:focus-visible {
   min-height: 40px;
 }
 
-.mathExamItemRow .iconButton:disabled {
-  opacity: 0.35;
-}
-
 .schoolMonthHeader {
   align-items: center;
   display: flex;
@@ -4754,10 +4122,6 @@ summary:focus-visible {
   font-weight: 900;
   margin: 0;
   text-align: center;
-}
-
-.schoolMonthAddButton {
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--academy-primary, #17213d) 16%, transparent);
 }
 
 .schoolCalendarFilterBar {
@@ -5188,8 +4552,7 @@ summary:focus-visible {
   padding: 8px 10px;
 }
 
-.studentTable,
-.studentListTable {
+.studentTable {
   border: 1px solid var(--status-neutral-border, #e2e8f0);
   border-radius: 8px;
   overflow: auto;
@@ -5205,13 +4568,11 @@ summary:focus-visible {
   padding: 12px 14px;
 }
 
-.tableRow:first-child,
-.studentListRow:first-child {
+.tableRow:first-child {
   border-top: 0;
 }
 
-.tableHead,
-.studentListHead {
+.tableHead {
   background: var(--academy-surface-muted, #f8fafc);
   color: var(--academy-muted, #64748b);
   font-size: 15px;
@@ -5554,19 +4915,6 @@ textarea {
   color: var(--academy-primary, #17213d);
 }
 
-.ghostButton.scheduleEditButton {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--academy-accent-border, #c7d2fe);
-  color: var(--academy-accent-text, #4f46e5);
-}
-
-.ghostButton.scheduleEditButton:hover,
-.ghostButton.scheduleEditButton:focus-visible {
-  background: var(--status-closure-bg, #e0e7ff);
-  border-color: var(--status-closure-border, #6366f1);
-  color: var(--status-closure-text, #3730a3);
-}
-
 .ghostButton.dangerText {
   background: var(--status-pending-bg, #fff7ed);
   border-color: var(--status-pending-border, #fed7aa);
@@ -5688,6 +5036,11 @@ button:disabled {
   overflow: hidden;
 }
 
+/* 2026-09-26 · Modal footer 슬롯을 쓰면 본문만 스크롤하고 푸터는 카드 바닥에 고정된다. */
+.modalCard.modalScrollable.modalHasFooter {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
 .modalScrollBody {
   display: grid;
   gap: 20px;
@@ -5721,10 +5074,6 @@ button:disabled {
 
 .modalFooter.tone-danger {
   border-top-color: var(--status-danger-border, #fecaca);
-}
-
-.modalCard.wideModal {
-  max-width: 1040px;
 }
 
 .modalCard.commentComposerModal {
@@ -6158,18 +5507,12 @@ button:disabled {
   align-items: flex-start;
 }
 
-.specialLectureGateHeader div:first-child {
-  display: grid;
-  gap: 4px;
-}
-
 .specialLectureGateHeader strong {
   color: var(--academy-text, #0f172a);
   font-size: 14px;
 }
 
-.specialLectureGateHeader span,
-.specialLectureGateEmpty {
+.specialLectureGateHeader span {
   color: var(--academy-text-muted, #52647c);
   font-size: 12px;
   line-height: 1.5;
@@ -7439,42 +6782,6 @@ button:disabled {
   margin: 0;
 }
 
-.specialLectureManagementBar {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  padding: 13px;
-}
-
-.specialLectureManagementBar > div {
-  display: grid;
-  gap: 4px;
-}
-
-.specialLectureManagementBar > div:last-child {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.specialLectureManagementBar span,
-.specialLectureManagementBar small {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.specialLectureManagementBar strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 15px;
-  font-weight: 900;
-}
-
 .specialLectureFormGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -7971,13 +7278,6 @@ button:disabled {
   text-align: center;
 }
 
-.specialLectureActionBar {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .specialLectureNoticePreview {
   background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--status-info-bg, #eff6ff);
@@ -8339,12 +7639,6 @@ button:disabled {
   font-weight: 800;
 }
 
-.modalCard.lessonModal {
-  gap: 18px;
-  max-width: 640px;
-  padding: 30px;
-}
-
 .modalCard.studentDeleteModal {
   gap: 18px;
   max-width: 520px;
@@ -8377,21 +7671,6 @@ button:disabled {
 .deleteConfirmStudent strong {
   color: var(--academy-text, #0f172a);
   font-size: 18px;
-}
-
-.deleteWarningBox {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  display: grid;
-  gap: 8px 12px;
-  grid-template-columns: 72px 1fr;
-  padding: 14px;
-}
-
-.deleteWarningBox span {
-  color: var(--status-pending-text, #c2410c);
-  font-weight: 800;
 }
 
 .dangerCopy {
@@ -8512,10 +7791,6 @@ button:disabled {
   gap: 10px;
   justify-items: stretch;
   text-align: left;
-}
-
-.lessonModalSection {
-  gap: 12px;
 }
 
 .typeTabs {
@@ -8656,11 +7931,6 @@ button:disabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.attendanceModalActions {
-  display: grid;
-  gap: 10px;
-}
-
 .attendanceSourceNotice {
   background: var(--status-info-bg);
   border: 1px solid var(--status-info-border);
@@ -8717,14 +7987,6 @@ button:disabled {
   word-break: break-word;
 }
 
-.lessonModalFields {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.lessonModalFields label:first-child {
-  grid-column: 1 / -1;
-}
-
 label,
 .wideLabel {
   color: var(--academy-text-strong, #475569);
@@ -8748,28 +8010,6 @@ textarea {
   gap: 8px;
 }
 
-.lessonStudentSearchRow {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.lessonStudentGroups {
-  display: grid;
-  gap: 12px;
-}
-
-.lessonStudentGroup {
-  display: grid;
-  gap: 8px;
-}
-
-.lessonStudentGroup > div:first-child {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-}
-
 .lessonStudentChip {
   background: var(--academy-surface, #ffffff);
   border: 1px solid var(--academy-border, #d8e3f8);
@@ -8784,31 +8024,6 @@ textarea {
   background: var(--academy-text, #0f172a);
   border-color: var(--academy-text, #0f172a);
   color: var(--academy-surface, #ffffff);
-}
-
-.lessonModalActions {
-  align-items: center;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding-top: 6px;
-}
-
-.lessonModalSaveStatus {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 12px;
-}
-
-.lessonModalSaveStatus > span {
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 800;
 }
 
 .closureJournalNotice {
@@ -8860,10 +8075,6 @@ textarea {
   width: auto;
 }
 
-.studentListTable {
-  margin-top: 16px;
-}
-
 .studentListToolbar {
   align-items: center;
   display: flex;
@@ -8877,57 +8088,8 @@ textarea {
   min-width: 132px;
 }
 
-.studentStatusPill {
-  align-items: center;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  display: inline-flex;
-  font-weight: 900;
-  min-height: 40px;
-  padding: 0 14px;
-}
-
-.mutedPill {
-  background: var(--academy-surface-muted, #f8fafc);
-  color: var(--academy-muted, #64748b);
-}
-
-.greenButton {
-  background: var(--status-success-border, #86efac);
-  border: 1px solid var(--status-success-border, #86efac);
-  border-radius: 8px;
-  color: var(--academy-surface, #ffffff);
-  font-weight: 900;
-  min-height: 40px;
-  padding: 0 14px;
-}
-
 .studentManagerTabs {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-bottom: 14px;
-  padding: 6px;
-  max-width: 720px;
-}
-
-.studentManagerTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-weight: 900;
-  min-height: 44px;
-}
-
-.studentManagerTabs button.active {
-  background: var(--academy-surface, #ffffff);
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
-  color: var(--academy-text, #0f172a);
 }
 
 .classTabList {
@@ -8963,58 +8125,7 @@ textarea {
   padding: 3px 8px;
 }
 
-.studentListRow {
-  align-items: center;
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 34px 190px 180px 120px 70px 80px 150px 150px 150px 104px; /* ⋯ 열 제거 — 행 전체가 수정 모달을 연다. docs/ui-row-actions.md R2·R3 */
-  min-width: 1244px;
-  padding: 10px 12px;
-}
-
 /* 행 전체가 학생 정보 수정 모달을 여는 버튼이다(칸 인라인 편집·⋯ 메뉴 제거, 2026-09-17). */
-.studentListRowClickable {
-  cursor: pointer;
-  text-align: left;
-  transition: background var(--academy-transition-fast, 150ms ease);
-}
-
-.studentListRowClickable:hover {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.studentListRowClickable:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--academy-focus-ring, #2563eb);
-  outline: none;
-}
-
-.studentNameCell {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-  min-width: 0;
-}
-
-.studentListRow.withdrawnStudentRow {
-  grid-template-columns: 48px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr);
-  min-width: 1510px;
-}
-
-.studentListRow:not(.studentListHead):hover {
-  background: var(--status-info-bg, #eff6ff);
-}
-
-.studentListRow.dirtyStudentRow {
-  background: var(--status-pending-bg, #fff7ed);
-}
-
-.studentListRow select {
-  border-radius: 999px;
-  font-size: 14px;
-  min-height: 34px;
-  padding: 0 12px;
-}
 
 .examPrepRow.excluded {
   background: var(--academy-surface-muted, #f8fafc);
@@ -9083,11 +8194,6 @@ textarea {
 .examPrepRosterHeader h3 {
   margin: 3px 0 4px;
 }
-
-.examPrepRosterHeader p {
-  margin: 0;
-}
-
 
 .examPrepRosterGroups {
   display: grid;
@@ -9256,254 +8362,6 @@ textarea {
   width: 100%;
 }
 
-.withdrawalReasonSelect {
-  width: 100%;
-}
-
-.withdrawalCommentInput {
-  width: 100%;
-}
-
-.withdrawnStudentBulkActions {
-  align-items: center;
-  background: rgba(248, 251, 255, 0.98);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 10px;
-  bottom: 16px;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--status-info-text, #1d4ed8) 16%, transparent);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  left: calc(var(--academy-sidebar-width) + 16px);
-  padding: 10px 12px;
-  position: fixed;
-  right: 24px;
-  z-index: 80;
-}
-
-.withdrawnStudentBulkActions > span {
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 13px;
-  font-weight: 900;
-  margin-right: 4px;
-}
-
-@media (max-width: 640px) {
-  .withdrawnStudentBulkActions {
-    bottom: max(8px, env(safe-area-inset-bottom));
-    left: max(8px, env(safe-area-inset-left));
-    max-height: min(56dvh, 420px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    right: max(8px, env(safe-area-inset-right));
-    scrollbar-gutter: stable;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-.withdrawnStudentSelect {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-
-.withdrawnStudentSelect input {
-  accent-color: var(--academy-focus-ring, #2563eb);
-  height: 18px;
-  width: 18px;
-}
-
-.studentRestoreNotice {
-  align-items: center;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--status-info-text, #1d4ed8);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-}
-
-.studentRestoreNotice.failed {
-  background: var(--status-destructive-bg, #fff1f2);
-  border-color: var(--status-destructive-border, #fecdd3);
-  color: var(--status-destructive-text, #dc2626);
-}
-
-.modalCard.studentPermanentDeleteModal {
-  gap: 18px;
-  max-width: 620px;
-}
-
-.permanentDeleteStudentSummary {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-}
-
-.permanentDeleteStudentSummary p {
-  margin: 4px 0 0;
-}
-
-.permanentDeleteAuditStatus,
-.permanentDeleteSafeBox,
-.permanentDeleteBlockedBox,
-.batchPermanentDeleteTargetList,
-.permanentDeleteError {
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  padding: 14px 16px;
-}
-
-.permanentDeleteAuditStatus {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.permanentDeleteAuditStatus p,
-.permanentDeleteSafeBox p,
-.permanentDeleteBlockedBox p {
-  margin: 8px 0 0;
-}
-
-.permanentDeleteSafeBox {
-  background: var(--status-success-bg, #ecfdf5);
-  border-color: var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.permanentDeleteBlockedBox,
-.permanentDeleteError {
-  background: var(--status-destructive-bg, #fff1f2);
-  border-color: var(--status-destructive-border, #fecdd3);
-  color: var(--status-destructive-text, #dc2626);
-}
-
-.permanentDeleteBlockedBox ul {
-  margin: 10px 0 0;
-  padding-left: 20px;
-}
-
-.batchPermanentDeleteTargetList {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  color: var(--academy-primary, #17213d);
-}
-
-.batchPermanentDeleteTargetList > ul {
-  display: grid;
-  gap: 8px;
-  list-style: none;
-  margin: 10px 0 0;
-  max-height: min(42vh, 360px);
-  overflow: auto;
-  padding: 0;
-}
-
-.batchPermanentDeleteTargetList li {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  padding: 9px 10px;
-}
-
-.batchPermanentDeleteTargetList li > div {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: space-between;
-}
-
-.batchPermanentDeleteTargetList li > div > span {
-  color: var(--status-destructive-text, #dc2626);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.batchPermanentDeleteTargetList li > p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 5px 0 0;
-}
-
-.permanentDeleteConfirmationField {
-  display: grid;
-  font-weight: 800;
-  gap: 8px;
-}
-
-.permanentDeleteForceField {
-  align-items: start;
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 12px;
-  color: var(--status-pending-text, #c2410c);
-  display: flex;
-  font-weight: 800;
-  gap: 10px;
-  padding: 12px 14px;
-}
-
-.permanentDeleteForceField input {
-  flex: 0 0 18px;
-  height: 18px;
-  margin-top: 3px;
-  min-height: 18px;
-  padding: 0;
-  width: 18px;
-}
-
-.permanentDeleteConfirmationField input {
-  border: 1px solid var(--status-destructive-border, #fecdd3);
-  border-radius: 10px;
-  min-height: 42px;
-  padding: 0 12px;
-}
-
-.studentListEmpty {
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  min-width: 860px;
-  padding: 28px 16px;
-}
-
-.monoCell {
-  color: var(--academy-text-strong, #475569);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 13px;
-}
-
-.editableTextCell {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-size: 15px;
-  min-height: 34px;
-  padding: 0 10px;
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.editableTextCell:hover {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--academy-border, #d8e3f8);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 6%, transparent);
-}
-
-.editableTextCell:focus {
-  background: var(--academy-surface, #ffffff);
-  border-color: var(--status-info-border, #bfdbfe);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 14%, transparent);
-  outline: 0;
-}
-
-.editableTextCell.monoCell {
-  font-size: 13px;
-}
-
 .gradeBadgeInput {
   background: var(--academy-surface-muted, #f8fafc);
   border-radius: 999px;
@@ -9520,20 +8378,6 @@ textarea {
   background: var(--academy-surface, #ffffff);
 }
 
-.studentNameButton {
-  align-items: center;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  display: inline-flex;
-  gap: 10px;
-  font-weight: 900;
-  min-height: 38px;
-  padding: 2px 8px 2px 2px;
-  text-align: left;
-}
-
 .studentInitial {
   align-items: center;
   background: var(--academy-surface-muted, #f8fafc);
@@ -9546,60 +8390,10 @@ textarea {
   width: 34px;
 }
 
-.studentNameButton:hover {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--academy-border, #d8e3f8);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 6%, transparent);
-  color: var(--academy-focus-ring, #2563eb);
-}
-
-.studentNameButton.active {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  color: var(--academy-focus-ring, #2563eb);
-  text-decoration: underline;
-}
-
-.gradeBadge {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 999px;
-  color: var(--academy-text-strong, #475569);
-  font-weight: 900;
-  justify-self: start;
-  padding: 5px 12px;
-}
-
-.withdrawButton {
-  background: transparent;
-  border: 0;
-  color: var(--status-pending-text, #c2410c);
-  font-weight: 900;
-  min-height: 32px;
-  padding: 0;
-}
-
-.withdrawButton::before {
-  content: "🔓 ";
-}
-
 .studentProfilePanel {
   display: grid;
   gap: 14px;
   margin-top: 16px;
-}
-
-.withdrawalReasonGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(150px, 0.5fr) minmax(260px, 1fr);
-}
-
-.withdrawalReasonGrid label {
-  color: var(--academy-primary, #17213d);
-  display: grid;
-  font-size: 13px;
-  font-weight: 900;
-  gap: 6px;
 }
 
 .emptyProfilePanel {
@@ -9610,151 +8404,6 @@ textarea {
   text-align: center;
 }
 
-.studentProfileModalWrap {
-  display: grid;
-  gap: 16px;
-}
-
-.studentProfileTileGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.studentProfileTile {
-  aspect-ratio: 1;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 96px;
-  padding: 14px;
-  text-align: left;
-}
-
-.studentProfileTile:hover,
-.studentProfileTile:focus-visible {
-  background: var(--status-info-bg, #eff6ff);
-}
-
-.studentProfileTile strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 15px;
-  font-weight: 950;
-}
-
-.studentProfileTile p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.4;
-  margin: 4px 0 0;
-}
-
-.studentProfileTileMeta {
-  color: var(--academy-text-strong, #475569);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.studentReminderSourceNote {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-}
-
-.studentProfileSectionModal {
-  max-width: 720px;
-}
-
-.studentProfileSectionBody {
-  display: grid;
-  gap: 14px;
-  padding: 14px;
-}
-
-@media (max-width: 640px) {
-  .studentProfileTileGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.studentAttendanceMonthInput {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  min-height: 36px;
-  padding: 6px 8px;
-}
-
-.studentAttendanceSectionActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.studentAttendanceSummaryGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.studentAttendanceSummaryCard {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.studentAttendanceSummaryCard > div {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-}
-
-.studentAttendanceSummaryCard b {
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 18px;
-}
-
-.studentAttendanceSummaryCard p {
-  color: var(--academy-text-muted, #52647c);
-  font-size: 12px;
-  margin: 8px 0 0;
-}
-
-.modalCard.studentMonthlyReportModal {
-  max-width: 1180px;
-}
-
-.studentMonthlyReportControls {
-  align-items: center;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  padding: 10px 12px;
-}
-
-.studentMonthlyReportControls label {
-  align-items: center;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 6px;
-}
-
-.studentMonthlyReportControls input[type="checkbox"],
 .lessonModalNewStudentMakeupPanel input[type="checkbox"] {
   appearance: auto;
   accent-color: var(--academy-focus-ring, #2563eb);
@@ -9767,373 +8416,11 @@ textarea {
   width: 16px;
 }
 
-.prepMemoHomeworkFollowupCheck input[type="checkbox"] {
-  flex-basis: 16px;
-  height: 16px;
-  min-width: 16px;
-  width: 16px;
-}
-
-.studentMonthlyReportControls fieldset {
-  align-items: center;
-  border: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-}
-
-.studentMonthlyReportControls legend {
-  color: var(--status-info-text, #1d4ed8);
-  float: left;
-  font-size: 12px;
-  font-weight: 900;
-  margin-right: 4px;
-}
-
-.studentMonthlyReportPreview {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-}
-
-.studentMonthlyReportPreview > header {
-  align-items: flex-start;
-  border-bottom: 1px solid var(--status-info-border, #bfdbfe);
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  padding-bottom: 14px;
-}
-
-.studentMonthlyReportPreview > header small {
-  color: var(--academy-focus-ring, #2563eb);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.studentMonthlyReportPreview h3 {
-  color: var(--academy-primary, #17213d);
-  font-size: 21px;
-  margin: 3px 0;
-}
-
-.studentMonthlyReportPreview header p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-}
-
-.studentMonthlyReportAttendanceCounts {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  color: var(--academy-text-muted, #52647c);
-  font-size: 12px;
-  font-weight: 800;
-  margin: -6px 0 0;
-  padding: 9px 12px;
-  text-align: center;
-}
-
-.studentMonthlyReportPreview > section {
-  display: grid;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.studentMonthlyReportPreview h4 {
-  color: var(--academy-primary, #17213d);
-  font-size: 14px;
-  margin: 0;
-}
-
-.studentMonthlyReportRows {
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 9px;
-  display: grid;
-  overflow: hidden;
-}
-
-.studentMonthlyReportRow {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 150px minmax(0, 1fr) auto;
-  min-height: 54px;
-  padding: 8px 11px;
-}
-
-.studentMonthlyReportRow + .studentMonthlyReportRow {
-  border-top: 1px solid var(--academy-border-strong, #cbd8ee);
-}
-
-.studentMonthlyReportRow > div {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.studentMonthlyReportRow strong {
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-}
-
-.studentMonthlyReportRow span {
-  color: var(--academy-muted, #64748b);
-  font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.studentMonthlyReportCalendar {
-  border-left: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 9px;
-  border-top: 1px solid var(--status-info-border, #bfdbfe);
-  display: grid;
-  grid-template-columns: repeat(7, minmax(100px, 1fr));
-  min-width: 760px;
-  overflow: hidden;
-}
-
-.studentMonthlyReportCalendarWeekday,
-.studentMonthlyReportCalendarDay {
-  border-bottom: 1px solid var(--status-info-border, #bfdbfe);
-  border-right: 1px solid var(--status-info-border, #bfdbfe);
-}
-
-.studentMonthlyReportCalendarWeekday {
-  background: var(--status-info-bg, #eff6ff);
-  color: var(--academy-text-strong, #475569);
-  font-size: 11px;
-  padding: 7px;
-  text-align: center;
-}
-
-.studentMonthlyReportCalendarDay {
-  background: var(--academy-surface, #ffffff);
-  min-height: 116px;
-  padding: 7px;
-}
-
-.studentMonthlyReportCalendarDay.outside {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.studentMonthlyReportCalendarDay > strong {
-  color: var(--academy-text-strong, #475569);
-  display: block;
-  font-size: 12px;
-  margin-bottom: 5px;
-}
-
-.studentMonthlyReportCalendarLesson {
-  background: var(--status-info-bg, #eff6ff);
-  border-radius: 5px;
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  font-size: 10px;
-  gap: 1px;
-  margin-top: 4px;
-  padding: 4px 5px;
-}
-
-.studentMonthlyReportCalendarLesson small {
-  color: var(--academy-muted, #64748b);
-  font-size: 9px;
-}
-
-.studentMonthlyReportCalendarLesson.canceled {
-  background: var(--academy-surface-muted, #f8fafc);
-  opacity: 0.78;
-  text-decoration: line-through;
-}
-
-.studentMonthlyReportTableWrap {
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 9px;
-  overflow-x: auto;
-}
-
-.studentMonthlyReportTable {
-  border-collapse: collapse;
-  min-width: 720px;
-  width: 100%;
-}
-
-.studentMonthlyReportTable th,
-.studentMonthlyReportTable td {
-  border-bottom: 1px solid var(--academy-border-strong, #cbd8ee);
-  color: var(--academy-text-strong, #475569);
-  font-size: 11px;
-  padding: 8px 10px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.studentMonthlyReportTable th {
-  background: var(--status-info-bg, #eff6ff);
-  color: var(--academy-text-strong, #475569);
-  font-weight: 900;
-}
-
-.studentMonthlyReportTable td small {
-  color: var(--academy-muted, #64748b);
-  display: block;
-  margin-top: 2px;
-}
-
-.studentMonthlyReportStatus,
-.studentMonthlyReportChangeReason {
-  border-radius: 999px;
-  font-size: 11px;
-  padding: 5px 8px;
-  white-space: nowrap;
-}
-
-.studentMonthlyReportStatus.status-present {
-  background: var(--status-success-bg, #ecfdf5);
-  color: var(--status-success-text, #047857);
-}
-
-.studentMonthlyReportStatus.status-pending {
-  background: var(--status-neutral-border, #e2e8f0);
-  color: var(--academy-text-strong, #475569);
-}
-
-.studentMonthlyReportStatus.status-attention,
-.studentMonthlyReportChangeReason {
-  background: var(--status-pending-bg, #fff7ed);
-  color: var(--status-pending-text, #c2410c);
-}
-
-.studentMonthlyReportEmpty {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-  padding: 12px;
-  text-align: center;
-}
-
-.studentMonthlyReportNote {
-  display: grid;
-  gap: 7px;
-}
-
-.studentMonthlyReportNote > span {
-  color: var(--academy-primary, #17213d);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.studentMonthlyReportNote small {
-  color: var(--academy-muted, #64748b);
-  font-weight: 700;
-}
-
-.studentMonthlyReportNote textarea {
-  min-height: 92px;
-  resize: vertical;
-}
-
-.studentMonthlyReportActionStatus {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 12px;
-  font-weight: 850;
-  margin: 0;
-  padding: 10px 12px;
-}
-
 @media (max-width: 720px) {
   .studentAttendanceSectionHeader {
     align-items: stretch;
     flex-direction: column;
   }
-
-  .studentAttendanceSectionActions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .studentMonthlyReportPreview {
-    padding: 14px;
-  }
-
-  .studentMonthlyReportPreview > header {
-    display: grid;
-  }
-
-  .studentMonthlyReportRow {
-    grid-template-columns: 110px minmax(0, 1fr);
-  }
-
-  .studentMonthlyReportStatus,
-  .studentMonthlyReportChangeReason {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-}
-
-.studentTallySubmissionPanel {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  padding: 0 12px;
-}
-
-.studentTallySubmissionPanel > .disclosureTrigger {
-  min-height: 52px;
-}
-
-.studentTallySubmissionPanel .disclosureTriggerLabel {
-  align-items: center;
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: space-between;
-}
-
-.studentTallySubmissionPanel .disclosureTriggerLabel span,
-.studentTallySubmissionCard > p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-}
-
-.studentTallySubmissionCard {
-  border-top: 1px solid var(--status-info-border, #bfdbfe);
-  padding: 12px 0;
-}
-
-.studentTallySubmissionCard > p {
-  margin: 0 0 10px;
-}
-
-.studentTallySubmissionCard dl {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-}
-
-.studentTallySubmissionCard dl > div {
-  display: grid;
-  gap: 2px;
-}
-
-.studentTallySubmissionCard dt {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-}
-
-.studentTallySubmissionCard dd {
-  margin: 0;
-  white-space: pre-wrap;
 }
 
 .studentProfileMemo {
@@ -10366,212 +8653,6 @@ textarea {
   width: 17px;
 }
 
-.modalCard.preparationMemoModal {
-  max-width: 1120px;
-}
-
-.prepMemoColumns {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-}
-
-.prepMemoPrevious {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-rows: auto auto minmax(300px, 1fr);
-  min-height: 560px;
-  padding: 14px;
-}
-
-.prepMemoPrevious h2 {
-  font-size: 18px;
-  margin: 0;
-}
-
-.prepMemoPrevious > span {
-  color: var(--status-pending-text, #c2410c);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.prepMemoPrevious.referenceOnly {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-}
-
-.prepMemoPrevious.referenceOnly > span {
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.prepMemoPrevious.referenceOnly pre,
-.prepMemoPrevious.referenceOnly .prepMemoAcknowledgeLine {
-  border-color: var(--status-info-border, #bfdbfe);
-}
-
-.prepMemoPrevious.referenceOnly .prepMemoAcknowledgeLine {
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.prepMemoPrevious pre {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.55;
-  margin: 0;
-  max-height: 360px;
-  min-height: 300px;
-  overflow: auto;
-  padding: 12px;
-  white-space: pre-wrap;
-}
-
-.prepMemoAcknowledgeLine {
-  align-items: center;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 999px;
-  color: var(--status-pending-text, #c2410c);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 6px;
-  line-height: 1.2;
-  min-height: 0;
-  padding: 5px 9px;
-  width: fit-content;
-}
-
-.prepMemoAcknowledgeLine input,
-.prepMemoHomeworkFollowupCheck input {
-  appearance: auto;
-  cursor: pointer;
-  flex: 0 0 16px;
-  height: 16px;
-  margin: 0;
-  min-height: 0;
-  width: 16px;
-}
-
-.prepMemoCheckedState {
-  align-content: center;
-  background: var(--status-success-bg, #ecfdf5);
-  border: 1px solid var(--status-success-border, #86efac);
-  border-radius: 8px;
-  color: var(--status-success-text, #047857);
-  display: grid;
-  gap: 5px;
-  min-height: 140px;
-  padding: 18px;
-}
-
-.prepMemoCheckedState strong {
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.prepMemoCheckedState span,
-.prepMemoCheckedState small {
-  color: var(--status-success-text, #047857);
-  font-weight: 800;
-}
-
-.prepMemoDraft {
-  display: grid;
-  gap: 14px;
-}
-
-.prepMemoHomeworkFollowup {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  color: var(--status-pending-text, #c2410c);
-  display: grid;
-  gap: 9px;
-  padding: 14px;
-}
-
-.prepMemoHomeworkFollowup.saved {
-  background: var(--status-success-bg, #ecfdf5);
-  border-color: var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.prepMemoHomeworkFollowup > strong {
-  color: inherit;
-  font-size: 16px;
-}
-
-.prepMemoHomeworkFollowup > p {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 6px;
-  color: var(--status-pending-text, #c2410c);
-  font-weight: 800;
-  line-height: 1.5;
-  margin: 0;
-  overflow-wrap: anywhere;
-  padding: 10px;
-  word-break: break-word;
-}
-
-.prepMemoHomeworkFollowupCheck {
-  align-items: center;
-  cursor: pointer;
-  display: flex !important;
-  flex-direction: row;
-  gap: 8px !important;
-  width: fit-content;
-}
-
-.prepMemoHomeworkFollowupSaved {
-  color: var(--status-success-text, #047857);
-  font-weight: 900;
-}
-
-.prepMemoDraft label {
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  font-weight: 900;
-  gap: 8px;
-}
-
-.prepMemoDraft textarea {
-  border-radius: 6px;
-  min-height: 112px;
-}
-
-.prepMemoSaveBar {
-  align-items: center;
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  padding-top: 12px;
-}
-
-.prepMemoIncludeBox {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-}
-
-.prepMemoIncludeBox strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 16px;
-}
-
 .checkboxLine {
   align-items: center;
   display: flex !important;
@@ -10582,12 +8663,6 @@ textarea {
 .checkboxLine input {
   height: 18px;
   width: 18px;
-}
-
-@media (max-width: 980px) {
-  .prepMemoColumns {
-    grid-template-columns: 1fr;
-  }
 }
 
 .portalNoticeStack,
@@ -10744,8 +8819,6 @@ textarea {
   font-weight: 900;
 }
 
-.resourceBulkActions button,
-.resourceGroupActions button,
 .resourceStudentButtons button {
   background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border, #d8e3f8);
@@ -10754,13 +8827,6 @@ textarea {
   cursor: pointer;
   font-weight: 900;
   padding: 8px 12px;
-}
-
-.resourceBulkActions button,
-.resourceGroupActions button {
-  color: var(--academy-focus-ring, #2563eb);
-  font-size: 13px;
-  padding: 7px 10px;
 }
 
 .resourceClassGroups {
@@ -10850,26 +8916,9 @@ textarea {
   overflow-wrap: anywhere;
 }
 
-.studentScoreModalTable {
-  overflow-x: auto;
-}
-
-.studentScoreModalTable .studentScoreRow {
-  min-width: 1080px;
-}
-
-.studentProfileDataTable {
-  overflow-x: auto;
-}
-
 .wrongProblemProfileRow {
   grid-template-columns: 170px 170px 130px minmax(240px, 1fr);
   min-width: 760px;
-}
-
-.academyTestProfileRow {
-  grid-template-columns: 140px 170px 170px 100px 100px minmax(220px, 1fr) 150px;
-  min-width: 1050px;
 }
 
 .reportDataSummaryGrid {
@@ -10901,43 +8950,12 @@ textarea {
   margin: 0;
 }
 
-.studentProfileGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.studentProfileGrid > div {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  min-height: 74px;
-  padding: 12px;
-}
-
-.studentProfileGrid small {
-  color: var(--academy-muted, #64748b);
-  font-weight: 900;
-}
-
 .profileHeaderActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
-}
-
-.profileEditHint {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  font-weight: 800;
-  padding: 10px 12px;
 }
 
 .profileSaveError {
@@ -10951,246 +8969,15 @@ textarea {
   padding: 10px 12px;
 }
 
-.studentScheduleEditor {
-  display: grid;
-  gap: 10px;
-}
-
-.studentScheduleRow {
-  align-items: end;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(260px, 1fr) 112px 112px auto;
-  padding: 10px;
-}
-
-
-.studentScheduleRow label {
-  color: var(--academy-muted, #64748b);
-  display: grid;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 4px;
-}
-
-.studentScheduleRow input {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font: inherit;
-  min-height: 36px;
-  padding: 0 8px;
-}
-
-.studentSchedulePreview,
-.studentScheduleEmpty,
-.studentScheduleLegacyText {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.45;
-  padding: 10px 12px;
-}
-
-.studentSchedulePreview strong {
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.studentScheduleLegacyText {
-  border-color: var(--status-pending-border, #fed7aa);
-  color: var(--status-pending-text, #c2410c);
-  display: grid;
-  gap: 8px;
-}
-
-.studentScheduleLegacyText span {
-  overflow-wrap: anywhere;
-}
-
-.studentScheduleActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.profileSavedText {
-  color: var(--status-success-text, #047857);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.studentConsultationComposer,
-.studentConsultationItem {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-
-.studentConsultationControls,
-.studentConsultationMeta,
-.studentProfileRowActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.studentConsultationControls select,
-.studentConsultationControls input,
-.studentConsultationMeta select,
-.studentConsultationMeta input {
-  min-height: 38px;
-}
-
-.studentConsultationComposer textarea,
-.studentConsultationItem textarea {
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  line-height: 1.5;
-  min-height: 92px;
-  padding: 10px;
-  resize: vertical;
-  width: 100%;
-}
-
-.studentConsultationList {
-  display: grid;
-  gap: 10px;
-}
-
-.studentConsultationItem.dirty,
 .managementRow.dirty,
 .managementRow.draftRow {
   background: var(--status-pending-bg, #fff7ed);
-}
-
-.studentConsultationType {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-radius: 999px;
-  color: var(--status-closure-text, #3730a3);
-  font-size: 12px;
-  font-weight: 900;
-  padding: 6px 9px;
-}
-
-.studentConsultationDate {
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.studentConsultationContent {
-  color: var(--academy-text, #0f172a);
-  font-size: 14px;
-  font-weight: 750;
-  line-height: 1.55;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.studentProfileRowActions .softButton,
-.studentProfileRowActions .dangerSoftButton {
-  min-height: 36px;
-  padding-inline: 10px;
-}
-
-.profileEditInput {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font-size: 16px;
-  font-weight: 800;
-  min-height: 42px;
-  padding: 8px 10px;
-  width: 100%;
-}
-
-textarea.profileEditInput {
-  line-height: 1.5;
-  resize: vertical;
-}
-
-.teacherOperatingMemoPanel {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 12px;
-  display: grid;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 14px;
-}
-
-.teacherOperatingMemoHeader,
-.teacherOperatingMemoActions,
-.teacherOperatingMemoSaveRow {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.teacherOperatingMemoHeader strong {
-  color: var(--academy-primary, #17213d);
-}
-
-.teacherOperatingMemoHeader p,
-.teacherOperatingMemoSaveRow span {
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  margin: 3px 0 0;
-}
-
-.teacherOperatingMemoContent,
-.teacherOperatingMemoEmpty {
-  color: var(--academy-text, #0f172a);
-  line-height: 1.6;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.teacherOperatingMemoEmpty {
-  color: var(--academy-muted, #64748b);
-}
-
-.teacherOperatingMemoInput {
-  min-height: 132px;
-}
-
-.profileLoginEdit {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) 110px;
-}
-
-.wideProfileItem {
-  grid-column: span 3;
-}
-
-.wideProfileItem > .muted {
-  display: block;
-  margin-top: 6px;
 }
 
 .studentScorePanel {
   display: grid;
   gap: 14px;
   margin-top: 18px;
-}
-
-.managementRow.studentScoreRow {
-  grid-template-columns: 130px 150px 150px 110px 110px minmax(260px, 1fr) 150px;
-  min-width: 1080px;
 }
 
 .classManagerPage,
@@ -11206,13 +8993,6 @@ textarea.profileEditInput {
 .aiVariantHero,
 .settingsHero {
   justify-content: space-between;
-}
-
-.linkButton {
-  align-items: center;
-  display: inline-flex;
-  justify-content: center;
-  text-decoration: none;
 }
 
 .classBoardGrid {
@@ -11572,11 +9352,6 @@ textarea.profileEditInput {
   grid-column: 1 / -1;
 }
 
-.aiTabs {
-  max-width: 360px;
-  grid-template-columns: 1fr;
-}
-
 .aiInputPanel {
   display: grid;
   gap: 16px;
@@ -11621,10 +9396,6 @@ textarea.profileEditInput {
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.aiToolCardTitle .muted {
-  margin-top: 6px;
 }
 
 .aiVariantTopGrid {
@@ -12593,21 +10364,6 @@ textarea.profileEditInput {
   text-decoration: line-through;
 }
 
-.emptyHomeworkBox {
-  align-items: center;
-  border: 1px dashed var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  display: flex;
-  justify-content: center;
-  min-height: 88px;
-}
-
-.emptyHomeworkBox.compact {
-  grid-column: 1 / -1;
-  min-height: 72px;
-}
-
 .homeworkActionCard {
   align-items: center;
   border: 1px solid var(--status-neutral-border, #e2e8f0);
@@ -13543,10 +11299,6 @@ textarea.profileEditInput {
   width: 12px;
 }
 
-.dateDot.included {
-  background: var(--academy-primary, #17213d);
-}
-
 .dateDot.excluded {
   background: var(--academy-border-strong, #cbd8ee);
 }
@@ -13597,12 +11349,6 @@ textarea.profileEditInput {
   padding: 6px;
 }
 
-.studentDateGrid button.included {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--academy-primary, #17213d);
-  color: var(--academy-primary, #17213d);
-}
-
 .studentDateGrid button.excluded {
   background: var(--academy-surface-muted, #f8fafc);
   color: var(--academy-border-strong, #cbd8ee);
@@ -13635,26 +11381,13 @@ textarea.profileEditInput {
   padding: 7px 10px;
 }
 
-.noticeBox,
-.emptyPortalPanel {
+.noticeBox {
+  background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border, #d8e3f8);
   border-radius: 8px;
   display: grid;
   gap: 10px;
   padding: 18px;
-}
-
-.noticeBox {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.emptyPortalPanel {
-  align-items: center;
-  border-style: dashed;
-  color: var(--academy-muted, #64748b);
-  justify-content: center;
-  min-height: 110px;
-  text-align: center;
 }
 
 .segmentedControl,
@@ -14278,33 +12011,6 @@ textarea.profileEditInput {
   font-weight: 900;
 }
 
-.supplementNotificationControlButton {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  display: grid;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 8px;
-  grid-template-columns: auto 1fr auto;
-  min-height: 38px;
-  padding: 8px 10px;
-  text-align: left;
-}
-
-.supplementNotificationControlButton:hover {
-  border-color: var(--academy-focus-ring, #2563eb);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 9%, transparent);
-}
-
-.supplementNotificationControlButton b {
-  color: var(--academy-primary, #17213d);
-  font-weight: 900;
-}
-
 .supplementNotificationControlLight,
 .supplementNotificationControlState i {
   background: var(--academy-border-strong, #cbd8ee);
@@ -14316,40 +12022,17 @@ textarea.profileEditInput {
   width: 10px;
 }
 
-.supplementNotificationControlButton.on,
-.supplementNotificationControlButton.done {
-  background: var(--status-success-bg, #ecfdf5);
-  border-color: var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.supplementNotificationControlButton.on .supplementNotificationControlLight,
-.supplementNotificationControlButton.done .supplementNotificationControlLight,
 .supplementNotificationControlState.on i,
 .supplementNotificationControlState.done i {
   background: var(--status-success-border, #86efac);
   box-shadow: 0 0 0 1px var(--status-success-text, #047857), 0 0 8px color-mix(in srgb, var(--status-success-border, #86efac) 65%, transparent);
 }
 
-.supplementNotificationControlButton.warning {
-  background: var(--status-pending-bg, #fff7ed);
-  border-color: var(--status-pending-border, #fed7aa);
-  color: var(--status-pending-text, #c2410c);
-}
-
-.supplementNotificationControlButton.warning .supplementNotificationControlLight,
 .supplementNotificationControlState.warning i {
   background: var(--status-pending-strong, #d8860b);
   box-shadow: 0 0 0 1px var(--status-pending-strong, #d8860b), 0 0 8px color-mix(in srgb, var(--status-pending-strong, #d8860b) 55%, transparent);
 }
 
-.supplementNotificationControlButton.failed {
-  background: var(--status-danger-bg, #fef2f2);
-  border-color: var(--status-danger-border, #fecaca);
-  color: var(--status-danger-text, #b91c1c);
-}
-
-.supplementNotificationControlButton.failed .supplementNotificationControlLight,
 .supplementNotificationControlState.failed i {
   background: var(--status-danger-text, #b91c1c);
   box-shadow: 0 0 0 1px var(--status-destructive-text, #dc2626);
@@ -14789,16 +12472,6 @@ textarea.profileEditInput {
   max-width: 520px;
 }
 
-.orangeButton {
-  background: var(--status-pending-strong, #d8860b);
-  border: 1px solid var(--status-pending-strong, #d8860b);
-  border-radius: 8px;
-  color: var(--academy-surface, #ffffff);
-  font-weight: 900;
-  min-height: 44px;
-  padding: 0 18px;
-}
-
 .progressRail {
   background: var(--academy-surface-muted, #f8fafc);
   border-radius: 999px;
@@ -15035,14 +12708,6 @@ textarea.profileEditInput {
   justify-content: flex-end;
 }
 
-.wrongProblemExplicitSaveActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
 .wrongProblemSaveMessage {
   background: var(--status-info-bg);
   border: 1px solid var(--status-info-border);
@@ -15113,55 +12778,6 @@ textarea.profileEditInput {
   flex: 0 0 auto;
   gap: 8px;
   white-space: nowrap;
-}
-
-.studentRosterEffectiveChoice {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  color: var(--status-pending-text, #c2410c);
-  display: grid;
-  gap: 6px;
-  padding: 12px;
-}
-
-.studentRosterEffectiveChoice span {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.studentRosterEffectiveChoice select {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-pending-strong, #d8860b);
-  min-height: 42px;
-}
-
-.studentPartialOverlapList {
-  display: grid;
-  gap: 8px;
-}
-
-.studentPartialOverlapList > div {
-  align-items: center;
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  display: grid;
-  gap: 4px;
-  grid-template-columns: minmax(140px, 1fr) auto auto;
-  padding: 12px;
-}
-
-.studentPartialOverlapList span,
-.studentPartialOverlapNotice {
-  color: var(--status-pending-text, #c2410c);
-  font-size: 13px;
-}
-
-@media (max-width: 640px) {
-  .studentPartialOverlapList > div {
-    grid-template-columns: 1fr;
-  }
 }
 
 .supplementSortControl > span {
@@ -15253,14 +12869,6 @@ textarea.profileEditInput {
   min-width: 0;
 }
 
-.supplementRowItem .textLinkButton {
-  color: var(--academy-text, #0f172a);
-  font-size: 17px;
-  justify-self: start;
-  line-height: 1.2;
-  padding: 0;
-}
-
 .supplementRowItem > div > span:not(.supplementProgressBadge) {
   color: var(--academy-text, #0f172a);
   font-size: 15px;
@@ -15333,11 +12941,6 @@ textarea.profileEditInput {
 .supplementRowItem .softButton {
   justify-self: end;
   min-width: 108px;
-  white-space: nowrap;
-}
-
-.supplementRowItem .primaryButton {
-  justify-self: end;
   white-space: nowrap;
 }
 
@@ -15702,32 +13305,6 @@ textarea.profileEditInput {
   gap: 14px;
 }
 
-.wrongBoardTabs {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  display: flex;
-  gap: 8px;
-  justify-self: center;
-  padding: 6px;
-}
-
-.wrongBoardTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-weight: 900;
-  min-height: 40px;
-  padding: 0 22px;
-}
-
-.wrongBoardTabs button.active {
-  background: var(--academy-surface, #ffffff);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
-  color: var(--academy-text, #0f172a);
-}
-
 .wrongBoardFilterPanel,
 .wrongBoardDiagnosis,
 .wrongBoardNotice,
@@ -15778,24 +13355,6 @@ textarea.profileEditInput {
 
 .wrongBoardControls select {
   min-width: 190px;
-}
-
-.pdfUploadButton {
-  align-items: center;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--academy-focus-ring, #2563eb);
-  cursor: pointer;
-  display: inline-flex;
-  font-weight: 900;
-  justify-content: center;
-  min-height: 40px;
-  padding: 0 14px;
-}
-
-.pdfUploadButton input {
-  display: none;
 }
 
 .wrongProblemToolbar {
@@ -15907,44 +13466,36 @@ textarea.profileEditInput {
   width: 18px;
 }
 
-.legendDot.first,
-.problemNumberButton.first {
+.legendDot.first {
   background: var(--academy-focus-ring, #2563eb);
 }
 
-.legendDot.retry,
-.problemNumberButton.retry {
+.legendDot.retry {
   background: var(--status-pending-strong, #d8860b);
 }
 
-.legendDot.second,
-.problemNumberButton.second {
+.legendDot.second {
   background: var(--status-success-border, #86efac);
 }
 
-.legendDot.wrong,
-.problemNumberButton.wrong {
+.legendDot.wrong {
   background: var(--status-danger-text, #b91c1c);
 }
 
-.legendDot.mistake,
-.problemNumberButton.mistake {
+.legendDot.mistake {
   background: var(--status-pending-strong, #d8860b);
   color: var(--academy-primary, #17213d);
 }
 
-.legendDot.question,
-.problemNumberButton.question {
+.legendDot.question {
   background: var(--status-closure-border, #6366f1);
 }
 
-.legendDot.outOfScope,
-.problemNumberButton.outOfScope {
+.legendDot.outOfScope {
   background: var(--academy-muted, #64748b);
 }
 
-.legendDot.unchecked,
-.problemNumberButton.unchecked {
+.legendDot.unchecked {
   background: var(--academy-surface-muted, #f8fafc);
 }
 
@@ -15968,38 +13519,6 @@ textarea.profileEditInput {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-}
-
-.problemNumberButton {
-  border: 2px solid transparent;
-  border-radius: 6px;
-  color: var(--academy-surface, #ffffff);
-  font-size: 13px;
-  font-weight: 900;
-  height: 38px;
-  min-width: 38px;
-  padding: 0 8px;
-}
-
-.problemNumberButton.unchecked {
-  color: var(--academy-muted, #64748b);
-}
-
-.problemNumberButton.selected {
-  background: var(--academy-focus-ring, #2563eb);
-  border-color: var(--academy-surface, #ffffff);
-  box-shadow: 0 0 0 2px var(--academy-accent-text, #4f46e5);
-  color: var(--academy-surface, #ffffff);
-}
-
-.problemNumberButton.active {
-  border-color: var(--academy-surface, #ffffff);
-  box-shadow: 0 0 0 2px var(--academy-accent-text, #4f46e5);
-}
-
-.problemNumberButton.picked {
-  border-color: var(--academy-text, #0f172a);
-  box-shadow: 0 0 0 3px var(--status-closure-border, #6366f1);
 }
 
 .problemPreviewBox {
@@ -16171,39 +13690,6 @@ textarea.profileEditInput {
 .materialManagerPage {
   display: grid;
   gap: 16px;
-}
-
-.localTabs {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-}
-
-.localTabs button {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 900;
-  min-height: 36px;
-  padding: 0 14px;
-}
-
-.localTabs button.active {
-  background: var(--academy-primary, #17213d);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--academy-primary, #17213d) 14%, transparent);
-  color: var(--academy-surface, #ffffff);
-}
-
-.materialTabs {
-  justify-self: start;
-  max-width: 620px;
 }
 
 .materialPanel {
@@ -16862,16 +14348,6 @@ textarea.profileEditInput {
   color: var(--status-destructive-text, #dc2626);
 }
 
-.dangerTextButton {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-danger-border, #fecaca);
-  border-radius: 8px;
-  color: var(--status-destructive-text, #dc2626);
-  font-weight: 900;
-  min-height: 36px;
-  padding: 0 10px;
-}
-
 .modalActionRow {
   align-items: center;
   display: flex;
@@ -16901,16 +14377,19 @@ body.attendanceOnlyBody {
 }
 
 .attendanceKioskPage.standalone {
+  align-content: stretch;
   background: var(--status-info-bg, #eff6ff);
   height: 100dvh;
   min-height: 100dvh;
-  overflow: hidden;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
   padding: 24px;
   width: 100vw;
 }
 
 .attendanceKioskPage.standalone .attendanceKioskCard {
   justify-self: center;
+  margin-block: auto;
   width: min(760px, 94vw);
 }
 
@@ -16920,9 +14399,9 @@ body.attendanceOnlyBody {
   border-radius: 8px;
   box-shadow: 0 18px 40px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
   display: grid;
-  gap: 22px;
+  gap: clamp(12px, 2.4dvh, 22px);
   max-width: 760px;
-  padding: 34px;
+  padding: clamp(18px, 3dvh, 34px);
   width: min(760px, 94vw);
 }
 
@@ -16950,16 +14429,16 @@ body.attendanceOnlyBody {
   border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 8px;
   color: var(--academy-text, #0f172a);
-  font-size: 58px;
+  font-size: clamp(36px, 6.5dvh, 58px);
   font-weight: 900;
   letter-spacing: 0;
-  min-height: 96px;
+  min-height: clamp(56px, 9dvh, 96px);
   text-align: center;
 }
 
 .attendancePinForm button {
   font-size: 20px;
-  min-height: 96px;
+  min-height: clamp(56px, 9dvh, 96px);
 }
 
 .attendanceNumberPad {
@@ -16975,7 +14454,7 @@ body.attendanceOnlyBody {
   color: var(--academy-text, #0f172a);
   font-size: 34px;
   font-weight: 900;
-  min-height: 88px;
+  min-height: clamp(52px, 8.5dvh, 88px);
   transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
@@ -17243,11 +14722,6 @@ body.attendanceOnlyBody {
     text-align: left;
   }
 
-  .sourceAnalysisButton {
-    min-width: 0;
-    width: 100%;
-  }
-
   .supplementDraftDiff li {
     align-items: stretch;
     grid-template-columns: 1fr;
@@ -17276,8 +14750,6 @@ body.attendanceOnlyBody {
   .closureJournalNotice,
   .accountSettingsGrid,
   .settingsRow,
-  .studentProfileGrid,
-  .studentScheduleRow,
   .editableEvent,
   .calendarDateGrid,
   .examSubjectRow,
@@ -17304,11 +14776,6 @@ body.attendanceOnlyBody {
     grid-column: auto;
   }
 
-  .wideProfileItem {
-    grid-column: auto;
-  }
-
-  .examManagementTabs,
   .tallyStats,
   .tallyMetricLine,
   .tallyReviewGrid {
@@ -17570,17 +15037,6 @@ body.attendanceOnlyBody {
 
   .sidebar.collapsed .sideStatus .ghostButton::before {
     content: none;
-  }
-
-  .teacherOperatingMemoHeader,
-  .teacherOperatingMemoSaveRow {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .teacherOperatingMemoActions {
-    align-items: center;
-    justify-content: flex-end;
   }
 
   .mainPanel {
@@ -18127,10 +15583,7 @@ body.attendanceOnlyBody {
   }
 
   .notificationControlGrid,
-  .notificationLessonItem,
-  .noticeComposerGrid,
-  .noticeFilterGrid,
-  .noticeScheduleGrid {
+  .notificationLessonItem {
     grid-template-columns: 1fr;
   }
 
@@ -18201,13 +15654,7 @@ body.attendanceOnlyBody {
     display: grid;
   }
 
-  .homeworkMakeupHero,
-  .absenceSourceJournalGrid,
-  .supplementAttendanceBox,
-  .homeworkMakeupSummary,
-  .examPrepSummaryGrid,
-  .makeupProcessFormGrid,
-  .makeupProcessStatusGrid {
+  .examPrepSummaryGrid {
     grid-template-columns: 1fr;
   }
 
@@ -18224,8 +15671,7 @@ body.attendanceOnlyBody {
 
 @media (max-width: 900px) {
   .academyReminderForm,
-  .academyReminderColumns,
-  .studentReminderControls {
+  .academyReminderColumns {
     grid-template-columns: 1fr;
   }
 
@@ -18238,8 +15684,7 @@ body.attendanceOnlyBody {
     display: grid;
   }
 
-  .academyReminderItem,
-  .studentReminderItem {
+  .academyReminderItem {
     grid-template-columns: 1fr;
   }
 }

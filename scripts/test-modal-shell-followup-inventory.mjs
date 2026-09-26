@@ -36,9 +36,19 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
 
 // 41 -> 40: 오답관리 옛 「뽑은 문제」 인쇄 모달(PickedProblemModal)을 2026-09-13 에 뺐다.
 // 40 -> 41: 반관리 반 개설·수정 모달(ClassTemplateEditorModal) 2026-09-16 추가.
-assert.equal(directModalCount, 41, "unexpected direct common Modal surface count");
+// 41 -> 42: 알림관리 공지 즉시/예약 발송 확인 모달(NotificationSendConfirmModal) 2026-09-19 추가.
+// 42 -> 43: 공용 확인 대화상자(ConfirmDialog)가 공용 Modal 을 한 번 감싼다(2026-09-19 U11). 화면의 <ConfirmDialog> 사용은 여기 세지 않는다.
+assert.equal(directModalCount, 43, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 20, "unexpected common ModalFooter count");
+// 20 -> 21: 발송 확인 모달의 [취소][N건 발송] 푸터 2026-09-19.
+// 21 -> 22: 출결 체크 모달 1단계 [출결 저장] 이 attendanceModalActions div 대신 ModalFooter 를 쓴다(2026-09-19 U5).
+// 22 -> 23: 학생 추가 모달 '한 명씩' 탭이 primaryButton full 대신 ModalFooter [취소][학생 저장] 을 쓴다(2026-09-19 U8).
+// 23 -> 24: 학사일정 등록/수정 모달 푸터 [일정 삭제][취소][등록] 이 schoolEventFormActions div 대신 ModalFooter 를 쓴다(2026-09-19 U9).
+// 24 -> 25: 공용 ConfirmDialog 의 [취소][확정] 푸터(2026-09-19 U11).
+// 25 -> 26: SNS 스튜디오 Chat 결과 가져오기 모달의 [가져오기 취소][가져오기 미리보기][반영] 푸터(2026-09-19 U13).
+// 26 -> 27: 수업 등록/수정 모달의 [수업 취소][저장 상태바][취소][✅ 수업 등록] 푸터가
+// lessonModalActions/lessonModalSaveStatus div 대신 ModalFooter 를 쓴다(2026-09-26 수업등록 개편).
+assert.equal(modalFooterCount, 27, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
@@ -54,7 +64,11 @@ for (const contract of [
   'aria-busy={closeDisabled || undefined}',
   'closeAriaLabel = "창 닫기"',
   "aria-label={closeAriaLabel}",
-  "export function ModalFooter"
+  "export function ModalFooter",
+  // 2026-09-26 · footer 슬롯은 본문 스크롤 밖에 그려져 저장 버튼이 항상 보이게 한다.
+  "footer = null",
+  'footer ? "modalHasFooter" : ""',
+  "{footer}"
 ]) {
   assert.ok(sharedModalSource.includes(contract), `missing common modal contract: ${contract}`);
 }

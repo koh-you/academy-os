@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { DEFAULT_TEACHER_ID } from "../shared/utils/sessionActor.js";
+import { DEFAULT_TENANT_ID } from "../shared/utils/tenantIdScope.js";
 
 function safeDecodeURIComponent(value) {
   try {
@@ -64,7 +66,7 @@ function normalizeTeacherSessionForStorage(session) {
     role,
     sessionToken,
     teacherId,
-    tenantId: tenantId || "tenant_default",
+    tenantId: tenantId || DEFAULT_TENANT_ID,
     teacherRole: teacherRole || "owner"
   };
 }
@@ -76,6 +78,31 @@ function encodeTeacherSession(session) {
   } catch {
     return "";
   }
+}
+
+// 활동 중 세션 연장 간격. App 의 활동 감지 effect 가 마지막 갱신 시각과 비교한다.
+export const sessionRefreshMinimumIntervalMs = 30 * 60 * 1000;
+
+export function isSessionRefreshDue(lastRefreshAt, now, minimumIntervalMs = sessionRefreshMinimumIntervalMs) {
+  return now - Number(lastRefreshAt || 0) >= minimumIntervalMs;
+}
+
+/**
+ * "지금 어느 자료를 보고 있나" 를 한 문자열로. 부트스트랩(전체 조회)은 이 값이 바뀔 때만
+ * 다시 돈다 — 계정·역할·테넌트·원장이 보는 선생님. 세션 토큰은 넣지 않는다: 활동 중
+ * 갱신으로 토큰만 바뀔 때 16개 조회를 다시 돌고 화면 상태를 서버 값으로 덮어쓸 이유가
+ * 없다.
+ */
+export function createSessionDataIdentity(session, viewTenantId = "") {
+  if (!session) return "";
+  return [
+    session.role ?? "",
+    session.teacherId ?? "",
+    session.studentId ?? "",
+    session.parentId ?? "",
+    session.tenantId ?? "",
+    viewTenantId ?? ""
+  ].join("|");
 }
 
 export function readStoredTeacherSession({ documentTarget, storageKey, windowTarget }) {
@@ -119,10 +146,10 @@ export async function authenticateAppSession({
         ok: true,
         session: {
           role: "teacher",
-          actorId: "instructor_owner_001",
+          actorId: result.account?.teacherId || DEFAULT_TEACHER_ID,
           name: result.account?.name || teacherAccount.name,
           teacherId: result.account?.teacherId || "",
-          tenantId: result.account?.tenantId || "tenant_default",
+          tenantId: result.account?.tenantId || DEFAULT_TENANT_ID,
           teacherRole: result.account?.teacherRole || "owner",
           sessionToken: result.account?.sessionToken || ""
         }

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { attendanceLabels } from "../lessons/labels.js";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -326,7 +328,6 @@ export function SupplementCenter({
             </button>
           </div>
         )}
-        description="숙제보충, 결석보강, 재시험과 직접 작성한 수동 보충을 관리합니다."
         title="보충관리"
       />
 
@@ -334,7 +335,6 @@ export function SupplementCenter({
         {supplementTabs.map((tab) => (
           <MetricCard
             active={activeSupplementTab === tab.id}
-            hint={tab.subtitle}
             key={tab.id}
             label={tab.title}
             onClick={() => setActiveSupplementTab(tab.id)}
@@ -360,12 +360,13 @@ export function SupplementCenter({
             </label>
           )}
           density="slim"
-          description={activeTabData.subtitle}
+          description={activeTabData.notice || ""}
           meta={<span className="countBadge">{activeTabData.count}건</span>}
           title={activeTabData.title}
+          titleAdornment={<HelpTip label={activeTabData.title} text={activeTabData.subtitle} />}
         />
 
-        {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
+        {activeTabData.items.length === 0 ? <EmptyState title={activeTabData.emptyText} /> : null}
 
         {activeSupplementTab === "absence_makeup" && activeDeferredAbsenceItems.length > 0 ? (
           <Disclosure

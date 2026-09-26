@@ -1,0 +1,856 @@
+% DeeP Math 정리편 · CM2-GM-03 원의 방정식 · 답지 v1
+% Phase 3 (2026-07-20 세션 55) : 청사진 v1.0 · Phase 2 본편 대응
+% 평면좌표 답지 골든 (v5) · 직선 답지 계승 · deep-math-answer.sty 퍼플 톤
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% Phase 2 확정 답 반영 (CHK2 a+b+c=-3, CHK8 두 접선 기울기 곱 -5/4,
+%                       L2-7 외접원 (x+2)²+(y-1)²=29, L2-12 두 P 중점 (3/2, -5/2))
+% 세션 55 신정책:
+%   - \textbf 금지 (정답 zone \dmanswerbox 안 값만)
+%   - 정답 zone 값만 (유도 부연 금지)
+%   - cplabel 완성 문장 (짧고 굵게)
+%   - CM2 스코프 밖 용어 금지 (삼각함수·벡터·매개변수·극한·미분·트레이스·집합기호)
+%   - ★ 노출 금지 · "정리편" 표기 금지
+%   - Overfull 0 필수
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{원의 방정식}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{원의 방정식 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (18문) · 빠른 정답 + 풀이 완결
+% 세션 90 (2026-07-26 · 마스터 승인 Option A) : 12 → 18 확장 · CHK 순서 재배치 대응
+%   CHK5·6 (신 · E3 아폴로니오스) : 원 CHK11·CHK12 이관
+%   CHK7·8 (신 · E4 원-직선) : 원 CHK5·CHK6 이관
+%   CHK9·10 (신 · E5 원-원점 거리) : 원 CHK9·CHK10 유지
+%   CHK11·12 (신 · E6 원 밖 점 접선) : 원 CHK7·CHK8 이관
+%   CHK13~18 (신규 6문) : E7·E8·E9 대응
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$a+b+r^2=14$} & \dmquick{2}{$a+b+c=-3$} & \dmquick{3}{중심 $(3,-3)$, $r=3$} & \dmquick{4}{정수 $a$: $3$\ 개} & \dmquick{5}{넓이 $=10\pi$} \\
+\dmquick{6}{둘레 $=6\pi$} & \dmquick{7}{$-2<k<2$} & \dmquick{8}{$k=20$} & \dmquick{9}{$M^2+m^2=84$} & \dmquick{10}{$5\sqrt{2}+1$} \\
+\dmquick{11}{$y$\ 절편의 곱 $=-25$} & \dmquick{12}{기울기 곱 $=-\dfrac{5}{4}$} & \dmquick{13}{$ab=-6$} & \dmquick{14}{$a+b=-7$} & \dmquick{15}{$A+B+C=-4$} \\
+\dmquick{16}{$a=3$} & \dmquick{17}{$2\sqrt{2}$} & \dmquick{18}{$a=5$} & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{중심이 사선 위에 있고 두 점을 지나는 원의 결정}
+\begin{dmanswerbox}
+정답: $a+b+r^2=14$
+\end{dmanswerbox}
+
+중심이 직선 $y = x$ 위에 있으므로 중심을 $\mathrm{C}(a,\, a)$\ 로 놓자. 두 점 $(1,\, -1)$,\ $(5,\, 3)$\ 까지의 거리가 같으므로
+\[ (a-1)^2 + (a+1)^2 = (a-5)^2 + (a-3)^2. \]
+좌우 전개하여 정리하면 $2a^2 + 2 = 2a^2 - 16a + 34$\ 에서 $16a = 32$\ 이므로 $a = 2$\ 이다. 따라서 중심은 $(2,\, 2)$\ 이고 반지름의 제곱은 $r^2 = (2-1)^2 + (2+1)^2 = 10$\ 이다. 원의 방정식이 $(x - 2)^2 + (y - 2)^2 = 10$\ 이므로 $a = 2$,\ $b = 2$,\ $r^2 = 10$\ 에서 $a + b + r^2 = 14$\ 이다.
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{지름의 양 끝점이 주어진 원의 일반형 계수합}
+\begin{dmanswerbox}
+정답: $a+b+c=-3$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(-3,\, 4)$,\ $\mathrm{B}(-1,\, -2)$\ 가 지름의 양 끝점이므로 중심은 이 두 점의 중점 $(-2,\, 1)$\ 이고 반지름의 제곱은 $r^2 = 1 + 9 = 10$\ 이다. 원의 방정식 $(x+2)^2 + (y-1)^2 = 10$\ 을 전개하면
+\[ x^2 + y^2 + 4x - 2y - 5 = 0 \]
+이므로 $a = 4$,\ $b = -2$,\ $c = -5$\ 에서 $a + b + c = -3$\ 이다.
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{중심이 직선 위에 있고 양축에 접하는 원 (제4사분면)}
+\begin{dmanswerbox}
+정답: $(x-3)^2+(y+3)^2=9$
+\end{dmanswerbox}
+
+$x$\ 축과 $y$\ 축에 동시에 접하고 중심이 제 $4$ 사분면에 있는 원의 중심은 $(r,\, -r)$ ($r > 0$)로 놓을 수 있다. 중심이 직선 $x + 3y + 6 = 0$ 위에 있으므로
+\[ r + 3 \cdot (-r) + 6 = 0,\quad -2r + 6 = 0 \]
+에서 $r = 3$\ 이다. 따라서 중심은 $(3,\, -3)$\ 이고 반지름의 길이는 $3$\ 이므로 원의 방정식은 $(x-3)^2 + (y+3)^2 = 9$\ 이다.
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{원이 되기 위한 조건과 정수 개수}
+\begin{dmanswerbox}
+정답: 정수 $a$\ 의 개수 $=3$
+\end{dmanswerbox}
+
+주어진 방정식 $x^2 + y^2 - 2(a+1)x + 2ay + 3a^2 - 2 = 0$\ 의 좌변을 완전제곱꼴로 정리하면
+\[ (x - (a+1))^2 + (y + a)^2 = (a+1)^2 + a^2 - (3a^2 - 2) \]
+이다. 원이 되려면 우변이 양수이어야 하므로
+\[ -a^2 + 2a + 3 > 0,\quad \text{즉}\quad a^2 - 2a - 3 < 0 \]
+이다. $(a-3)(a+1) < 0$\ 에서 $-1 < a < 3$\ 이다. 이 범위의 정수는 $0,\, 1,\, 2$\ 의 $3$\ 개이다.
+
+% ─────────────── 확인 5 (E6 아폴로니오스 CHK · 원 CHK11) ───────────────
+\dmsoltitle{5}{거리 제곱의 합 조건에서 자취가 원인 도형의 넓이}
+\begin{dmanswerbox}
+정답: 넓이 $=10\pi$
+\end{dmanswerbox}
+
+$\mathrm{P}(x,\, y)$\ 라 하면 $\overline{\mathrm{AP}}^{\,2} + \overline{\mathrm{BP}}^{\,2} = 30$\ 에서
+\[ x^2 + (y+1)^2 + (x-2)^2 + (y-3)^2 = 30 \]
+이 성립한다. 좌변을 전개하여 정리하면
+\[ 2x^2 - 4x + 2y^2 - 4y + 14 = 30,\quad x^2 - 2x + y^2 - 2y = 8 \]
+이고 완전제곱꼴로 변형하면
+\[ (x - 1)^2 + (y - 1)^2 = 10 \]
+이다. 점 $\mathrm{P}$\ 의 자취는 반지름의 길이가 $\sqrt{10}$\ 인 원이므로 넓이는 $10\pi$\ 이다.
+
+% ─────────────── 확인 6 (E6 아폴로니오스 CHK · 원 CHK12) ───────────────
+\dmsoltitle{6}{거리비 자취 원의 둘레}
+\begin{dmanswerbox}
+정답: 둘레 $=6\pi$
+\end{dmanswerbox}
+
+$\mathrm{P}(x,\, y)$\ 라 하면 $\overline{\mathrm{AP}} : \overline{\mathrm{BP}} = 1 : 3$\ 에서 $3\overline{\mathrm{AP}} = \overline{\mathrm{BP}}$, 즉 $9\overline{\mathrm{AP}}^{\,2} = \overline{\mathrm{BP}}^{\,2}$\ 이다.
+\[ 9\{(x-2)^2 + y^2\} = (x-10)^2 + y^2 \]
+좌변을 전개하여 정리하면
+\[ 8x^2 - 16x + 8y^2 - 64 = 0,\quad x^2 - 2x + y^2 = 8 \]
+에서 $(x-1)^2 + y^2 = 9$\ 이다. 이 원의 반지름의 길이는 $3$\ 이므로 둘레의 길이는 $6\pi$\ 이다.
+
+% ─────────────── 확인 7 (E4 원-직선 CHK · 원 CHK5) ───────────────
+\dmsoltitle{7}{원과 직선이 두 점에서 만나는 조건}
+\begin{dmanswerbox}
+정답: $-2<k<2$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 = 2$\ 의 중심은 원점이고 반지름의 길이는 $\sqrt{2}$\ 이다. 직선 $y = x + k$, 즉 $x - y + k = 0$\ 과 원점 사이의 거리는
+\[ d = \dfrac{|k|}{\sqrt{1^2 + (-1)^2}} = \dfrac{|k|}{\sqrt{2}} \]
+이다. 원과 직선이 서로 다른 두 점에서 만나려면 $d < \sqrt{2}$\ 이어야 하므로
+\[ \dfrac{|k|}{\sqrt{2}} < \sqrt{2},\quad |k| < 2 \]
+에서 $-2 < k < 2$\ 이다.
+
+% ─────────────── 확인 8 (E4 원-직선 CHK · 원 CHK6) ───────────────
+\dmsoltitle{8}{현의 길이 조건에서 상수의 값}
+\begin{dmanswerbox}
+정답: $k=20$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 = 25$\ 의 중심은 원점이고 반지름의 길이는 $5$\ 이다. 원점과 직선 $3x + 4y + k = 0$ 사이의 거리는
+\[ d = \dfrac{|k|}{\sqrt{9 + 16}} = \dfrac{|k|}{5} \]
+이다. 현의 길이가 $6$\ 이므로 $2\sqrt{r^2 - d^2} = 6$\ 에서
+\[ r^2 - d^2 = 9,\quad 25 - \dfrac{k^2}{25} = 9,\quad k^2 = 400 \]
+이다. 양수 조건에서 $k = 20$\ 이다.
+
+% ─────────────── 확인 9 (E5 원-원점 거리 CHK · 원 CHK9 유지) ───────────────
+\dmsoltitle{9}{원 위의 점과 원점 사이의 거리의 최댓값과 최솟값}
+\begin{dmanswerbox}
+정답: $M^2+m^2=84$
+\end{dmanswerbox}
+
+원의 방정식을 표준형으로 정리하면
+\[ (x-1)^2 + (y-5)^2 = 16 \]
+이므로 중심은 $\mathrm{C}(1,\, 5)$\ 이고 반지름의 길이는 $r = 4$\ 이다. 원점 $\mathrm{O}$\ 에서 중심 $\mathrm{C}$\ 까지의 거리는
+\[ \overline{\mathrm{OC}} = \sqrt{1^2 + 5^2} = \sqrt{26} \]
+이다. $\overline{\mathrm{OC}} > r$\ 이므로 $\mathrm{O}$\ 가 원의 외부에 있고
+\[ M = \sqrt{26} + 4,\quad m = \sqrt{26} - 4. \]
+따라서 $M^2 + m^2 = 2(26 + 16) = 84$\ 이다.
+
+% ─────────────── 확인 10 (E5 원-원점 거리 CHK · 원 CHK10 유지) ───────────────
+\dmsoltitle{10}{두 원 위의 두 점 사이의 거리의 최댓값}
+\begin{dmanswerbox}
+정답: 최댓값 $=5\sqrt{2}+1$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 = 1$\ 의 중심은 $\mathrm{O}(0,\, 0)$\ 이고 반지름의 길이는 $1$\ 이다. 원 $x^2 + y^2 + 6x + 6y + 10 = 0$\ 을 표준형으로 정리하면
+\[ (x+3)^2 + (y+3)^2 = 8 \]
+이므로 중심은 $\mathrm{C}(-3,\, -3)$\ 이고 반지름의 길이는 $2\sqrt{2}$\ 이다. 두 원의 중심 사이의 거리는
+\[ \overline{\mathrm{OC}} = \sqrt{9 + 9} = 3\sqrt{2} \]
+이다. $\overline{\mathrm{OC}} > 1 + 2\sqrt{2}$\ 이므로 두 원은 서로 외부에 있고 선분 $\overline{\mathrm{PQ}}$\ 의 최댓값은
+\[ \overline{\mathrm{OC}} + 1 + 2\sqrt{2} = 3\sqrt{2} + 1 + 2\sqrt{2} = 5\sqrt{2} + 1. \]
+
+% ─────────────── 확인 11 (E6 원 밖 점 접선 CHK · 원 CHK7) ───────────────
+\dmsoltitle{11}{기울기가 주어진 원의 두 접선의 $y$\ 절편의 곱}
+\begin{dmanswerbox}
+정답: $y$\ 절편의 곱 $=-25$
+\end{dmanswerbox}
+
+기울기가 $2$\ 인 직선의 방정식을 $y = 2x + k$, 즉 $2x - y + k = 0$\ 이라 하자. 이 직선이 원 $x^2 + y^2 = 5$\ 에 접하려면 원점에서 이 직선까지의 거리가 반지름 $\sqrt{5}$\ 와 같아야 하므로
+\[ \dfrac{|k|}{\sqrt{4 + 1}} = \sqrt{5},\quad |k| = 5 \]
+이다. 따라서 $k = 5$ 또는 $k = -5$\ 이므로 두 직선의 $y$\ 절편의 곱은 $5 \cdot (-5) = -25$\ 이다.
+
+% ─────────────── 확인 12 (E6 원 밖 점 접선 CHK · 원 CHK8) ───────────────
+\dmsoltitle{12}{원 밖의 점에서 그은 두 접선의 기울기의 곱}
+\begin{dmanswerbox}
+정답: 두 접선의 기울기의 곱 $= -\dfrac{5}{4}$
+\end{dmanswerbox}
+
+점 $(0,\, 3)$\ 을 지나는 직선을 $mx - y + 3 = 0$\ 이라 하면 원 $x^2 + y^2 = 4$\ 에 접할 조건은 원점과의 거리가 반지름 $2$\ 와 같다는 것이므로
+\[ \dfrac{3}{\sqrt{m^2 + 1}} = 2,\quad 9 = 4(m^2 + 1),\quad 4m^2 - 5 = 0 \]
+이다. 두 접선의 기울기 $m$\ 은 이 이차방정식의 두 근이므로 곱은 $-\dfrac{5}{4}$\ 이다\ $(\because$ 근과 계수의 관계 $m_1 m_2 = \dfrac{-5}{4})$.
+
+% ─────────────── 확인 13 (신규 · E7 CHK · RPM #0258) ───────────────
+\dmsoltitle{13}{원 위의 점에서의 접선의 기울기 조건}
+\begin{dmanswerbox}
+정답: $ab=-6$
+\end{dmanswerbox}
+
+점 $(a,\, b)$\ 가 원 $x^2 + y^2 = 20$ 위에 있으므로 접선의 방정식은
+\[ ax + by = 20 \]
+이고 이 접선의 기울기는 $-\dfrac{a}{b}$\ 이다. 기울기가 $3$\ 이므로 $-\dfrac{a}{b} = 3$, 즉 $a = -3b$\ 이다. 이를 $a^2 + b^2 = 20$\ 에 대입하면
+\[ 9b^2 + b^2 = 20,\quad b^2 = 2,\quad b = \pm \sqrt{2}. \]
+따라서 $ab = -3b \cdot b = -3b^2 = -6$\ 이다.
+
+% ─────────────── 확인 14 (신규 · E7 CHK · RPM #0260) ───────────────
+\dmsoltitle{14}{원 위의 점에서의 접선이 주어진 점을 지나는 조건}
+\begin{dmanswerbox}
+정답: $a+b=-7$
+\end{dmanswerbox}
+
+점 $(-4,\, a)$\ 가 원 $x^2 + y^2 = 25$ 위에 있으므로 $16 + a^2 = 25$\ 에서 $a^2 = 9$\ 이고 $a > 0$\ 이므로 $a = 3$\ 이다. 이 점에서의 접선의 방정식은
+\[ -4x + 3y = 25 \]
+이고 이 접선이 점 $(b,\, -5)$\ 를 지나므로 $-4b - 15 = 25$\ 에서 $b = -10$\ 이다. 따라서 $a + b = 3 + (-10) = -7$\ 이다.
+
+% ─────────────── 확인 15 (신규 · E8 CHK · RPM #0270) ───────────────
+\dmsoltitle{15}{두 원의 교점과 한 점을 지나는 원의 계수합}
+\begin{dmanswerbox}
+정답: $A+B+C=-4$
+\end{dmanswerbox}
+
+두 원의 교점을 지나는 원의 방정식을
+\[ (x^2 + y^2 - 1) + k\{(x-1)^2 + (y-1)^2 - 1\} = 0 \quad (k \ne -1) \]
+로 놓고 점 $(3,\, 1)$\ 을 대입하면
+\[ (9 + 1 - 1) + k\{(3-1)^2 + (1-1)^2 - 1\} = 0,\quad 9 + 3k = 0 \]
+에서 $k = -3$\ 이다. $k = -3$\ 을 대입하여 전개하면
+\[ (x^2 + y^2 - 1) - 3(x^2 + y^2 - 2x - 2y + 1) = 0 \]
+이고 정리하면
+\[ -2x^2 - 2y^2 + 6x + 6y - 4 = 0,\quad x^2 + y^2 - 3x - 3y + 2 = 0 \]
+이다. 따라서 $A = -3$,\ $B = -3$,\ $C = 2$\ 에서 $A + B + C = -4$\ 이다.
+
+% ─────────────── 확인 16 (신규 · E8 CHK · RPM #0272) ───────────────
+\dmsoltitle{16}{두 원의 교점과 원점을 지나는 원의 넓이 조건}
+\begin{dmanswerbox}
+정답: $a=3$
+\end{dmanswerbox}
+
+두 원의 교점과 원점을 지나는 원의 방정식을
+\[ (x^2 + y^2 - 6y + 4) + k(x^2 + y^2 + ax - 4y + 2) = 0 \quad (k \ne -1) \]
+로 놓고 원점을 대입하면 $4 + 2k = 0$\ 에서 $k = -2$\ 이다. $k = -2$\ 를 대입하여 전개하면
+\[ -x^2 - y^2 - 2ax + 2y = 0,\quad x^2 + y^2 + 2ax - 2y = 0 \]
+이고 완전제곱꼴로 정리하면
+\[ (x + a)^2 + (y - 1)^2 = a^2 + 1 \]
+이다. 이 원의 넓이가 $10\pi$\ 이므로 $\pi(a^2 + 1) = 10\pi$\ 에서 $a^2 = 9$\ 이고 양수 조건에서 $a = 3$\ 이다.
+
+% ─────────────── 확인 17 (신규 · E9 CHK · 유제-221) ───────────────
+\dmsoltitle{17}{두 원의 공통현의 길이}
+\begin{dmanswerbox}
+정답: 공통현의 길이 $= 2\sqrt{2}$
+\end{dmanswerbox}
+
+두 원의 방정식을 빼면
+\[ 4x - 4y - 4 = 0,\quad \text{즉}\quad x - y - 1 = 0 \]
+이므로 이 직선이 공통현이다. 첫째 원을 표준형으로 정리하면 $(x - 1)^2 + (y - 2)^2 = 4$\ 이므로 중심은 $\mathrm{C}(1,\, 2)$\ 이고 반지름의 길이는 $r = 2$\ 이다. 중심에서 공통현까지의 거리는
+\[ d = \dfrac{|1 - 2 - 1|}{\sqrt{1^2 + (-1)^2}} = \dfrac{2}{\sqrt{2}} = \sqrt{2} \]
+이므로 공통현의 길이는
+\[ 2\sqrt{r^2 - d^2} = 2\sqrt{4 - 2} = 2\sqrt{2}. \]
+
+% ─────────────── 확인 18 (신규 · E9 CHK · 유제-222) ───────────────
+\dmsoltitle{18}{공통현의 길이 조건에서 상수의 값}
+\begin{dmanswerbox}
+정답: $a=5$
+\end{dmanswerbox}
+
+두 원의 방정식을 빼면
+\[ -4x + 3y - 5 - a = 0,\quad \text{즉}\quad 4x - 3y + (5 + a) = 0 \]
+이므로 이 직선이 공통현이다. 첫째 원 $x^2 + y^2 = 5$\ 의 중심은 원점이고 반지름의 길이는 $r = \sqrt{5}$\ 이다. 중심에서 공통현까지의 거리는
+\[ d = \dfrac{|5 + a|}{\sqrt{16 + 9}} = \dfrac{|5 + a|}{5} \]
+이다. 공통현의 길이가 $2$\ 이므로 $2\sqrt{r^2 - d^2} = 2$\ 에서 $r^2 - d^2 = 1$\ 이고
+\[ 5 - \dfrac{(5 + a)^2}{25} = 1,\quad (5 + a)^2 = 100. \]
+$5 + a = \pm 10$\ 에서 $a = 5$ 또는 $a = -15$\ 이고 양수 조건에서 $a = 5$\ 이다.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$r=3$} & \dmquick{2}{$a+b+c=24$} & \dmquick{3}{$a+b+r=12$} & \dmquick{4}{$p+q=10$} & \dmquick{5}{$k=16$} \\
+\dmquick{6}{$a$\ 의 최댓값 $=4$} & \dmquick{7}{$k$\ 의 곱 $=-18$} & \dmquick{8}{반지름의 합 $=12$} & \dmquick{9}{$r=2$} & \dmquick{10}{$3 \le k < 6$} \\
+\dmquick{11}{$y$\ 절편 $=-2$} & \dmquick{12}{최댓값 $=15$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{두 원이 외접할 조건에서 반지름의 결정}
+\begin{dmanswerbox}
+정답: $r=3$
+\end{dmanswerbox}
+
+두 원 $x^2 + y^2 = 4$\ 와 $(x-3)^2 + (y-4)^2 = r^2$\ 의 중심을 각각 $\mathrm{O}(0,\, 0)$, $\mathrm{C}(3,\, 4)$\ 라 하고 반지름의 길이를 각각 $2$, $r$\ 이라 하자. 두 원이 외접할 조건은 두 중심 사이의 거리가 두 반지름의 합과 같다는 것이므로
+\[ \overline{\mathrm{OC}} = \sqrt{9 + 16} = 5,\quad 2 + r = 5 \]
+에서 $r = 3$\ 이다.
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{지름의 양 끝점이 주어진 원의 표준형 계수합}
+\begin{dmanswerbox}
+정답: $a+b+c=24$
+\end{dmanswerbox}
+
+중심은 두 점 $\mathrm{A}(5,\, 1)$,\ $\mathrm{B}(-1,\, 7)$\ 의 중점이므로
+\[ \left( \dfrac{5+(-1)}{2},\ \dfrac{1+7}{2} \right) = (2,\, 4) \]
+이고 반지름의 제곱은 $(2-5)^{2} + (4-1)^{2} = 9 + 9 = 18$\ 이다. 원의 방정식은 $(x-2)^2 + (y-4)^2 = 18$\ 이므로 $a = 2$,\ $b = 4$,\ $c = 18$\ 이고 $a + b + c = 24$\ 이다.
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{일반형 원의 중심·반지름과 계수합}
+\begin{dmanswerbox}
+정답: $a+b+r=12$
+\end{dmanswerbox}
+
+원의 방정식을 완전제곱꼴로 정리하면
+\[ (x-3)^2 + \left( y + \dfrac{a}{2} \right)^2 = 9 + \dfrac{a^2}{4} - 9 = \dfrac{a^2}{4} \]
+이다. 중심의 $y$\ 좌표가 $-\dfrac{a}{2} = -3$\ 이므로 $a = 6$\ 이고, $x$\ 좌표 $b = 3$\ 이다. 반지름의 길이는 $r = \sqrt{a^2/4} = 3$\ 이므로 $a + b + r = 6 + 3 + 3 = 12$\ 이다.
+
+% ─────────────── L1-4 ───────────────
+\dmsoltitle{4}{세 점을 지나는 원의 중심 좌표합}
+\begin{dmanswerbox}
+정답: $p+q=10$
+\end{dmanswerbox}
+
+원의 방정식을 $x^2 + y^2 + Ax + By + C = 0$\ 이라 하자. 점 $(0,\, 0)$\ 을 대입하면 $C = 0$\ 이다. 점 $(6,\, 0)$\ 을 대입하면 $36 + 6A = 0$\ 에서 $A = -6$\ 이다. 점 $(-4,\, 4)$\ 를 대입하면 $16 + 16 - 4A + 4B = 0$\ 에서 $32 + 24 + 4B = 0$,\ $B = -14$\ 이다. 중심은
+\[ \left( -\dfrac{A}{2},\ -\dfrac{B}{2} \right) = (3,\, 7) \]
+이므로 $p + q = 10$\ 이다.
+
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{$x$\ 축에 접하는 원의 조건}
+\begin{dmanswerbox}
+정답: $k=16$
+\end{dmanswerbox}
+
+원의 방정식을 완전제곱꼴로 정리하면
+\[ (x-4)^2 + (y+5)^2 = 41 - k \]
+이므로 중심은 $(4,\, -5)$\ 이고 반지름의 제곱은 $41 - k$\ 이다. $x$\ 축에 접하므로 반지름의 길이가 $|-5| = 5$\ 와 같다. 따라서
+\[ 41 - k = 25,\quad k = 16. \]
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{원이 되기 위한 조건에서 자연수의 최댓값}
+\begin{dmanswerbox}
+정답: $a$\ 의 최댓값 $=4$
+\end{dmanswerbox}
+
+주어진 방정식을 완전제곱꼴로 정리하면 우변은
+\[ 4a^2 + 4 - (5a^2 - 2a - 11) = -a^2 + 2a + 15 \]
+이다. 이 값이 양수이어야 원이 되므로 $a^2 - 2a - 15 < 0$,\ $(a-5)(a+3) < 0$\ 에서 $-3 < a < 5$\ 이다. 이 범위의 자연수 $a$\ 는 $1,\, 2,\, 3,\, 4$\ 이므로 최댓값은 $4$\ 이다.
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{원과 직선이 접할 조건에서 상수의 값의 곱}
+\begin{dmanswerbox}
+정답: $k$\ 의 곱 $=-18$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 = 9$\ 의 중심은 원점이고 반지름의 길이는 $3$\ 이다. 직선 $y = x + k$, 즉 $x - y + k = 0$\ 과 원점 사이의 거리가 반지름과 같아야 접하므로
+\[ \dfrac{|k|}{\sqrt{2}} = 3,\quad |k| = 3\sqrt{2},\quad k = \pm 3\sqrt{2}. \]
+두 값의 곱은 $-18$\ 이다.
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{$y$\ 축에 접하고 한 점을 지나는 두 원의 반지름의 합}
+\begin{dmanswerbox}
+정답: 반지름의 합 $=12$
+\end{dmanswerbox}
+
+중심이 직선 $y = x + 2$ 위에 있으므로 중심을 $(t,\, t+2)$\ 라 하자. $y$\ 축에 접하므로 반지름의 길이는 $|t|$\ 이다. 점 $(4,\, 4)$\ 를 지나므로
+\[ (4-t)^2 + (4-(t+2))^2 = t^2 \]
+에서 $(4-t)^2 + (2-t)^2 = t^2$\ 이 성립한다. 좌변을 전개하여 정리하면
+\[ 16 - 8t + t^2 + 4 - 4t + t^2 = t^2,\quad t^2 - 12t + 20 = 0 \]
+이고 $(t-2)(t-10) = 0$\ 에서 $t = 2$ 또는 $t = 10$\ 이다. 두 반지름은 각각 $2$,\ $10$\ 이므로 합은 $12$\ 이다.
+
+% ─────────────── L1-9 ───────────────
+\dmsoltitle{9}{원 밖의 점과 원 사이의 거리의 최솟값}
+\begin{dmanswerbox}
+정답: $r=2$
+\end{dmanswerbox}
+
+원의 중심은 $\mathrm{C}(-5,\, 4)$\ 이므로 점 $\mathrm{P}(-1,\, 1)$\ 에서 중심까지의 거리는
+\[ \overline{\mathrm{PC}} = \sqrt{(-1-(-5))^2 + (1-4)^2} = \sqrt{16 + 9} = 5 \]
+이다. $\mathrm{P}$\ 가 원 밖에 있으므로 선분 $\overline{\mathrm{PQ}}$\ 의 최솟값은 $\overline{\mathrm{PC}} - r = 5 - r$\ 이다. 이 값이 $3$\ 이므로 $r = 2$\ 이다.
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{반지름의 길이 조건과 원이 될 조건의 결합}
+\begin{dmanswerbox}
+정답: $3 \le k < 6$
+\end{dmanswerbox}
+
+주어진 방정식을 완전제곱꼴로 정리하면
+\[ (x+2)^2 + (y-1)^2 = 12 - 2k. \]
+원이 될 조건에서 $12 - 2k > 0$\ 이므로 $k < 6$\ 이고, 반지름의 길이가 $\sqrt{6}$ 이하이려면 $12 - 2k \le 6$\ 에서 $k \ge 3$\ 이다. 두 조건을 결합하여 $3 \le k < 6$\ 이다.
+
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{두 원의 넓이를 이등분하는 직선의 $y$\ 절편}
+\begin{dmanswerbox}
+정답: $y$\ 절편 $=-2$
+\end{dmanswerbox}
+
+원 $(x-1)^2 + y^2 = 4$\ 의 중심은 $(1,\, 0)$\ 이고, 원 $x^2 + y^2 - 6x - 8y + 10 = 0$\ 을 정리하면
+\[ (x-3)^2 + (y-4)^2 = 15 \]
+이므로 중심은 $(3,\, 4)$\ 이다. 두 원의 넓이를 동시에 이등분하는 직선은 두 중심을 지나는 직선이다. 기울기는 $\dfrac{4-0}{3-1} = 2$\ 이므로 방정식은
+\[ y - 0 = 2(x - 1),\quad \text{즉}\quad y = 2x - 2 \]
+이다. $y$\ 절편은 $-2$\ 이다.
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{거리비 자취 원과 삼각형의 최대 넓이}
+\begin{dmanswerbox}
+정답: 넓이의 최댓값 $=15$
+\end{dmanswerbox}
+
+$\mathrm{P}(x,\, y)$\ 라 하면 $\overline{\mathrm{PA}} : \overline{\mathrm{PB}} = 3 : 2$\ 에서 $4\overline{\mathrm{PA}}^{\,2} = 9\overline{\mathrm{PB}}^{\,2}$\ 이다.
+\[ 4\{(x+2)^2 + y^2\} = 9\{(x-3)^2 + y^2\} \]
+좌변을 전개하여 정리하면
+\[ 5x^2 - 70x + 5y^2 + 65 = 0,\quad (x-7)^2 + y^2 = 36 \]
+이다. 자취는 중심 $(7,\, 0)$, 반지름 $6$\ 인 원이다. 삼각형 $\mathrm{PAB}$\ 의 밑변은 $\overline{\mathrm{AB}} = 5$\ 이고 높이는 $\mathrm{P}$\ 의 $y$\ 좌표의 절댓값이다. $y$\ 좌표의 절댓값은 자취 원의 반지름과 같은 $6$\ 이 최대이므로 넓이의 최댓값은
+\[ \dfrac{1}{2} \cdot 5 \cdot 6 = 15. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 점에 대한 거리비가 일정한 점의 자취는 원이다}: 자취가 정해진 원이므로 밑변이 고정된 삼각형의 높이 최댓값은 그 원의 반지름과 같다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{두 점 사이의 거리 $=4\sqrt{6}$} & \dmquick{2}{중심 $(2,\,-1)$} & \dmquick{3}{$y=8x-11$} & \dmquick{4}{$abc=\dfrac{13}{2}$} & \dmquick{5}{넓이 $=2\pi$} \\
+\dmquick{6}{길이 $=\dfrac{7\sqrt{10}}{3}$} & \dmquick{7}{$(x+2)^2+(y-1)^2=29$} & \dmquick{8}{합 $=4$} & \dmquick{9}{$a+b=8$} & \dmquick{10}{합 $=112$} \\
+\dmquick{11}{넓이 $=\dfrac{32}{5}$} & \dmquick{12}{중점 $\left( \dfrac{3}{2},\,-\dfrac{5}{2} \right)$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+\dmsoltitle{1}{지름의 양 끝점과 $x$\ 축이 만나는 두 점 사이의 거리}
+\begin{dmanswerbox}
+정답: 두 점 사이의 거리 $=4\sqrt{6}$
+\end{dmanswerbox}
+
+원의 중심은 두 점 $(-2,\, 3)$,\ $(4,\, -5)$\ 의 중점 $(1,\, -1)$\ 이고 반지름의 제곱은
+\[ (1-(-2))^2 + (-1-3)^2 = 9 + 16 = 25 \]
+이므로 원의 방정식은 $(x-1)^2 + (y+1)^2 = 25$\ 이다. $x$\ 축과 만나는 점은 $y = 0$\ 을 대입하여 $(x-1)^2 = 24$\ 에서 $x = 1 \pm 2\sqrt{6}$\ 이므로 두 점 사이의 거리는 $4\sqrt{6}$\ 이다.
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{원의 넓이가 최소일 때 중심의 좌표}
+\begin{dmanswerbox}
+정답: 중심 $(2,\, -1)$
+\end{dmanswerbox}
+
+원의 방정식을 완전제곱꼴로 정리하면
+\[ (x-2k)^2 + (y+k)^2 = 5k^2 - 10k + 15. \] 원의 넓이는 반지름의 제곱에 비례하므로 우변이 최소일 때 넓이가 최소이다. 우변은
+\[ 5k^2 - 10k + 15 = 5(k-1)^2 + 10 \]
+이므로 $k = 1$\ 일 때 최소이다. 이때 중심은 $(2,\, -1)$\ 이다.
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{원과 직사각형의 넓이를 동시에 이등분하는 직선}
+\begin{dmanswerbox}
+정답: $y=8x-11$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 - 2x + 6y + 6 = 0$\ 을 정리하면 $(x-1)^2 + (y+3)^2 = 4$\ 이므로 중심은 $(1,\, -3)$\ 이다. 직사각형의 중심은 두 대각선의 교점 $\left( \dfrac{-1+5}{2},\ \dfrac{3+7}{2} \right) = (2,\, 5)$\ 이다.
+
+원의 넓이를 이등분하는 직선은 원의 중심을, 직사각형의 넓이를 이등분하는 직선은 직사각형의 중심을 각각 지나야 하므로 구하는 직선은 두 중심을 잇는다. 기울기는 $\dfrac{5-(-3)}{2-1} = 8$\ 이고 $(1,\, -3)$\ 을 지나므로
+\[ y = 8x - 11. \]
+% ─────────────── L2-4 ───────────────
+\dmsoltitle{4}{원의 넓이를 $4$\ 등분하는 두 수직 직선}
+\begin{dmanswerbox}
+정답: $abc=\dfrac{13}{2}$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 - 6x + 4y - 12 = 0$\ 을 정리하면
+\[ (x-3)^2 + (y+2)^2 = 25 \]
+이므로 중심은 $(3,\, -2)$\ 이다. 원의 넓이를 $4$\ 등분하는 두 직선은 원의 중심을 지나면서 서로 수직인 두 직선이다.
+
+직선 $y = ax$\ 는 중심을 지나므로 $-2 = 3a$\ 에서 $a = -\dfrac{2}{3}$\ 이다. 직선 $y = bx + c$\ 가 앞의 직선과 수직이려면 $b = \dfrac{3}{2}$\ 이고, 이 직선이 중심 $(3,\, -2)$\ 를 지나므로
+\[ -2 = \dfrac{3}{2} \cdot 3 + c,\quad c = -\dfrac{13}{2}. \]
+따라서
+\[ abc = \left( -\dfrac{2}{3} \right) \cdot \dfrac{3}{2} \cdot \left( -\dfrac{13}{2} \right) = \dfrac{13}{2}. \]
+% ─────────────── L2-5 ───────────────
+\dmsoltitle{5}{한 고정된 점과 원 위의 점의 중점이 그리는 도형}
+\begin{dmanswerbox}
+정답: 넓이 $=2\pi$
+\end{dmanswerbox}
+
+선분 $\overline{\mathrm{AP}}$\ 의 중점을 $\mathrm{M}(X,\, Y)$\ 라 하면
+\[ X = \dfrac{3 + P_x}{2},\quad Y = \dfrac{2 + P_y}{2} \]
+이므로 $P_x = 2X - 3$,\ $P_y = 2Y - 2$\ 이다. $\mathrm{P}$\ 가 원 $(x-1)^2 + (y+2)^2 = 8$ 위에 있으므로
+\[ (2X - 4)^2 + (2Y)^2 = 8 \]
+이고 양변을 $4$\ 로 나누면 $(X-2)^2 + Y^2 = 2$\ 이다. $\mathrm{M}$\ 의 자취는 중심 $(2,\, 0)$, 반지름 $\sqrt{2}$\ 인 원이므로 넓이는 $2\pi$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{원 위 점의 좌표를 중점의 좌표로 옮기는 관계식이 일차식이다}: $\mathrm{M}$\ 의 자취도 원이고 반지름은 축소된 비율만큼 짧아진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{두 점을 지나는 원의 중심이 제2사분면에서 그리는 도형의 길이}
+\begin{dmanswerbox}
+정답: 길이 $=\dfrac{7\sqrt{10}}{3}$
+\end{dmanswerbox}
+
+두 점 $(-2,\, 5)$,\ $(0,\, -1)$\ 을 지나는 원의 중심은 두 점의 수직이등분선 위에 있다. 중점은 $(-1,\, 2)$\ 이고 두 점을 지나는 직선의 기울기는 $\dfrac{5-(-1)}{-2-0} = -3$\ 이므로 수직이등분선의 기울기는 $\dfrac{1}{3}$\ 이다. 방정식은
+\[ y - 2 = \dfrac{1}{3}(x + 1),\quad \text{즉}\quad y = \dfrac{x}{3} + \dfrac{7}{3} \]
+이다. 중심이 제 $2$ 사분면에 있으려면 $x < 0$\ 이고 $y > 0$\ 이어야 한다. 이로부터 $-7 < x < 0$\ 을 얻고, 이 범위에서 수직이등분선의 두 끝점은
+\[ \left( 0,\ \dfrac{7}{3} \right),\quad (-7,\ 0) \]
+이다. 두 점 사이의 거리는
+\[ \sqrt{7^2 + \left( \dfrac{7}{3} \right)^2} = 7\sqrt{1 + \dfrac{1}{9}} = \dfrac{7\sqrt{10}}{3}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 점을 지나는 원의 중심의 자취는 두 점의 수직이등분선이다}: 사분면 조건은 이 직선 위 $x$·$y$\ 좌표의 부호 조건으로 옮겨져 자취의 두 끝점이 정해진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{세 직선으로 만들어지는 삼각형의 외접원}
+\begin{dmanswerbox}
+정답: $(x+2)^2+(y-1)^2=29$
+\end{dmanswerbox}
+
+세 직선을 두 개씩 연립하여 세 꼭짓점의 좌표를 구한다.
+
+$5x + 2y + 8 = 0$\ 과 $7x - 3y - 12 = 0$\ 을 연립하면
+\[ 29x = 0,\quad x = 0,\ y = -4 \]
+이므로 $\mathrm{A}(0,\, -4)$\ 이다. $5x + 2y + 8 = 0$\ 과 $3x + 7y - 30 = 0$\ 을 연립하면
+\[ 29x = -116,\quad x = -4,\ y = 6 \]
+이므로 $\mathrm{B}(-4,\, 6)$\ 이다. $7x - 3y - 12 = 0$\ 과 $3x + 7y - 30 = 0$\ 을 연립하면
+\[ 58x = 174,\quad x = 3,\ y = 3 \]
+이므로 $\mathrm{C}(3,\, 3)$\ 이다.
+
+외접원의 방정식을 $x^2 + y^2 + Dx + Ey + F = 0$\ 이라 하자. 세 점을 대입하면
+\begin{align*}
+  16 - 4E + F &= 0,\\
+  52 - 4D + 6E + F &= 0,\\
+  18 + 3D + 3E + F &= 0
+\end{align*}
+을 얻는다. 연립하여 $D = 4$,\ $E = -2$,\ $F = -24$\ 이므로 표준형은
+\[ (x+2)^2 + (y-1)^2 = 29. \]
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{원과 직선이 만날 때 원 위의 점과 직선 사이 거리의 최댓값과 최솟값의 합}
+\begin{dmanswerbox}
+정답: 합 $=4$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 - 2x - 4y - 4 = 0$\ 을 정리하면
+\[ (x-1)^2 + (y-2)^2 = 9 \]
+이므로 중심은 $\mathrm{C}(1,\, 2)$\ 이고 반지름의 길이는 $3$\ 이다. 중심 $\mathrm{C}$\ 에서 직선 $3x - 4y + 10 = 0$\ 까지의 거리는
+\[ d = \dfrac{|3 - 8 + 10|}{\sqrt{9 + 16}} = \dfrac{5}{5} = 1 \]
+이다. $d < r$\ 이므로 원과 직선은 서로 다른 두 점에서 만나고, 원 위의 점과 직선 사이의 거리의 최솟값은 $0$\ 이고 최댓값은 $d + r = 4$\ 이다. 따라서 합은 $4$\ 이다.
+
+% ─────────────── L2-9 ───────────────
+\dmsoltitle{9}{원 밖의 점에서 그은 두 접선과 $y$\ 축의 교점의 좌표합}
+\begin{dmanswerbox}
+정답: $a+b=8$
+\end{dmanswerbox}
+
+점 $(2,\, -4)$\ 를 지나는 접선의 기울기를 $m$\ 이라 하면 접선의 방정식은 $y = m(x - 2) - 4$, 즉 $mx - y - 2m - 4 = 0$\ 이다. 원 $x^2 + y^2 = 2$\ 의 중심에서 이 직선까지의 거리가 반지름 $\sqrt{2}$\ 와 같아야 하므로
+\[ \dfrac{|{-2m - 4}|}{\sqrt{m^2 + 1}} = \sqrt{2} \]
+이다. 양변을 제곱하여 정리하면
+\[ (2m + 4)^2 = 2(m^2 + 1) \]
+에서
+\[ 2m^2 + 16m + 14 = 0,\quad m^2 + 8m + 7 = 0 \]
+이고 $(m+1)(m+7) = 0$\ 에서 $m = -1$ 또는 $m = -7$\ 이다.
+
+접선이 $y$\ 축과 만나는 점의 $y$\ 좌표는 $x = 0$\ 을 대입해서 $y = -2m - 4$\ 이다. $m = -1$\ 일 때 $y = -2$\ 이고 $m = -7$\ 일 때 $y = 10$\ 이므로 $a + b = -2 + 10 = 8$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{원 밖의 점에서 그은 접선은 두 개이며 각각의 기울기는 중심에서 직선까지의 거리 조건에서 이차방정식의 두 근으로 나온다}: 두 접선의 $y$\ 절편을 각각 구하지 않고 두 기울기에 대한 표현식에 근과 계수의 관계를 적용해도 좋다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-10 ───────────────
+\dmsoltitle{10}{두 고정된 점에 대한 거리 제곱의 합의 최댓값과 최솟값}
+\begin{dmanswerbox}
+정답: 합 $=112$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 + 4x + 3 = 0$\ 을 정리하면
+\[ (x+2)^2 + y^2 = 1 \]
+이므로 중심은 $\mathrm{C}(-2,\, 0)$\ 이고 반지름의 길이는 $1$\ 이다. 두 점 $\mathrm{A}(0,\, 5)$,\ $\mathrm{B}(2,\, 3)$\ 의 중점 $\mathrm{M}(1,\, 4)$\ 을 잡으면 중선의 성질에 의하여
+\[ \overline{\mathrm{PA}}^{\,2} + \overline{\mathrm{PB}}^{\,2} = 2\overline{\mathrm{PM}}^{\,2} + \dfrac{\overline{\mathrm{AB}}^{\,2}}{2} \]
+이다. $\overline{\mathrm{AB}}^{\,2} = 4 + 4 = 8$\ 이고 $\overline{\mathrm{MC}} = \sqrt{9 + 16} = 5$\ 이므로
+\[ \overline{\mathrm{PM}}_{\max} = 5 + 1 = 6,\quad \overline{\mathrm{PM}}_{\min} = 5 - 1 = 4 \]
+이다. 따라서
+\[ \text{최댓값} = 2 \cdot 36 + 4 = 76,\quad \text{최솟값} = 2 \cdot 16 + 4 = 36 \]
+이므로 합은 $112$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{중선의 성질로 두 점까지 거리 제곱의 합이 한 점까지 거리 문제로 바뀐다}: $\overline{\mathrm{PA}}^{\,2} + \overline{\mathrm{PB}}^{\,2}$\ 의 최값은 중점 $\mathrm{M}$\ 까지의 거리 $\overline{\mathrm{PM}}$\ 의 최값으로 옮겨진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-11 ───────────────
+\dmsoltitle{11}{원 밖의 점에서 그은 두 접선의 접점이 이루는 삼각형의 넓이}
+\begin{dmanswerbox}
+정답: 넓이 $=\dfrac{32}{5}$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 - 6x - 2y + 6 = 0$\ 을 표준형으로 정리하면
+\[ (x - 3)^2 + (y - 1)^2 = 4 \]
+이므로 중심은 $\mathrm{C}(3,\, 1)$\ 이고 반지름의 길이는 $2$\ 이다. 점 $\mathrm{P}(-1,\, 3)$\ 에서 중심까지의 거리는
+\[ \overline{\mathrm{CP}} = \sqrt{4^2 + 2^2} = 2\sqrt{5} \]
+이다. 접점 $\mathrm{A}$\ 에서 $\overline{\mathrm{CA}} \perp \overline{\mathrm{PA}}$\ 이므로 직각삼각형 $\mathrm{CAP}$\ 에서 접선의 길이는
+\[ \overline{\mathrm{PA}} = \sqrt{\overline{\mathrm{CP}}^{\,2} - r^2} = \sqrt{20 - 4} = 4. \]
+
+두 접점 $\mathrm{A}$,\ $\mathrm{B}$\ 는 직선 $\overline{\mathrm{CP}}$\ 에 대하여 대칭이므로 $\overline{\mathrm{AB}} \perp \overline{\mathrm{CP}}$\ 이다. $\overline{\mathrm{AB}}$\ 가 $\overline{\mathrm{CP}}$\ 와 만나는 점을 $\mathrm{H}$\ 라 하면 $\mathrm{H}$\ 는 $\overline{\mathrm{AB}}$\ 의 중점이다. 직각삼각형 $\mathrm{CAP}$\ 에서 빗변 $\overline{\mathrm{CP}}$\ 에 내린 수선의 발이 $\mathrm{H}$\ 이므로 넓이를 이용하여
+\[ \overline{\mathrm{AH}} = \dfrac{\overline{\mathrm{CA}} \cdot \overline{\mathrm{PA}}}{\overline{\mathrm{CP}}} = \dfrac{2 \cdot 4}{2\sqrt{5}} = \dfrac{4\sqrt{5}}{5} \]
+이고 $\overline{\mathrm{PH}} = \dfrac{\overline{\mathrm{PA}}^{\,2}}{\overline{\mathrm{CP}}} = \dfrac{16}{2\sqrt{5}} = \dfrac{8\sqrt{5}}{5}$\ 이다. 따라서
+\[ \overline{\mathrm{AB}} = 2\overline{\mathrm{AH}} = \dfrac{8\sqrt{5}}{5} \]
+이고 삼각형 $\mathrm{PAB}$\ 의 넓이는
+\[ \dfrac{1}{2} \cdot \overline{\mathrm{AB}} \cdot \overline{\mathrm{PH}} = \dfrac{1}{2} \cdot \dfrac{8\sqrt{5}}{5} \cdot \dfrac{8\sqrt{5}}{5} = \dfrac{32}{5}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{원 밖의 점과 중심을 잇는 선분은 두 접점을 잇는 현의 수직이등분선이다}: $\overline{\mathrm{CP}} \perp \overline{\mathrm{AB}}$\ 가 성립하므로 삼각형의 넓이는 밑변 $\overline{\mathrm{AB}}$\ 와 높이 $\overline{\mathrm{PH}}$\ 의 곱으로 간단히 계산된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-12 ───────────────
+\dmsoltitle{12}{직각삼각형 조건을 만족시키는 원 위의 두 점의 중점}
+\begin{dmanswerbox}
+정답: 중점 $\left( \dfrac{3}{2},\, -\dfrac{5}{2} \right)$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(6,\, 4)$,\ $\mathrm{B}(-1,\, 5)$\ 가 모두 원 $(x-2)^2 + (y-1)^2 = 25$ 위에 있음을 확인하고 원의 중심을 $\mathrm{C}(2,\, 1)$, 반지름의 길이를 $5$\ 라 하자. $\overline{\mathrm{AB}} = \sqrt{49 + 1} = 5\sqrt{2}$\ 이므로 $\overline{\mathrm{AB}}$\ 는 지름의 길이 $10$\ 과 다르다. 따라서 $\mathrm{P}$\ 에서 직각이 성립할 수 없고, $\mathrm{A}$ 또는 $\mathrm{B}$\ 에서 직각이어야 한다.
+
+$\angle \mathrm{A} = 90^{\circ}$\ 인 경우: $\overline{\mathrm{BP}}$\ 가 지름이므로 $\mathrm{P}$\ 는 $\mathrm{B}$\ 의 원 중심에 대한 대칭점이다.
+\[ \mathrm{P}_1 = (2 \cdot 2 - (-1),\ 2 \cdot 1 - 5) = (5,\, -3) \]
+
+$\angle \mathrm{B} = 90^{\circ}$\ 인 경우: $\overline{\mathrm{AP}}$\ 가 지름이므로 $\mathrm{P}$\ 는 $\mathrm{A}$\ 의 원 중심에 대한 대칭점이다.
+\[ \mathrm{P}_2 = (2 \cdot 2 - 6,\ 2 \cdot 1 - 4) = (-2,\, -2) \]
+
+두 점 $\mathrm{P}_1$,\ $\mathrm{P}_2$\ 의 중점은
+\[ \left( \dfrac{5 + (-2)}{2},\ \dfrac{-3 + (-2)}{2} \right) = \left( \dfrac{3}{2},\ -\dfrac{5}{2} \right). \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{원에 내접하는 직각삼각형의 빗변은 지름이다}: $\overline{\mathrm{AB}}$\ 가 지름이 아니므로 $\mathrm{A}$\ 나 $\mathrm{B}$\ 에서 직각인 두 경우만 존재한다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$\mathrm{P}$\ 의 개수 $=18$} & \dmquick{2}{$y_2 y_3 \cdots y_9 = \dfrac{\sqrt{5}}{3}$} & \dmquick{3}{$100ab=200$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 ───────────────
+\dmsoltitle{1}{삼각형의 넓이가 자연수가 되도록 하는 원 위 점의 개수}
+\begin{dmanswerbox}
+정답: $\mathrm{P}$\ 의 개수 $=18$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 - 6x - 2y = 0$\ 을 정리하면
+\[ (x-3)^2 + (y-1)^2 = 10 \]
+이므로 중심은 $(3,\, 1)$\ 이고 반지름의 길이는 $\sqrt{10}$\ 이다. $x$\ 축과 만나는 점은 $y = 0$\ 을 대입해 $x^2 - 6x = 0$\ 에서 $x = 0$ 또는 $6$\ 이므로 $\mathrm{A}(0,\, 0)$,\ $\mathrm{B}(6,\, 0)$\ 이고 $\overline{\mathrm{AB}} = 6$\ 이다.
+
+점 $\mathrm{P}$\ 의 $y$\ 좌표를 $y_p$\ 라 하면 삼각형 $\mathrm{ABP}$\ 의 넓이는 $\dfrac{1}{2} \cdot 6 \cdot y_p = 3 y_p$\ 이다. 제 $1$ 사분면 위의 $\mathrm{P}$\ 이므로 $x_p > 0$\ 이고 $y_p > 0$\ 이며, 원 위이므로
+\[ (x_p - 3)^2 + (y_p - 1)^2 = 10 \]
+에서 $x_p = 3 \pm \sqrt{10 - (y_p - 1)^2}$\ 이다. $x_p > 0$ 조건에서
+\begin{itemize}[leftmargin=6mm, itemsep=0.3mm, topsep=0.5mm]
+  \item $0 < y_p \le 2$\ 이면 $x_p = 3 + \sqrt{10 - (y_p - 1)^2}$\ 만 유효하여 $\mathrm{P}$\ 가 $1$\ 개
+  \item $2 < y_p \le 1 + \sqrt{10}$\ 이면 두 값 모두 유효하여 $\mathrm{P}$\ 가 $2$\ 개
+\end{itemize}
+이다. 넓이가 자연수 $k$\ 이려면 $y_p = \dfrac{k}{3}$\ 이어야 하고, $y_p \le 1 + \sqrt{10} \approx 4.16$\ 이므로 $k = 1,\, 2,\, \ldots,\, 12$\ 의 총 $12$\ 개 값을 확인한다.
+
+$k = 1,\, 2,\, 3,\, 4,\, 5,\, 6$\ 일 때 $y_p = \dfrac{1}{3},\, \dfrac{2}{3},\, 1,\, \dfrac{4}{3},\, \dfrac{5}{3},\, 2$\ 로 각 $1$\ 개, 총 $6$\ 개이다. $k = 7,\, 8,\, 9,\, 10,\, 11,\, 12$\ 일 때 $y_p = \dfrac{7}{3},\, \dfrac{8}{3},\, 3,\, \dfrac{10}{3},\, \dfrac{11}{3},\, 4$\ 로 각 $2$\ 개, 총 $12$\ 개이다. 따라서 총 개수는 $6 + 12 = 18$\ 개이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{제 $1$ 사분면 호 위 점의 $y$\ 좌표 범위와 넓이 조건이 이산 값을 낳는다}: 넓이가 자연수이려면 $y_p = \dfrac{k}{3}$\ 의 유리수 값만 허용된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 ───────────────
+\dmsoltitle{2}{원 밖의 점에서 그은 접선의 접점의 $y$\ 좌표의 곱}
+\begin{dmanswerbox}
+정답: $y_2 y_3 \cdots y_9 = \dfrac{\sqrt{5}}{3}$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 = 1$ 위의 점 $(x_1,\, y_1)$\ 에서의 접선의 방정식은 $x_1 x + y_1 y = 1$\ 이다. 이 접선이 점 $(n,\, 0)$\ 을 지나므로 $n \cdot x_1 = 1$\ 에서 $x_1 = \dfrac{1}{n}$\ 이다. 접점이 원 위에 있으므로
+\[ x_1^2 + y_1^2 = 1,\quad y_1^2 = 1 - \dfrac{1}{n^2} = \dfrac{n^2 - 1}{n^2} \]
+이고 제 $1$ 사분면 위이므로 $y_n$\ 은 다음과 같다.
+\[ y_n = \dfrac{\sqrt{n^2 - 1}}{n} = \dfrac{\sqrt{(n-1)(n+1)}}{n}. \]
+
+따라서 구하는 곱은
+\[ y_2 y_3 \cdots y_9 = \dfrac{\sqrt{1 \cdot 3} \cdot \sqrt{2 \cdot 4} \cdots \sqrt{8 \cdot 10}}{2 \cdot 3 \cdots 9} \]
+이다. 분자의 근호 안 곱을 분해하면
+\begin{align*}
+  (n-1)\text{의 곱} &= 1 \cdot 2 \cdots 8 = 8!,\\
+  (n+1)\text{의 곱} &= 3 \cdot 4 \cdots 10 = \dfrac{10!}{2}
+\end{align*}
+이고 분모는 $2 \cdot 3 \cdots 9 = 9!$\ 이다. 비의 제곱을 계산하면
+\[ \dfrac{8! \cdot 10!/2}{(9!)^2} = \dfrac{10 \cdot 8!}{2 \cdot 9!} = \dfrac{10}{2 \cdot 9} = \dfrac{5}{9} \]
+이므로 $y_2 y_3 \cdots y_9 = \sqrt{\dfrac{5}{9}} = \dfrac{\sqrt{5}}{3}$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{접선 공식에 외부 점을 대입하면 접점의 좌표가 곧바로 나온다}: 접선의 기울기를 따로 구하지 않아도 $x_1 = \dfrac{1}{n}$\ 이 나온다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 ───────────────
+\dmsoltitle{3}{이차함수 위의 중심 · 두 접선 조건 · 두 반지름의 곱}
+\begin{dmanswerbox}
+정답: $100ab=200$
+\end{dmanswerbox}
+
+이차함수 $y = x^2$ 위의 점을 $(t,\, t^2)$\ 이라 하고 이 점을 중심으로 하는 원의 반지름의 길이는 $y$\ 축에 접하므로 $|t|$\ 이다. 이 원이 직선 $\sqrt{3}\, x - y - 2 = 0$\ 과 접하려면 중심에서 직선까지의 거리가 $|t|$\ 와 같아야 한다.
+\[ \dfrac{|\sqrt{3}\, t - t^2 - 2|}{\sqrt{3 + 1}} = |t|,\quad |{-t^2 + \sqrt{3}\, t - 2}| = 2|t| \]
+
+경우 (i) $-t^2 + \sqrt{3}\, t - 2 = 2t$: $t^2 + (2 - \sqrt{3})t + 2 = 0$\ 의 판별식은 $(2-\sqrt{3})^2 - 8 = 7 - 4\sqrt{3} - 8 = -1 - 4\sqrt{3} < 0$\ 이므로 실근이 없다.
+
+경우 (ii) $-t^2 + \sqrt{3}\, t - 2 = -2t$: $t^2 - (2 + \sqrt{3})t + 2 = 0$\ 의 판별식은 $(2 + \sqrt{3})^2 - 8 = 7 + 4\sqrt{3} - 8 = -1 + 4\sqrt{3} > 0$\ 이므로 서로 다른 두 실근을 가진다.
+
+두 근 $t_1$,\ $t_2$\ 에 대하여 두 근의 곱은 $t_1 t_2 = 2 > 0$\ 이고 두 근의 합은 $t_1 + t_2 = 2 + \sqrt{3} > 0$\ 이므로 두 근 모두 양수이다. 따라서 두 반지름 $a = t_1$,\ $b = t_2$\ 의 곱은 $ab = t_1 t_2 = 2$\ 이고
+\[ 100ab = 200. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{절댓값 두 경우의 판별식이 실근 존재 여부를 가른다}: 실근이 없는 경우 (i)은 유효한 원을 만들 수 없으므로 배제된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결 (세션 70 문항 순서 스왑)
+% 세션 70 스왑 (마스터 지시 · 마지막 페이지 1문 원칙 · feedback_min_solution_space_4cm) :
+%   원 R-1 (2021.9 고1 28번 · TikZ + 조건 박스) 을 R-3 자리로 이동
+%   원 R-2 (2022.11 고1 20번) → R-1 · 원 R-3 (2019.9 고1 21번) → R-2
+% 최종 배치 :
+%   - R-1 : 2022.11 고1 20번 (원 R-2 승격) · 원주각-접선각 · 정답 $f(p)+g(1/2)=\dfrac{1}{4}$
+%   - R-2 : 2019.9 고1 21번 (원 R-3 승격) · 내심 · 정답 $\overline{\mathrm{OP}}=\sqrt{34}$
+%   - R-3 : 2021.9 고1 28번 (원 R-1 강등 · 마지막 페이지 단독) · 정답 $a+b+r^2=14$
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$f(p)+g(1/2)=\dfrac{1}{4}$} & \dmquick{2}{$\overline{\mathrm{OP}}=\sqrt{34}$} & \dmquick{3}{$a+b+r^2=14$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── R-1 (세션 70 승격 · 원 R-2 · 2022.11월 고1 20번) ───────────────
+\dmsoltitle{1}{접선과 원주각 · 조건에서 결정되는 원의 방정식}
+\begin{dmanswerbox}
+정답: $f(p)+g(1/2)=\dfrac{1}{4}$
+\end{dmanswerbox}
+
+원 $C$\ 는 원점 $\mathrm{O}$\ 를 지나고 점 $\mathrm{A}$\ 에서 직선 $\mathrm{AB}$\ 에 접하므로 원의 중심 $\mathrm{C}$\ 는 점 $\mathrm{A}$\ 에서 직선 $\mathrm{AB}$\ 에 그은 수선 위에 있다. 직선 $\mathrm{AB}$\ 의 기울기는
+\[ \dfrac{k - 0}{0 - k} = -1 \]
+이므로 그 수선의 기울기는 $1$\ 이다. 또한 $\mathrm{C}$\ 는 $\mathrm{O}$\ 와 $\mathrm{A}$\ 로부터의 거리가 같으므로 $\mathrm{C}$\ 의 $x$\ 좌표는 $\dfrac{k}{2}$\ 이다.
+
+수선이 점 $\mathrm{A}(k,\, 0)$\ 을 지나고 기울기가 $1$\ 이므로 $y - 0 = 1 \cdot (x - k)$\ 에 $x = \dfrac{k}{2}$\ 를 대입하면 $\mathrm{C}$\ 의 $y$\ 좌표는 $-\dfrac{k}{2}$\ 이다. 따라서 (가) $= -\dfrac{k}{2}$\ 이고 $f(k) = -\dfrac{k}{2}$\ 이다.
+
+원 $C$\ 의 반지름의 길이는
+\[ \overline{\mathrm{CA}} = \sqrt{\left( \dfrac{k}{2} \right)^2 + \left( \dfrac{k}{2} \right)^2} = \dfrac{k\sqrt{2}}{2} \]
+이므로 (나) $= \dfrac{k\sqrt{2}}{2}$\ 이고 $g(k) = \dfrac{k\sqrt{2}}{2}$\ 이다.
+
+점 $\mathrm{P}$\ 의 $y$\ 좌표는 $\overline{\mathrm{CP}}$\ 가 양의 $y$\ 방향으로 놓일 때 최대이므로 $\mathrm{C}$\ 의 $y$\ 좌표에 반지름을 더한 값과 같다.
+\[ M(k) = -\dfrac{k}{2} + \dfrac{k\sqrt{2}}{2} = \dfrac{\sqrt{2} - 1}{2} \cdot k \]
+에서 (다) $= \dfrac{\sqrt{2} - 1}{2}$\ 이고 $p = \dfrac{\sqrt{2} - 1}{2}$\ 이다. 따라서
+\begin{align*}
+  f(p) &= -\dfrac{p}{2} = \dfrac{1 - \sqrt{2}}{4},\\
+  g\!\left( \dfrac{1}{2} \right) &= \dfrac{1}{2} \cdot \dfrac{\sqrt{2}}{2} = \dfrac{\sqrt{2}}{4}
+\end{align*}
+이므로
+\[ f(p) + g\!\left( \dfrac{1}{2} \right) = \dfrac{1 - \sqrt{2}}{4} + \dfrac{\sqrt{2}}{4} = \dfrac{1}{4}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{접선-현 각 정리로 자취가 접점 $\mathrm{A}$\ 를 지나며 $\overline{\mathrm{AB}}$\ 에 접하는 원임이 밝혀진다}: $\angle \mathrm{AOP} = \angle \mathrm{BAP}$\ 의 등식이 원 위 조건과 동치이다.
+\end{dmcriticalpoint}
+
+% ─────────────── R-2 (세션 70 승격 · 원 R-3 · 2019.9월 고1 21번) ───────────────
+% 세션 73 : 그래프 추가 (feedback_solution_graph_requirement · 유형 · 삼각형 내접원)
+%   좌표 압축 0.4 (원본 A(6,0)·B(0,-3)·C(10,-8) → (2.4, 0)·(0, -1.2)·(4, -3.2))
+%   실효 규약 scale=1.0 유지 (§37)
+\dmsoltitle{2}{내심의 좌표 공식과 원점까지의 거리}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{OP}}=\sqrt{34}$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 여백 ≥25% GREEN 확보)
+  \draw[-stealth, black, line width=0.7pt] (-1, 0) -- (5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -4) -- (0, 1) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {$\mathrm{O}$};
+  % ── 삼각형 ABC (압축 0.4) · A(2.4, 0), B(0, -1.2), C(4, -3.2)
+  \draw[black, line width=0.5pt] (2.4, 0) -- (0, -1.2) -- (4, -3.2) -- cycle;
+  % ── 내접원 · 중심 P(2, -1.2) · 반지름 √5 × 0.4 ≈ 0.894
+  \draw[dm-accent, line width=0.5pt] (2, -1.2) circle (0.894);
+  % ── 정점 (주요 정점 실효 0.8pt)
+  \filldraw[black] (2.4, 0) circle (0.8pt) node[above, font=\scriptsize] {$\mathrm{A}$};
+  \filldraw[black] (0, -1.2) circle (0.8pt) node[left, font=\scriptsize] {$\mathrm{B}$};
+  \filldraw[black] (4, -3.2) circle (0.8pt) node[below right, font=\scriptsize] {$\mathrm{C}$};
+  % ── 내심 (파생점 실효 0.7pt)
+  \filldraw[dm-accent] (2, -1.2) circle (0.7pt) node[above right, font=\scriptsize] {$\mathrm{P}$};
+\end{tikzpicture}
+\end{center}
+
+세 변의 길이를 구하면
+\begin{align*}
+  \overline{\mathrm{BC}} &= \sqrt{10^2 + (-5)^2} = 5\sqrt{5},\\
+  \overline{\mathrm{CA}} &= \sqrt{(-4)^2 + 8^2} = 4\sqrt{5},\\
+  \overline{\mathrm{AB}} &= \sqrt{6^2 + 3^2} = 3\sqrt{5}.
+\end{align*}
+세 변의 길이비는 $\overline{\mathrm{BC}} : \overline{\mathrm{CA}} : \overline{\mathrm{AB}} = 5 : 4 : 3$\ 이므로 삼각형 $\mathrm{ABC}$\ 는 $\overline{\mathrm{CA}}^{\,2} + \overline{\mathrm{AB}}^{\,2} = 80 + 45 = 125 = \overline{\mathrm{BC}}^{\,2}$\ 에서 $\angle \mathrm{A} = 90^{\circ}$\ 인 직각삼각형이다.
+
+내심 $\mathrm{P}$\ 의 좌표는 각 꼭짓점의 좌표에 대변의 길이를 곱해 합하고 세 변의 길이의 합으로 나눈 값과 같다. 세 변의 길이의 합은 $12\sqrt{5}$\ 이므로
+\begin{align*}
+  \mathrm{P}_x &= \dfrac{5\sqrt{5} \cdot 6 + 3\sqrt{5} \cdot 10}{12\sqrt{5}} = \dfrac{60}{12} = 5,\\
+  \mathrm{P}_y &= \dfrac{4\sqrt{5} \cdot (-3) + 3\sqrt{5} \cdot (-8)}{12\sqrt{5}} = \dfrac{-36}{12} = -3
+\end{align*}
+이므로 $\mathrm{P}(5,\, -3)$\ 이다. 따라서
+\[ \overline{\mathrm{OP}} = \sqrt{25 + 9} = \sqrt{34}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{세 변의 길이비 $3:4:5$\ 에서 직각삼각형이 곧바로 드러난다}: 가장 긴 변이 빗변이고 반대쪽 꼭짓점이 직각이다.
+\end{dmcriticalpoint}
+
+% ─────────────── R-3 (세션 70 강등 · 원 R-1 · 2021.9월 고1 28번) ───────────────
+\dmsoltitle{3}{원 · 직선 조건과 두 축 절편의 결합}
+\begin{dmanswerbox}
+정답: $a+b+r^2=14$
+\end{dmanswerbox}
+
+원의 중심 $\mathrm{C}(a,\, b)$\ 가 원점을 지나므로 $a^2 + b^2 = r^2$\ 이다. $x$\ 축과 만나는 점 중 원점이 아닌 점 $\mathrm{A}$\ 의 좌표는 원의 방정식 $(x-a)^2 + (y-b)^2 = a^2 + b^2$\ 에 $y = 0$\ 을 대입하여
+\[ (x-a)^2 = a^2,\quad x = 0\ \text{또는}\ 2a \]
+이므로 $\mathrm{A}(2a,\, 0)$\ 이고 $\overline{\mathrm{OA}} = 2a$\ 이다. 마찬가지로 $\mathrm{B}(0,\, 2b)$\ 이고 $\overline{\mathrm{OB}} = 2b$\ 이다.
+
+조건 (가) $\overline{\mathrm{OB}} - \overline{\mathrm{OA}} = 4$\ 에서 $2b - 2a = 4$\ 이므로 $b - a = 2$\ 이고, 조건 (나) 두 점 $\mathrm{O}$,\ $\mathrm{C}$\ 를 지나는 직선이 $y = 3x$\ 이므로 $b = 3a$\ 이다. 두 식을 연립하면 $a = 1$,\ $b = 3$\ 에서 $r^2 = a^2 + b^2 = 10$\ 이므로
+\[ a + b + r^2 = 1 + 3 + 10 = 14. \]
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 74 : scale=1.0 통일 · 좌표 압축 0.7 (원본 C(1,3)·A(2,0)·B(0,6))
+  % 실효 : 축 0.7pt · 원·선분 0.5pt · 점선 0.4pt · 정점 0.8pt · 여백 ≥25%
+  \draw[-stealth, black, line width=0.7pt] (-0.85, 0) -- (3.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.85) -- (0, 4.9) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {$\mathrm{O}$};
+  % 원 · 중심 C(0.7, 2.1), 반지름 √10 × 0.7 ≈ 2.214
+  \draw[black, line width=0.5pt] (0.7, 2.1) circle (2.214);
+  % 직선 y = 3x · sloped 라벨
+  \begin{scope}
+    \clip (-0.85, -0.85) rectangle (3.5, 4.9);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-0.85, -2.55) --
+      node[pos=0.8, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=3x$}
+      (3.5, 10.5);
+  \end{scope}
+  % 정점
+  \filldraw[black] (0.7, 2.1) circle (0.8pt) node[right, font=\scriptsize] {$\mathrm{C}$};
+  \filldraw[black] (1.4, 0) circle (0.8pt) node[below right, font=\scriptsize] {$\mathrm{A}$};
+  \filldraw[black] (0, 4.2) circle (0.8pt) node[above left, font=\scriptsize] {$\mathrm{B}$};
+\end{tikzpicture}
+\end{center}
+
+\begin{dmcriticalpoint}
+\dmcplabel{원점을 지나는 원과 축의 다른 교점은 중심 좌표의 두 배이다}: $y = 0$ 대입에서 $(x-a)^2 = a^2$\ 이 되어 $x = 2a$\ 가 곧바로 나온다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

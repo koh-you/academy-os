@@ -1,3 +1,4 @@
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { getCanceledLessonRemainingDays } from "./recentCanceledLessons.js";
 
@@ -16,8 +17,13 @@ export function CanceledLessonRestoreModal({
       closeDisabled={isBusy}
       onClose={onClose}
       scrollable
-      subtitle="취소 처리된 수업은 7일 안에 Supabase 원천에서 복구할 수 있습니다."
       title="삭제한 수업 복구"
+      titleAdornment={(
+        <HelpTip
+          label="삭제한 수업 복구"
+          text="취소 처리된 수업은 7일 안에 Supabase 원천에서 복구할 수 있습니다."
+        />
+      )}
     >
       {isLoading ? <p role="status">삭제한 수업을 확인하는 중입니다.</p> : null}
       {error ? <p className="saveStatus failed" role="alert">{error}</p> : null}

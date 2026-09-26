@@ -21,6 +21,8 @@ const initialState = createLessonJournalReservationInitialState();
 
 assert.deepEqual(initialState, {
   cancelingReservationJobId: "",
+  // 2026-09-19 · U11: 예약 1건 취소 ConfirmDialog 가 기다리는 job(닫힘 = null).
+  pendingCancelReservationJob: null,
   reservationApplyState: "idle",
   reservationAudit: {
     message: "",
@@ -48,7 +50,7 @@ const localStateBoundaryEnd = detailSource.indexOf("const [editingMemoKey");
 const localStateBoundary = detailSource.slice(0, localStateBoundaryEnd);
 
 for (const binding of [
-  'import { useLessonJournalReservationState } from "../domains/lessons/useLessonJournalReservationState.js"',
+  'import { useLessonJournalReservationState } from "./useLessonJournalReservationState.js"',
   "} = useLessonJournalReservationState({",
   "lessonId: lesson.lessonId,",
   "notificationPlanMode: lessonNotificationPlan?.mode,",

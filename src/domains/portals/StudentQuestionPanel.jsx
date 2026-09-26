@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
@@ -57,8 +59,8 @@ export function StudentQuestionPanel({
     <section className="studentQuestionPanel">
       <SectionHeader
         density="compact"
-        description="막힌 문제나 헷갈린 개념을 짧게 적어두면 수업 시작이 훨씬 빨라집니다."
         title="수업 전에 정리할 질문"
+        titleAdornment={<HelpTip label="수업 전에 정리할 질문" text="막힌 문제나 헷갈린 개념을 짧게 적어두면 수업 시작이 훨씬 빨라집니다." />}
       />
       <form className="studentQuestionForm" onSubmit={submitQuestion}>
         <input
@@ -78,7 +80,7 @@ export function StudentQuestionPanel({
       ) : null}
       <QuestionSaveFeedback saveState={createFeedbackState} targetId="create" />
       <div className="studentQuestionList">
-        {questions.length === 0 ? <div className="emptyHomeworkBox compact">아직 정리한 질문이 없습니다.</div> : null}
+        {questions.length === 0 ? <EmptyState density="compact" title="아직 정리한 질문이 없습니다." /> : null}
         {questions.slice(0, 6).map((question) => (
           <ListCard className={`studentQuestionItem ${question.status === "resolved" ? "resolved" : ""}`} density="compact" key={question.questionId}>
             <ListCardBody>

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isNpmScriptCoveredByProductionTests } from "./productionTestMembership.mjs";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { academyReminderRouteSignatures } from "../src/shared/server/academyReminderRouteRegistry.js";
@@ -547,22 +548,22 @@ for (const providerOwner of [
 }
 
 assert.equal(packageJson.scripts["test:fourth-pass-server-route-baseline"], "node scripts/test-fourth-pass-server-route-baseline.mjs");
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:fourth-pass-server-route-baseline"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:session-route-guard"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:system-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:auth-login-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:teacher-account-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-read-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-write-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-post-confirm-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:app-core-read-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:app-state-write-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:report-snapshot-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:test-session-read-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:test-session-write-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-read-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-run-write-route-registry"));
-assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-question-count-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:fourth-pass-server-route-baseline"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:session-route-guard"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:system-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:auth-login-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:teacher-account-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:portal-read-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:portal-write-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:exam-post-confirm-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:app-core-read-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:app-state-write-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:report-snapshot-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:test-session-read-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:test-session-write-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:exam-analysis-read-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:exam-analysis-run-write-route-registry"));
+assert.ok(isNpmScriptCoveredByProductionTests("test:exam-analysis-question-count-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 124 routes · GET 31/POST 80/DELETE 13 · session/credential 16 + dispatch 2"

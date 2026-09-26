@@ -423,14 +423,6 @@
   flex: 0 0 auto;
 }
 
-.monthlySettlementEmpty {
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  color: var(--academy-muted, #64748b);
-  padding: 28px;
-  text-align: center;
-}
-
 .monthlySettlementSaveBar {
   margin-top: 0;
 }

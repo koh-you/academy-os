@@ -1,6 +1,7 @@
 import { createStudentExamPrepRow } from "./studentExamPrepRow.js";
 import { normalizeExamPrepRowReviewDraft } from "./examReviewDraft.js";
 import { safeIdPart } from "../../shared/utils/id.js";
+import { scopeDeterministicId } from "../../shared/utils/tenantIdScope.js";
 import {
   compactCalendarLabel,
   formatCalendarSummaryLabel,
@@ -260,9 +261,15 @@ export function createExamPrepCalendarCluster(today) {
     return [examCycleTermKey(row.examCycle), getSchoolGradeKey(row.schoolName, row.grade) || "학교미입력_학년미입력"].join("_");
   }
 
-  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = []) {
-    const classStudents = classTemplateId
-      ? students.filter((student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === classTemplateId)
+  // classTemplateIds: 대상 반 id (문자열 하나, 쉼표로 이은 여러 개, 또는 배열). 비면 전체.
+  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateIds = "", existingRows = []) {
+    const targetClassIds = new Set(
+      (Array.isArray(classTemplateIds) ? classTemplateIds : String(classTemplateIds ?? "").split(","))
+        .map((id) => String(id ?? "").trim())
+        .filter(Boolean)
+    );
+    const classStudents = targetClassIds.size > 0
+      ? students.filter((student) => (student.status ?? "active") === "active" && targetClassIds.has(student.defaultClassTemplateId))
       : students.filter((student) => (student.status ?? "active") === "active");
     const seen = new Set(
       existingRows
@@ -295,7 +302,7 @@ export function createExamPrepCalendarCluster(today) {
   function createSchoolEventFromExamPrepRow(row, index = 0) {
     const schoolName = row.schoolName || "학교 미입력";
     return {
-      eventId: `event_exam_${row.examPrepId ?? index}`,
+      eventId: scopeDeterministicId(`event_exam_${row.examPrepId ?? index}`),
       date: getDefaultMathExamDate(row, index),
       schoolName,
       title: `${examCycleLabel(row.examCycle ?? currentExamCycle)} 수학시험`,
@@ -375,7 +382,7 @@ export function createExamPrepCalendarCluster(today) {
       ].join("|");
       const existing = grouped.get(key) ?? {
         ...event,
-        eventId: `month_period_${safeIdPart(key)}`,
+        eventId: scopeDeterministicId(`month_period_${safeIdPart(key)}`),
         title: "",
         color: getSchoolCalendarEventColor(event),
         schoolNames: new Set(),
@@ -453,7 +460,7 @@ export function createExamPrepCalendarCluster(today) {
           periodKeys.add(periodKey);
           events.push({
             ...base,
-            eventId: `derived_period_${safeIdPart(periodKey)}`,
+            eventId: scopeDeterministicId(`derived_period_${safeIdPart(periodKey)}`),
             examPeriodGroupKey: periodKey,
             date: period.date,
             endDate: period.endDate,
@@ -474,7 +481,7 @@ export function createExamPrepCalendarCluster(today) {
           ...base,
           grade: entry.grade || row.grade || "",
           examSubject: entry.label || entry.subject || row.subject || "수학",
-          eventId: `derived_math_${row.examPrepId}_${entry.id || index}`,
+          eventId: scopeDeterministicId(`derived_math_${row.examPrepId}_${entry.id || index}`),
           date: entry.date,
           endDate: "",
           title: formatMathExamEntryLabel(row, entry),

@@ -12,7 +12,7 @@ export function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, o
         actions={(
           <>
             <button className="softButton" onClick={() => onEditLesson?.(lesson)} type="button">수업 수정</button>
-            <button className="dangerButton" onClick={() => onDeleteLesson?.(lesson.lessonId)} type="button">수업 취소 처리</button>
+            <button className="dangerSoftButton" onClick={() => onDeleteLesson?.(lesson.lessonId)} type="button">수업 취소 처리</button>
           </>
         )}
         className="lessonJournalHeader"

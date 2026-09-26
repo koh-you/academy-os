@@ -467,7 +467,19 @@ function createInitialState() {
   return snapshot;
 }
 
+// 빈 tenant: 목록은 전부 비우고 app_state 도 없다. 문제은행 fixture 는 협력 교사 메뉴에 없어 그대로.
+function createEmptyTenantState() {
+  const snapshot = createInitialState();
+  for (const [key, value] of Object.entries(snapshot)) {
+    if (Array.isArray(value)) snapshot[key] = [];
+  }
+  snapshot.appStates = {};
+  snapshot.appStateUpdatedAt = {};
+  return snapshot;
+}
+
 let state = createInitialState();
+let resetGeneration = 0;
 let resourceMaterialFiles = new Map();
 let testPaperFiles = new Map();
 
@@ -575,6 +587,84 @@ function hasSafeAttendanceArrival(record = {}) {
 
 function hasSafeAttendanceCheckout(record = {}) {
   return Boolean(record?.checkOutAt || record?.checkOutTime);
+}
+
+function normalizeSafeAttendanceTime(value = "") {
+  const match = String(value ?? "").match(/(\d{1,2}):(\d{2})/);
+  if (!match) return "";
+  return `${String(Math.min(23, Number(match[1]))).padStart(2, "0")}:${String(Math.min(59, Number(match[2]))).padStart(2, "0")}`;
+}
+
+function getSafeNextHourlyReservationAt(now = new Date()) {
+  const next = new Date(now.getTime());
+  next.setUTCMinutes(0, 0, 0);
+  next.setUTCHours(next.getUTCHours() + 1);
+  return next.toISOString();
+}
+
+// 2026-09-25 · 수업일지 출결 체크 모달은 source "manual" 로 저장한다. 키오스크 경로와 달리 "오늘 수업"
+// 이 아니라 payload.lessonId 를 그대로 쓰므로 별도 분기가 필요하다. api/server.js manual 분기의
+// 결과 계약만 재현한다: status 저장(absent/excused/pending)은 등·하원 시각을 비우고, 결석 +
+// sendAlimtalk 은 학부모 결석 알림톡을 다음 정각 예약(scheduled) 으로 남긴다.
+function handleSafeManualAttendance(pathname, payload = {}) {
+  const student = state.students.find((item) => item.studentId === payload.studentId);
+  if (!student) return { error: "가상 출결 학생을 찾지 못했습니다.", ok: false, statusCode: 404 };
+  const lesson = state.lessons.find((item) => item.lessonId === payload.lessonId);
+  if (!lesson) return { error: "가상 출결 수업을 찾지 못했습니다.", ok: false, statusCode: 404 };
+  const existingRecord = state.records.find(
+    (record) => record.lessonId === lesson.lessonId && record.studentId === student.studentId
+  ) ?? null;
+  const action = String(payload.action || "checkin");
+  const attendanceStatus = String(payload.attendanceStatus || existingRecord?.attendanceStatus || "present");
+  const clearsAttendanceTimes = ["absent", "excused", "pending"].includes(attendanceStatus);
+  const checkInTime = clearsAttendanceTimes
+    ? ""
+    : normalizeSafeAttendanceTime(payload.checkInTime) || existingRecord?.checkInTime || "15:55";
+  const checkOutTime = clearsAttendanceTimes || action !== "checkout"
+    ? ""
+    : normalizeSafeAttendanceTime(payload.checkOutTime) || existingRecord?.checkOutTime || "19:05";
+  const record = {
+    ...(existingRecord ?? {}),
+    lessonStudentRecordId: existingRecord?.lessonStudentRecordId || `safe_record_${lesson.lessonId}_${student.studentId}`,
+    lessonId: lesson.lessonId,
+    studentId: student.studentId,
+    attendanceStatus,
+    attendanceReason: payload.attendanceReason ?? "",
+    lateMinutes: attendanceStatus === "late" ? payload.lateMinutes ?? "" : "",
+    checkInAt: checkInTime ? `${lesson.date}T${checkInTime}:00+09:00` : "",
+    checkInTime,
+    checkOutAt: checkOutTime ? `${lesson.date}T${checkOutTime}:00+09:00` : "",
+    checkOutTime,
+    updatedBy: "manual_attendance"
+  };
+  if (pathname === "/api/attendance/preview") {
+    return { action, alimtalk: { status: "preview" }, lesson, mode: "manual", record, student };
+  }
+  state.records = upsertById(state.records, record, ["lessonStudentRecordId"]);
+  let alimtalk = { status: "skipped" };
+  if (payload.sendAlimtalk === true && attendanceStatus === "absent") {
+    const scheduledAt = getSafeNextHourlyReservationAt();
+    const notificationJob = {
+      createdAt: new Date().toISOString(),
+      error: "",
+      lessonId: lesson.lessonId,
+      lessonStudentRecordId: record.lessonStudentRecordId,
+      notificationJobId: `attendance_absence_${record.lessonStudentRecordId}_${scheduledAt.replaceAll(/\D/g, "").slice(0, 10)}`,
+      notificationType: "attendance",
+      payload: { lessonDate: lesson.date, notificationType: "attendance", scheduledDate: scheduledAt, sendMode: "scheduled", studentName: student.name, target: "parent" },
+      previewBody: `${student.name} 결석 안내(가상)`,
+      provider: "academy-os-reserving",
+      recipient: student.parentPhone ?? "",
+      result: { attendanceSource: "manual_journal", reservationPending: true },
+      scheduledAt,
+      status: "scheduled",
+      studentId: student.studentId,
+      target: "parent"
+    };
+    state.notificationJobs = upsertById(state.notificationJobs, notificationJob, ["notificationJobId"]);
+    alimtalk = { reserved: true, result: { notificationJob }, status: "scheduled" };
+  }
+  return { action, alimtalk, lesson, mode: "manual", record, student };
 }
 
 function handleSafeConsecutiveAttendance(pathname, payload = {}) {
@@ -1066,6 +1156,10 @@ function handleMutation(pathname, payload) {
     };
   }
   if (["/api/attendance/check", "/api/attendance/preview"].includes(pathname)) {
+    // 2026-09-25 · 수업일지 수동 저장(source "manual")과 태블릿 키오스크는 수업을 고르는 방식이 달라 분기한다.
+    if (String(payload.source || "kiosk") === "manual") {
+      return { ok: true, ...handleSafeManualAttendance(pathname, payload) };
+    }
     return { ok: true, ...handleSafeConsecutiveAttendance(pathname, payload) };
   }
   if (pathname === "/api/app-state") {
@@ -1997,6 +2091,27 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/auth/login") {
     const payload = await readJson(request);
     if (!payload.loginId || !payload.password) return sendJson(response, 400, { ok: false, error: "미리보기 아이디와 비밀번호를 입력하세요." });
+    // "fresh" 로 로그인하면 빈 tenant 의 협력 교사가 된다 — 반·학생·수업·시험정보·app_state 전부 0.
+    // 새 선생님의 첫날을 재현하는 브라우저 시나리오(fresh-tenant.spec.js)가 쓴다(2026-09-19).
+    if (String(payload.loginId) === "fresh") {
+      state = createEmptyTenantState();
+      resetGeneration += 1;
+      return sendJson(response, 200, {
+        account: {
+          actorId: "safe-fresh-teacher",
+          loginId: "fresh",
+          name: "새 선생님",
+          role: "teacher",
+          sessionToken: "safe-fixture-session-fresh",
+          teacherId: "safe-fresh-teacher",
+          teacherRole: "assistant",
+          tenantId: "tenant_safe_fresh"
+        },
+        authenticated: true,
+        ok: true,
+        safeFixture: true
+      });
+    }
     return sendJson(response, 200, {
       account: {
         actorId: "safe-preview-teacher",
@@ -2012,12 +2127,16 @@ const server = http.createServer(async (request, response) => {
     });
   }
   if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {
+    // 운영과 같이 ?keys=a,b 면 그 키만 돌려준다(저장 뒤 재조회가 좁혀서 읽는 경로).
+    const keysParam = requestUrl.searchParams.get("keys");
+    const requestedKeys = keysParam === null ? null : new Set(keysParam.split(",").map((key) => key.trim()).filter(Boolean));
+    const includesKey = (key) => !requestedKeys || requestedKeys.has(key);
     return sendJson(response, 200, {
       ok: true,
       safeFixture: true,
       source: "supabase",
-      stateRows: Object.entries(state.appStateUpdatedAt).map(([key, updatedAt]) => ({ key, updatedAt })),
-      states: state.appStates
+      stateRows: Object.entries(state.appStateUpdatedAt).filter(([key]) => includesKey(key)).map(([key, updatedAt]) => ({ key, updatedAt })),
+      states: Object.fromEntries(Object.entries(state.appStates).filter(([key]) => includesKey(key)))
     });
   }
   if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {
@@ -2292,12 +2411,20 @@ const server = http.createServer(async (request, response) => {
     const payload = await readJson(request);
     if (requestUrl.pathname === "/api/safe-fixture/reset") {
       state = createInitialState();
+      resetGeneration += 1;
       resourceMaterialFiles = new Map();
       testPaperFiles = new Map();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
     if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/resource-materials", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
+      // 800ms 지연 뒤 fixture 가 초기화됐으면(다음 테스트가 시작됨) 이 저장은 이전 테스트의
+      // 잔여 요청이다. 적용하면 다음 테스트가 "빈 app_state 에서 시작" 하지 못한다(2026-09-19:
+      // session-identity 스펙이 앞 테스트의 첫 부트스트랩 저장에 밀려 간헐적으로 실패했다).
+      const generationBeforeDelay = resetGeneration;
       await new Promise((resolve) => setTimeout(resolve, 800));
+      if (generationBeforeDelay !== resetGeneration) {
+        return sendJson(response, 200, { ok: true, safeFixture: true, source: "supabase", stale: true, verified: true });
+      }
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);
     return sendJson(response, statusCode, {

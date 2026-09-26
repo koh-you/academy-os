@@ -1,0 +1,43 @@
+pair_id: BT-004
+p_file: creation-04.tex
+q_file: anchor-04.tex
+p_grade: B
+q_grade: B
+p_answer: 36
+q_answer: 13
+p_coefficient_naturalness: pythagorean
+q_coefficient_naturalness: irrational_alignment
+winner: Q
+confidence: 0.62
+reasoning: |
+  두 문항 모두 CM2-GM 원 mechanism (평행 두 직선 사이 접원)의 표준 골격을 공유하며
+  풀이 절차 (평행 판정 → 반지름 → 거리 공식 → 양수 선택)와 M 축 프로파일이 거의 동일.
+  ★ 3 수준으로 근접한 품질.
+
+  P (creation-04):
+  - 3-4-5 Pythagorean triple 활용. 넓이 π → 반지름 1 → 지름 2 → |b-2|/5 = 2 → b=12.
+  - 답 a×b = 3×12 = 36 (정수·자연).
+  - 계수 설계 관용적·명료 (CM2-GM 표준 pythagorean 활용).
+  - 통찰 밀도: I-EQV (평행 → 계수비 동치) + I-MI (양수 조건 분기) 얕은~중간 깊이.
+  - 학습 초기·연습 목적에 최적. 무리수 없이 계산 부담 최소.
+
+  Q (anchor-04):
+  - 방향 벡터 노름 √(2²+1²) = √5. 넓이 5π → r² = 5 → r = √5 → 지름 2√5.
+  - 거리 공식 |q-1|/√5 = 2√5 → |q-1| = 10 → q=11.
+  - 답 p+q = 2+11 = 13 (정수).
+  - 핵심 통찰: 넓이 5π 자체가 방향 벡터 노름 √5와 4중 정합
+    (넓이 5π ↔ r² = 5 ↔ 노름 √5 ↔ 지름 2√5). 무리수 소거로 |q-1| = 10 정수 도착.
+  - I-RT (표현 전환 · 넓이↔반지름↔노름 대응) 깊이 2 추가.
+
+  판정: Q 약간 우위 (winner: Q, confidence 0.62).
+  이유:
+  1. Q는 계수 설계에 무리수 정합 통찰이 내재 (irrational_alignment) → 학생이 "왜 5π인가"
+     를 인지하면 원 단원 특유의 미학을 경험. P의 pythagorean은 표준 관용에 머묾.
+  2. Q의 무리수 처리·소거 경험이 CM2-GM 원 문항의 정점 스킬 (√5·√10 노름 정합)로
+     연결. P는 정수 계산에 국한.
+  3. 단, P는 명료성·학습 초기 적합성에서 우위. confidence 0.62로 낮은 마진 반영.
+  4. 답의 자연스러움은 P(36)·Q(13) 모두 양호. Q의 13이 다소 인위적 (11이 큰 값이라
+     선호도 낮을 수 있음)이나 무리수 정합 통찰이 이를 상쇄.
+
+  두 문항 모두 grade B (구조 견고·계수 자연·답 정수). ★ 3 표준 원 mechanism 안에서
+  Q가 통찰 깊이 +1 우위.

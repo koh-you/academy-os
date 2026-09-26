@@ -175,7 +175,7 @@ for (const sourceRule of [
   "studentId: student.studentId,",
   'teacherCommentSendStatus: record.notificationMutedParent ? "알림 제외" : statusText',
   'studentCommentSendStatus: record.notificationMutedStudent ? "알림 제외" : statusText',
-  'updatedBy: "instructor_owner_001"',
+  "updatedBy: getSessionTeacherId()",
   "updatedAt"
 ]) {
   assert.ok(builderSource.includes(sourceRule), `missing record status row rule: ${sourceRule}`);

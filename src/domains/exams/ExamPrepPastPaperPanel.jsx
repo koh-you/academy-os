@@ -1,4 +1,5 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import "./examPrepPastPaperPanel.css";
 
 export function ExamPrepPastPaperPanel({
@@ -11,9 +12,12 @@ export function ExamPrepPastPaperPanel({
   return (
     <section className="pastPaperFramePanel">
       <div className="pastPaperToolbar">
-        <div>
+        <div className="helpTipTitleRow">
           <h2>기출문제 아카이브</h2>
-          <p className="muted">외부 Google Apps Script 웹앱을 academy-os 안에서 엽니다.</p>
+          <HelpTip
+            label="기출문제 아카이브"
+            text="외부 Google Apps Script 웹앱을 academy-os 안에서 엽니다."
+          />
         </div>
         <div className="pastPaperActions">
           <button className="softButton" onClick={onReload} type="button">

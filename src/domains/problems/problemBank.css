@@ -19,7 +19,6 @@
 }
 
 .problemBankSidebarHead strong { display: block; font-size: 15px; }
-.problemBankSidebarHead small { color: var(--academy-text-muted, #6b7280); }
 
 .problemBankBreadcrumb { display: flex; flex-wrap: wrap; gap: 4px; }
 .problemBankBreadcrumb button {
@@ -88,16 +87,6 @@
 .problemBankStudentPick select,
 .problemBankRoundPick select { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; padding: 6px 8px; }
 .problemBankSelectionActions { align-items: center; display: inline-flex; gap: 6px; margin-left: auto; }
-.problemBankSelectionActions button {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--academy-border, #e2e6ec);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  padding: 6px 12px;
-}
-.problemBankSelectionActions button.primaryButton { background: var(--academy-text-strong, #111827); border-color: var(--academy-text-strong, #111827); color: #fff; }
-.problemBankSelectionActions button:disabled { cursor: not-allowed; opacity: 0.5; }
 .problemBankSelectionCount { color: var(--academy-primary, #1e4a8f); font-weight: 600; font-size: 13px; }
 
 .problemBankLegend { align-items: center; display: flex; flex-wrap: wrap; font-size: 12px; gap: 6px 14px; }
@@ -134,7 +123,6 @@
 .problemBankUnitSelect { background: transparent; border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 11.5px; padding: 2px 9px; }
 
 .problemBankNumberGrid { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); }
-.problemBankModeHint { color: var(--academy-text-muted, #6b7280); font-size: 12px; max-width: 360px; }
 .problemBankNumber {
   background: var(--academy-surface-muted, #f3f4f6);
   border: 2px solid transparent;
@@ -192,7 +180,6 @@
 .problemBankPreviewBody img { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 6px; max-width: 100%; }
 .problemBankPreviewBody .problemBankZoomButton { background: none; border: 0; cursor: zoom-in; display: block; padding: 0; text-align: left; width: 100%; }
 .problemBankPreviewBody .problemBankZoomButton img { width: 100%; }
-.problemBankZoomHint { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; margin: 4px 0 0; }
 .problemBankZoomLayer { align-items: center; background: rgba(17, 24, 39, 0.72); display: flex; inset: 0; justify-content: center; padding: 24px; position: fixed; z-index: 1300; }
 .problemBankZoomLayer .problemBankZoomCard { background: #fff; border-radius: 12px; max-height: calc(100vh - 48px); max-width: min(1100px, calc(100vw - 48px)); overflow: auto; padding: 14px; }
 .problemBankZoomLayer .problemBankZoomCard img { display: block; max-width: 100%; }
@@ -209,6 +196,8 @@
 .problemBankImportPanel h2,
 .problemBankListPanel h2,
 .problemBankDetailPanel h2 { font-size: 15px; margin: 0 0 6px; }
+/* 2026-09-26 · 제목 옆 물음표와 같은 줄에 맞춘다. 아래 여백은 패널 그리드 gap 이 이미 만든다. */
+.problemBankImportPanel .helpTipTitleRow h2 { margin: 0; }
 .problemBankStatus { align-items: center; display: flex; flex-wrap: wrap; font-size: 12.5px; gap: 8px; margin: 0; }
 .problemBankStatusBadge { border-radius: 999px; font-size: 11.5px; font-weight: 600; padding: 2px 9px; white-space: nowrap; }
 .problemBankStatus.stage-done .problemBankStatusBadge { background: #dcfce7; color: #166534; }
@@ -221,10 +210,6 @@
 .problemBankUploadMessage.stage-done { color: #15803d; }
 .problemBankListPanel { grid-column: 1; }
 .problemBankDetailPanel { grid-column: 2; grid-row: 1 / span 2; }
-.problemBankBookList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
-.problemBankTools .problemBankDangerButton { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
-.problemBankDangerButton { background: #b91c1c; border: 1px solid #b91c1c; color: #fff; }
-.problemBankDeleteWarn { color: #b91c1c; font-size: 12px; }
 .problemBankAnswerImport { border: 1px dashed var(--academy-border, #e2e6ec); border-radius: 10px; display: grid; gap: 8px; margin-bottom: 12px; padding: 10px 12px; }
 .problemBankAnswerImport h3 { font-size: 14px; margin: 0; }
 .problemBankAnswerImport .softButton, .problemBankAnswerImport .primaryButton { border-radius: 8px; cursor: pointer; font-size: 13px; justify-self: start; padding: 6px 12px; }
@@ -240,8 +225,13 @@
 .problemBankInfo div { display: grid; gap: 2px; }
 .problemBankInfo dt { color: var(--academy-text-muted, #6b7280); font-size: 12px; }
 .problemBankInfo dd { margin: 0; }
+.problemBankFolderEdit { align-items: center; display: flex; flex-wrap: wrap; gap: 6px; }
+.problemBankFolderEdit input { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 6px; flex: 1 1 150px; font: inherit; font-size: 13px; min-width: 0; padding: 4px 8px; }
+.problemBankFolderEdit .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; cursor: pointer; flex: 0 0 auto; font-size: 12px; padding: 4px 10px; }
 .problemBankTools { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .problemBankTools .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
+/* 2026-09-19 · U11: 교재 삭제 진입은 도구 줄 끝 ⋯ 메뉴(OverflowMenu tone danger), 확정은 ConfirmDialog 다. 무장 줄 전용 규칙은 뺐다. */
+.problemBankTools .problemBankToolsMenu { margin-left: auto; }
 .problemBankAnswerImport:empty { display: none; }
 .problemBankReviewFilters { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
 .problemBankReviewFilters .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 12.5px; padding: 3px 10px; }
@@ -276,7 +266,8 @@
 .problemBankPrintToolbar small { color: var(--academy-text-muted, #6b7280); }
 .problemBankPrintToolbar label { align-items: center; display: inline-flex; font-size: 13px; gap: 6px; }
 .problemBankPrintToolbar button { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 14px; }
-.problemBankPrintToolbar .primaryButton { background: #111; border: 1px solid #111; color: #fff; margin-left: auto; }
+/* 툴바 오른쪽 끝 액션 묶음: [닫기][PPT 저장][🖨 인쇄] — 취소 왼쪽·확정 오른쪽(2026-09-19). primary 색은 표준 토큰을 그대로 쓴다. */
+.problemBankPrintToolbarActions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .problemBankPrintToolbar .softButton { background: #fff; border: 1px solid var(--academy-border, #e2e6ec); }
 
 /* 종이: A4 세로. 화면에서도 종이 크기로 보여 인쇄와 같게 한다. */
@@ -364,7 +355,6 @@
 .problemBankPrintAnswerGrid small { color: #000; font-size: 7pt; }
 .problemBankPreviewAnswer { border-top: 1px dashed var(--academy-border, #e2e6ec); margin-top: 8px; padding-top: 6px; }
 .problemBankPreviewAnswer strong { font-size: 12.5px; }
-.problemBankPreviewAnswer .problemBankLinkButton { background: none; border: 0; color: var(--academy-accent, #176e59); cursor: pointer; font-size: 12.5px; font-weight: 600; padding: 0; }
 .problemBankPreviewAnswer img { display: block; margin-top: 6px; max-width: 100%; }
 
 @media print {

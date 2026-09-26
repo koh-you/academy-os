@@ -1,0 +1,8 @@
+{
+  "_comment": "원장 전용 상수 사용 개수(파일::패턴). 늘어나면 check:owner-constants 가 실패한다. 줄이면 --update 로 낮춘다.",
+  "counts": {
+    "src/app/appConfig.js :: template_mwf_7_10": 1,
+    "src/app/appConfig.js :: template_tt_sat": 2,
+    "src/shared/server/kioskDeviceRegistry.js :: tenant_default": 1
+  }
+}

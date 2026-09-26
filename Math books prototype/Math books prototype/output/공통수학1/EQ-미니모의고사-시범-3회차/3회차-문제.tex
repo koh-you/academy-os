@@ -1,0 +1,135 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-eq}
+\renewcommand{\examround}{미니모의고사}
+\renewcommand{\examvol}{vol.3}
+
+\begin{document}
+
+\examheader{}{공통수학1 — 고차방정식·연립방정식·부등식 — 8문 / 20분}
+
+% ─────────────── 객관식 ───────────────
+\examsection{객관식 (3·4점, 총 21점)}
+
+\begin{pagepair}
+
+\begin{problem}{1}{s}
+\pointbadge{3}\par\smallskip
+$x$에 대한 사차방정식 $x^4 - 3x^3 + x^2 + 3x - 2 = 0$의 \emph{모든 실근의 곱}은? (단, 중복된 근은 중복도만큼 센다.)
+\begin{choices}
+\choice{$-4$}
+\choice{$-3$}
+\choice{$-2$}
+\choice{$-1$}
+\choice{$1$}
+\end{choices}
+\end{problem}
+
+\begin{problem}{2}{s}
+\pointbadge{3}\par\smallskip
+$x$에 대한 사차방정식 $x^4 - 13x^2 + 36 = 0$의 \emph{모든 양의 실근의 합}은?
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+
+\end{pagepair}
+
+\begin{pagepair}
+
+\begin{problem}{3}{s}
+\pointbadge{3}\par\smallskip
+실수 $a$에 대하여 $x$에 대한 부등식 $ax > 1$의 해에 관한 \[보기\]에서 옳은 것만을 있는 대로 고른 것은?
+\begin{conditions}
+\setlength{\baselineskip}{1.4\baselineskip}
+ㄱ. $a > 0$이면 해는 $x > \dfrac{1}{a}$이다. \\[6pt]
+ㄴ. $a = 0$이면 해가 존재하지 않는다. \\[6pt]
+ㄷ. $a < 0$이면 해는 $x > \dfrac{1}{a}$이다.
+\end{conditions}
+\begin{choices}
+\choice{ㄱ}
+\choice{ㄷ}
+\choice{ㄱ, ㄴ}
+\choice{ㄴ, ㄷ}
+\choice{ㄱ, ㄴ, ㄷ}
+\end{choices}
+\end{problem}
+
+\begin{problem}{4}{s}
+\pointbadge{4}\par\smallskip
+실수 $a$에 대하여 $x$에 대한 이차부등식
+$$(a - 2)x^2 + 2(a - 2)x + 4 > 0$$
+이 모든 실수 $x$에서 성립하도록 하는 $a$의 값의 범위는?
+\begin{choices}
+\choice{$2 < a < 6$}
+\choice{$2 \le a < 6$}
+\choice{$a < 6$}
+\choice{$a > 2$}
+\choice{$2 < a \le 6$}
+\end{choices}
+\end{problem}
+
+\end{pagepair}
+
+\begin{pagepair}
+
+\begin{problem}{5}{s}
+\pointbadge{4}\par\smallskip
+한 변의 길이가 $a$인 정사각형 $\mathrm{ABCD}$와 한 변의 길이가 $b$인 정사각형 $\mathrm{EFGH}$가 다음 그림과 같이 위치한다. 두 정사각형의 \emph{겹치는 부분}인 사각형 $\mathrm{EBCI}$의 넓이가 정사각형 $\mathrm{EFGH}$의 넓이의 $\dfrac{1}{4}$이고, $\overline{\mathrm{EB}} = 1$, $\overline{\mathrm{AF}} = 5$일 때, $b$의 값은? (단, $1 < a < b < 5$)
+\begin{center}
+\twosquareoverlap{2.7}{3.3}{1}
+\end{center}
+\begin{choices}
+\choice{$-2 + \sqrt{26}$}
+\choice{$-2 + 3\sqrt{3}$}
+\choice{$-2 + 2\sqrt{7}$}
+\choice{$-2 + \sqrt{29}$}
+\choice{$-2 + \sqrt{30}$}
+\end{choices}
+\end{problem}
+
+\begin{problem}{6}{s}
+\pointbadge{4}\par\smallskip
+실수 $k$에 대한 $x$에 대한 사차방정식 $x^4 + kx^2 + 4 = 0$의 근에 관한 \[보기\]에서 옳은 것만을 있는 대로 고른 것은?
+\begin{conditions}
+ㄱ. $k = -5$이면 서로 다른 네 실근을 가진다. \\
+ㄴ. $k > 0$이면 실근을 가지지 않는다. \\
+ㄷ. 서로 다른 두 실근과 두 허근을 가지도록 하는 실수 $k$가 존재한다.
+\end{conditions}
+\begin{choices}
+\choice{ㄱ}
+\choice{ㄴ}
+\choice{ㄷ}
+\choice{ㄱ, ㄴ}
+\choice{ㄱ, ㄴ, ㄷ}
+\end{choices}
+\end{problem}
+
+\end{pagepair}
+
+% ─────────────── 서답 (단답·논술 통합, v0.2) ───────────────
+\examsection{서답 (4점, 총 8점) — 답만 적으시오.}
+
+\begin{pagepair}
+
+\begin{problem}{7}{s}
+\pointbadge{4}\par\smallskip
+자연수 $n$에 대하여 연립이차부등식
+$$\begin{cases} x^2 - 10x + 21 \le 0 \\ x^2 - 2(n - 1)x + n^2 - 2n \ge 0 \end{cases}$$
+의 정수해의 개수가 $4$가 되도록 하는 모든 $n$의 값들의 합을 구하시오.
+\end{problem}
+
+\begin{problem}{8}{s}
+\pointbadge{4}\par\smallskip
+자연수 $n$에 대하여 연립부등식
+$$|\,x - n\,| \le n - 1, \qquad x^2 \le 2n^2 + 2n$$
+의 공통 정수해의 합이 $n$의 배수가 되도록 하는 모든 $n$의 값들의 합을 구하시오. (단, $n \le 15$)
+\end{problem}
+
+\end{pagepair}
+
+\end{document}

@@ -1,3 +1,6 @@
+import { scopeDeterministicId } from "../../shared/utils/tenantIdScope.js";
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
+
 export function createExamPrepLessonCandidateBuilder({
   examCycleLabel,
   getExamPrepGeneratedKeyForDate,
@@ -83,7 +86,7 @@ export function createExamPrepLessonCandidateBuilder({
             `${schoolNames} 시험기간 전 시험대비`,
           lesson: {
             lessonId:
-              `lesson_exam_prep_${entry.date}`,
+              scopeDeterministicId(`lesson_exam_prep_${entry.date}`),
             classTemplateId: "",
             className: "시험대비",
             lessonType: "examPrep",
@@ -108,7 +111,7 @@ export function createExamPrepLessonCandidateBuilder({
                 lessonType: "examPrep"
               }),
             teacherId:
-              "instructor_owner_001",
+              getSessionTeacherId(),
             studentIds,
             status: "scheduled",
             generatedKey: entry.key

@@ -195,7 +195,7 @@ export function StudentMyPageTab({
       {myPageTab === "log" ? (
         <div className="taskStack">
           {studentLessonComments.length === 0 ? (
-            <EmptyState className="emptyPortalPanel" title="아직 선생님이 보낸 학생 코멘트가 없습니다." />
+            <EmptyState title="아직 선생님이 보낸 학생 코멘트가 없습니다." />
           ) : (
             studentLessonComments.map((record) => (
               <article className="studentHomeworkCard" key={record.lessonStudentRecordId}>

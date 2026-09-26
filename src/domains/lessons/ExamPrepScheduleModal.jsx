@@ -52,8 +52,10 @@ export function ExamPrepScheduleModal({ lessons, onClose, onSave, persistedLesso
     }
   }
 
+  // 2026-09-25 · 부제로 같은 시작 날짜 규칙을 한 번 더 적던 것을 지웠다. 아래 examPrepScheduleRule 이
+  // 같은 날짜로 적용 범위까지 더 자세히 알려주므로 부제는 정보를 보태지 않았다.
   return (
-    <Modal className="examPrepScheduleEditModal" title="시험대비 일정 수정" subtitle={`${sourceLesson.date}부터 이후 시험대비에 적용합니다.`} onClose={onClose}>
+    <Modal className="examPrepScheduleEditModal" closeDisabled={saveState.state === "saving"} title="시험대비 일정 수정" onClose={onClose}>
       <div className="examPrepScheduleEditor">
         <div className="examPrepScheduleMode" role="tablist" aria-label="일정 대상 선택 방식">
           {modes.map((item) => (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { getJsonWithTimeout, postJson } from "../../shared/utils/apiClient.js";
@@ -264,10 +265,14 @@ export function TestPaperLibraryPanel({
   return (
     <section className="panel materialPanel testPaperLibraryPanel">
       <SectionHeader
-        description="미리 만든 단원별 평가 시험지를 등록·관리합니다. 시험지는 한 번 만들면 여러 학생·시점에 재사용합니다."
         meta={<InlineSaveStatus label="시험지 목록" saveState={saveState} />}
         title="시험지 목록"
-        titleAs="h1"
+        titleAdornment={(
+          <HelpTip
+            label="시험지 목록"
+            text="미리 만든 단원별 평가 시험지를 등록·관리합니다. 시험지는 한 번 만들면 여러 학생·시점에 재사용합니다."
+          />
+        )}
       />
 
       <div className="testPaperCoverage">
@@ -353,7 +358,6 @@ export function TestPaperLibraryPanel({
         </div>
       ) : (
         <EmptyState
-          className="examPrepEmptyState"
           description="필터를 바꿔 다른 과목·종류·난이도를 확인해 주세요."
           title="표시할 시험지가 없습니다."
         />
@@ -459,7 +463,7 @@ export function TestPaperLibraryPanel({
             {copiedPath === selectedRow.folderPath ? <span className="testAttemptRetestHint">복사됨</span> : null}
           </div>
           <div className="testAttemptActions">
-            <button className="saveDraftButton" disabled={savingDisabled} onClick={handleSave} type="button">
+            <button className="primaryButton" disabled={savingDisabled} onClick={handleSave} type="button">
               {saveState === "saving" ? "저장 중" : "시험지 정보 저장"}
             </button>
           </div>

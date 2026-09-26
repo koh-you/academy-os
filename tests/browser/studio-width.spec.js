@@ -5,6 +5,10 @@ test("both studios use available width with paired editing and no mobile overflo
   test.setTimeout(90000);
   await resetSafeFixture(request);
   await loginAsTeacher(page);
+  // 2026-09-25 · .appFrame 은 grid-template-columns 에 180ms transition 이 걸려 있다(사이드바 ‹ 토글용).
+  // 뷰포트를 바꾼 뒤 재면 전환 시작 전(1024 에서 사이드바 294px 기준 690px)이나 중간값이 잡혀
+  // 두 스튜디오 수치가 달라진다. 폭을 재는 테스트에서는 전환을 꺼서 항상 최종 배치를 잰다.
+  await page.addStyleTag({ content: ".appFrame { transition: none !important; }" });
   const widths = {};
   for (const name of ["시험분석", "SNS 스튜디오"]) {
     await page.setViewportSize({ width: 2844, height: 1038 });
@@ -12,12 +16,22 @@ test("both studios use available width with paired editing and no mobile overflo
     await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
     for (const width of [2844, 1920, 1024, 390]) {
       await page.setViewportSize({ width, height: 1000 });
-      const dimensions = await page.locator(".studioPage").evaluate(element => {
+      // 2026-09-25 · .appFrame 은 grid-template-columns 에 180ms transition 이 걸려 있다(사이드바 ‹ 토글용).
+      // 폭을 바꾼 직후 재면 레일(86px)로 줄어드는 도중의 중간값이 잡혀 두 스튜디오 수치가 달라진다.
+      // 연속 두 번 같은 값이 나올 때까지 기다린 뒤 잰다.
+      const readDimensions = () => page.locator(".studioPage").evaluate(element => {
         const parent = element.parentElement;
         const style = getComputedStyle(parent);
         const available = parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
         return { available, actual: element.getBoundingClientRect().width, overflow: document.documentElement.scrollWidth > innerWidth };
       });
+      let dimensions = await readDimensions();
+      await expect.poll(async () => {
+        const next = await readDimensions();
+        const settled = Math.abs(next.actual - dimensions.actual) < 0.5;
+        dimensions = next;
+        return settled;
+      }, { timeout: 5000 }).toBe(true);
       expect(Math.abs(dimensions.available - dimensions.actual)).toBeLessThan(2);
       expect(dimensions.overflow).toBe(false);
       (widths[name] ||= []).push(dimensions.actual);

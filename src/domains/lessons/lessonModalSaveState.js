@@ -29,14 +29,14 @@ export function createLessonModalSavingSaveState({
     message:
       lessonType === "closure" && closureMakeupEnabled
         ? "휴강과 연결 보충 수업일지 저장 중"
-        : "수업일지 저장 중",
+        : "수업 일정 저장 중",
     state: "saving"
   };
 }
 
 export function createLessonModalSavedSaveState(result) {
   return {
-    message: result?.message || "수업일지 저장 완료",
+    message: result?.message || "수업 일정 저장 완료",
     state: "saved"
   };
 }

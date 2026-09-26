@@ -1,4 +1,5 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
@@ -10,7 +11,12 @@ export function SupplementHistoryModal({ getMethodLabel, getTypeLabel, onChangeQ
     <Modal
       className="supplementHistoryModal"
       title="최근 한 달 보충관리 내역"
-      subtitle="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+      titleAdornment={(
+        <HelpTip
+          label="최근 한 달 보충관리 내역"
+          text="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+        />
+      )}
       onClose={onClose}
       scrollable
     >
@@ -30,7 +36,6 @@ export function SupplementHistoryModal({ getMethodLabel, getTypeLabel, onChangeQ
           action={query.trim() ? (
             <button className="softButton compact" onClick={() => onChangeQuery?.("")} type="button">검색어 지우기</button>
           ) : null}
-          className="emptyHomeworkBox"
           description={query.trim() ? "학생명·학교·보충 항목을 다시 확인하세요." : "보충 완료·취소·일정 확정 이력이 생기면 여기에 표시됩니다."}
           title={query.trim() ? "검색 결과가 없습니다." : "최근 한 달 보충관리 내역이 없습니다."}
         />

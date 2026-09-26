@@ -1,4 +1,8 @@
 .examPromptStudio { display: grid; gap: 16px; }
+/* 2026-09-25 · HelpTip 되돌리기 규칙(.examPromptStudio .helpTipBubble{display:none} 등 5줄)은
+   지웠다. 공용 HelpTip.css 가 `.helpTip > …` 로 특이도를 올렸고(PR #417), 이 화면에서 HelpTip 을
+   덮어쓰던 포괄 규칙(.examPromptSequencePanel .examPromptRoleHeading > div 의 display:grid)도
+   아래에서 함께 없앴다. 화면별로 열림/닫힘 상태 기계를 복제하지 않는다. */
 .examPromptStudioHeader { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
 .examPromptStudioHeader > div:first-child { display: grid; gap: 5px; }
 .examPromptStudioHeader strong { font-size: 18px; }
@@ -15,7 +19,9 @@
 .examPromptLevelSwitch button { border: 1px solid var(--academy-border-strong, #cbd8ee); border-radius: 999px; background: white; padding: 8px 14px; cursor: pointer; }
 .examPromptLevelSwitch button.active { border-color: var(--academy-focus-ring, #2563eb); color: var(--status-info-text, #1d4ed8); background: var(--status-info-bg, #eff6ff); font-weight: 700; }
 .examPromptSequencePanel { border: 1px solid var(--academy-border-strong, #cbd8ee); border-radius: 16px; padding: 14px; display: grid; gap: 12px; background: var(--academy-surface-muted, #f8fafc); }
-.examPromptSequencePanel .examPromptRoleHeading > div { display: grid; gap: 3px; }
+/* 2026-09-25 · `.examPromptSequencePanel .examPromptRoleHeading > div { display: grid }` 삭제.
+   그 자리의 유일한 대상이 이제 제목 + 물음표 한 줄(.helpTipTitleRow)이라, 남겨 두면 공용
+   HelpTip 의 display:flex 를 특이도로 이겨 제목과 물음표가 세로로 쪼개진다. */
 .examPromptSequencePanel small { color: var(--academy-muted, #64748b); }
 .examPromptRoleToggles { display: flex; flex-wrap: wrap; gap: 7px; }
 .examPromptRoleToggles label { display: flex; gap: 5px; align-items: center; border: 1px solid var(--academy-border, #d8e3f8); border-radius: 999px; padding: 6px 9px; background: var(--academy-surface, #fff); font-size: 12px; }
@@ -76,12 +82,13 @@
 .examPromptFieldGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .examPromptField { display: grid; gap: 6px; }
 .examPromptField > span { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+/* 2026-09-25 · 제목 줄은 <label htmlFor> 이 되어 <b>라벨</b> + <small>원천 구분</small> 을 감싼다
+   (물음표 <button> 을 label 밖으로 뺀 결과). 예전 제목 줄과 같은 배치를 label 안에서 유지한다. */
+.examPromptField > span > label { display: flex; flex: 1 1 auto; justify-content: space-between; gap: 8px; align-items: baseline; min-width: 0; }
 .examPromptField small { color: var(--academy-muted, #64748b); font-size: 10px; }
-.examPromptField .examPromptFieldHint { color: var(--academy-muted, #64748b); font-size: 11px; line-height: 1.45; }
 .examPromptField input, .examPromptField textarea, .examPromptPhrasePicker select { width: 100%; border: 1px solid var(--academy-border-strong, #cbd8ee); border-radius: 9px; padding: 9px 10px; background: var(--academy-surface, #fff); color: inherit; box-sizing: border-box; }
 .examPromptField textarea { resize: vertical; min-height: 64px; }
 .examPromptPhrasePicker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; align-items: center; padding: 8px; border-radius: 10px; background: var(--academy-surface-muted, #f8fafc); }
-.examPromptPhrasePicker small { grid-column: 1 / -1; color: var(--academy-muted, #64748b); }
 .examPromptQuestionCard { border-top: 1px dashed var(--academy-border-strong, #cbd8ee); padding-top: 14px; display: grid; gap: 10px; }
 .examPromptQuestionTitle { display: flex; justify-content: flex-start; gap: 10px; align-items: center; }
 .examPromptQuestionTitle span { font-size: 11px; color: var(--status-pending-text, #c2410c); }
@@ -95,5 +102,4 @@
   .examPromptWorkflowStepHeader, .examPromptWorkflowStep .disclosureTriggerLabel { flex-wrap: wrap; }
   .examPromptRoleCard.wide { grid-column: auto; }
   .examPromptPhrasePicker { grid-template-columns: 1fr; }
-  .examPromptPhrasePicker small { grid-column: auto; }
 }

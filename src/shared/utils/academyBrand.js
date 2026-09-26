@@ -15,3 +15,13 @@ export function formatTeacherBrandName(teacherName = "") {
   if (!name) return academyBrandName;
   return `${academyName} ${name.endsWith("T") ? name : `${name}T`}`;
 }
+
+// 로그인한 선생님 기준 브랜드("으뜸수학 최경석T"). App 이 세션이 바뀔 때 set 한다.
+// 세션을 모르는 모듈 함수(코멘트 미리보기 원문 등)가 원장 상수 대신 이걸 읽는다.
+let sessionBrandName = academyBrandName;
+export function setSessionBrandName(teacherName = "") {
+  sessionBrandName = formatTeacherBrandName(teacherName);
+}
+export function getSessionBrandName() {
+  return sessionBrandName;
+}

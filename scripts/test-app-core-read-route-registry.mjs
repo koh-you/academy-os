@@ -12,9 +12,11 @@ let listResult = {
 };
 let listError = null;
 let listCalls = 0;
+const listOptions = [];
 const registry = createAppCoreReadRouteRegistry({
-  listAppState: async () => {
+  listAppState: async (options) => {
     listCalls += 1;
+    listOptions.push(options);
     if (listError) throw listError;
     return listResult;
   },
@@ -53,6 +55,16 @@ assert.equal(await registry.dispatch(request("/api/app-state?includeRows=true"))
 assert.deepEqual(sends.at(-1).body.stateRows, {
   monthlySettlements: { updatedAt: "v1" }
 });
+// keys 가 없으면 전체 읽기(부트스트랩) — listAppState 에 옵션을 넘기지 않는다.
+assert.deepEqual(listOptions, [undefined, undefined]);
+
+// 저장 뒤 재조회는 저장한 키만 읽는다. 표 전체(알림 기록·보고서 스냅샷·성적 …)를 한 키 확인에
+// 다시 받지 않도록 keys=a,b 를 그대로 listAppState 에 넘긴다. 응답 모양은 같다.
+assert.equal(await registry.dispatch(request("/api/app-state?includeRows=true&verify=autosave-1&keys=aiSettings,notificationLogs")), true);
+assert.deepEqual(listOptions.at(-1), { keys: ["aiSettings", "notificationLogs"] });
+assert.deepEqual(sends.at(-1).body.stateRows, { monthlySettlements: { updatedAt: "v1" } });
+assert.equal(await registry.dispatch(request("/api/app-state?keys=%20wrongProblems%20,,")), true);
+assert.deepEqual(listOptions.at(-1), { keys: ["wrongProblems"] });
 
 assert.equal(await registry.dispatch(request("/api/special-lecture-guides")), true);
 assert.deepEqual(sends.at(-1).body, {

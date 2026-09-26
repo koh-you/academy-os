@@ -1,0 +1,872 @@
+% DeeP Math 정리편 · CM2-FN 함수 · 답지 v1
+% Phase 3 (2026-07-20 세션 57) : 청사진 v1.0 · Phase 2 본편 대응
+% 답지 v1 골든 계승 (05-ST-집합명제-답지.tex) · deep-math-answer.sty
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% 세션 55·57 신정책 승계:
+%   - \textbf 금지 (정답 zone \dmanswerbox 안 값만)
+%   - 정답 zone 값만 (유도 부연 금지)
+%   - cplabel 완성 문장 (짧고 굵게 · 15자 내 · 등호 표기 금지)
+%   - CM2-FN 정규 도구: 함수 기호 f, g, h · f∘g · f⁻¹ · 항등함수 I
+%   - "자기역함수" 표현 금지 → "역함수가 자기 자신과 같은" 자연어
+%   - 상위 과정 용어 회피 · ★ 노출 금지 · "정리편" 표기 금지
+%   - Overfull 0 필수 · 원문 그림 없음 (전 42슬롯)
+%   - Phase 2 확정 답 반영: L2-8 = -3/4 · L3-3 = 6 · CHK3 조건 자연어 서술
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{함수}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{함수 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$\{1,\, 3\}$} & \dmquick{2}{\textcircled{\scriptsize 4}} & \dmquick{3}{$a\ne 2$\ 인 모든 실수} & \dmquick{4}{$6$} & \dmquick{5}{$9$} \\
+\dmquick{6}{$a=1$} & \dmquick{7}{$g(x)=2x-2$} & \dmquick{8}{$21$} & \dmquick{9}{$3$} & \dmquick{10}{$9$} \\
+\dmquick{11}{$1$} & \dmquick{12}{$\dfrac{5}{2}$} & & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{정의역의 원소 대입으로 얻는 치역}
+\begin{dmanswerbox}
+정답: $\{1,\, 3\}$
+\end{dmanswerbox}
+
+정의역 $X = \{-1,\, 0,\, 1\}$\ 의 각 원소를 $f(x) = x^{2} + x + 1$\ 에 대입한다.
+\[ f(-1) = 1,\quad f(0) = 1,\quad f(1) = 3. \]
+따라서 함숫값들을 모은 집합은 치역이므로 치역은 $\{1,\, 3\}$\ 이다.
+
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{함수의 정의와 공역의 원소 확인}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 4}
+\end{dmanswerbox}
+
+정의역의 각 원소에 대응되는 값이 공역 $Y = \{0,\, 1,\, 2\}$\ 의 원소이어야 함수이다. 각 대응을 확인한다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 1} $f(x) = |x|$\ 에서 $f(-1) = 1$,\ $f(0) = 0$,\ $f(1) = 1$\ 이므로 모두 $Y$\ 의 원소이다. 함수 성립.
+
+\vspace{3mm}
+\textcircled{\scriptsize 2} $f(x) = x + 1$\ 에서 $f(-1) = 0$,\ $f(0) = 1$,\ $f(1) = 2$\ 이므로 함수 성립.
+
+\vspace{3mm}
+\textcircled{\scriptsize 3} $f(x) = x^{2} + 1$\ 에서 $f(-1) = 2$,\ $f(0) = 1$,\ $f(1) = 2$\ 이므로 함수 성립.
+
+\vspace{3mm}
+\textcircled{\scriptsize 4} $f(x) = 2x + 1$\ 에서 $f(-1) = -1 \notin Y$\ 이므로 함수가 아니다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 5} $f(x) = x^{3} + 1$\ 에서 $f(-1) = 0$,\ $f(0) = 1$,\ $f(1) = 2$\ 이므로 함수 성립.
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{일대일대응이 되기 위한 일차함수 조건}
+\begin{dmanswerbox}
+정답: $a\ne 2$\ 인 모든 실수
+\end{dmanswerbox}
+
+$f(x) = (a - 2)x + 3a - 1$\ 은 일차함수이다. 실수 전체에서 일대일대응이 되려면 기울기가 $0$\ 이 아니어야 한다.
+\[ a - 2 \ne 0,\quad a \ne 2. \]
+따라서 상수 $a$\ 는 $2$\ 가 아닌 모든 실수이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{기울기 $0$\ 은 배제된다}: 이 경우 $f$\ 가 상수함수가 되어 일대일이 깨지므로 일대일대응 조건에서 기울기 $0$\ 은 필연적으로 제외된다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{항등함수·상수함수의 함숫값 계산}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$f$\ 가 항등함수이므로 $f(1) = 1$\ 이고, $g$\ 는 상수함수이면서 $g(2) = f(2) = 2$\ 이므로 $g(3) = 2$\ 이다.
+\[ h(1) = 1 - 3 + 5 = 3,\qquad h(2) = 4 - 6 + 5 = 3. \]
+$\therefore\ h(f(1)) + h(g(3)) = h(1) + h(2) = 6$.
+
+% ─────────────── 확인 5 ───────────────
+\dmsoltitle{5}{두 함수의 합성함숫값}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+$(g \circ f)(2) = g(f(2))$\ 이므로 먼저 $f(2) = 4 + 1 = 5$,\ $g(5) = 10 - 3 = 7$\ 이다.
+
+$(f \circ g)(1) = f(g(1))$\ 이므로 $g(1) = 2 - 3 = -1$,\ $f(-1) = 1 + 1 = 2$\ 이다.
+
+따라서
+\[ (g \circ f)(2) + (f \circ g)(1) = 7 + 2 = 9. \]
+
+% ─────────────── 확인 6 ───────────────
+\dmsoltitle{6}{합성 교환조건과 계수 결정}
+\begin{dmanswerbox}
+정답: $a=1$
+\end{dmanswerbox}
+
+$f(g(x)) = g(x) + 2 = ax + b + 2$\ 이고 $g(f(x)) = a(x + 2) + b = ax + 2a + b$\ 이다. $f \circ g = g \circ f$\ 가 모든 실수 $x$\ 에 대하여 성립하려면
+\[ ax + b + 2 = ax + 2a + b \]
+에서 상수항을 비교해 $b + 2 = 2a + b$, 즉 $2a = 2$\ 이므로 $a = 1$\ 이다.
+
+% ─────────────── 확인 7 ───────────────
+\dmsoltitle{7}{합성함수 조건에서 미지 함수 결정}
+\begin{dmanswerbox}
+정답: $g(x)=2x-2$
+\end{dmanswerbox}
+
+$(f \circ g)(x) = f(g(x)) = 3\, g(x) + 1$\ 이고 이 값이 $6x - 5$\ 와 같으므로
+\[ 3\, g(x) + 1 = 6x - 5,\quad 3\, g(x) = 6x - 6. \]
+따라서 $g(x) = 2x - 2$\ 이다.
+
+% ─────────────── 확인 8 ───────────────
+\dmsoltitle{8}{반복 합성함수의 값}
+\begin{dmanswerbox}
+정답: $21$
+\end{dmanswerbox}
+
+$f(x) = x + 2$\ 에서 한 번 합성마다 함숫값이 $2$\ 씩 증가하므로 $f^{n}(x) = x + 2n$\ 이다.
+\[ \therefore\ f^{10}(1) = 1 + 20 = 21. \]
+
+% ─────────────── 확인 9 ───────────────
+\dmsoltitle{9}{역함수의 값}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+$f^{-1}(4) = k$\ 로 놓으면 $f(k) = 4$\ 이므로 $3k - 5 = 4$\ 에서 $3k = 9$,\ $k = 3$\ 이다.
+
+% ─────────────── 확인 10 ───────────────
+\dmsoltitle{10}{역함수 값 조건과 계수 결정}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+$f(2) = 5$\ 에서 $2a + b = 5$\ 이다. 한편 $f^{-1}(-1) = -1$\ 은 $f(-1) = -1$\ 과 같으므로 $-a + b = -1$\ 이다.
+
+두 식을 빼면 $3a = 6$\ 이므로 $a = 2$,\ $b = 1$\ 이다. 따라서 $f(x) = 2x + 1$\ 이고
+\[ f(4) = 2 \cdot 4 + 1 = 9. \]
+
+% ─────────────── 확인 11 ───────────────
+\dmsoltitle{11}{역함수와 합성의 값 계산}
+\begin{dmanswerbox}
+정답: $1$
+\end{dmanswerbox}
+
+$(f^{-1} \circ g)(5) = f^{-1}(g(5))$\ 이므로 먼저 $g(5) = -5 + 4 = -1$\ 이다. 다음으로 $f^{-1}(-1) = k$\ 로 놓으면 $f(k) = -1$\ 에서 $2k - 3 = -1$,\ $k = 1$\ 이다.
+
+% ─────────────── 확인 12 ───────────────
+\dmsoltitle{12}{합성함수의 역함수 값}
+\begin{dmanswerbox}
+정답: $\dfrac{5}{2}$
+\end{dmanswerbox}
+
+$(g \circ f)^{-1}(9) = k$\ 로 놓으면 $(g \circ f)(k) = 9$\ 이다.
+\[ g(f(k)) = f(k) + 3 = (2k + 1) + 3 = 2k + 4 = 9 \]
+에서 $2k = 5$\ 이므로 $k = \dfrac{5}{2}$\ 이다.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{\textcircled{\scriptsize 2}} & \dmquick{2}{$2$} & \dmquick{3}{$4$} & \dmquick{4}{$37$} & \dmquick{5}{$3$} \\
+\dmquick{6}{$a=0$} & \dmquick{7}{$24$} & \dmquick{8}{\textcircled{\scriptsize 3}} & \dmquick{9}{$-3$} & \dmquick{10}{$17$} \\
+\dmquick{11}{$-43$} & \dmquick{12}{$4$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{함수 여부와 공역의 원소}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 2}
+\end{dmanswerbox}
+
+$X = \{-1,\, 0,\, 1\}$\ 의 각 원소에 대한 함숫값이 모두 $X$\ 의 원소이어야 $X$\ 에서 $X$\ 로의 함수이다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 1} $f(x) = x$\ 에서 함숫값은 $-1,\, 0,\, 1 \in X$\ 이므로 함수이다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 2} $f(x) = |x| + 1$\ 에서 $f(-1) = 2 \notin X$\ 이므로 함수가 아니다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 3} $f(x) = x^{2} - |x| + 1$\ 에서 $f(-1) = 1$,\ $f(0) = 1$,\ $f(1) = 1$\ 이므로 모두 $X$\ 의 원소이며 함수이다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 4} $f(x) = -x^{2} + 1$\ 에서 $f(-1) = 0$,\ $f(0) = 1$,\ $f(1) = 0$\ 이므로 함수이다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 5} $f(x) = x^{3}$\ 에서 $f(-1) = -1$,\ $f(0) = 0$,\ $f(1) = 1$\ 이므로 함수이다.
+
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{서로 같은 함수와 계수 결정}
+\begin{dmanswerbox}
+정답: $2$
+\end{dmanswerbox}
+
+두 함수가 정의역 $X = \{-1,\, 2\}$\ 에서 서로 같으려면 정의역의 각 원소에서 함숫값이 같아야 한다.
+\[ f(-1) = g(-1),\qquad f(2) = g(2). \]
+$g(-1) = 1$\ 이므로 $1 - a + b = 1$\ 에서 $-a + b = 0$\ 이다. $g(2) = 7$\ 이므로 $4 + 2a + b = 7$\ 에서 $2a + b = 3$\ 이다.
+
+두 식을 빼면 $3a = 3$\ 이므로 $a = 1$,\ $b = 1$\ 이다. 따라서 $a + b = 2$\ 이다.
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{함수방정식과 정수 함숫값}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+주어진 조건 $f(x + y) = f(x) + f(y)$\ 에 $x = y = 0$\ 을 대입하면 $f(0) = 2\, f(0)$\ 이므로 $f(0) = 0$\ 이다. 다음으로 $y = -x$\ 를 대입하면
+\[ f(0) = f(x) + f(-x) \]
+에서 $f(-x) = -f(x)$\ 이다.
+
+$f(1) = 2$\ 에서 귀납적으로 $f(n) = 2n$\ 이므로
+\[ f(5) = 10,\qquad f(-3) = -f(3) = -6. \]
+$\therefore\ f(-3) + f(5) = 4$.
+
+% ─────────────── L1-4 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3 인접)
+%   골든 : piecewise-shape.tex 응용 · scale=1.0 · 두 경우 개형 병기
+\dmsoltitle{4}{치역과 공역이 같은 일차함수의 두 경우}
+\begin{dmanswerbox}
+정답: $37$
+\end{dmanswerbox}
+
+$X = \{x \mid 1 \le x \le 5\}$\ 에서 $X$\ 로의 일차함수 $f(x) = ax + b$\ 의 치역이 공역과 같으므로 $f$\ 는 $X$ 위의 일대일대응이다. 기울기 $a$\ 의 부호에 따라 두 개형이 대응된다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (6.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 6.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, anchor=north east] at (-0.05, -0.05) {O};
+  \node[font=\tiny, anchor=north] at (1, -0.12) {$1$};
+  \node[font=\tiny, anchor=north] at (5, -0.12) {$5$};
+  \node[font=\tiny, anchor=east] at (-0.12, 1) {$1$};
+  \node[font=\tiny, anchor=east] at (-0.12, 5) {$5$};
+  % ── 정사각형 $X \times X$ 안내 (얇은 점선 경계 · 실효 0.4pt)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt]
+    (1, 0) -- (1, 5)  (5, 0) -- (5, 5)
+    (0, 1) -- (5, 1)  (0, 5) -- (5, 5);
+  % ── (i) 증가 경우 · f(x) = x · 실효 0.5pt
+  \draw[black, line width=0.5pt] (1, 1) -- (5, 5);
+  \filldraw[black] (1, 1) circle (0.8pt);
+  \filldraw[black] (5, 5) circle (0.8pt);
+  \node[font=\tiny, anchor=north west] at (5.05, 5.05) {(i) $y=x$};
+  % ── (ii) 감소 경우 · f(x) = -x + 6 · 실효 0.5pt
+  \draw[dm-accent, line width=0.5pt] (1, 5) -- (5, 1);
+  \filldraw[dm-accent] (1, 5) circle (0.8pt);
+  \filldraw[dm-accent] (5, 1) circle (0.8pt);
+  \node[font=\tiny, anchor=south west, dm-accent] at (5.05, 0.95) {(ii) $y=-x+6$};
+\end{tikzpicture}
+\end{center}
+
+\vspace{3mm}
+(i) $a > 0$\ 이면 $f$\ 는 증가이므로 $f(1) = 1$,\ $f(5) = 5$\ 이다. 두 식에서 $a + b = 1$\ 과 $5a + b = 5$\ 이므로 $4a = 4$\ 에서 $a = 1$,\ $b = 0$\ 이다. 이때 $a^{2} + b^{2} = 1$\ 이다.
+
+\vspace{3mm}
+(ii) $a < 0$\ 이면 $f$\ 는 감소이므로 $f(1) = 5$,\ $f(5) = 1$\ 이다. 두 식에서 $a + b = 5$\ 와 $5a + b = 1$\ 이므로 $4a = -4$\ 에서 $a = -1$,\ $b = 6$\ 이다. 이때 $a^{2} + b^{2} = 1 + 36 = 37$\ 이다.
+
+\vspace{3mm}
+두 경우 중 최댓값은 $37$\ 이다.
+
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{여러 함수 유형의 확인}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+네 함수의 성질을 각각 확인한다.
+
+\vspace{3mm}
+ㄱ. $f(x) = 4x$\ 는 실수 전체에서 서로 다른 두 값의 함숫값이 다르므로 일대일함수이고 치역이 실수 전체이므로 일대일대응이다.
+
+\vspace{3mm}
+ㄴ. $f(x) = 3$\ 은 상수함수이므로 일대일함수가 아니고 일대일대응도 아니다.
+
+\vspace{3mm}
+ㄷ. $f(x) = x^{2}$\ 은 $f(-1) = f(1) = 1$\ 이므로 일대일함수가 아니다.
+
+\vspace{3mm}
+ㄹ. $f(x) = x$\ 는 항등함수이자 일대일대응이다.
+
+\vspace{3mm}
+일대일대응은 ㄱ,\ ㄹ의 $2$\ 개이므로 $a = 2$\ 이고, 항등함수는 ㄹ의 $1$\ 개이므로 $c = 1$\ 이다. 따라서 $a + c = 3$\ 이다.
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{일대일대응 조건에서 상수 결정}
+\begin{dmanswerbox}
+정답: $a=0$
+\end{dmanswerbox}
+
+$f(x) = -x^{2} + 2x + a = -(x - 1)^{2} + 1 + a$\ 이다. 정의역 $X = \{x \mid x \ge 1\}$\ 과 공역 $Y = \{y \mid y \le 1\}$\ 에 대하여 $f$\ 가 일대일대응이 되려면 정의역에서 $f$\ 가 감소하면서 함숫값의 최댓값이 공역의 경계값과 일치해야 한다.
+
+꼭짓점 $x = 1$\ 이 정의역의 왼쪽 끝이므로 $f$\ 는 $x \ge 1$\ 에서 감소함수이고, 이때 최댓값은 $x = 1$\ 에서의 값 $1 + a$\ 이다. 공역이 $y \le 1$\ 이므로 이 최댓값이 $1$\ 과 같아야 한다.
+\[ 1 + a = 1,\qquad a = 0. \]
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{$f(1) = 3$\ 인 일대일대응의 개수}
+\begin{dmanswerbox}
+정답: $24$
+\end{dmanswerbox}
+
+$X = \{1,\, 2,\, 3,\, 4,\, 5\}$\ 에서 $X$\ 로의 일대일대응의 총수는 $5! = 120$\ 이다. 이 중에서 $f(1) = 3$\ 인 것은 나머지 네 원소 $\{2,\, 3,\, 4,\, 5\}$\ 를 $\{1,\, 2,\, 4,\, 5\}$\ 에 일대일대응시키는 것과 같으므로
+\[ 4! = 24. \]
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{함수 유형의 성질 확인}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 3}
+\end{dmanswerbox}
+
+각 명제의 참·거짓을 판별한다.
+
+\vspace{3mm}
+ㄱ. $f(x) = |x|$\ 에서 $f(-1) = f(1) = 1$\ 이므로 일대일함수가 아니다. 거짓.
+
+\vspace{3mm}
+ㄴ. $f(x) = x^{3}$\ 은 실수 전체에서 서로 다른 두 값의 함숫값이 다르고 치역이 실수 전체이므로 일대일대응이다. 참.
+
+\vspace{3mm}
+ㄷ. $f(x) = x^{2} + 1$\ 에서 $f(-1) = f(1) = 2$\ 이므로 일대일함수가 아니다. 참.
+
+\vspace{3mm}
+ㄹ. 상수함수는 정의역의 모든 원소가 한 값에 대응하므로 일대일함수가 아니다. 거짓.
+
+\vspace{3mm}
+옳은 것은 ㄴ, ㄷ이다.
+
+% ─────────────── L1-9 ───────────────
+\dmsoltitle{9}{합성함수 방정식의 해}
+\begin{dmanswerbox}
+정답: $-3$
+\end{dmanswerbox}
+
+$(g \circ f)(a) = g(f(a)) = g(2a + 3)$\ 이다. $g(x) = x^{2} - 1$\ 이므로
+\[ (2a + 3)^{2} - 1 = 15,\qquad (2a + 3)^{2} = 16. \]
+따라서 $2a + 3 = \pm 4$\ 에서 $a = \dfrac{1}{2}$ 또는 $a = -\dfrac{7}{2}$\ 이다. 두 값의 합은
+\[ \dfrac{1}{2} + \left(-\dfrac{7}{2}\right) = -3. \]
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{세 함수의 합성}
+\begin{dmanswerbox}
+정답: $17$
+\end{dmanswerbox}
+
+합성함수의 결합법칙에 의해 $(h \circ (g \circ f))(3) = h(g(f(3)))$\ 이다.
+\[ f(3) = 2,\quad g(2) = 4,\quad h(4) = 16 + 1 = 17. \]
+
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{역함수 반복 합성의 값}
+\begin{dmanswerbox}
+정답: $-43$
+\end{dmanswerbox}
+
+$(f^{-1} \circ f^{-1} \circ f^{-1})(a) = -1$\ 은 $a$\ 에 $f^{-1}$\ 을 세 번 적용한 값이 $-1$\ 이라는 뜻이다. 양변에 $f$\ 를 세 번 적용하면
+\[ a = f(f(f(-1))). \]
+$f(x) = 2x - 5$\ 이므로 순차 대입한다.
+\[ f(-1) = -7,\quad f(-7) = -19,\quad f(-19) = -43. \]
+따라서 $a = -43$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$f^{-1}$\ 은 $f$\ 의 반복 적용으로 해소된다}: 좌변의 $f^{-1}$\ 을 하나씩 없애려면 양변에 $f$\ 를 같은 횟수만큼 적용해야 하고, 이 관계로 상수 $a$\ 가 원함수 반복 대입만으로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{원함수와 역함수의 교점}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+$f(x) = x^{2} - 2x + 2 = (x - 1)^{2} + 1$\ 은 $x \ge \dfrac{3}{2}$\ 에서 증가함수이므로 일대일대응이고 역함수가 존재한다. 두 그래프는 직선 $y = x$\ 에 대칭이고 원함수가 순증가이므로 두 그래프의 교점은 $f(x) = x$\ 의 해이다.
+\[ x^{2} - 2x + 2 = x,\qquad x^{2} - 3x + 2 = 0. \]
+인수분해하면 $(x - 1)(x - 2) = 0$\ 이므로 $x = 1$ 또는 $x = 2$\ 이다. 정의역 조건 $x \ge \dfrac{3}{2}$\ 을 만족시키는 해는 $x = 2$\ 뿐이므로 유일한 교점은 $(2,\, 2)$\ 이다.
+
+따라서 $a = 2$,\ $b = 2$\ 이고
+\[ a + b = 4. \]
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$3$} & \dmquick{2}{$4$} & \dmquick{3}{$4$} & \dmquick{4}{$\sqrt{2}$} & \dmquick{5}{$5$} \\
+\dmquick{6}{$25$} & \dmquick{7}{$36$} & \dmquick{8}{$-\dfrac{3}{4}$} & \dmquick{9}{$-8$} & \dmquick{10}{$6$} \\
+\dmquick{11}{$\dfrac{25}{4}$} & \dmquick{12}{$21$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3)
+%   골든 : templates/tikz-graph-golden/piecewise-shape.tex 계승
+%   규약 : scale=1.0 · 실효 두께 (축 0.7 · 곡선 0.5 · 점선 0.4) · 점 (0.8/0.7)
+\dmsoltitle{1}{두 식으로 정의된 함수의 방정식과 해의 합}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (3.8, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -3.2) -- (0, 4) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, anchor=north east] at (-0.08, -0.08) {O};
+  \node[font=\scriptsize, anchor=north] at (1, -0.15) {$1$};
+  \node[font=\scriptsize, anchor=north] at (3, -0.15) {$3$};
+  % ── 왼쪽 식 · y = 3x - 4 (x < 1) · 실효 0.5pt · 시각 범위 x ∈ [0.3, 1]
+  \draw[black, line width=0.5pt] (0.3, -3.1) -- (1, -1);
+  % ── 오른쪽 식 · y = x² - 2x (x ≥ 1) · 실효 0.5pt · x ∈ [1, 3.5]
+  \draw[black, line width=0.5pt, domain=1:3.5, samples=60] plot (\x, {\x*\x - 2*\x});
+  % ── 경계점 (1, -1) · 오른쪽 식 (x ≥ 1) 포함 · closed 검정 0.8pt
+  \filldraw[black] (1, -1) circle (0.8pt);
+  % ── 타깃 수평선 y = 3 · 점선 dm-accent 0.4pt · 프레임 좌우 채움
+  \begin{scope}
+    \clip (-0.5, -3.2) rectangle (3.8, 4);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-0.5, 3) -- node[pos=0.1, above=0.5pt, font=\tiny, dm-accent] {$y=3$}
+      (3.8, 3);
+  \end{scope}
+  % ── 해 (교점) (3, 3) · 파생점 dm-accent 0.7pt
+  \filldraw[dm-accent] (3, 3) circle (0.7pt);
+  \node[font=\tiny, anchor=south east, dm-accent] at (3.02, 3.05) {$(3,\, 3)$};
+  % ── 식 라벨 · 프레임 안에 배치
+  \node[font=\scriptsize, anchor=north west] at (1.05, -1.15) {$y=3x-4$};
+  \node[font=\scriptsize, anchor=south west] at (3.4, 3.55) {$y=x^{2}-2x$};
+\end{tikzpicture}
+\end{center}
+
+$f(a) = 3$\ 을 두 식으로 나누어 푸는데, 각 식의 방정식에서 얻은 해가 그 식의 정의역에 속하는지 반드시 확인해야 한다.
+
+\vspace{3mm}
+(i) 이차식 $a^{2} - 2a = 3$\ 에서 $a^{2} - 2a - 3 = 0$\ 이므로 $(a - 3)(a + 1) = 0$\ 이다. 따라서 $a = 3$ 또는 $a = -1$\ 인데, 이 식의 정의역이 $a \ge 1$\ 이므로 $a = -1$\ 은 배제되고 $a = 3$\ 만 유효하다.
+
+\vspace{3mm}
+(ii) 일차식 $3a - 4 = 3$\ 에서 $3a = 7$\ 이므로 $a = \dfrac{7}{3}$\ 이다. 그런데 이 식의 정의역은 $a < 1$\ 이고 $\dfrac{7}{3} > 1$\ 이므로 이 값은 배제된다. 즉 이 식에서는 해가 없다.
+
+\vspace{3mm}
+따라서 유효한 해는 $a = 3$\ 뿐이므로 모든 해의 합은 $3$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{각 조각의 해는 그 조각의 정의역 안에서만 유효하다}: 두 식으로 정의된 함수의 방정식은 각 식에서의 해가 해당 식의 정의역에 속하는지를 반드시 확인해야 유효한 해로 인정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{두 일차식으로 정의된 함수의 일대일대응 · 기울기 부호 일치}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+두 식이 모두 일차식이므로 각 식은 각자의 정의역 위에서 이미 일대일이다. 따라서 두 식이 합쳐져 실수 전체에서 일대일대응이 되려면 두 식의 증감이 같은 방향이어야 한다.
+
+두 기울기 $3 - a$\ 와 $2 + a$\ 의 부호가 같아야 하므로
+\[ (3 - a)(2 + a) > 0,\quad -2 < a < 3. \]
+
+경계 $x = 1$\ 에서 오른쪽 식의 값이 $(3 - a) + (a - 1) = 2$\ 이고 왼쪽 식의 값도 $(2 + a) - a = 2$\ 이므로 두 식은 자동으로 이어진다 (추가 조건 없음).
+
+$-2 < a < 3$\ 을 만족시키는 정수 $a$\ 는 $-1,\, 0,\, 1,\, 2$\ 의 $4$\ 개이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 조각의 단조 방향이 같아야 전체가 일대일이 된다}: 각 조각은 이미 일대일이므로 두 기울기의 부호가 같아 함수 전체가 한 방향으로 증가 또는 감소하는 경우에만 일대일대응이 성립한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{두 일대일대응의 조건 논리}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+$(g \circ f)(2) = g(f(2)) = g(3) = 1$\ 이고 $(f \circ g)(1) = f(g(1)) = f(3) = 1$\ 이다.
+
+$f$\ 가 $X = \{1,\, 2,\, 3\}$\ 에서 $X$\ 로의 일대일대응이고 $f(2) = 3$,\ $f(3) = 1$\ 이므로 나머지 원소 $1$\ 의 상은 $2$\ 가 된다. 즉 $f(1) = 2$\ 이다.
+
+$g$\ 도 $X$\ 에서 $X$\ 로의 일대일대응이고 $g(1) = 3$,\ $g(3) = 1$\ 이므로 $g(2) = 2$\ 이다.
+
+$(f \circ f)(3) = f(f(3)) = f(1) = 2$,\ \ $(g \circ f)(1) = g(f(1)) = g(2) = 2$\ 이므로
+\[ (f \circ f)(3) + (g \circ f)(1) = 4. \]
+
+% ─────────────── L2-4 (세션 78 스왑 : 옛 L2-5 · 이차·역함수 거리 √2) ───────────────
+\dmsoltitle{4}{원함수와 역함수 그래프의 교점 사이 거리}
+\begin{dmanswerbox}
+정답: $\sqrt{2}$
+\end{dmanswerbox}
+
+$f(x) = x^{2} - 4x + 6 = (x - 2)^{2} + 2$\ 는 $x \ge 2$\ 에서 증가함수이므로 역함수가 존재한다. 두 그래프는 $y = x$\ 에 대칭이므로 $f = f^{-1}$\ 의 교점은 $f(x) = x$\ 의 해이다.
+\[ x^{2} - 4x + 6 = x,\qquad x^{2} - 5x + 6 = 0. \]
+인수분해하면 $(x - 2)(x - 3) = 0$\ 이므로 $x = 2$,\ $x = 3$\ 이다. 두 값 모두 $x \ge 2$\ 를 만족시키므로 교점은 $(2,\, 2)$,\ $(3,\, 3)$\ 이다. 두 점 사이 거리는
+\[ \sqrt{(3 - 2)^{2} + (3 - 2)^{2}} = \sqrt{2}. \]
+
+% ─────────────── L2-5 (세션 78 스왑 : 옛 L2-4 · 일차함수 역함수 두 점) ───────────────
+\dmsoltitle{5}{일차함수의 역함수 두 점 조건}
+\begin{dmanswerbox}
+정답: $5$
+\end{dmanswerbox}
+
+$g$\ 가 $f$\ 의 역함수이므로 $g(3) = 1$\ 은 $f(1) = 3$\ 과 같고, $g(-1) = 3$\ 은 $f(3) = -1$\ 과 같다.
+\[ a + b = 3,\qquad 3a + b = -1. \]
+두 식을 빼면 $2a = -4$\ 이므로 $a = -2$,\ $b = 5$\ 이다. 따라서 $f(x) = -2x + 5$\ 이고
+\[ f(0) = 5. \]
+
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{함수방정식의 해와 함숫값}
+\begin{dmanswerbox}
+정답: $25$
+\end{dmanswerbox}
+
+조건 $f(x + y) = f(x) + f(y) + 2xy$\ 에 $x = y = 0$\ 을 대입하면 $f(0) = 2\, f(0)$\ 이므로 $f(0) = 0$\ 이다. $y = 1$\ 을 대입하면
+\[ f(x + 1) = f(x) + f(1) + 2x = f(x) + 1 + 2x. \]
+이 관계식으로부터 $f(1) = 1$,\ $f(2) = f(1) + 1 + 2 = 4$,\ $f(3) = f(2) + 1 + 4 = 9$,\ $\ldots$\ 이 되어 $f(n) = n^{2}$\ 이 성립한다. 따라서
+\[ f(5) = 25. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{한 변수를 상수로 고정하면 차례로 이어지는 관계식이 성립한다}: 두 변수 함수방정식에서 $y = 1$\ 로 고정하면 $f(x + 1)$\ 과 $f(x)$\ 의 관계식이 나오므로 자연수 함숫값이 차례로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{치역이 공역과 같은 함수의 개수}
+\begin{dmanswerbox}
+정답: $36$
+\end{dmanswerbox}
+
+$X = \{1,\, 2,\, 3,\, 4\}$\ 에서 $Y = \{1,\, 2,\, 3\}$\ 으로의 모든 함수의 개수는 $3^{4} = 81$\ 이다.
+
+치역이 $Y$\ 의 부분집합이면서 $Y$\ 와 같지 않은 함수는 치역이 $Y$\ 의 원소 두 개 이하인 함수이다. 각 부분집합별로 세면
+\begin{itemize}[leftmargin=6mm, itemsep=0.3mm, topsep=0.5mm]
+  \item 치역이 원소 하나 (상수함수): 세 가지 원소 각각 $3$\ 개.
+  \item 치역이 원소 둘: ${}_{3}\mathrm{C}_{2}$\ 가지의 두 원소 조합 각각에 대해 두 원소만 쓰는 함수 수는 $2^{4} - 2 = 14$\ 개. 조합은 $3$\ 가지이므로 $3 \cdot 14 = 42$\ 개.
+\end{itemize}
+따라서 치역이 $Y$\ 와 같은 함수의 개수는
+\[ 81 - 3 - 42 = 36. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{치역이 공역과 같은 함수는 전체 함수에서 치역이 진부분집합인 함수를 뺀 것이다}: 원소 두 개만으로 만드는 함수 개수를 셀 때 상수함수 두 개를 미리 제외해야 진부분집합인 경우가 정확히 세어진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{꼭짓점 이동을 이용한 최댓값}
+\begin{dmanswerbox}
+정답: $-\dfrac{3}{4}$
+\end{dmanswerbox}
+
+$f(x) = x^{2} - 2x + 3 = (x - 1)^{2} + 2$\ 는 꼭짓점이 $(1,\, 2)$\ 이고 $x \ge 1$\ 에서 증가함수이다. $X = \{x \mid x \ge a\}$\ 에서 일대일대응이 되려면 $a \ge 1$\ 이어야 하고, 이때 치역은 $\{y \mid y \ge f(a)\}$\ 이므로 $b = f(a) = a^{2} - 2a + 3$\ 이다.
+
+$a - b = a - (a^{2} - 2a + 3) = -a^{2} + 3a - 3$\ 이므로
+\[ a - b = -\left(a - \dfrac{3}{2}\right)^{2} - \dfrac{3}{4}. \]
+$a \ge 1$\ 이므로 꼭짓점 $a = \dfrac{3}{2}$\ 이 정의역 안에 있고, 이 자리에서 최댓값 $-\dfrac{3}{4}$\ 이 나온다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{일대일 조건이 $a$\ 의 하한을 결정한다}: 이차함수가 정의역에서 일대일이 되려면 꼭짓점을 포함하지 않고 한쪽 단조 부분에만 놓여야 하므로 $a$\ 의 하한은 꼭짓점의 $x$\ 좌표로 정해진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-9 ───────────────
+\dmsoltitle{9}{일차함수의 자기 합성}
+\begin{dmanswerbox}
+정답: $-8$
+\end{dmanswerbox}
+
+$f(x) = ax + b$\ 이므로
+\[ f(f(x)) = a(ax + b) + b = a^{2} x + ab + b. \]
+이것이 $4x - 3$\ 과 같으려면 계수와 상수항이 각각 일치해야 하므로
+\[ a^{2} = 4,\qquad b(a + 1) = -3. \]
+
+\vspace{3mm}
+$a = 2$\ 일 때 $3b = -3$\ 이므로 $b = -1$\ 이고 $ab = -2$\ 이다.
+
+\vspace{3mm}
+$a = -2$\ 일 때 $-b = -3$\ 이므로 $b = 3$\ 이고 $ab = -6$\ 이다.
+
+\vspace{3mm}
+따라서 $ab$\ 의 모든 가능한 값의 합은 $-2 + (-6) = -8$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{합성함수의 계수와 상수항을 원래 함수와 비교하면 두 개의 조건식이 나온다}: 이차식 $a^{2}=4$\ 에서 $a$\ 가 두 값을 가지므로 각각의 경우에 $b$\ 를 결정하여 두 조합을 모두 취해야 한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-10 ───────────────
+\dmsoltitle{10}{일대일대응의 값 배치 논리}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$f$\ 가 $X = \{1,\, 2,\, 3,\, 4,\, 5\}$\ 에서 $X$\ 로의 일대일대응이므로 $f(1)$\ 과 $f(3)$\ 은 서로 다른 $X$\ 의 원소이다. $f(1) + 2\,f(3) = 12$\ 을 만족시키는 순서쌍 $(f(1),\, f(3))$\ 은
+\[ (2,\, 5),\ (4,\, 4),\ (6,\, 3) \]
+가운데 $f$\ 의 값이 서로 다른 $X$\ 의 원소인 경우만 유효하므로
+\[ f(1) = 2,\qquad f(3) = 5 \]
+이다.
+
+$f^{-1}(1) = a$,\ $f^{-1}(3) = b$\ 라 하면 $f(a) = 1$,\ $f(b) = 3$\ 이고 $a - b = 2$\ 이다. $a$,\ $b$\ 는 아직 값이 정해지지 않은 자리 $\{2,\, 4,\, 5\}$\ 에 속하므로 $(a,\, b) = (4,\, 2)$\ 만 유효하다. $f(4) = 1$,\ $f(2) = 3$\ 이고 남은 값에서 $f(5) = 4$\ 이다.
+
+$f^{-1}(4) = 5$\ 이므로
+\[ f(4) + f^{-1}(4) = 1 + 5 = 6. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{일대일대응이므로 두 함숫값은 서로 다른 원소이어야 한다는 제약이 후보를 압축한다}: 일차식 조건에서 얻은 순서쌍 중 값이 겹치는 경우를 배제하고, 역함수 조건은 다시 남은 자리에서만 후보를 걸러 유일한 배열이 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-11 ───────────────
+\dmsoltitle{11}{역함수와 원함수 그래프의 접함}
+\begin{dmanswerbox}
+정답: $\dfrac{25}{4}$
+\end{dmanswerbox}
+
+$f(x) = x^{2} - 4x + k = (x - 2)^{2} + k - 4$\ 는 $x \ge 2$\ 에서 증가함수이므로 일대일대응이고 역함수가 존재한다. 두 그래프가 $y = x$\ 에 대칭이고 원함수가 순증가이므로 두 그래프의 교점은 모두 $y = x$ 위에 있다.
+
+두 그래프가 접하려면 $f(x) = x$\ 가 중근을 가져야 한다.
+\[ x^{2} - 4x + k = x,\qquad x^{2} - 5x + k = 0. \]
+판별식이 $0$\ 이어야 하므로
+\[ 25 - 4k = 0,\qquad k = \dfrac{25}{4}. \]
+
+이 중근은 $x = \dfrac{5}{2}$\ 이고, $\dfrac{5}{2} \ge 2$\ 이므로 정의역 조건에 부합한다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{순증가 함수의 그래프와 그 역함수의 그래프가 접하려면 원함수와 $y=x$\ 가 접해야 한다}: 두 그래프가 $y=x$\ 에 대해 대칭이고 원함수가 증가함수이므로 교점이 반드시 $y=x$ 위에 놓이며, 따라서 접선 조건이 $f(x)=x$\ 의 중근 조건으로 옮겨진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-12 ───────────────
+\dmsoltitle{12}{이차함수의 대칭축을 이용한 계수 결정}
+\begin{dmanswerbox}
+정답: $21$
+\end{dmanswerbox}
+
+$f(x) = x^{2} - 2x + a = (x - 1)^{2} + a - 1$\ 은 대칭축이 $x = 1$\ 인 이차함수이다. $x = 2$\ 와 $x = 4$\ 에서 함숫값을 계산하면
+\[ f(2) = 4 - 4 + a = a,\qquad f(4) = 16 - 8 + a = 8 + a. \]
+
+$(f \circ f)(2) = f(a)$\ 이고 $(f \circ f)(4) = f(8 + a)$\ 이므로 두 값이 같으려면 $a$\ 와 $8 + a$\ 가 대칭축 $x = 1$\ 에서 같은 거리이어야 한다.
+\[ 1 - a = (8 + a) - 1,\qquad 2 = 2a + 8,\qquad a = -3. \]
+
+따라서 $f(x) = x^{2} - 2x - 3$\ 이고
+\[ f(6) = 36 - 12 - 3 = 21. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{$f(u) = f(v)$\ 는 $u + v$\ 가 대칭축 두 배임을 뜻한다}: 이차함수의 등식 $f(u) = f(v)$\ 는 두 점이 대칭축에 대해 같은 거리라는 조건과 같으므로 이 관계로 $a$\ 가 결정된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$\dfrac{2}{3}$} & \dmquick{2}{$9$} & \dmquick{3}{$6$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3)
+%   골든 : piecewise-shape.tex · scale=1.0 유지 · 좌표 3배 확대 (세션 74 프로토콜)
+%   변환 : 원 도메인 [0,1] → 표시 도메인 [0,3] · 축 라벨은 원값 유지
+\dmsoltitle{1}{두 식으로 정의된 함수의 반복 합성과 주기}
+\begin{dmanswerbox}
+정답: $\dfrac{2}{3}$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 좌표 3배 확대 · 원 도메인 [0,1] = 표시 [0,3])
+  \draw[-stealth, black, line width=0.7pt] (-0.4, 0) -- (3.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.4) -- (0, 3.8) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, anchor=north east] at (-0.08, -0.08) {O};
+  \node[font=\tiny, anchor=north] at (1, -0.18) {$\dfrac{1}{3}$};
+  \node[font=\tiny, anchor=north] at (1.5, -0.18) {$\dfrac{1}{2}$};
+  \node[font=\tiny, anchor=north] at (2, -0.18) {$\dfrac{2}{3}$};
+  \node[font=\tiny, anchor=north] at (3, -0.18) {$1$};
+  \node[font=\tiny, anchor=east] at (-0.18, 2) {$\dfrac{2}{3}$};
+  \node[font=\tiny, anchor=east] at (-0.18, 3) {$1$};
+  % ── 왼쪽 식 · y = 2x (0 ≤ x < 1/2) · 표시 y = 2x
+  \draw[black, line width=0.5pt] (0, 0) -- (1.5, 3);
+  % ── 오른쪽 식 · y = 2-2x (1/2 ≤ x ≤ 1) · 표시 y = 6-2x
+  \draw[black, line width=0.5pt] (1.5, 3) -- (3, 0);
+  % ── y = x 대각선 (v4 세션 77) : 라벨 유지 (간략표기) · sloped 유지 (대각선 특성)
+  \begin{scope}
+    \clip (-0.4, -0.4) rectangle (3.5, 3.8);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-0.4, -0.4) -- node[pos=0.85, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=x$}
+      (3.5, 3.5);
+  \end{scope}
+  % ── 고정점 (2/3, 2/3) · 좌표축 숫자 이미 표시 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 2) -- (2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 2) -- (0, 2);
+  \filldraw[dm-accent] (2, 2) circle (0.7pt);
+  % ── 시작점 x = 1/3 · f(1/3) = 2/3 · 좌표축 숫자 이미 표시 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1, 2) -- (1, 0);
+  \filldraw[black] (1, 2) circle (0.7pt);
+  % ── v4 (세션 77) : 완전 식 라벨 y=2x·y=2-2x 삭제
+\end{tikzpicture}
+\end{center}
+
+$x = \dfrac{1}{3}$\ 은 $0 \le x < \dfrac{1}{2}$\ 에 속하므로 $f\!\left(\dfrac{1}{3}\right) = 2 \cdot \dfrac{1}{3} = \dfrac{2}{3}$\ 이다.
+
+$\dfrac{2}{3}$\ 은 $\dfrac{1}{2} \le x \le 1$\ 에 속하므로 $f\!\left(\dfrac{2}{3}\right) = 2 - 2 \cdot \dfrac{2}{3} = \dfrac{2}{3}$\ 이다.
+
+$f\!\left(\dfrac{2}{3}\right) = \dfrac{2}{3}$\ 이므로 $\dfrac{2}{3}$\ 은 $f$\ 의 고정점이고
+\[ f^{n}\!\left(\dfrac{1}{3}\right) = \dfrac{2}{3}\quad (n \ge 1). \]
+$\therefore\ f^{10}\!\left(\dfrac{1}{3}\right) = \dfrac{2}{3}$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{고정점에 도달하면 이후 합성은 그 값을 유지한다}: $f(\alpha) = \alpha$\ 이면 $\alpha$\ 는 고정점이므로 $f^{n}(\alpha) = \alpha$\ 가 모든 $n$\ 에 대해 성립한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 ───────────────
+\dmsoltitle{2}{항등·상수함수 조합과 남은 함수의 값}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+$f$\ 가 항등함수이므로 $f(x) = x$\ 이고, 특히 $f(1) = 1$,\ $f(4) = 4$\ 이다.
+
+$g$\ 는 상수함수이고 $g(2) = 3$\ 이므로 $g(x) = 3$\ 이 모든 $x$\ 에 대해 성립한다.
+
+조건 (다) $f(x) + g(x) + h(x) = 10$\ 에서 $h(x) = 10 - x - 3 = 7 - x$\ 이므로
+\[ h(1) = 6,\qquad h(4) = 3,\qquad h(1) + h(4) = 9. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{항등·상수 조건이 $h$\ 의 식을 곧바로 결정한다}: $f = x$\ 와 $g = 3$\ 이 조건에서 확정되므로 합 조건이 곧 $h(x) = 7 - x$\ 라는 명시적 식으로 정리된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 ───────────────
+\dmsoltitle{3}{원함수와 역함수 그래프의 두 교점과 거리}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$f(x) = x^{2} - 4x + k = (x - 2)^{2} + k - 4$\ 는 $x \ge 2$\ 에서 증가함수이므로 역함수가 존재하고, 두 그래프의 교점은 모두 $y = x$ 위에 있다.
+
+$f(x) = x$\ 에서 $x^{2} - 5x + k = 0$\ 이므로 두 교점의 $x$\ 좌표를 $\alpha$,\ $\beta$\ 라 하면
+\[ \alpha + \beta = 5,\qquad \alpha\beta = k. \]
+두 교점 $(\alpha,\, \alpha)$\ 와 $(\beta,\, \beta)$ 사이 거리는
+\[ \sqrt{(\alpha - \beta)^{2} + (\alpha - \beta)^{2}} = \sqrt{2}\, |\alpha - \beta|. \]
+
+거리가 $\sqrt{2}$\ 이므로 $|\alpha - \beta| = 1$\ 이고
+\[ (\alpha - \beta)^{2} = (\alpha + \beta)^{2} - 4\alpha\beta = 25 - 4k = 1. \]
+따라서 $k = 6$\ 이다.
+
+한편 두 근은 $x = 2$,\ $x = 3$\ 이므로 둘 다 정의역 $x \ge 2$\ 의 조건을 만족시킨다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{순증가 원함수의 교점은 모두 $y = x$ 위에 있다}: 원함수가 순증가이면 그 그래프와 역함수 그래프의 교점은 모두 $y = x$ 위에 놓이므로 교점 문제가 $f(x) = x$\ 의 근 문제로 환치된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$4$} & \dmquick{2}{$7$} & \dmquick{3}{$26$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── 실전 1 (R-1 · 2021.11월 고1 27번) ───────────────
+\dmsoltitle{1}{합성이 항등함수가 되는 계수 결정}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+$X = \{2,\, 3\}$\ 에서 $f(x) = ax - 3a = a(x - 3)$\ 이므로
+\[ f(2) = -a,\qquad f(3) = 0. \]
+따라서 $f$\ 의 치역은 $\{-a,\, 0\}$\ 이고, 이 두 값이 $g$\ 의 정의역이다.
+
+$g \circ f : X \to X$\ 가 항등함수이므로 $g(f(x)) = x$\ 가 $X$\ 의 모든 원소에서 성립한다.
+\[ g(f(2)) = g(-a) = 2,\qquad g(f(3)) = g(0) = 3. \]
+
+$g(x) = x^{2} + 2x + b$\ 이므로 $g(0) = b = 3$\ 이고 $g(-a) = a^{2} - 2a + b = a^{2} - 2a + 3 = 2$\ 이다. 이를 정리하면
+\[ a^{2} - 2a + 1 = 0,\qquad (a - 1)^{2} = 0,\qquad a = 1. \]
+
+따라서 $a + b = 1 + 3 = 4$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{유한 정의역의 항등 조건은 원소별 등식으로 분해된다}: 정의역이 두 원소뿐이므로 $g \circ f =$ 항등이라는 조건이 원소별 등식 두 개로 갈라져 미지수가 순차 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 2 (R-2 · 2018.11월 고1 28번) ───────────────
+\dmsoltitle{2}{치역 3중 제약과 중복되는 함숫값}
+\begin{dmanswerbox}
+정답: $7$
+\end{dmanswerbox}
+
+조건 (가) 치역의 원소 개수 $7$\ 이므로 정의역 $X$\ 의 $8$\ 개 원소 중 정확히 두 원소가 같은 함숫값을 가지고 나머지 여섯 원소는 서로 다른 함숫값을 가진다. 따라서 치역은 $X = \{1,\, 2,\, \ldots,\, 8\}$\ 의 $7$\ 개 원소로 이루어진 부분집합이다.
+
+조건 (다) 치역의 원소 중 최댓값 $M$\ 과 최솟값 $m$\ 의 차 $M - m = 6$\ 이다. $X \subset \{1,\, \ldots,\, 8\}$\ 이므로 가능한 $(m,\, M)$\ 은 $(1,\, 7)$ 또는 $(2,\, 8)$\ 이다.
+
+$(m,\, M) = (1,\, 7)$\ 인 경우 치역은 $\{1,\, 2,\, 3,\, 4,\, 5,\, 6,\, 7\}$\ 이다. 함숫값의 합은 조건 (나)에서 $42$\ 이고 치역의 원소를 모두 한 번씩 세면 $1 + 2 + \cdots + 7 = 28$\ 이다. 두 원소에서 같은 값을 갖는 부분이 중복 계산되므로 그 중복 값 $n$\ 은
+\[ 28 + n = 42,\qquad n = 14. \]
+그런데 $n \le 7$\ 이어야 하므로 이 경우는 불가능.
+
+$(m,\, M) = (2,\, 8)$\ 인 경우 치역은 $\{2,\, 3,\, 4,\, 5,\, 6,\, 7,\, 8\}$\ 이다. 원소의 합은 $2 + 3 + \cdots + 8 = 35$\ 이고
+\[ 35 + n = 42,\qquad n = 7. \]
+$n = 7$\ 은 치역 안에 있으므로 조건을 모두 만족시킨다. 따라서 $n = 7$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$8 \to 7$\ 은 정확히 한 값에서 두 원소가 겹친다}: 정의역이 $8$\ 개 원소이고 치역이 $7$\ 개 원소이므로 정확히 한 함숫값에서만 두 원소가 겹친다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 3 (R-3 · 2023.11월 고1 29번) ───────────────
+\dmsoltitle{3}{두 곡선 조합과 일대일함수의 부호 조건}
+\begin{dmanswerbox}
+정답: $26$
+\end{dmanswerbox}
+
+조건 (가)에서 각 $x \in X$\ 에 대하여
+\[ f(x) = -x^{2} + 5 \quad \text{또는} \quad f(x) = -4x. \]
+$X = \{-3,\, -2,\, -1,\, 0,\, 1,\, 2\}$\ 의 각 원소에서 두 후보 값은 다음과 같다.
+
+\vspace{3mm}
+\begin{center}
+\begin{tabular}{c|rrrrrr}
+$x$ & $-3$ & $-2$ & $-1$ & $0$ & $1$ & $2$ \\ \hline
+$-x^{2} + 5$ & $-4$ & $1$ & $4$ & $5$ & $4$ & $1$ \\
+$-4x$ & $12$ & $8$ & $4$ & $0$ & $-4$ & $-8$
+\end{tabular}
+\end{center}
+
+\vspace{3mm}
+$f$\ 는 일대일함수이므로 서로 다른 $x$\ 에 대해 함숫값이 달라야 한다. $x = -1$\ 에서는 두 후보가 모두 $4$\ 로 같으므로 $f(-1) = 4$\ 가 강제된다.
+
+$-x^{2} + 5$\ 의 표에서 $x = -3$\ 이 $-4$\ 를 주고 $-4x$\ 의 표에서 $x = 1$\ 이 $-4$\ 를 주므로, 이 두 원소는 서로 다른 곡선을 골라야 일대일이 유지된다. 또 $x = -2$\ 와 $x = 2$\ 가 $-x^{2} + 5$\ 에서 모두 $1$\ 이므로 이 두 원소도 서로 다른 곡선을 골라야 한다.
+
+조건 (나) $f(0) \cdot f(1) \cdot f(2) < 0$\ 을 만족시키는 유일한 배치는
+\[ f(-3) = 12,\ f(-2) = 8,\ f(-1) = 4, \]
+\[ f(0) = 5,\ f(1) = -4,\ f(2) = 1 \]
+이다. 이때 $f(0) \cdot f(1) \cdot f(2) = 5 \cdot (-4) \cdot 1 = -20 < 0$\ 이 성립하고 여섯 값이 서로 달라 일대일이다.
+\[ \therefore\ 12 + 8 + 4 + 5 - 4 + 1 = 26. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 곡선이 같은 값을 주는 자리는 $f$\ 를 자동으로 결정한다}: $x = -1$\ 에서 두 곡선이 모두 $4$\ 이므로 어느 곡선을 골라도 $f(-1) = 4$\ 가 강제된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

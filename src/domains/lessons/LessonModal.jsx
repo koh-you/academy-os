@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { createClosureMakeupNotificationDrafts } from "../notifications/closureMakeupNotification.js";
 import {
@@ -13,6 +14,7 @@ import {
 import {
   createLessonModalColorOptions,
   createLessonModalDateChangePatch,
+  createLessonModalStartTimeChangePatch,
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "./lessonModalDraftTransitions.js";
@@ -40,6 +42,7 @@ import {
 } from "./LessonModalClosureMakeupPanel.jsx";
 import { LessonModalNewStudentMakeupPanel } from "./LessonModalNewStudentMakeupPanel.jsx";
 import { LessonModalStudentPicker } from "./LessonModalStudentPicker.jsx";
+import "./lessonModal.css";
 import "./lessonModalActions.css";
 
 export function LessonModal({
@@ -79,7 +82,11 @@ export function LessonModal({
   });
   const normalizedTemplates = normalizeClassTemplates(templates);
   const fallbackTemplate = normalizedTemplates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
-  const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : normalizedTemplates[0]?.classTemplateId || "");
+  // 2026-09-26 · 신규 등록은 반을 고르지 않은 상태("직접 입력 일정")로 연다.
+  // 목록 첫 반을 미리 선택해 두면 명단은 0명인데 반만 골라져 있는 상태가 되고,
+  // 같은 항목을 다시 골라도 <select> 가 change 를 쏘지 않아 「반 불러오기」가 죽은 컨트롤이 된다.
+  // 저장 payload 도 사용자가 고르지 않은 반을 참칭하게 된다. 기존 수업 편집은 그 수업의 반을 그대로 쓴다.
+  const [classTemplateId, setClassTemplateId] = useState(initialLesson?.classTemplateId || "");
   const activeTemplate = normalizedTemplates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
   const initialDraft = createLessonModalInitialDraft({
     activeStudents,
@@ -124,9 +131,11 @@ export function LessonModal({
   const [notificationAudiences, setNotificationAudiences] = useState(["parent"]);
   const [includeStudentReminder, setIncludeStudentReminder] = useState(true);
   const [isClosureMakeupNotificationModalOpen, setIsClosureMakeupNotificationModalOpen] = useState(false);
+  const [isGeneratedLessonCancelConfirmOpen, setIsGeneratedLessonCancelConfirmOpen] = useState(false);
   const [closureMakeupNotificationDrafts, setClosureMakeupNotificationDrafts] = useState({});
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
+  const isEditingExistingLesson = Boolean(initialLesson);
   const isSaving = saveState === "saving";
   const isSaved = saveState === "saved";
   const isFormLocked = isSaving || isSaved;
@@ -236,6 +245,20 @@ export function LessonModal({
     }
   }
 
+  // 2026-09-26 · 사용자가 시작 시간을 직접 바꿀 때만 종료를 +3시간으로 다시 맞춘다.
+  // 모달을 열 때·반을 불러올 때·날짜를 바꿀 때는 각각의 기존 경로가 종료를 정한다.
+  // 기존 수업 편집에서는 사람이 정해 둔 종료(직전 시작+3시간이 아닌 값)를 덮지 않는다.
+  function handleStartTimeChange(nextStartTime) {
+    const patch = createLessonModalStartTimeChangePatch({
+      currentEndTime: endTime,
+      isEditingExistingLesson,
+      nextStartTime,
+      previousStartTime: startTime
+    });
+    setStartTime(patch.startTime);
+    if (patch.endTime !== undefined) setEndTime(patch.endTime);
+  }
+
   function handleClosureMakeupDateChange(nextDate) {
     setClosureMakeupDate(nextDate);
     setClosureMakeupDateTouched(true);
@@ -245,16 +268,13 @@ export function LessonModal({
     setStudentIds(filteredStudents.map((student) => student.studentId));
   }
 
-  function selectLessonModalStudentGroup(groupStudents) {
-    const groupIds = groupStudents.map((student) => student.studentId);
-    setStudentIds((current) => Array.from(new Set([...current, ...groupIds])));
+  // 2026-09-26 · 학년 그룹별 선택/해제 대신 재원생 전체를 한 번에 켜고 끔다.
+  function selectAllLessonModalStudents() {
+    setStudentIds(activeStudents.map((student) => student.studentId));
   }
 
-  function deselectLessonModalStudentGroup(groupStudents) {
-    const groupIds = new Set(groupStudents.map((student) => student.studentId));
-    setStudentIds((current) =>
-      current.filter((studentId) => !groupIds.has(studentId))
-    );
+  function clearAllLessonModalStudents() {
+    setStudentIds([]);
   }
 
   function toggleLessonModalStudent(studentId, isSelected) {
@@ -352,101 +372,131 @@ export function LessonModal({
     setClosureMakeupNotificationDrafts((current) => ({ ...current, [field]: value }));
   }
 
+  // 2026-09-19 · U11(lessons-10): 자동 생성 수업 취소는 브라우저 confirm 대신 ConfirmDialog 로 묻는다(문구 동일).
+  // 일반 수업은 App 의 '수업 취소 확인' 모달이 맡으므로 여기서는 바로 onDeleteLesson 을 부른다(기존과 같음).
   function requestDeleteLesson() {
     if (!initialLesson?.lessonId || !onDeleteLesson) return;
     const isGeneratedLesson = initialLesson.isVirtualGeneratedLesson || initialLesson.isExamPrepAutoLesson;
-    if (isGeneratedLesson && !window.confirm("이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다.")) return;
+    if (isGeneratedLesson) {
+      setIsGeneratedLessonCancelConfirmOpen(true);
+      return;
+    }
     onDeleteLesson(initialLesson.lessonId);
   }
 
+  function confirmGeneratedLessonCancel() {
+    setIsGeneratedLessonCancelConfirmOpen(false);
+    if (!initialLesson?.lessonId || !onDeleteLesson) return;
+    onDeleteLesson(initialLesson.lessonId);
+  }
+
+  // 2026-09-19 · U13(modals-12): 저장 중 닫기 차단은 빈 함수 onClose 대신 공용 closeDisabled(× 비활성·Esc 무시·aria-busy)로 통일.
+  // isSaving 계산·onClose 계약은 그대로.
+  // 2026-09-26 · 가로 2열 모달: 왼쪽은 수업 정보, 오른쪽은 포함 학생(자체 스크롤).
+  // 상태바·액션은 Modal 의 footer 슬롯으로 내려 본문 스크롤과 무관하게 항상 보이게 한다.
   return (
-    <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={isSaving ? () => {} : onClose}>
-      <LessonModalBasics
-        classTemplateId={classTemplateId}
-        color={color}
-        date={date}
-        endTime={endTime}
-        isFormLocked={isFormLocked}
-        isLessonTypeChoiceDisabled={isLessonTypeChoiceDisabled}
-        lessonColorOptions={lessonColorOptions}
-        lessonType={lessonType}
-        name={name}
-        onClassTemplateChange={handleTemplateChange}
-        onColorOptionClick={handleColorOptionClick}
-        onDateChange={handleDateChange}
-        onEndTimeChange={setEndTime}
-        onLessonTypeChange={handleLessonTypeChange}
-        onNameChange={setName}
-        onStartTimeChange={setStartTime}
-        startTime={startTime}
-        templates={normalizedTemplates}
-      >
-        {lessonType === "closure" ? (
-          <LessonModalClosurePanel
-            blockingNotificationJobCount={closureBlockingNotificationJobs.length}
-            closureMakeupDate={closureMakeupDate}
-            closureMakeupEnabled={closureMakeupEnabled}
-            closureMakeupEndTime={closureMakeupEndTime}
-            closureMakeupStartTime={closureMakeupStartTime}
-            closureRecordCount={closureRecordCount}
+    <Modal
+      className="lessonModal"
+      closeDisabled={isSaving}
+      footer={(
+        <LessonModalActions
+          closureMakeupEnabled={closureMakeupEnabled}
+          isEditing={isEditingExistingLesson}
+          isSaved={isSaved}
+          isSaving={isSaving}
+          lessonType={lessonType}
+          notificationEnabled={notificationEnabled}
+          onClose={onClose}
+          onDelete={initialLesson && onDeleteLesson ? requestDeleteLesson : null}
+          onSave={submitLesson}
+          saveMessage={saveMessage}
+          saveState={saveState}
+          selectedStudentCount={studentIds.length}
+        />
+      )}
+      scrollable
+      title={initialLesson ? "수업 수정" : "수업 등록"}
+      onClose={onClose}
+    >
+      <div className="lessonModalLayout">
+        <div className="lessonModalFormColumn">
+          <LessonModalBasics
+            color={color}
+            date={date}
+            endTime={endTime}
+            isEditingExistingLesson={isEditingExistingLesson}
+            isFormLocked={isFormLocked}
+            isLessonTypeChoiceDisabled={isLessonTypeChoiceDisabled}
+            lessonColorOptions={lessonColorOptions}
+            lessonType={lessonType}
+            name={name}
+            onColorOptionClick={handleColorOptionClick}
+            onDateChange={handleDateChange}
+            onEndTimeChange={setEndTime}
+            onLessonTypeChange={handleLessonTypeChange}
+            onNameChange={setName}
+            onStartTimeChange={handleStartTimeChange}
+            startTime={startTime}
+          >
+            {lessonType === "closure" ? (
+              <LessonModalClosurePanel
+                blockingNotificationJobCount={closureBlockingNotificationJobs.length}
+                closureMakeupDate={closureMakeupDate}
+                closureMakeupEnabled={closureMakeupEnabled}
+                closureMakeupEndTime={closureMakeupEndTime}
+                closureMakeupStartTime={closureMakeupStartTime}
+                closureRecordCount={closureRecordCount}
+                initialStudentCount={getLessonStudentIds(initialLesson).length}
+                isClosureConversion={isClosureConversion}
+                isFormLocked={isFormLocked}
+                isPersistedClosure={isPersistedClosure}
+                onClosureMakeupDateChange={handleClosureMakeupDateChange}
+                onClosureMakeupEnabledChange={setClosureMakeupEnabled}
+                onClosureMakeupEndTimeChange={setClosureMakeupEndTime}
+                onClosureMakeupStartTimeChange={setClosureMakeupStartTime}
+              />
+            ) : null}
+            {lessonType === "newStudentMakeup" ? (
+              <LessonModalNewStudentMakeupPanel
+                isFormLocked={isFormLocked}
+                notificationAudiences={notificationAudiences}
+                notificationEnabled={notificationEnabled}
+                onNotificationAudienceChange={setNotificationAudiences}
+                onNotificationEnabledChange={setNotificationEnabled}
+                selectedStudentCount={studentIds.length}
+              />
+            ) : null}
+            {lessonType === "closureMakeup" ? (
+              <LessonModalClosureMakeupPanel
+                isFormLocked={isFormLocked}
+                onOpenNotificationModal={openClosureMakeupNotificationModal}
+                selectedStudentCount={studentIds.length}
+              />
+            ) : null}
+          </LessonModalBasics>
+        </div>
+
+        <div className="lessonModalRosterColumn">
+          <LessonModalStudentPicker
+            activeStudentCount={activeStudents.length}
+            classTemplateId={classTemplateId}
+            filteredStudents={filteredStudents}
+            groupedStudents={groupedStudents}
             initialStudentCount={getLessonStudentIds(initialLesson).length}
             isClosureConversion={isClosureConversion}
-            isFormLocked={isFormLocked}
-            isPersistedClosure={isPersistedClosure}
-            onClosureMakeupDateChange={handleClosureMakeupDateChange}
-            onClosureMakeupEnabledChange={setClosureMakeupEnabled}
-            onClosureMakeupEndTimeChange={setClosureMakeupEndTime}
-            onClosureMakeupStartTimeChange={setClosureMakeupStartTime}
+            isRosterLocked={isStudentRosterLocked}
+            onClassTemplateChange={handleTemplateChange}
+            onClearAll={clearAllLessonModalStudents}
+            onSearchChange={setStudentSearch}
+            onSelectAll={selectAllLessonModalStudents}
+            onSelectVisible={selectVisibleLessonModalStudents}
+            onToggleStudent={toggleLessonModalStudent}
+            search={studentSearch}
+            selectedStudentIds={studentIds}
+            templates={normalizedTemplates}
           />
-        ) : null}
-        {lessonType === "newStudentMakeup" ? (
-          <LessonModalNewStudentMakeupPanel
-            isFormLocked={isFormLocked}
-            notificationAudiences={notificationAudiences}
-            notificationEnabled={notificationEnabled}
-            onNotificationAudienceChange={setNotificationAudiences}
-            onNotificationEnabledChange={setNotificationEnabled}
-            selectedStudentCount={studentIds.length}
-          />
-        ) : null}
-        {lessonType === "closureMakeup" ? (
-          <LessonModalClosureMakeupPanel
-            isFormLocked={isFormLocked}
-            onOpenNotificationModal={openClosureMakeupNotificationModal}
-            selectedStudentCount={studentIds.length}
-          />
-        ) : null}
-      </LessonModalBasics>
-
-      <LessonModalStudentPicker
-        activeStudentCount={activeStudents.length}
-        filteredStudents={filteredStudents}
-        groupedStudents={groupedStudents}
-        initialStudentCount={getLessonStudentIds(initialLesson).length}
-        isClosureConversion={isClosureConversion}
-        isRosterLocked={isStudentRosterLocked}
-        onDeselectGroup={deselectLessonModalStudentGroup}
-        onSearchChange={setStudentSearch}
-        onSelectGroup={selectLessonModalStudentGroup}
-        onSelectVisible={selectVisibleLessonModalStudents}
-        onToggleStudent={toggleLessonModalStudent}
-        search={studentSearch}
-        selectedStudentIds={studentIds}
-      />
-
-      <LessonModalActions
-        closureMakeupEnabled={closureMakeupEnabled}
-        isEditing={Boolean(initialLesson)}
-        isSaved={isSaved}
-        isSaving={isSaving}
-        lessonType={lessonType}
-        notificationEnabled={notificationEnabled}
-        onClose={onClose}
-        onDelete={initialLesson && onDeleteLesson ? requestDeleteLesson : null}
-        onSave={submitLesson}
-        saveMessage={saveMessage}
-        saveState={saveState}
-      />
+        </div>
+      </div>
       {isClosureMakeupNotificationModalOpen ? (
         <LessonModalClosureMakeupNotificationModal
           includeStudentReminder={includeStudentReminder}
@@ -461,6 +511,15 @@ export function LessonModal({
           selectedStudentCount={studentIds.length}
         />
       ) : null}
+      <ConfirmDialog
+        confirmLabel="수업 취소"
+        description="이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다."
+        onCancel={() => setIsGeneratedLessonCancelConfirmOpen(false)}
+        onConfirm={confirmGeneratedLessonCancel}
+        open={isGeneratedLessonCancelConfirmOpen}
+        title="자동 생성 수업 취소"
+        tone="danger"
+      />
     </Modal>
   );
 }

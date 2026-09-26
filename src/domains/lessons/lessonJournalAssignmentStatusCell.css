@@ -1,0 +1,23 @@
+/* 수업일지 숙제 상태 칸의 읽기 모드 값. 비활성 select 대신 글자로만 보여준다(docs/ui-row-actions.md R1).
+   높이·여백은 편집 모드의 .assignmentStatusSelect 와 맞춰 모드 전환 때 행 높이가 튀지 않게 한다.
+   App.css 가 파일 크기 상한에 걸려 있어 도메인 CSS 로 둔다. */
+
+.assignmentStatusCell .assignmentStatusReadValue {
+  align-items: center;
+  align-self: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  display: flex;
+  font-size: 14px;
+  font-weight: 800;
+  min-height: 36px;
+  overflow-wrap: anywhere;
+  padding: 6px 10px;
+}
+
+.assignmentStatusCell .assignmentStatusReadValue.empty {
+  color: var(--academy-muted, #64748b);
+  font-weight: 600;
+}

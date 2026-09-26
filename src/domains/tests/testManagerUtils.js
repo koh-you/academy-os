@@ -1,5 +1,6 @@
 import { testPaperKindOptions } from "../../app/appConfig.js";
 import { safeIdPart } from "../../shared/utils/id.js";
+import { scopeDeterministicId } from "../../shared/utils/tenantIdScope.js";
 
 export function getTestPaperKindLabel(value = "") {
   return testPaperKindOptions.find((option) => option.id === value)?.label ?? "데일리";
@@ -14,7 +15,7 @@ export function createTestSessionIdForPaper({
   testTitle = ""
 } = {}) {
   const sourceKey = problemBookId || [testKind, subject, testTitle].filter(Boolean).join("_");
-  return `test_session_${safeIdPart(testDate || "date")}_${safeIdPart(classTemplateId || "all")}_${safeIdPart(sourceKey || "test")}`;
+  return scopeDeterministicId(`test_session_${safeIdPart(testDate || "date")}_${safeIdPart(classTemplateId || "all")}_${safeIdPart(sourceKey || "test")}`);
 }
 
 export function createTestAttemptId(testSessionId = "", studentId = "") {

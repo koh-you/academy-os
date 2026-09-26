@@ -4,6 +4,7 @@ import { ListCard } from "../../shared/components/ListCard.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
+import "./examPostSubmissionManager.css";
 
 export function ExamPostSubmissionManager({
   buildExamPostTargetsForStudent,
@@ -137,6 +138,7 @@ export function ExamPostSubmissionManager({
                 <strong>{submission?.studentName || target.studentName || "학생"}</strong>
                 <span>{target.schoolName} · {target.grade} · {target.subject} · {target.examDate}</span>
                 <small>{submission ? `제출 ${formatKoreanDateTime(submission.submittedAt)}` : `미제출 · 마감 ${target.dueDate} 23:59`}</small>
+                {submission?.teacherConfirmed ? <span className="examPostConfirmedBadge">확인 완료</span> : null}
               </div>
               {submission ? (
                 <div className="examPostDetail">
@@ -180,12 +182,12 @@ export function ExamPostSubmissionManager({
               {submission ? (
                 <div className="examPostConfirmAction">
                   <button
-                    className={submission.teacherConfirmed ? "softButton" : "primaryButton compact"}
+                    className="softButton compact"
                     disabled={confirmSaveState.state === "saving"}
                     onClick={() => onConfirmExamPostSubmission?.(submission.submissionId, !submission.teacherConfirmed)}
                     type="button"
                   >
-                    {confirmSaveState.state === "saving" ? "저장 중..." : submission.teacherConfirmed ? "확인 완료" : "확인 처리"}
+                    {confirmSaveState.state === "saving" ? "저장 중..." : submission.teacherConfirmed ? "확인 취소" : "확인 처리"}
                   </button>
                   {confirmSaveState.state !== "idle" ? (
                     <div className={`examPostConfirmSaveFeedback ${confirmSaveState.state}`} aria-live="polite" role="status">

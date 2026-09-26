@@ -36,7 +36,9 @@ domainRoot.walkRules((rule) => {
     assert.ok(isStudentModalSelector(selector), `unexpected student modal selector: ${selector}`);
   }
 });
-assert.equal(domainSelectors.length, 61);
+// 2026-09-19 · UI U8: .primaryButton.studentAddSubmit 삭제(−1), .studentIntakePanel .studentIntakeAutosaveNote 와
+// .studentAddModal .modalScrollBody(탭 줄 찌그러짐 보정) 추가(+2) → 62.
+assert.equal(domainSelectors.length, 62);
 
 const appSelectors = [];
 postcss.parse(appCss).walkRules((rule) => {
@@ -45,4 +47,4 @@ postcss.parse(appCss).walkRules((rule) => {
 assert.deepEqual(domainSelectors.filter((selector) => appSelectors.includes(selector)), []);
 assert.ok(appSelectors.includes(".classRosterList:focus-visible"), "shared class roster focus rule must remain in App.css");
 
-console.log("student modal CSS domain split passed · 61 selectors moved · shared class roster rule preserved");
+console.log("student modal CSS domain split passed · 62 selectors · shared class roster rule preserved");

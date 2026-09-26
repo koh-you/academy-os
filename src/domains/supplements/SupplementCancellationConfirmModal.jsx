@@ -13,6 +13,7 @@ export function SupplementCancellationConfirmModal({
   return (
     <Modal
       className="supplementPassConfirmModal supplementCancellationConfirmModal"
+      closeDisabled={isBusy}
       title={keepsSourceAbsence ? "보강만 취소할까요?" : "결석 기록을 취소할까요?"}
       subtitle={keepsSourceAbsence
         ? closesUnsavedMakeupCandidate

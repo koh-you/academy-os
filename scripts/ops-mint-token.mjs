@@ -1,6 +1,7 @@
 // ops(기계) 토큰 발급. Claude/Codex 가 최소권한으로 운영 API 를 조사·수정할 때 사용.
 //
 //   node scripts/ops-mint-token.mjs --scope read --tenant tenant_default --ttl 2h --label claude-local
+//   node scripts/ops-mint-token.mjs --scope bank-write --tenant tenant_default --ttl 2160h --label claude-problem-bank
 //   node scripts/ops-mint-token.mjs --scope cas-write --tenant tenant_abc --ttl 30m --label codex-fix
 //   node scripts/ops-mint-token.mjs --scope highrisk --cross-tenant --ttl 15m --label operator --reason "퇴원버그 정정"
 //
@@ -46,8 +47,8 @@ const tenantId = typeof args.tenant === "string" ? args.tenant : null;
 const label = typeof args.label === "string" ? args.label : "";
 const reason = typeof args.reason === "string" ? args.reason : "";
 
-if (!["read", "cas-write", "highrisk"].includes(scope)) {
-  console.error("--scope 는 read | cas-write | highrisk 중 하나여야 합니다.");
+if (!["read", "bank-write", "cas-write", "highrisk"].includes(scope)) {
+  console.error("--scope 는 read | bank-write | cas-write | highrisk 중 하나여야 합니다.");
   process.exit(1);
 }
 if (!process.env.OPS_TOKEN_SIGNING_SECRET) {

@@ -1,0 +1,1227 @@
+% DeeP Math 정리편 · CM2-RF-02 무리함수 · 답지 v1
+% Phase 3 (2026-07-20 세션 57) : 청사진 v1.0 · 본편 Phase 2 대응
+% RF-01 답지 골든 계승 · deep-math-answer.sty
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% 세션 55~57 신정책 준수:
+%   - \textbf 금지 (dmanswerbox 안 값만)
+%   - cplabel 완성 문장 (짧고 굵게)
+%   - "자기역함수" 미사용 → "역함수가 자기 자신과 같은"
+%   - "매개변수·극한·미분·삼각함수·벡터" 자연어화
+%   - "정확히 N개" 금지 → "오직 한 점"·"오직 한 개"
+%   - 원문 그림: R-2·L3-3 재현 · R-1·R-3 원문 그림 없음
+%   - L3-1 답 재검증: 정답 "0<k ≤ 1/2" (blueprint 재정정)
+%   - CHK9 답 원문 그대로: "k > -3 또는 k = -7/2"
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{무리함수}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{무리함수 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{풀이 참조} & \dmquick{2}{풀이 참조} & \dmquick{3}{$2x$} & \dmquick{4}{$\sqrt{2}+1$} & \dmquick{5}{풀이 참조} \\
+\dmquick{6}{$10$} & \dmquick{7}{$3$} & \dmquick{8}{$6$} & \dmquick{9}{풀이 참조} & \dmquick{10}{풀이 참조} \\
+\dmquick{11}{$30$} & \dmquick{12}{$13$} & & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{무리식이 실수가 되기 위한 $x$\ 의 범위}
+\begin{dmanslist}
+\dmansitem{1} $-3 \le x < 2$ \\
+& \dmansitem{2} $\dfrac{1}{2}\le x < 4$
+\end{dmanslist}
+
+\dmsubprob{1} 근호 안의 두 식이 모두 $0$ 이상이어야 하고, 분모의 근호 안은 $0$\ 이 아니어야 한다.
+\[ x+3 \ge 0,\qquad 2-x > 0. \]
+두 조건을 함께 정리하면 $-3 \le x < 2$\ 이다.
+
+\dmsubprob{2} 분자의 근호 안은 $0$ 이상, 분모의 근호 안은 양수이어야 한다.
+\[ 2x-1 \ge 0,\qquad 4-x > 0. \]
+따라서 $\dfrac{1}{2}\le x < 4$\ 이다.
+
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{켤레무리식을 곱한 분모의 유리화}
+\begin{dmanslist}
+\dmansitem{1} $\dfrac{x(\sqrt{x+4}+2)}{x}=\sqrt{x+4}+2$ \\
+& \dmansitem{2} $\sqrt{x+3}+\sqrt{x-3}$
+\end{dmanslist}
+
+\dmsubprob{1} 분자와 분모에 $\sqrt{x+4}+2$\ 를 곱하면 분모는
+\[ (x+4)-4=x \]
+가 되므로
+\[ \dfrac{x}{\sqrt{x+4}-2}=\dfrac{x(\sqrt{x+4}+2)}{x}=\sqrt{x+4}+2. \]
+
+\dmsubprob{2} 분자와 분모에 $\sqrt{x+3}+\sqrt{x-3}$\ 을 곱하면 분모가 $(x+3)-(x-3)=6$\ 이 되므로
+\begin{align*}
+\dfrac{6}{\sqrt{x+3}-\sqrt{x-3}}
+&=\dfrac{6\bigl(\sqrt{x+3}+\sqrt{x-3}\bigr)}{6}\\
+&=\sqrt{x+3}+\sqrt{x-3}.
+\end{align*}
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{켤레무리식의 합에서 근호 소거}
+\begin{dmanswerbox}
+정답: $2x$
+\end{dmanswerbox}
+
+두 분모가 서로 켤레이므로 각각 유리화하면
+\[ \dfrac{1}{x+\sqrt{x^{2}-1}}=x-\sqrt{x^{2}-1}, \]
+\[ \dfrac{1}{x-\sqrt{x^{2}-1}}=x+\sqrt{x^{2}-1}. \]
+두 식을 더하면 근호가 상쇄되어 $2x$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 두 분모가 서로 켤레이면 통분한 결과의 분모가 유리식이 되어 분자의 두 근호가 상쇄된다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{조건 대입 전 유리화}
+\begin{dmanswerbox}
+정답: $\sqrt{2}+1$
+\end{dmanswerbox}
+
+두 조건식을 유리화하면
+\[ x=\dfrac{1}{\sqrt{2}-1}=\sqrt{2}+1,\qquad y=\dfrac{1}{\sqrt{2}+1}=\sqrt{2}-1. \]
+
+$x+y=2\sqrt{2}$,\ $x-y=2$,\ $xy=(\sqrt{2}+1)(\sqrt{2}-1)=1$\ 이다. 구하는 식의 분자와 분모에 $\sqrt{x}+\sqrt{y}$\ 를 곱하면 다음 식이 성립한다.
+\[ \dfrac{\sqrt{x}+\sqrt{y}}{\sqrt{x}-\sqrt{y}}=\dfrac{(\sqrt{x}+\sqrt{y})^{2}}{(\sqrt{x}-\sqrt{y})(\sqrt{x}+\sqrt{y})}=\dfrac{x+y+2\sqrt{xy}}{x-y}. \]
+
+$x+y+2\sqrt{xy}=2\sqrt{2}+2\sqrt{1}=2\sqrt{2}+2$\ 이고 $x-y=2$\ 이므로
+\[ \dfrac{\sqrt{x}+\sqrt{y}}{\sqrt{x}-\sqrt{y}}=\dfrac{2\sqrt{2}+2}{2}=\sqrt{2}+1. \]
+
+% ─────────────── 확인 5 ───────────────
+\dmsoltitle{5}{표준형에서 정의역·치역 판독}
+\begin{dmanslist}
+\dmansitem{1} 정의역 $x \le 3$, 치역 $y \ge 0$ \\
+& \dmansitem{2} 정의역 $x \ge 2$, 치역 $y \le 1$
+\end{dmanslist}
+
+\dmsubprob{1} $y=\sqrt{-(x-3)}$\ 의 시작점은 $(3,\, 0)$\ 이고 왼쪽 위로 뻗어 나가므로 정의역은 $x \le 3$, 치역은 $y \ge 0$\ 이다.
+
+\dmsubprob{2} $y=-\sqrt{x-2}+1$\ 의 시작점은 $(2,\, 1)$\ 이고 오른쪽 아래로 뻗어 나가므로 정의역은 $x \ge 2$, 치역은 $y \le 1$\ 이다.
+
+% ─────────────── 확인 6 ───────────────
+\dmsoltitle{6}{평행이동으로 두 그래프를 일치시킴}
+\begin{dmanswerbox}
+정답: $10$
+\end{dmanswerbox}
+
+이동 후의 함수는
+\[ y=\sqrt{a(x-b)-3}+2+c. \]
+이 식이 $y=\sqrt{5x+2}=\sqrt{5\!\left(x+\dfrac{2}{5}\right)}$\ 와 같으려면 근호 안 계수 비교에서 $a=5$\ 이다. 근호 안 나머지 부분은
+\[ 5(x-b)-3=5x-(5b+3), \]
+이 값이 $5x+2$\ 와 같으므로 $5b+3=-2$\ 에서 $b=-1$\ 이다. 상수항에서 $2+c=0$\ 이므로 $c=-2$\ 이다. $\therefore\ abc=5\cdot(-1)\cdot(-2)=10$\ 이다.
+
+% ─────────────── 확인 7 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3 인접 · 폐구간 개형)
+%   골든 : piecewise-shape.tex §확장 폐구간 개형 · scale=1.0 · 양 경계 closed
+\dmsoltitle{7}{폐구간에서 감소함수의 최대·최소}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-2.8, 0) -- (2, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -5) -- (0, 0.8) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {O};
+  \node[font=\tiny, below] at (-2, -0.02) {$-2$};
+  \node[font=\tiny, below] at (1, -0.02) {$1$};
+  \node[font=\tiny, left] at (-0.02, -1) {$-1$};
+  \node[font=\tiny, left] at (-0.02, -4) {$-4$};
+  % ── 곡선 y = -√(3-3x) - 1 · x ∈ [-2, 1] · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=-2:1, samples=80]
+    plot (\x, {-sqrt(3 - 3*\x) - 1});
+  % ── 왼쪽 경계 (-2, -4) 수선의 발 (x축·y축) · 점선 gray 0.4pt
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-2, -4) -- (-2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-2, -4) -- (0, -4);
+  % ── 오른쪽 경계 (1, -1) 수선의 발 (x축·y축) · 점선 gray 0.4pt
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1, -1) -- (1, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1, -1) -- (0, -1);
+  % ── 왼쪽 경계 (-2, -4) · 정의역 포함 · closed 검정 0.8pt · 최솟값
+  \filldraw[black] (-2, -4) circle (0.8pt);
+  \node[font=\tiny, anchor=north east] at (-2.05, -4.05) {$b=-4$};
+  % ── 오른쪽 경계 (1, -1) · 정의역 포함 · closed 검정 0.8pt · 최댓값
+  \filldraw[black] (1, -1) circle (0.8pt);
+  \node[font=\tiny, anchor=south west] at (1.05, -0.95) {$a=-1$};
+\end{tikzpicture}
+\end{center}
+
+$y=-\sqrt{-3(x-1)}-1$\ 의 시작점은 $(1,\, -1)$\ 이고 왼쪽 아래로 뻗어 나간다. 정의역 $-2 \le x \le 1$\ 에서 $x$\ 가 커질수록 근호 안이 작아지므로 $y$\ 는 증가한다.
+
+경계값을 대입하면
+$$y(-2)=-\sqrt{9}-1=-4,\qquad y(1)=-\sqrt{0}-1=-1.$$
+$\therefore\ a=-1$,\ $b=-4$\ 이고 $a-b=3$\ 이다.
+
+% ─────────────── 확인 8 ───────────────
+\dmsoltitle{8}{정의역·치역에서 시작점과 계수 결정}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+정의역이 $x \ge -3$\ 이므로 시작점의 $x$\ 좌표는 $-3$\ 이고 근호 안이 $0$\ 이어야 하므로
+\[ a\cdot(-3)+9=0,\qquad a=3. \]
+그래프는 감소함수이므로 시작점에서 최댓값을 갖는다. 치역 $y \le 2$\ 에서 시작점의 $y$\ 좌표는 $2$\ 이므로
+\[ -\sqrt{0}+b=2,\qquad b=2. \]
+$\therefore\ ab=3\cdot 2=6$\ 이다.
+
+% ─────────────── 확인 9 ───────────────
+% 세션 73 : 그래프 추가 (feedback_solution_graph_requirement · 유형 1)
+%   골든 : templates/tikz-graph-golden/curve-line-intersection.tex 계승
+%   규약 : scale=1.0 · 실효 두께 (축 0.7 · 곡선 0.5 · 점선 0.4) · 축 프레임 채움 · 점 (0.8/0.7)
+\dmsoltitle{9}{시작점과 접함으로 갈리는 유일 만남 조건}
+\begin{dmanswerbox}
+정답: $k>-3$ 또는 $k=-\dfrac{7}{2}$
+\end{dmanswerbox}
+
+$y=-\sqrt{-2(x-3)}$\ 의 시작점은 $(3,\, 0)$·정의역 $x \le 3$·치역 $y \le 0$\ 이며 곡선은 왼쪽 아래로 뻗어 나간다. 직선 $y=x+k$\ 의 위치를 곡선과 대조하여 한 점 만남의 경계를 찾는다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 77 v4 (마스터 지시) : 완전 식 라벨 전면 삭제 · 점 문자 라벨과 수선의 발만
+  \draw[-stealth, black, line width=0.7pt] (-2, 0) -- (4, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -3.5) -- (0, 0.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above left] at (0, 0) {O};
+  \node[font=\scriptsize, below] at (3, -0.02) {$3$};
+  % ── 곡선 y = -√(6-2x), x ≤ 3
+  \draw[black, line width=0.5pt, domain=-2:3, samples=60] plot (\x, {-sqrt(6 - 2*\x)});
+  % ── 임계 직선 2개 (라벨 없음 · 본문에서 설명)
+  \begin{scope}
+    \clip (-2, -3.5) rectangle (4, 0.5);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2, -5) -- (4, 1);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2, -5.5) -- (4, 0.5);
+  \end{scope}
+  % ── 시작점 (3, 0)
+  \filldraw[black] (3, 0) circle (0.8pt);
+  % ── 접점 (5/2, -1) · 좌표축 숫자 표시 → 수선의 발 필수
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.5, -1) -- (2.5, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.5, -1) -- (0, -1);
+  \filldraw[dm-accent] (2.5, -1) circle (0.7pt);
+  % 세션 78 : 수직 수선의 발이 label 관통 · anchor=north east로 좌측 offset (v3 원칙 · 수평 유지)
+  \node[font=\tiny, anchor=north east] at (2.45, -0.05) {$\tfrac{5}{2}$};
+  \node[font=\tiny, anchor=east] at (-0.08, -1) {$-1$};
+\end{tikzpicture}
+\end{center}
+
+두 경계값을 구한다.
+\begin{itemize}[leftmargin=8mm, itemsep=1mm, topsep=1mm]
+  \item 시작점 $(3,\, 0)$ 통과 : $0=3+k$\ 에서 $k=-3$
+  \item 곡선에 접함 : $\sqrt{6-2x}=-(x+k)$\ 의 양변을 제곱하면 $x^{2}+(2k+2)x+(k^{2}-6)=0$\ 이고 판별식 $=0$\ 에서 $k=-\dfrac{7}{2}$ \quad(접점 $\left(\dfrac{5}{2},\, -1\right)$)
+\end{itemize}
+
+그래프에서 직선의 위치에 따른 만남 개수는 다음과 같다.
+\begin{itemize}[leftmargin=8mm, itemsep=1mm, topsep=1mm]
+  \item $k>-3$ : 한 점에서 만남
+  \item $-\dfrac{7}{2}<k<-3$ : 두 점에서 만남
+  \item $k=-\dfrac{7}{2}$ : 접함 (한 점)
+  \item $k<-\dfrac{7}{2}$ : 만나지 않음
+\end{itemize}
+따라서 한 점에서만 만나는 조건은 $k>-3$ 또는 $k=-\dfrac{7}{2}$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 반직선꼴 곡선에서는 시작점 통과와 접함이 서로 다른 유일 만남을 만들므로, 두 경계값 사이의 범위를 분리해 판단한다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 10 ───────────────
+% 세션 73 : 그래프 추가 (feedback_solution_graph_requirement · 유형 1)
+%   골든 : templates/tikz-graph-golden/curve-line-intersection.tex 계승
+%   scale=0.85 (접점 (8, -2√2) 포함 · 컬럼 폭 대응)
+\dmsoltitle{10}{원점을 지나는 직선과 무리함수의 두 점 만남}
+\begin{dmanswerbox}
+정답: $-\dfrac{\sqrt{2}}{4}<m<0$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 77 v4 (마스터 지시) : 완전 식 라벨 전면 삭제 · 접점 수선의 발 + 좌표 숫자만
+  \draw[-stealth, black, line width=0.7pt] (-0.425, 0) -- (7.225, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -2.72) -- (0, 0.85) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above left] at (0, 0) {O};
+  \node[font=\scriptsize, anchor=north east] at (3.4, -0.02) {$4$};
+  \node[font=\scriptsize, anchor=north east] at (6.8, -0.02) {$8$};
+  % ── 곡선 y=-√(2x-8), 도메인 [3.4, 7.14]
+  \draw[black, line width=0.5pt, domain=3.4:7.14, samples=60]
+    plot (\x, {-0.85*sqrt(2.353*\x - 8)});
+  % ── 접선 (라벨 없음 · 본문에서 설명)
+  \begin{scope}
+    \clip (-0.425, -2.72) rectangle (7.225, 0.85);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-0.425, 0.150) -- (7.225, -2.555);
+  \end{scope}
+  % ── 시작점 (4, 0)
+  \filldraw[black] (3.4, 0) circle (0.8pt);
+  % ── 접점 (8, -2√2) · 좌표축 숫자 표시 → 수선의 발 필수
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (6.8, -2.404) -- (6.8, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (6.8, -2.404) -- (0, -2.404);
+  \filldraw[dm-accent] (6.8, -2.404) circle (0.7pt);
+  \node[font=\tiny, anchor=east] at (-0.05, -2.404) {$-2\sqrt{2}$};
+\end{tikzpicture}
+\end{center}
+
+$y=-\sqrt{2(x-4)}$\ 의 시작점은 $(4,\, 0)$\ 이고 오른쪽 아래로 뻗어 나간다. 직선 $y=mx$\ 는 원점을 지나며, $m<0$\ 일 때 곡선과 만난다.
+
+$-\sqrt{2x-8}=mx$\ 의 양변을 제곱하면 $mx\le 0$\ 이 필요하고
+\[ 2x-8=m^{2}x^{2},\qquad m^{2}x^{2}-2x+8=0. \]
+
+$m\ne 0$\ 일 때 판별식이 양수이어야 두 근이 존재한다.
+\[ 4-32m^{2}>0,\qquad m^{2}<\dfrac{1}{8},\qquad -\dfrac{1}{2\sqrt{2}}<m<\dfrac{1}{2\sqrt{2}}. \]
+정의역 $x\ge 4$·$mx\le 0$\ 에서 $m<0$\ 이므로 접함(등호)를 제외하면
+\[ -\dfrac{\sqrt{2}}{4}<m<0. \]
+그래프에서 이 범위의 직선은 시작점 오른쪽 곡선을 두 점에서 자른다.
+
+% ─────────────── 확인 11 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5)
+%   골든 : inverse-symmetry.tex · scale=1.0 · 좌표 0.5배 압축
+%   변환 : f: y = 2(x-2)² - 3 (원 (x-4)²-6, x≤4) · f⁻¹: y = -0.5√(2x+6) + 2
+\dmsoltitle{11}{이차함수 제한 정의역의 역함수}
+\begin{dmanswerbox}
+정답: $30$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 77 v4 (마스터 지시) : 간략 라벨(y=f(x)·y=f^{-1}(x)·y=x)은 유지 · rotate 제거 · 수평 배치
+  \draw[-stealth, black, line width=0.7pt] (-3.6, 0) -- (3, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -3.6) -- (0, 3) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {O};
+  \node[font=\tiny, below] at (2, -0.02) {$4$};
+  \node[font=\tiny, below] at (-3, -0.02) {$-6$};
+  \node[font=\tiny, left] at (-0.02, -3) {$-6$};
+  \node[font=\tiny, left] at (-0.02, 2) {$4$};
+  % ── 원함수 f · y_c = 2(x_c-2)² - 3
+  \draw[black, line width=0.5pt, domain=0.3:2, samples=80]
+    plot (\x, {2*(\x-2)*(\x-2) - 3});
+  \filldraw[black] (2, -3) circle (0.8pt);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, -3) -- (2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, -3) -- (0, -3);
+  % ── y=f(x) 라벨 : 수평 · 원함수 정점 (2,-3) 아래
+  \node[font=\tiny, anchor=north] at (2.2, -3.1) {$y=f(x)$};
+  % ── 역함수 f⁻¹ · y_c = -0.5√(2x+6) + 2 · x ≥ -3
+  \draw[dm-accent, line width=0.5pt, domain=-3:3, samples=80]
+    plot (\x, {-0.5*sqrt(2*\x + 6) + 2});
+  \filldraw[dm-accent] (-3, 2) circle (0.8pt);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-3, 2) -- (-3, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-3, 2) -- (0, 2);
+  % ── y=f^{-1}(x) 라벨 : 수평 · 역함수 정점 (-3,2) 왼쪽 위
+  \node[font=\tiny, anchor=south east, dm-accent] at (-3.1, 2.1) {$y=f^{-1}(x)$};
+  % ── y = x 대각선 · 라벨 수평 (오른쪽 상단 밖)
+  \begin{scope}
+    \clip (-3.6, -3.6) rectangle (3, 3);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-3.6, -3.6) -- (2.5, 2.5);
+  \end{scope}
+  \node[font=\tiny, anchor=south west, dm-accent] at (2.6, 2.55) {$y=x$};
+\end{tikzpicture}
+\end{center}
+
+$f(x)=x^{2}-8x+10=(x-4)^{2}-6$\ 이고 정의역 $x \le 4$\ 에서 이차함수의 그래프는 감소함수이므로 일대일대응이다. $y=(x-4)^{2}-6$\ 에서 $y+6=(x-4)^{2}$\ 을 얻고 $x \le 4$\ 이므로 $x-4=-\sqrt{y+6}$, 즉
+\[ x=-\sqrt{y+6}+4. \]
+$x$\ 와 $y$\ 를 바꾸면
+\[ f^{-1}(x)=-\sqrt{x+6}+4. \]
+원래 함수의 치역은 $y \ge -6$\ 이므로 역함수의 정의역은 $x \ge -6$\ 이다.
+
+$a=1$,\ $b=6$,\ $c=4$,\ $d=-6$\ 이므로
+\[ ab-cd=1\cdot 6-4\cdot(-6)=6+24=30. \]
+
+% ─────────────── 확인 12 ───────────────
+\dmsoltitle{12}{합성함수의 역함수 관계}
+\begin{dmanswerbox}
+정답: $13$
+\end{dmanswerbox}
+
+$(g^{-1}\circ f)^{-1}=f^{-1}\circ g$\ 이므로
+\[ (g^{-1}\circ f)^{-1}(2)=f^{-1}(g(2)). \]
+
+$g(2)=\sqrt{2\cdot 2+5}+1=\sqrt{9}+1=4$\ 이고, $f(x)=\sqrt{x+3}$\ 의 역함수는 $y=\sqrt{x+3}$\ 에서 $y^{2}=x+3$,\ $x=y^{2}-3$\ 이므로 $f^{-1}(x)=x^{2}-3$\ 이다. 따라서
+\[ f^{-1}(4)=16-3=13. \]
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$x \ge 2$} & \dmquick{2}{$\dfrac{-2\sqrt{y}}{x-y}$} & \dmquick{3}{$2\sqrt{x+9}$} & \dmquick{4}{$6$} & \dmquick{5}{$x \ge 2$} \\
+\dmquick{6}{풀이 참조} & \dmquick{7}{$8$} & \dmquick{8}{$2\!\le\! x\!\le\! 5$} & \dmquick{9}{$4$} & \dmquick{10}{$k<\dfrac{7}{2}$} \\
+\dmquick{11}{$-4$} & \dmquick{12}{$6$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{두 근호 안이 모두 $0$ 이상}
+\begin{dmanswerbox}
+정답: $x \ge 2$
+\end{dmanswerbox}
+
+두 근호 안이 각각 $0$ 이상이어야 한다.
+\[ x-1 \ge 0,\qquad 2x-4 \ge 0. \]
+공통 범위는 $x \ge 2$\ 이다.
+
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{두 켤레무리식의 차}
+\begin{dmanswerbox}
+정답: $\dfrac{-2\sqrt{y}}{x-y}$
+\end{dmanswerbox}
+
+각 항의 분모를 유리화하면
+\[ \dfrac{1}{\sqrt{x}+\sqrt{y}}=\dfrac{\sqrt{x}-\sqrt{y}}{x-y},\qquad \dfrac{1}{\sqrt{x}-\sqrt{y}}=\dfrac{\sqrt{x}+\sqrt{y}}{x-y}. \]
+두 식의 차는
+\[ \dfrac{(\sqrt{x}-\sqrt{y})-(\sqrt{x}+\sqrt{y})}{x-y}=\dfrac{-2\sqrt{y}}{x-y}. \]
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{켤레무리식으로 유리화하여 합산}
+\begin{dmanswerbox}
+정답: $2\sqrt{x+9}$
+\end{dmanswerbox}
+
+각 분수의 분자와 분모에 켤레무리식을 곱해 유리화하면 분모가 상수식이 된다.
+\begin{align*}
+&\dfrac{x(\sqrt{x+9}-3)}{(x+9)-9}+\dfrac{x(\sqrt{x+9}+3)}{(x+9)-9} \\
+&=\dfrac{x(\sqrt{x+9}-3)+x(\sqrt{x+9}+3)}{x} \\
+&=\dfrac{2x\sqrt{x+9}}{x}=2\sqrt{x+9}.
+\end{align*}
+
+% ─────────────── L1-4 ───────────────
+\dmsoltitle{4}{두 절댓값 조건의 공통 정수 해}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+두 근호 안이 모두 $0$ 이상이어야 한다.
+
+$|x+3|-3 \ge 0$\ 에서 $|x+3| \ge 3$\ 이므로 $x \le -6$ 또는 $x \ge 0$\ 이다.
+
+$4-|x-1| \ge 0$\ 에서 $|x-1| \le 4$\ 이므로 $-3 \le x \le 5$\ 이다.
+
+두 조건의 공통 범위는 $0 \le x \le 5$\ 이다. 이 안의 정수는 $0,\, 1,\, 2,\, 3,\, 4,\, 5$\ 의 $6$\ 개이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 두 근호가 동시에 실수이려면 각 근호 안이 $0$ 이상이어야 하므로, 두 절댓값 부등식의 공통 범위가 정의 범위이다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{무리함수의 정의역은 근호 안에서 결정}
+\begin{dmanswerbox}
+정답: $x \ge 2$
+\end{dmanswerbox}
+
+근호 안이 $0$\ 이상이어야 하므로
+\[ 2x-4 \ge 0,\qquad x \ge 2. \]
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{표준형에서 정의역·치역 판독}
+\begin{dmanswerbox}
+정답: 정의역 $x \le 3$, 치역 $y \ge 2$
+\end{dmanswerbox}
+
+$y=\sqrt{-2(x-3)}+2$\ 이므로 시작점은 $(3,\, 2)$\ 이고 왼쪽 위로 뻗어 나가는 곡선이다. 따라서 정의역은 $x \le 3$, 치역은 $y \ge 2$\ 이다.
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{$y$\ 축 대칭이동과 평행이동 결합}
+\begin{dmanswerbox}
+정답: $8$
+\end{dmanswerbox}
+
+$y=2\sqrt{x}$\ 를 $y$\ 축 대칭이동하면 $y=2\sqrt{-x}$\ 이고, $x$\ 축 방향 $a$·$y$\ 축 방향 $b$ 평행이동하면
+$$y=2\sqrt{-(x-a)}+b=\sqrt{-4x+4a}+b.$$
+이 식이 $y=\sqrt{-4x+12}+5$\ 와 같으려면 $4a=12$\ 에서 $a=3$,\ $b=5$\ 이다. $\therefore\ a+b=8$\ 이다.
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{치역에서 두 경계로 정의역 복원}
+\begin{dmanswerbox}
+정답: $2 \le x \le 5$
+\end{dmanswerbox}
+
+$y=-\sqrt{4x-4}+3$\ 의 시작점은 $(1,\, 3)$\ 이고 오른쪽 아래로 뻗어 나간다. 치역의 두 경계값에 대응되는 $x$\ 값을 구한다.
+
+$y=-1$\ 에서 $-\sqrt{4x-4}+3=-1$,\ $\sqrt{4x-4}=4$,\ $4x-4=16$,\ $x=5$.
+$y=1$\ 에서 $-\sqrt{4x-4}+3=1$,\ $\sqrt{4x-4}=2$,\ $4x-4=4$,\ $x=2$.
+
+따라서 정의역은 $2 \le x \le 5$\ 이다.
+
+% ─────────────── L1-9 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3 인접 · 폐구간 개형)
+%   골든 : piecewise-shape.tex §확장 폐구간 개형 · scale=1.0 · 양 경계 closed
+\dmsoltitle{9}{감소함수의 폐구간 최대·최소}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+$y=\sqrt{-2x+3}+2=\sqrt{-2\!\left(x-\dfrac{3}{2}\right)}+2$\ 의 시작점은 $\left(\dfrac{3}{2},\, 2\right)$\ 이고 왼쪽 위로 뻗어 나간다. 정의역 $-3 \le x \le a$\ 에서 감소하므로 왼쪽 끝 $x=-3$\ 에서 최댓값,\ 오른쪽 끝 $x=a$\ 에서 최솟값이 나온다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt)
+  \draw[-stealth, black, line width=0.7pt] (-4, 0) -- (2, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 6) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {O};
+  \node[font=\tiny, below] at (-3, -0.02) {$-3$};
+  \node[font=\tiny, below] at (1, -0.02) {$1$};
+  \node[font=\tiny, left] at (-0.02, 3) {$3$};
+  \node[font=\tiny, left] at (-0.02, 5) {$5$};
+  % ── 곡선 y = √(3 - 2x) + 2 · x ∈ [-3, 1] · 실효 0.5pt (감소함수)
+  \draw[black, line width=0.5pt, domain=-3:1, samples=80]
+    plot (\x, {sqrt(3 - 2*\x) + 2});
+  % ── 왼쪽 경계 (-3, 5) · 좌표축 숫자 있음 → 수선의 발 (v4 세션 77)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-3, 5) -- (-3, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-3, 5) -- (0, 5);
+  \filldraw[black] (-3, 5) circle (0.8pt);
+  \node[font=\tiny, anchor=south east] at (-3.05, 5.05) {$b=5$};
+  % ── 오른쪽 경계 (1, 3) · 좌표축 숫자 있음 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1, 3) -- (1, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1, 3) -- (0, 3);
+  \filldraw[black] (1, 3) circle (0.8pt);
+  \node[font=\tiny, anchor=south west] at (1.05, 3.05) {$(a,\, 3)$};
+\end{tikzpicture}
+\end{center}
+
+최솟값 $3$\ 에서 $\sqrt{3-2a}+2=3$\ 이므로 $\sqrt{3-2a}=1$,\ $a=1$\ 이다. 최댓값은 $x=-3$\ 에서
+\[ b=\sqrt{3+6}+2=5. \]
+$\therefore\ b-a=5-1=4$\ 이다.
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{만나지 않을 조건은 시작점 부호로}
+\begin{dmanswerbox}
+정답: $k<\dfrac{7}{2}$
+\end{dmanswerbox}
+
+$y=\sqrt{4x-8}=2\sqrt{x-2}$\ 의 시작점은 $(2,\, 0)$\ 이고 오른쪽 위로 뻗어 나간다. 직선 $y=2x-k$\ 는 기울기 $2$·$y$\ 절편 $-k$\ 이다.
+
+$\sqrt{4x-8}=2x-k$\ 의 양변을 제곱하면 $2x-k \ge 0$\ 이 필요하고
+$$4x-8=4x^{2}-4kx+k^{2},\qquad 4x^{2}-(4k+4)x+(k^{2}+8)=0.$$
+판별식이 음수이면 실근이 없어 만나지 않는다.
+\[ (4k+4)^{2}-16(k^{2}+8)=32k-112<0\quad(\because\ k<\dfrac{7}{2}). \]
+
+시작점 $(2,\, 0)$\ 을 지나는 조건은 $0=4-k$\ 에서 $k=4$\ 이다. $k=\dfrac{7}{2}$\ 에서 접함,\ $k=4$\ 에서 시작점을 지남이므로 그 사이에서 두 점 만남이 생긴다. $\therefore\ k<\dfrac{7}{2}$\ 이다.
+
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{역함수와의 교점은 $y=x$ 위에서}
+\begin{dmanswerbox}
+정답: $-4$
+\end{dmanswerbox}
+
+$f(x)=-\sqrt{2-x}$\ 의 정의역은 $x \le 2$, 치역은 $y \le 0$\ 이다. 직선 $y=x$\ 에 대하여 대칭인 두 그래프의 교점은 $y=x$ 위에 놓이므로 $f(x)=x$\ 의 해를 구한다.
+\[ -\sqrt{2-x}=x,\qquad \sqrt{2-x}=-x. \]
+$-x \ge 0$\ 에서 $x \le 0$\ 이 필요하다. 양변을 제곱하면
+\[ 2-x=x^{2},\qquad x^{2}+x-2=0,\qquad (x-1)(x+2)=0. \]
+$x \le 0$\ 이므로 $x=-2$\ 이다. 이때 $y=-2$\ 이므로 교점은 $(-2,\, -2)$\ 이고 $a+b=-4$\ 이다.
+
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{합성함수의 역함수를 소거로 정리}
+\begin{dmanswerbox}
+정답: $6$
+\end{dmanswerbox}
+
+$(f\circ g^{-1})^{-1}=g\circ f^{-1}$\ 이므로
+\[ (f\circ g^{-1})^{-1}\!\left(\dfrac{7}{6}\right)=g\!\left(f^{-1}\!\left(\dfrac{7}{6}\right)\right). \]
+
+$f^{-1}\!\left(\dfrac{7}{6}\right)=t$\ 이면 $f(t)=\dfrac{t+1}{t-2}=\dfrac{7}{6}$\ 이므로
+\[ 6(t+1)=7(t-2),\qquad t=20. \]
+따라서
+\[ g(20)=\sqrt{2\cdot 20-4}=\sqrt{36}=6. \]
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{ㄱ, ㄴ} & \dmquick{2}{$y \le 1$} & \dmquick{3}{$-8$} & \dmquick{4}{$\dfrac{5}{2}$} & \dmquick{5}{$\sqrt{6}$} \\
+\dmquick{6}{$15$} & \dmquick{7}{풀이 참조} & \dmquick{8}{풀이 참조} & \dmquick{9}{$-1$} & \dmquick{10}{$5$} \\
+\dmquick{11}{$4$} & \dmquick{12}{풀이 참조} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+\dmsoltitle{1}{표준형·평행이동·사분면 통과 확인}
+\begin{dmanswerbox}
+정답: ㄱ, ㄴ
+\end{dmanswerbox}
+
+$y=-\sqrt{6-3x}+4=-\sqrt{-3(x-2)}+4$\ 이므로 시작점은 $(2,\, 4)$\ 이고 왼쪽 아래로 뻗어 나간다.
+
+\vspace{3mm}
+ㄱ. 근호 안의 계수가 같은 $y=-\sqrt{-3x}$\ 와 평행이동으로 겹칠 수 있으므로 참.
+
+\vspace{3mm}
+ㄴ. 시작점이 $(2,\, 4)$\ 이고 왼쪽 아래이므로 정의역은 $x \le 2$, 치역은 $y \le 4$\ 이다. 참.
+
+\vspace{3mm}
+ㄷ. $x=0$\ 에서 $y=-\sqrt{6}+4>0$\ 이므로 곡선은 $y$\ 축 위 양의 부분을 지난다. 왼쪽으로 이동하면 $y$\ 값이 계속 감소해 $x=-\dfrac{10}{3}$\ 에서 $y=0$\ 이 되고 그 왼쪽에서는 $y<0$\ 이 되므로 곡선은 제$2$\ 사분면 (예: $x=-1$,\ $y=1$)과 제$3$\ 사분면 ($x<-\dfrac{10}{3}$) 모두를 지난다. 따라서 "제$2$\ 사분면을 지나지 않는다"는 옳지 않다.
+
+\vspace{3mm}
+따라서 옳은 것은 ㄱ, ㄴ이다.
+
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{지나는 점 조건 → 상수 → 치역}
+\begin{dmanswerbox}
+정답: $y \le 1$
+\end{dmanswerbox}
+
+$y=-\sqrt{x-a}+a+2$\ 에 $(a,\, -a)$\ 를 대입하면
+\[ -a=-\sqrt{0}+a+2,\qquad -2a=2,\qquad a=-1. \]
+따라서 함수는 $y=-\sqrt{x+1}+1$\ 이고 시작점은 $(-1,\, 1)$\ 이며 아래로 뻗어 나가므로 치역은 $y \le 1$\ 이다.
+
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{감소함수의 두 경계 연립}
+\begin{dmanswerbox}
+정답: $-8$
+\end{dmanswerbox}
+
+$a<0$\ 이므로 근호 안 $ax+b$\ 는 감소함수이며 결과적으로 $\sqrt{ax+b}$\ 도 정의역에서 감소한다. 그래프는 오른쪽 아래로 뻗어 나가지 않고, 왼쪽 끝에서 최댓값, 오른쪽 끝에서 최솟값을 갖는다.
+
+$x=-6$\ 에서 최댓값 $5$: $\sqrt{-6a+b}+1=5$,\ $-6a+b=16$.
+$x=0$\ 에서 최솟값 $3$: $\sqrt{b}+1=3$,\ $b=4$.
+두 식을 연립하면 $-6a+4=16$,\ $a=-2$\ 이다. 따라서 $ab=(-2)\cdot 4=-8$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{근호 안이 감소하면 무리함수 전체가 감소하므로 최댓값·최솟값이 나오는 끝점이 뒤집힌다}: 왼쪽 끝에서 최대, 오른쪽 끝에서 최소가 되도록 각 끝점 조건을 정확한 방향으로 대입해야 두 미지수가 옳게 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-4 ───────────────
+\dmsoltitle{4}{역함수 소거로 합성 정리}
+\begin{dmanswerbox}
+정답: $\dfrac{5}{2}$
+\end{dmanswerbox}
+
+$(f\circ(g\circ f)^{-1}\circ f)(x)=f\circ f^{-1}\circ g^{-1}\circ f(x)=g^{-1}(f(x))$\ 이므로
+\[ (f\circ(g\circ f)^{-1}\circ f)(4)=g^{-1}(f(4)). \]
+
+$f(4)=\dfrac{4+2}{4-1}=2$\ 이고 $g(x)=\sqrt{2x-1}$\ 의 역함수를 구하면 $y^{2}=2x-1$,\ $x=\dfrac{y^{2}+1}{2}$\ 이므로 $g^{-1}(x)=\dfrac{x^{2}+1}{2}$\ 이다. 따라서
+\[ g^{-1}(2)=\dfrac{4+1}{2}=\dfrac{5}{2}. \]
+
+% ─────────────── L2-5 ───────────────
+\dmsoltitle{5}{역함수 정의 이용: $f^{-1}(A)=B \Leftrightarrow A=f(B)$}
+\begin{dmanswerbox}정답: $\sqrt{6}$\end{dmanswerbox}
+
+$f^{-1}(g(x))=2x$\ 는 $g(x)=f(2x)$\ 와 동치이다. 대입하면
+\[ g(x)=\sqrt{3\cdot 2x-12}=\sqrt{6x-12}. \]
+따라서 $g(3)=\sqrt{18-12}=\sqrt{6}$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 역함수 조건 $f^{-1}(g(x))=2x$\ 는 곧 $g(x)=f(2x)$\ 이므로, $g$\ 가 원함수 $f$\ 의 대입값으로 곧바로 정해진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{사분면 조건과 시작점·$y$\ 절편}
+\begin{dmanswerbox}
+정답: $15$
+\end{dmanswerbox}
+
+$y=5-2\sqrt{1-x}$\ 의 시작점은 $(1,\, 5)$\ 이고 왼쪽 아래로 뻗어 나간다. 직선 $y=-x+k$\ 가 제$1$\ 사분면에서 이 곡선과 만나려면 만남의 좌표가 모두 양이어야 한다.
+
+시작점 $(1,\, 5)$\ 를 지날 때: $5=-1+k$,\ $k=6$.
+$x=0$\ 일 때 곡선 위 점은 $(0,\, 5-2)=(0,\, 3)$\ 이고, 이 점을 직선이 지나면 $k=3$\ 이다.
+곡선과 $x$\ 축의 교점: $5-2\sqrt{1-x}=0$\ 에서 $\sqrt{1-x}=\dfrac{5}{2}$,\ $x=-\dfrac{21}{4}$.
+
+두 그래프가 제$1$\ 사분면에서 만나려면 직선의 $y$\ 절편 $k$\ 가 다음 범위를 만족해야 한다.
+\[ 3<k \le 6. \]
+이 안의 정수는 $4,\, 5,\, 6$\ 이고 합은 $4+5+6=15$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{제$1$\ 사분면에서 만나는 조건은 곡선의 시작점과 $y$\ 축 교점의 두 임계 위치가 $k$\ 의 범위를 결정한다}: 시작점을 지날 때가 포함되는 위 경계이고, $y$\ 축 교점을 지날 때는 제$1$\ 사분면을 벗어나는 아래 경계이므로 두 부등호의 방향과 등호 포함 여부를 정확히 판별해야 한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{제$4$\ 사분면 지남·제$3$\ 사분면 안 지남 조건}
+\begin{dmanswerbox}
+정답: $-\sqrt{2}\le a<0$
+\end{dmanswerbox}
+
+$y=\sqrt{-x+2}+a=\sqrt{-(x-2)}+a$\ 의 시작점은 $(2,\, a)$\ 이고 왼쪽 위로 뻗어 나간다. $y$\ 축과의 교점은 $x=0$\ 일 때 $y=\sqrt{2}+a$\ 이다.
+
+제$4$\ 사분면을 지나려면 시작점 $(2,\, a)$\ 의 $y$\ 좌표가 음수이어야 하므로 $a<0$\ 이다. 제$3$\ 사분면을 지나지 않으려면 $y$\ 축을 넘어 왼쪽으로 갈 때 $y$\ 값이 항상 $0$ 이상이어야 하므로 $y$\ 축 위 점의 $y$\ 좌표가 $0$ 이상, 즉
+\[ \sqrt{2}+a \ge 0,\qquad a \ge -\sqrt{2}. \]
+두 조건을 모두 만족시키는 범위는
+\[ -\sqrt{2}\le a<0. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{시작점과 $y$\ 축 교점의 두 좌표가 각 사분면을 지나는지의 조건이 된다}: 사분면 통과 조건은 곡선이 뻗어 가는 방향을 그림으로 확인한 뒤, 시작점과 $y$\ 축 교점 두 특징점의 $y$\ 좌표 부호로 옮겨져야 한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{직선이 지나는 고정점과 시작점 케이스}
+\begin{dmanswerbox}
+정답: $a \le -2$ 또는 $a>0$
+\end{dmanswerbox}
+
+직선 $y=ax-3a+1=a(x-3)+1$\ 은 $a$\ 의 값에 관계없이 항상 $(3,\, 1)$\ 을 지난다. 무리함수의 시작점은 $(2,\, 3)$\ 이며 오른쪽 위로 뻗어 나간다.
+
+곡선과 시작점을 잇는 직선의 기울기는 $\dfrac{3-1}{2-3}=-2$\ 이다. 곡선 위의 점 $(x,\, \sqrt{x-2}+3)$\ 과 $(3,\, 1)$\ 을 잇는 직선의 기울기는
+\[ \dfrac{\sqrt{x-2}+2}{x-3}. \]
+
+$a>0$\ 이면 직선이 $(3,\, 1)$\ 을 지나 오른쪽 위로 뻗어 나가 곡선과 반드시 만난다. $a<0$\ 이면 직선이 오른쪽 아래로 뻗어 나가므로 기울기가 시작점을 잇는 기울기 이하일 때만 곡선과 만난다. 즉 $a\le -2$\ 이다.
+
+$a=0$\ 이면 직선은 $y=1$\ 인데 곡선의 최솟값이 $3$\ 이므로 만나지 않는다.
+
+따라서 만나도록 하는 범위는 $a \le -2$ 또는 $a>0$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 직선 $y=a(x-3)+1$\ 은 $a$\ 에 관계없이 고정점 $(3,\, 1)$\ 을 지나므로, 이 고정점과 곡선의 시작점을 잇는 기울기가 만남의 임계값이다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-9 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3)
+%   골든 : piecewise-shape.tex · scale=1.0 · 좌표 0.5배 압축 (세션 74 프로토콜)
+%   변환 : 오른쪽 y = 0.5√(4x-6)+0.5 · 왼쪽 y = -0.5√(-2x+3)+0.5
+\dmsoltitle{9}{두 식으로 정의된 함수의 부분별 역함수}
+\begin{dmanswerbox}
+정답: $-1$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 좌표 0.5배 압축)
+  \draw[-stealth, black, line width=0.7pt] (-4.2, 0) -- (3.8, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1.8) -- (0, 2.4) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {O};
+  % 축 라벨 (원값 표시 · 물리 좌표 = 원값 × 0.5)
+  \node[font=\tiny, below] at (1.5, -0.02) {$3$};
+  \node[font=\tiny, below] at (2.5, -0.02) {$5$};
+  \node[font=\tiny, below] at (-3, -0.02) {$-6$};
+  \node[font=\tiny, left] at (-0.02, 0.5) {$1$};
+  \node[font=\tiny, left] at (-0.02, 1.5) {$3$};
+  \node[font=\tiny, left] at (-0.02, -1) {$-2$};
+  % ── 오른쪽 식 · y = 0.5√(4x-6)+0.5 (x ≥ 1.5, 원 x ≥ 3) · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=1.5:2.7, samples=60]
+    plot (\x, {0.5*sqrt(4*\x - 6) + 0.5});
+  % ── 왼쪽 식 · y = -0.5√(-2x+3)+0.5 (원 x < 3) · 실효 0.5pt
+  \draw[black, line width=0.5pt, domain=-3.4:1.5, samples=80]
+    plot (\x, {-0.5*sqrt(-2*\x + 3) + 0.5});
+  % ── 경계점 (1.5, 0.5) 원 (3, 1) · 좌표축 숫자 표시 → 수선의 발 (v4 세션 77)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1.5, 0.5) -- (1.5, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1.5, 0.5) -- (0, 0.5);
+  \filldraw[black] (1.5, 0.5) circle (0.8pt);
+  % ── 타깃 수평선 y = 3 (원값 · 물리 y=1.5) · dm-accent 점선 · 프레임 좌우 채움
+  \begin{scope}
+    \clip (-4.2, -1.8) rectangle (3.8, 2.4);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-4.2, 1.5) -- node[pos=0.05, above=0.5pt, font=\tiny, dm-accent] {$y=3$} (3.8, 1.5);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-4.2, -1) -- node[pos=0.05, above=0.5pt, font=\tiny, dm-accent] {$y=-2$} (3.8, -1);
+  \end{scope}
+  % ── 해 (교점) · 원 (5, 3) · 물리 (2.5, 1.5) · 좌표축 숫자 표시 → 수선의 발 (v4)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.5, 1.5) -- (2.5, 0);
+  \filldraw[dm-accent] (2.5, 1.5) circle (0.7pt);
+  % ── 해 (교점) · 원 (-6, -2) · 물리 (-3, -1) · 좌표축 숫자 표시 → 수선의 발 (v4)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-3, -1) -- (-3, 0);
+  \filldraw[dm-accent] (-3, -1) circle (0.7pt);
+\end{tikzpicture}
+\end{center}
+
+$y=3$\ 의 조건에서 함수 값이 $3$\ 이려면 두 식 중 어느 것을 선택해야 하는지 살핀다. $x \ge 3$\ 인 식 $\sqrt{2x-6}+1=3$\ 에서 $\sqrt{2x-6}=2$,\ $2x-6=4$,\ $x=5$. $x<3$\ 인 식의 최댓값은 $1$\ 이므로 조건 불가.
+
+$y=-2$\ 에서 $x<3$\ 인 식 $-\sqrt{-x+3}+1=-2$,\ $\sqrt{-x+3}=3$,\ $-x+3=9$,\ $x=-6$. $x \ge 3$\ 인 식의 최솟값은 $1$\ 이므로 조건 불가.
+
+따라서 $f^{-1}(3)+f^{-1}(-2)=5+(-6)=-1$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 식으로 정의된 함수의 역함수는 각 부분의 치역을 미리 확인해 어느 식을 대입할지 선택해야 한다}: 주어진 함숫값이 어느 부분의 치역에 속하는지 판별하지 않고 두 식에 무조건 대입하면 실수 해가 나와도 정의역을 벗어나 오답이 된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-10 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5)
+%   골든 : inverse-symmetry.tex · scale=1.0 · 좌표 0.4배 압축
+%   f(x)=(x-2)²+3, x≥2 · f⁻¹(x)=√(x-3)+2 · 폐구간 [6,12]에서 최댓값 f⁻¹(12)=5
+\dmsoltitle{10}{이차·무리 역함수 관계 · 폐구간 최댓값}
+\begin{dmanswerbox}
+정답: $5$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % v4 (세션 77 마스터 지시) : 원함수·역함수 스케일 통일 (y=x 대칭 회복) · 수선의 발 · 완전 식 라벨 삭제
+  %   좌표 0.4배 압축 · aspect ratio 1 (x·y 동일 스케일)
+  %   원함수 원 [2, 5] → 표시 [0.8, 2.0] · 역함수 원 [3, 12] → 표시 [1.2, 4.8] (대칭)
+  \draw[-stealth, black, line width=0.7pt] (-0.6, 0) -- (5.6, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.6) -- (0, 5.6) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+  \node[font=\tiny, below] at (0.8, -0.02) {$2$};
+  \node[font=\tiny, below] at (1.2, -0.02) {$3$};
+  \node[font=\tiny, below] at (2.4, -0.02) {$6$};
+  \node[font=\tiny, below] at (4.8, -0.02) {$12$};
+  \node[font=\tiny, left] at (-0.02, 0.8) {$2$};
+  \node[font=\tiny, left] at (-0.02, 1.2) {$3$};
+  \node[font=\tiny, left] at (-0.02, 2) {$5$};
+  \node[font=\tiny, left] at (-0.02, 4.8) {$12$};
+  % ── 원함수 f(x)=(x-2)²+3, x∈[2, 5] · 표시 [0.8, 2.0]  · y 표시 [1.2, 4.8]
+  \draw[black, line width=0.5pt, domain=0.8:2.0, samples=80]
+    plot (\x, {2.5*(\x-0.8)*(\x-0.8) + 1.2});
+  % ── 원함수 정점 (2, 3) → 표시 (0.8, 1.2) · 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (0.8, 1.2) -- (0.8, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (0.8, 1.2) -- (0, 1.2);
+  \filldraw[black] (0.8, 1.2) circle (0.8pt);
+  % ── 원함수 오른쪽 끝점 (5, 12) → 표시 (2.0, 4.8) · 수선의 발 (마스터 지적)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.0, 4.8) -- (2.0, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.0, 4.8) -- (0, 4.8);
+  \filldraw[black] (2.0, 4.8) circle (0.8pt);
+  \node[font=\tiny, below] at (2.0, -0.02) {$5$};
+  % ── 역함수 f⁻¹(x)=√(x-3)+2, x∈[3, 12] · 표시 [1.2, 4.8]  · y 표시 [0.8, 2.0]
+  \draw[dm-accent, line width=0.5pt, domain=1.201:4.8, samples=80]
+    plot (\x, {0.4*sqrt(2.5*\x - 3) + 0.8});
+  % ── 역함수 정점 (3, 2) → 표시 (1.2, 0.8) · 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1.2, 0.8) -- (1.2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1.2, 0.8) -- (0, 0.8);
+  \filldraw[dm-accent] (1.2, 0.8) circle (0.8pt);
+  % ── y = x 대각선 · 점선 dm-accent 0.4pt (라벨은 간략표기 유지 · sloped 대각선 특성)
+  \begin{scope}
+    \clip (-0.6, -0.6) rectangle (5.6, 5.6);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-0.6, -0.6) -- node[pos=0.9, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=x$}
+      (5.6, 5.6);
+  \end{scope}
+  % ── 폐구간 [6, 12] 오른쪽 경계 최댓값 지점 · f⁻¹(12)=5 · 원 (12, 5) → 표시 (4.8, 2) · 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (4.8, 2) -- (4.8, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (4.8, 2) -- (0, 2);
+  \filldraw[dm-accent] (4.8, 2) circle (0.7pt);
+\end{tikzpicture}
+\end{center}
+
+꼭짓점이 $(2,\, 3)$\ 이고 정의역 $x \ge 2$\ 인 이차함수는 $f(x)=a(x-2)^{2}+3$\ 이다. 점 $(3,\, 4)$\ 를 지나므로 $4=a+3$,\ $a=1$\ 이다. 즉 $f(x)=(x-2)^{2}+3$\ 이다.
+
+이 함수는 $x \ge 2$\ 에서 증가하므로 일대일대응이고 역함수는
+\[ f^{-1}(x)=\sqrt{x-3}+2. \]
+$6 \le x \le 12$\ 에서 $f^{-1}$\ 은 증가하므로 최댓값은 $x=12$\ 에서
+\[ f^{-1}(12)=\sqrt{9}+2=5. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{이차함수는 정의역이 제한되어야 일대일대응이 되고 그 역함수는 무리함수가 된다}: 정의역 제한을 확인한 뒤 정점 조건과 지나는 점 조건에서 이차식의 계수를 결정하고, 역함수의 폐구간 최댓값은 증가·감소 방향에 따른 끝점에서 얻는다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-11 ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5)
+%   골든 : inverse-symmetry.tex · scale=1.0 · a=4 대입한 개형
+%   f(x)=√(2x-4)+2 (x≥2) · f⁻¹(x)=(x-2)²/2+2 (x≥2) · 교점 (2,2)·(4,4)
+\dmsoltitle{11}{역함수와의 두 교점 = $y=x$ 위 · 거리}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+$f(x)=\sqrt{2x-a}+2$\ 는 정의역 $x \ge \dfrac{a}{2}$\ 에서 증가함수이므로 일대일대응이다. 역함수와의 두 교점이 존재하면 두 점은 모두 직선 $y=x$ 위에 놓인다. 두 교점의 $x$\ 좌표를 방정식 $f(x)=x$\ 의 두 근으로 표현하여 거리 조건을 대입한다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % v4 (세션 77 마스터 지시) : 원함수·역함수 대칭 스케일 회복 · 수선의 발 · 라벨 간략 유지
+  %   원함수 x∈[2, 5.5] → y∈[2, √7+2≈4.65] · 역함수 x∈[2, 4.65] → y∈[2, 5.5] (y=x 대칭)
+  \draw[-stealth, black, line width=0.7pt] (-1, 0) -- (6, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1) -- (0, 6) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+  \node[font=\tiny, below] at (2, -0.02) {$\alpha$};
+  \node[font=\tiny, below] at (4, -0.02) {$\beta$};
+  \node[font=\tiny, left] at (-0.02, 2) {$\alpha$};
+  \node[font=\tiny, left] at (-0.02, 4) {$\beta$};
+  % ── 원함수 f(x) = √(2x-a)+2, x∈[2, 5.5] (a=4 대입 · 개형)
+  \draw[black, line width=0.5pt, domain=2:5.5, samples=80]
+    plot (\x, {sqrt(2*\x - 4) + 2});
+  % ── 역함수 f⁻¹(x) = (x-2)²/2+2, x∈[2, 4.65] (y_max ≈ 5.5로 원함수와 대칭)
+  \draw[dm-accent, line width=0.5pt, domain=2:4.65, samples=80]
+    plot (\x, {0.5*(\x-2)*(\x-2) + 2});
+  % ── y = x 대각선 · 점선 dm-accent 0.4pt · 프레임 좌우 채움
+  \begin{scope}
+    \clip (-1, -1) rectangle (6, 6);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-1, -1) -- node[pos=0.9, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=x$}
+      (6, 6);
+  \end{scope}
+  % ── 두 교점 (α, α)=(2, 2)·(β, β)=(4, 4) · 좌표축 숫자 표시 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 2) -- (2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 2) -- (0, 2);
+  \filldraw[dm-accent] (2, 2) circle (0.7pt);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (4, 4) -- (4, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (4, 4) -- (0, 4);
+  \filldraw[dm-accent] (4, 4) circle (0.7pt);
+\end{tikzpicture}
+\end{center}
+
+$\sqrt{2x-a}=x-2$\ 의 양변을 제곱하면 ($x \ge 2$)
+\[ 2x-a=x^{2}-4x+4,\qquad x^{2}-6x+(a+4)=0. \]
+두 실근을 $\alpha,\, \beta$\ 라 하면 두 교점은 $(\alpha,\, \alpha),\, (\beta,\, \beta)$\ 이므로 두 교점 사이의 거리는 $\sqrt{2}\,|\alpha-\beta|=2\sqrt{2}$\ 이다. $|\alpha-\beta|=2$\ 에서 $(\alpha-\beta)^{2}=4$\ 이다.
+
+근과 계수의 관계에서 $\alpha+\beta=6,\ \alpha\beta=a+4$\ 이므로
+\[ (\alpha-\beta)^{2}=(\alpha+\beta)^{2}-4\alpha\beta=36-4(a+4)=20-4a=4. \]
+$\therefore\ a=4$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 증가함수 $f$\ 와 그 역함수의 두 교점은 반드시 직선 $y=x$ 위에 있으므로, 두 교점의 좌표는 $f(x)=x$\ 의 두 근이다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-12 ───────────────
+% 세션 72 : 그래프 추가 (feedback_solution_graph_requirement · 유형 1·4)
+% 세션 73 : 골든 재조판 (feedback_figure_effective_rendering v1.0)
+%   - scale=1.0 통일 (§37 대안)
+%   - 실효 두께: 축 0.7pt · 곡선 0.5pt · 점선 0.4pt (§21-34 목표 범위)
+%   - 점 크기: 시작점 0.8pt (주요 정점) · 접점 0.7pt (파생점) · 실효값 그대로
+%   - 축 프레임 채움: 두 임계 직선 x [-2.5, 3.5] 전체 · clip으로 y 범위 제한
+%   - 접점 (5/4, 1/2) 강조 표시 · k=-3/4 임계 기하 명시
+\dmsoltitle{12}{절댓값 무리함수와 직선의 세 점 만남}
+\begin{dmanswerbox}
+정답: $-1<k<-\dfrac{3}{4}$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 축 (실효 0.7pt · 목표 [0.55, 0.85])
+  \draw[-stealth, black, line width=0.7pt] (-2.5, 0) -- (3.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1.5) -- (0, 2.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {O};
+  % v2.0 정정 (세션 76) : "1" 라벨을 접선 겹침 회피 · 시작점 (1, 0) 오른쪽으로 shift
+  \node[font=\scriptsize, anchor=north west] at (1.05, -0.05) {$1$};
+  % 곡선 y = √|x-1| 두 갈래 (실효 0.5pt · 목표 [0.30, 0.60])
+  \draw[black, line width=0.5pt, domain=1:3.5, samples=60] plot (\x, {sqrt(\x - 1)});
+  \draw[black, line width=0.5pt, domain=-2.5:1, samples=60] plot (\x, {sqrt(1 - \x)});
+  % 임계 직선 2개 (v4 세션 77) : 완전 식 라벨 삭제 · 본문에서 설명
+  \begin{scope}
+    \clip (-2.5, -1.5) rectangle (3.5, 2.5);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2.5, -3.25) -- (3.5, 2.75);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2.5, -3.5) -- (3.5, 2.5);
+  \end{scope}
+  % 시작점 (1, 0)
+  \filldraw[black] (1, 0) circle (0.8pt);
+  % 접점 (5/4, 1/2) · 좌표축 숫자 표시 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1.25, 0.5) -- (1.25, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (1.25, 0.5) -- (0, 0.5);
+  \filldraw[dm-accent] (1.25, 0.5) circle (0.7pt);
+  \node[font=\tiny, anchor=north west] at (1.28, -0.02) {$\tfrac{5}{4}$};
+  \node[font=\tiny, left] at (-0.02, 0.5) {$\tfrac{1}{2}$};
+\end{tikzpicture}
+\end{center}
+
+두 경계값을 구한다.
+\begin{itemize}[leftmargin=8mm, itemsep=1mm, topsep=1mm]
+  \item 오른쪽 갈래 $y=\sqrt{x-1}$\ 에 직선이 접함 : 판별식 $=0$ 에서 $k=-\dfrac{3}{4}$
+  \item 시작점 $(1,\, 0)$\ 을 직선이 지남 : $0=1+k$ 에서 $k=-1$
+\end{itemize}
+
+그래프에서 두 경계 사이 범위 $-1<k<-\dfrac{3}{4}$ 에서 왼쪽 갈래 한 점 + 오른쪽 갈래 두 점 = 세 점에서 만난다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$\sqrt{|x-1|}$\ 은 시작점을 꼭짓점으로 좌우로 뻗어 나가는 두 갈래 곡선이다}: 왼쪽 갈래는 직선과 항상 한 점에서 만나므로 오른쪽 갈래와 두 점에서 만나야 하며, 그 임계는 접함과 시작점 통과의 두 경계로 결정된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$0<k \le \dfrac{1}{2}$} & \dmquick{2}{ㄱ, ㄷ} & \dmquick{3}{$13$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 ───────────────
+\dmsoltitle{1}{곡선의 시작점 조건과 접선 조건으로 나누어 두 점에서 만날 범위}
+\begin{dmanswerbox}
+정답: $0<k \le \dfrac{1}{2}$
+\end{dmanswerbox}
+
+$f(x)=-\sqrt{2x-5}-2$\ 의 정의역은 $x \ge \dfrac{5}{2}$\ 이고, 시작점은 $\left(\dfrac{5}{2},\, -2\right)$\ 이다.
+
+직선이 곡선의 시작점을 지날 때
+\[ -2=-\dfrac{5}{2}+k,\qquad k=\dfrac{1}{2}. \]
+
+직선이 곡선에 접할 때 $\sqrt{2x-5}=x-2-k$\ 의 양변을 제곱하면 $x^{2}-(2k+6)x+(k^{2}+4k+9)=0$\ 이고, 판별식 $=0$\ 에서
+\[ 8k=0,\qquad k=0. \]
+이때 중근 $x=3$\ 은 정의역 $x \ge \dfrac{5}{2}$ 안에 있으므로 실제 접점이다.
+
+두 경계값 $k=0$\ 과 $k=\dfrac{1}{2}$\ 을 기준으로 교점의 개수를 정리하면 다음과 같다.
+\begin{center}
+\small
+\begin{tabular}{c|c}
+\hline
+$k$\ 의 범위 & 교점의 개수 \\
+\hline
+$k \le 0$ & 0 또는 1 (접함) \\
+$0 < k < \dfrac{1}{2}$ & 2 (서로 다른 두 점) \\
+$k = \dfrac{1}{2}$ & 2 (시작점 + 곡선 위 한 점) \\
+$k > \dfrac{1}{2}$ & 1 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 시작점 통과와 접함은 서로 다른 임계값을 만드므로, 두 임계 $k=0$·$k=\dfrac{1}{2}$ 사이의 위치가 교점의 개수를 가른다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 (세션 63 교체) ───────────────
+% source : 전국연합-2018-3월-고2-20번 · 두 무리곡선 원점 대칭 · <보기> ㄱ, ㄷ
+\dmsoltitle{2}{원점 대칭 확인과 실수 $k$\ 의 교점 개수 조사}
+\begin{dmanswerbox}
+정답: ㄱ, ㄷ
+\end{dmanswerbox}
+
+두 곡선을 각각 $y = f(x) = -\sqrt{kx + 2k} + 4$,\ $y = g(x) = \sqrt{-kx + 2k} - 4$\ 로 놓는다.
+
+\vspace{3mm}
+ㄱ. $-f(-x) = -(-\sqrt{-kx + 2k} + 4) = \sqrt{-kx + 2k} - 4 = g(x)$\ 이므로 두 곡선은 원점에 대하여 대칭이다. (참)
+
+\vspace{3mm}
+ㄴ. $k < 0$\ 이면 첫 곡선의 근호 안 $kx + 2k = k(x + 2) \ge 0$\ 에서 $x \le -2$\ 이고, 둘째 곡선의 근호 안 $-kx + 2k = -k(x - 2) \ge 0$\ 에서 $x \ge 2$\ 이다. 두 곡선의 정의역이 서로 겹치지 않으므로 두 곡선은 만나지 않는다. (거짓)
+
+\vspace{3mm}
+ㄷ. $k > 0$\ 이면 첫 곡선의 정의역은 $x \ge -2$\ 이고, 둘째 곡선의 정의역은 $x \le 2$\ 이므로 공통 정의역은 $-2 \le x \le 2$\ 이다. 대칭성으로 원점을 지나는 점이 있으면 두 곡선의 교점이 되는데, 원점 대입 시 $f(0) = -\sqrt{2k} + 4$\ 와 $g(0) = \sqrt{2k} - 4$\ 가 서로 반수이다.
+
+$f(x) = g(x)$ 조건을 정리하면 두 곡선이 원점 대칭이므로 교점은 원점 대칭 짝으로 존재한다. 조건 $-\sqrt{kx + 2k} + 4 = \sqrt{-kx + 2k} - 4$\ 에서 $8 = \sqrt{kx + 2k} + \sqrt{-kx + 2k}$\ 를 얻는다. 양변을 제곱하면
+\begin{align*}
+64 &= 4k + 2\sqrt{(kx + 2k)(-kx + 2k)} \\
+&= 4k + 2\sqrt{k^{2}(4 - x^{2})}.
+\end{align*}
+$32 - 2k = k\sqrt{4 - x^{2}}$\ 이 성립하므로 $4 - x^{2} = \dfrac{(32 - 2k)^{2}}{k^{2}}$\ 이다. 서로 다른 두 점에서 만나려면 $0 < 4 - x^{2} \le 4$\ 가 두 값의 $x$\ 에서 성립하도록 $0 < \dfrac{(32 - 2k)^{2}}{k^{2}} < 4$\ 가 필요하고, 이를 정리하면 $k > 16$\ 일 때 만나지 않고, $k = 16$\ 일 때 유일한 두 대칭 짝 접점이 생긴다. 따라서 서로 다른 두 점에서 만나도록 하는 $k$\ 의 최댓값은 $16$\ 이다. (참)
+
+\vspace{3mm}
+옳은 것은 ㄱ, ㄷ이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 원점 대칭 여부는 정의식 $-f(-x)=g(x)$\ 의 확인만으로 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 (세션 63 교체) ───────────────
+% source : 블랙라벨-CM2-08-STEP3-#12 · 전국연합-2020-3월-고2-30번 · O-NEW-32 원형
+\dmsoltitle{3}{$g(x)$\ 가 $\min\{f, f^{-1}\}$\ 일 때 직선과의 교점 개수 조건}
+\begin{dmanswerbox}정답: $p + q = 13$\end{dmanswerbox}
+
+$f(x) = \sqrt{ax - 3} + 2$\ 의 정의역은 $x \ge \dfrac{3}{a}$, 치역은 $y \ge 2$\ 이다. 역함수는 $y = f^{-1}(x) = \dfrac{(x - 2)^{2} + 3}{a}$\ 이고 정의역은 $x \ge 2$, 치역은 $y \ge \dfrac{3}{a}$\ 이다.
+
+$x \ge 2$\ 에서 $f$\ 와 $f^{-1}$\ 은 모두 정의되어 있고 두 그래프는 직선 $y = x$\ 에 대해 대칭이다. 두 그래프의 교점은 $f(x) = x$\ 의 해이며, $\sqrt{ax - 3} + 2 = x$\ 에서 $ax - 3 = (x - 2)^{2}$, 즉 $x^{2} - (a + 4)x + 7 = 0$\ 이다.
+
+$g(x)$\ 는 $x$\ 에 대하여 $f(x)$\ 와 $f^{-1}(x)$ 중 작은 값이므로, 두 그래프의 교점을 기준으로 $g$\ 의 그래프는 $y = x$ 아래쪽의 두 부분을 이어 붙인 것이다.
+
+직선 $y = x - n$\ 과 $y = g(x)$\ 의 교점 개수가 $h(n)$\ 이다. $y = x - n$\ 은 $y = x$\ 를 아래로 $n$\ 만큼 평행이동한 직선이므로, $n$\ 이 커질수록 $y = g(x)$\ 와의 교점 위치가 달라진다.
+
+조건 $h(1) = h(3) < h(2)$\ 는 $n = 2$\ 에서만 교점이 하나 늘어나는 상황이다. 이는 $y = x - 2$\ 가 $y = g(x)$\ 의 한 부분과 접함을 의미하고, 판별식 $= 0$ 조건에서 $a = 6$\ 을 얻는다.
+
+$a = 6$\ 이면 $f^{-1}(x) = \dfrac{(x - 2)^{2} + 3}{6}$\ 이므로
+\[ g(4) = f^{-1}(4) = \dfrac{4 + 3}{6} = \dfrac{7}{6}. \]
+$p = 6$,\ $q = 7$\ 이고 $p + q = 13$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: $f$\ 와 $f^{-1}$\ 이 $y=x$\ 에 대해 대칭이므로, $\min\{f,\, f^{-1}\}$\ 의 그래프는 두 곡선의 아래 부분을 이어 붙인 것이다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결 (세션 63 재편 · 세션 70 문항 순서 스왑)
+% 세션 70 스왑 (마스터 지시 · 마지막 페이지 1문 원칙 · feedback_min_solution_space_4cm) :
+%   원 R-1 (2023.3 고2 20번 · 두 식으로 정의된 함수의 고정점) 을 R-3 자리로 이동
+%   원 R-2 (2024.3 고2 14번) → R-1 · 원 R-3 (2015.6 고2 26번) → R-2
+% 최종 배치 :
+%   - R-1 : 2024학년도 3월 고2 학평 14번 (삼각형 넓이 비 · 원문 그림 재현) · 정답 $27$
+%   - R-2 : 2015학년도 6월 고2 학평 26번 (곡선-직선 대칭 넓이) · 정답 $10$
+%   - R-3 : 2023학년도 3월 고2 학평 20번 (두 식으로 정의된 함수의 고정점) · 정답 $3$
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$27$} & \dmquick{2}{$10$} & \dmquick{3}{$3$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── R-1 (세션 70 승격 · 원 R-2 · 2024학년도 3월 고2 학평 14번) ───────────────
+\dmsoltitle{1}{두 무리곡선 위 수직 절편과 넓이비}
+\begin{dmanswerbox}
+정답: $27$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 74 : scale=1.0 통일 · 좌표 압축 0.5 (원본 A(4,0)·B(4,2)·C(4,4)·y=√x·y=√(kx))
+  % 실효 : 축 0.7pt · 곡선 0.5pt · 점선 0.4pt · 정점 0.8pt · 여백 ≥25%
+  \draw[-stealth, black, line width=0.7pt] (-0.8, 0) -- (4.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.8) -- (0, 3.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {$\mathrm{O}$};
+  % 곡선 y=√x (압축 y_c=√(x_c/2))
+  \draw[black, line width=0.5pt, domain=0:3.8, samples=80] plot (\x, {sqrt(\x/2)});
+  % 곡선 y=√(kx) (압축 · k=4 표본 y_c=√(2 x_c))
+  \draw[black, line width=0.5pt, domain=0:3.8, samples=80] plot (\x, {sqrt(2*\x)});
+  % 수직선 x=k (점선 · A~C)
+  \draw[dash pattern=on 2pt off 2pt, gray, line width=0.4pt] (2, 0) -- (2, 2.3);
+  % 정점
+  \filldraw[black] (2, 0) circle (0.8pt) node[below, font=\scriptsize] {$\mathrm{A}$};
+  % v2.0 정정 (세션 76) : B·C 라벨을 곡선 겹침 회피
+  %   B (2, 1) 위 곡선 y=√(x/2) x=2에서 y=1 접점 · above right offset
+  %   C (2, 2) 위 곡선 y=√(2x) x=2에서 y=2 접점 · above right + xshift 로 곡선 위 shift
+  \filldraw[black] (2, 1) circle (0.8pt) node[above right=1pt, font=\scriptsize] {$\mathrm{B}$};
+  \filldraw[black] (2, 2) circle (0.8pt) node[above right=2pt, font=\scriptsize] {$\mathrm{C}$};
+  % v4 (세션 77) : 완전 식 곡선 라벨 삭제 · 본문에서 설명
+\end{tikzpicture}
+\end{center}
+
+$x=k$\ 일 때 두 곡선의 $y$\ 좌표는 각각
+\[ \mathrm{B}=(k,\, \sqrt{k}),\qquad \mathrm{C}=(k,\, \sqrt{k^{2}})=(k,\, k)\quad (k>0). \]
+
+삼각형 OAB는 밑변 OA$=k$, 높이 $\sqrt{k}$\ 이므로 넓이는 $\dfrac{1}{2}k\sqrt{k}$\ 이다.
+
+삼각형 OBC는 밑변 BC$=k-\sqrt{k}$, 높이 $k$ (원점에서 수직선 $x=k$\ 까지의 거리)이므로 넓이는 $\dfrac{1}{2}k(k-\sqrt{k})$\ 이다.
+
+조건 (넓이 OBC) $=2\cdot$(넓이 OAB)에서
+\[ \dfrac{1}{2}k(k-\sqrt{k})=2\cdot\dfrac{1}{2}k\sqrt{k}. \]
+양변을 $k$\ 로 나누면 $k-\sqrt{k}=2\sqrt{k}$\ 이므로 $\sqrt{k}=3$,\ $k=9$\ 이다. $\therefore\ \triangle\mathrm{OBC}=\dfrac{1}{2}\cdot 9\cdot 6=27$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 점 $\mathrm{A}(k,\, 0)$\ 을 지나는 $y$\ 축 평행 직선 위의 곡선 점은 $x=k$ 대입값이므로, B·C의 좌표가 상수 $k$\ 만으로 표현된다.
+\end{dmcriticalpoint}
+
+% ─────────────── R-2 (세션 70 승격 · 원 R-3 · 2015학년도 6월 고2 학평 26번) ───────────────
+% 두 식으로 정의된 함수의 그래프와 직선 사이 넓이 · $y = x$ 대칭 활용해 삼각형 넓이로 옮김
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3)
+%   골든 : piecewise-shape.tex · scale=1.0 · 좌표 0.5배 압축 (세션 74 프로토콜)
+%   변환 : 오른쪽 y = √(0.5·x) · 왼쪽 y = 2·x² · 직선 y = (5-x)/3
+\dmsoltitle{2}{두 식으로 정의된 함수의 그래프와 직선 사이 넓이의 대칭 활용}
+\begin{dmanswerbox}
+정답: $10$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 좌표 0.5배 압축 · 원값 라벨 유지)
+  \draw[-stealth, black, line width=0.7pt] (-2, 0) -- (3.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 3) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below right] at (0, 0) {$\mathrm{O}$};
+  \node[font=\tiny, below] at (-1, -0.02) {$-2$};
+  \node[font=\tiny, below] at (2, -0.02) {$4$};
+  \node[font=\tiny, left] at (-0.02, 2) {$4$};
+  \node[font=\tiny, left] at (-0.02, 1) {$2$};
+  % ── 오른쪽 식 · y = √x → y_c = √(0.5·x_c) (x ≥ 0)
+  \draw[black, line width=0.5pt, domain=0:3.4, samples=80]
+    plot (\x, {sqrt(0.5*\x)});
+  % ── 왼쪽 식 · y = x² → y_c = 2·x_c² (x < 0)
+  \draw[black, line width=0.5pt, domain=-1.15:0, samples=60]
+    plot (\x, {2*\x*\x});
+  % ── 경계점 (0, 0) · 오른쪽 식 포함 · closed 검정 0.8pt
+  \filldraw[black] (0, 0) circle (0.8pt);
+  % ── 직선 x + 3y = 10 (v4 세션 77) : 라벨 삭제 · 본문에서 설명
+  \begin{scope}
+    \clip (-2, -0.5) rectangle (3.5, 3);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (-2, 2.333) -- (3.5, 0.5);
+  \end{scope}
+  % ── 두 만남 점 A(-2, 4) · B(4, 2) · 좌표축 숫자 표시 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-1, 2) -- (-1, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (-1, 2) -- (0, 2);
+  \filldraw[dm-accent] (-1, 2) circle (0.7pt) node[above left, font=\tiny, dm-accent] {$\mathrm{A}$};
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 1) -- (2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 1) -- (0, 1);
+  \filldraw[dm-accent] (2, 1) circle (0.7pt) node[above right, font=\tiny, dm-accent] {$\mathrm{B}$};
+\end{tikzpicture}
+\end{center}
+
+$f$\ 의 $x \ge 0$\ 인 식 $y = \sqrt{x}$\ 와 $x < 0$\ 인 식 $y = x^{2}$\ 이 직선 $y = x$\ 에 대하여 서로 대칭이다. 이는 $y = \sqrt{x}$\ 가 $y = x^{2}$ ($x \ge 0$)의 역함수이고, $x < 0$\ 에서 $y = x^{2}$\ 이 $y = \sqrt{x}$\ 의 뒤집힌 짝임을 이용한 것이다.
+
+주어진 직선 $x + 3y - 10 = 0$\ 을 $y = -\dfrac{x - 10}{3}$\ 로 쓰면 두 점 $\mathrm{A}(-2,\, 4)$,\ $\mathrm{B}(4,\, 2)$\ 가 직선 위에 있음을 확인한다. 또한 $y = \sqrt{4} = 2$\ 이므로 $\mathrm{B}$\ 는 $y = \sqrt{x}$ 위의 점이고, $y = (-2)^{2} = 4$\ 이므로 $\mathrm{A}$\ 는 $y = x^{2}$ 위의 점이다.
+
+두 곡선 부분과 직선 사이의 넓이는 다음과 같이 대칭이동으로 옮긴다. $x < 0$ 부분의 $y = x^{2}$\ 을 직선 $y = x$\ 에 대하여 반사하면 $x > 0$ 부분의 $y = \sqrt{x}$\ 가 되므로, 반사 후 두 식이 모두 $y = \sqrt{x}$ 그래프 위로 옮겨진다. 이때 직선 $x + 3y - 10 = 0$\ 도 $y = x$ 반사에 대응하여 이동하며, 두 식과 이 두 직선이 이루는 도형은 세 점 $\mathrm{O}$,\ $\mathrm{A}$,\ $\mathrm{B}$\ 를 꼭짓점으로 하는 삼각형과 같은 넓이를 갖는다.
+
+삼각형 OAB의 넓이는 다음과 같다. $\overline{\mathrm{AB}} = \sqrt{(4 - (-2))^{2} + (2 - 4)^{2}} = \sqrt{36 + 4} = 2\sqrt{10}$\ 이고, 원점에서 직선 $x + 3y - 10 = 0$\ 까지의 거리는
+\[ \dfrac{|0 + 0 - 10|}{\sqrt{1^{2} + 3^{2}}} = \dfrac{10}{\sqrt{10}} = \sqrt{10}. \]
+따라서
+\[ \triangle \mathrm{OAB} = \dfrac{1}{2} \cdot 2\sqrt{10} \cdot \sqrt{10} = 10. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 한 곡선이 다른 곡선의 역함수이므로 $y=x$ 반사로 두 식이 겹쳐지고, 곡선-직선 사이 도형이 삼각형 넓이로 옮겨진다.
+\end{dmcriticalpoint}
+
+% ─────────────── R-3 (세션 70 강등 · 원 R-1 · 2023학년도 3월 고2 학평 20번) ───────────────
+% 세션 75 : 그래프 추가 (feedback_solution_graph_requirement · 유형 3)
+%   골든 : piecewise-shape.tex · scale=1.0 · 좌표 0.5배 압축 (a=5·b=5 결정 후 개형 표시)
+%   변환 : 왼쪽 y = -0.5(2x-5)²+2.5 · 오른쪽 y = -0.5√(2x-5)+2.5 · y=x
+\dmsoltitle{3}{두 식으로 정의된 함수의 고정점과 세 실근의 관계}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+$f$\ 는 $x \le a$\ 에서 최고차항의 계수가 음수인 포물선·$x > a$\ 에서 감소하는 무리식으로 정의되어 있고, 두 부분은 $x=a$\ 에서 값 $b$\ 로 이어 붙어 있다. 고정점 $\alpha,\, \beta$\ 는 각각 이차식·무리식 부분에서 $y=x$\ 와 만나는 점이다. 개형을 함께 확인하며 고정점과 세 번째 실근 $\gamma$\ 의 위치를 정한다.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % ── 축 (실효 0.7pt · 좌표 0.5배 압축 · 축 라벨은 원값)
+  \draw[-stealth, black, line width=0.7pt] (-0.5, 0) -- (4.5, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -0.5) -- (0, 3.5) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {$\mathrm{O}$};
+  % 축 라벨 (원값 · 물리 좌표 × 2 = 원값)
+  \node[font=\tiny, below] at (2, -0.02) {$4$};
+  \node[font=\tiny, below] at (2.5, -0.02) {$5$};
+  \node[font=\tiny, below] at (3, -0.02) {$6$};
+  \node[font=\tiny, left] at (-0.02, 2) {$4$};
+  \node[font=\tiny, left] at (-0.02, 2.5) {$5$};
+  % ── 왼쪽 식 · y = -0.5(2x-5)²+2.5 (원 y = -(x-5)²+5, x ≤ 5)
+  \draw[black, line width=0.5pt, domain=1.2:2.5, samples=80]
+    plot (\x, {-0.5*(2*\x - 5)*(2*\x - 5) + 2.5});
+  % ── 오른쪽 식 · y = -0.5√(2x-5)+2.5 (원 y = -√(x-5)+5, x > 5)
+  \draw[black, line width=0.5pt, domain=2.5:4.3, samples=80]
+    plot (\x, {-0.5*sqrt(2*\x - 5) + 2.5});
+  % ── 경계점 (2.5, 2.5) · 원 (5, 5) · β 고정점 · 좌표축 숫자 표시 → 수선의 발 (v4)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.5, 2.5) -- (2.5, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2.5, 2.5) -- (0, 2.5);
+  \filldraw[black] (2.5, 2.5) circle (0.8pt);
+  % ── y = x 대각선 · 점선 dm-accent 0.4pt · 프레임 좌우 채움
+  \begin{scope}
+    \clip (-0.5, -0.5) rectangle (4.5, 3.5);
+    \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt]
+      (-0.5, -0.5) -- node[pos=0.7, above=0.5pt, sloped, font=\tiny, dm-accent] {$y=x$}
+      (4.5, 4.5);
+  \end{scope}
+  % ── 고정점 α (원 α=4) · 물리 (2, 2) · 좌표축 숫자 표시 → 수선의 발
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 2) -- (2, 0);
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (2, 2) -- (0, 2);
+  \filldraw[dm-accent] (2, 2) circle (0.7pt);
+  \node[font=\tiny, anchor=south east, dm-accent] at (2, 2.1) {$\alpha$};
+  % ── 고정점 β · 라벨만 (수선의 발은 경계점에서 이미 처리)
+  \node[font=\tiny, anchor=south east, dm-accent] at (2.5, 2.6) {$\beta$};
+  % ── 세 번째 해 γ (원 γ=6) · 물리 (3, 2) · 좌표축 숫자 표시 → 수선의 발 (x축 · y=4는 α와 공유)
+  \draw[gray, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt] (3, 2) -- (3, 0);
+  \filldraw[dm-accent] (3, 2) circle (0.7pt);
+  \node[font=\tiny, anchor=south west, dm-accent] at (3.05, 2.1) {$\gamma$};
+\end{tikzpicture}
+\end{center}
+
+$x \le a$\ 인 이차식 $-(x-a)^{2}+b$\ 는 $x=a$\ 에서 최댓값 $b$\ 를 가지며,\ $y=x$\ 와의 교점은
+\[ -(x-a)^{2}+b = x. \]
+
+$x > a$\ 인 무리식 $-\sqrt{x-a}+b$\ 는 $x=a$ 방향으로 값 $b$\ 에 접근하며,\ $y=x$\ 와의 교점은
+\[ -\sqrt{x-a}+b = x. \]
+
+두 고정점 $\alpha,\, \beta$ ($\alpha < \beta$) 중 하나는 이차식 부분, 다른 하나는 무리식 부분에서 나온다. 조건 (가) $\{f(x)-\alpha\}\{f(x)-\beta\}=0$\ 의 실근이 $\alpha,\, \beta,\, \gamma$\ 뿐이라는 조건에서 세 실근은 $f(x)=\alpha$ 또는 $f(x)=\beta$\ 의 해집합이다. 부분별 개형과 고정점 위치에서 $\alpha = \beta-1,\ \gamma = \beta+1$\ 의 관계이다.
+
+$\alpha+\beta+\gamma=3\beta=15$\ 에서 $\beta=5,\ \alpha=4,\ \gamma=6$\ 이다. $f(\beta)=\beta=5$\ 에서 무리식 부분의 시작점 $y$\ 좌표가 $b=5$\ 이고, 이차식 고정점 $\alpha=4$ 조건에서 $a=5$\ 이다.
+
+$\alpha+\beta=9>a=5$\ 이므로 $f(9)$\ 는 무리식 부분의 값이다.
+\[ f(9) = -\sqrt{9-5}+5 = 3. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{통찰}: 고정점 조건 $f(x)=x$\ 는 그래프와 직선 $y=x$\ 의 교점 조건이므로, 부분별로 개형이 다른 함수도 각 식에서 고정점을 따로 찾을 수 있다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

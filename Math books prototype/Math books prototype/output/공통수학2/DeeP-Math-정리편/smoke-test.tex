@@ -1,0 +1,303 @@
+% DeeP Math smoke-test v5.3 (조건 박스 시연 · 세션 58)
+% ─────────────────────────────────────────────────────────────
+% 시연 구성:
+%   p.1 (챕터+개념)     : dmchapter · dmconcept · dmsub · dmexample · dmnote · dmexplain
+%   p.2 (예제+확인)     : dmex · dmproblem · dmapproach · dmsolution · dmanswer · dmcheck
+%   p.3 (Level 1 4문)   : dmlevel · dmpnum
+%   p.4 (Level 1 4문)   : dmlevelspace · dmpnum
+%   p.5 (Level 2 3문)   : dmlevel · dmpnum
+%   p.6 (Level 3 2문)   : dmlevel · dmpnum · dmoptionbox (조건 박스 시연)
+%   p.7 (실전 3문)       : dmrealtype · dmpnum · dmkichul · dmoptionbox · dmoptioninline
+%
+% 실제 콘텐츠는 problem-author agent가 개념원리·RPM 기반 3·4·5스타 채움
+\documentclass[10pt]{article}
+\usepackage{deep-math}
+\usepackage{dm-suneung}   % v1.1 · 수능특강 2027 예제 페이지 스타일 (세션 65 · 5 개선사항 반영)
+
+% v5.7 · \dmframepage 활성화 (세션 63 M2 재부활 · 페이지 전체 라운드 프레임)
+\dmframepageon
+
+\begin{document}
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 1 · 챕터 + 개념 요약
+% ══════════════════════════════════════════════════════════════
+\dmchapter{01}{평면좌표}
+\dmbracket{6}
+
+\begin{dmconcept}{1}{두 점 사이의 거리}
+
+\dmsub{1}{수직선 위의 두 점 사이의 거리}
+
+수직선 위의 두 점 $\mathrm{A}(x_1)$,\ $\mathrm{B}(x_2)$ 사이의 거리는 두 좌표의 차의 절댓값이다.
+\begin{equation*}
+  \overline{\mathrm{AB}} = |x_2 - x_1|
+\end{equation*}
+
+절댓값의 성질에 의해 $|x_2 - x_1| = |x_1 - x_2|$이므로 두 점의 순서를 바꾸어도 거리는 변하지 않는다.
+
+\begin{dmexample}
+두 점 $\mathrm{A}(-3)$,\ $\mathrm{B}(5)$ 사이의 거리는 $\overline{\mathrm{AB}} = |5 - (-3)| = 8$이다.
+\end{dmexample}
+
+\begin{dmnote}
+$|x_2 - x_1|$의 값은 항상 $0$ 이상이며, 두 점이 일치할 때만 $0$이다.
+\end{dmnote}
+
+\dmsub{2}{좌표평면 위의 두 점 사이의 거리}
+
+좌표평면 위의 두 점 $\mathrm{A}(x_1,\, y_1)$,\ $\mathrm{B}(x_2,\, y_2)$ 사이의 거리는
+\begin{equation*}
+  \overline{\mathrm{AB}} = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+\end{equation*}
+이다.
+
+\begin{dmexplain}
+좌표평면 위 두 점 사이의 거리 공식은 $x$좌표의 차와 $y$좌표의 차를 각각 제곱하여 더한 뒤 양의 제곱근을 취한 형태이다.
+\end{dmexplain}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 2 · 수능특강 2027 재현 (dm-suneung 스타일 · 세션 64)
+% 원본: EBS 수능특강 2027 수학Ⅰ p.5 (거듭제곱근 예제 1)
+% 마스터 지시: "예제 페이지를 수능특강 2027이랑 똑같이 만들어봐"
+% 콘텐츠 그대로 재현 (거듭제곱근 · 유제 2문)
+% ══════════════════════════════════════════════════════════════
+\begin{dmssexbox}[www.ebsi.co.kr]{1}{거듭제곱근}
+$\displaystyle\sqrt[3]{\dfrac{27}{\sqrt[3]{27}}} \times \sqrt[6]{9}$\,의 값은?
+\par\vspace{2mm}
+\noindent\makebox[0.18\linewidth][l]{$\text{\textcircled{\scriptsize 1}}\ \sqrt[3]{3}$}%
+\makebox[0.18\linewidth][l]{$\text{\textcircled{\scriptsize 2}}\ \sqrt{3}$}%
+\makebox[0.18\linewidth][l]{$\text{\textcircled{\scriptsize 3}}\ 1$}%
+\makebox[0.18\linewidth][l]{$\text{\textcircled{\scriptsize 4}}\ 3$}%
+\makebox[0.18\linewidth][l]{$\text{\textcircled{\scriptsize 5}}\ 9$}
+\end{dmssexbox}
+
+% v1.1: 좌측 세로 dot line 유제까지 완전 연결 (95mm · 예제 박스 하단 ~ 유제 배지 위)
+\dmssdotline{95mm}
+
+\begin{dmssguide}
+$a>0,\ b>0$이고 $m,\ n$이 $2$ 이상의 자연수일 때
+\par\vspace{1mm}
+\noindent\makebox[0.48\linewidth][l]{$\text{\textcircled{\scriptsize 1}}\ (\sqrt[n]{a})^n = a$}%
+\makebox[0.48\linewidth][l]{$\text{\textcircled{\scriptsize 2}}\ \sqrt[n]{a}\,\sqrt[n]{b} = \sqrt[n]{ab}$}
+\par
+$\text{\textcircled{\scriptsize 3}}\ \sqrt[np]{a^{mp}} = \sqrt[n]{a^m}$ \ (단, $p$는 자연수)
+\end{dmssguide}
+
+\begin{dmsssolve}
+$\sqrt[3]{27} = \sqrt[3]{3^3} = 3$,\ $\sqrt[6]{9} = \sqrt[6]{3^2} = \sqrt[3]{3}$이므로
+\begin{align*}
+\sqrt[3]{\dfrac{27}{\sqrt[3]{27}}} \times \sqrt[6]{9}
+&= \sqrt[3]{\dfrac{27}{3}} \times \sqrt[3]{3}\\
+&= \sqrt[3]{9} \times \sqrt[3]{3}\\
+&= \sqrt[3]{9 \times 3}\\
+&= \sqrt[3]{27}\\
+&= 3
+\end{align*}
+\dmssanswer{\textcircled{\scriptsize 4}}
+\end{dmsssolve}
+
+\begin{dmssyujaebox}{2}
+\dmssyujaenum{1}{26008-0001}%
+$\sqrt[5]{(-3.2) \times 10^{6}}$\,의 값은?
+\par\vspace{1mm}
+\hspace*{20mm}\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 1}}\ -20$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 2}}\ -16$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 3}}\ -12$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 4}}\ -8$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 5}}\ -4$}
+
+\vspace{9mm}
+
+\dmssyujaenum{2}{26008-0002}%
+$8$ 이하의 자연수 $a,\ b$에 대하여
+\begin{equation*}
+a + \dfrac{b}{10} \le \sqrt[3]{12} < a + \dfrac{b+1}{10}
+\end{equation*}
+이 성립할 때, $a+b$의 값은?
+\par\vspace{1mm}
+\hspace*{20mm}\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 1}}\ 2$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 2}}\ 3$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 3}}\ 4$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 4}}\ 5$}%
+\makebox[0.15\linewidth][l]{$\text{\textcircled{\scriptsize 5}}\ 6$}
+\vspace{22mm}    % 원본 재현 · 유제 박스 하단 여백 확보 (학생 풀이 공간)
+\end{dmssyujaebox}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 3 · Level 1 첫 페이지 (4문)
+% ══════════════════════════════════════════════════════════════
+\dmlevel{1}
+
+\dmpnum{1}{%
+두 점 $\mathrm{A}(2,\, 1)$,\ $\mathrm{B}(6,\, 5)$ 사이의 거리를 구하시오.%
+}
+
+\dmpnum{2}{%
+두 점 $\mathrm{A}(a,\, 3)$,\ $\mathrm{B}(-1,\, 2a)$ 사이의 거리가 $\sqrt{29}$일 때, 양수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{3}{%
+세 점 $\mathrm{A}(1,\, 4)$,\ $\mathrm{B}(-2,\, 1)$,\ $\mathrm{C}(t,\, -1)$에 대하여 $\overline{\mathrm{AC}} = \overline{\mathrm{BC}}$일 때, $t$의 값을 구하시오.%
+}
+
+\dmpnum{4}{%
+좌표평면 위의 세 점 $\mathrm{A}(1,\, 2)$,\ $\mathrm{B}(4,\, 6)$,\ $\mathrm{C}(a,\, 0)$이 이등변삼각형을 이루도록 하는 상수 $a$의 값을 모두 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 4 · Level 1 두 번째 페이지 (4문)
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+두 점 $\mathrm{A}(-1,\, 3)$,\ $\mathrm{B}(5,\, 7)$을 이은 선분을 $2 : 3$으로 내분하는 점의 좌표를 구하시오.%
+}
+
+\dmpnum{6}{%
+좌표평면 위의 두 점 $\mathrm{A}(-2,\, 4)$,\ $\mathrm{B}(6,\, -2)$에 대하여 선분 $\overline{\mathrm{AB}}$를 $3 : 1$로 외분하는 점의 좌표를 구하시오.%
+}
+
+\dmpnum{7}{%
+세 점 $\mathrm{A}(1,\, 2)$,\ $\mathrm{B}(-3,\, 4)$,\ $\mathrm{C}(5,\, -6)$을 꼭짓점으로 하는 삼각형의 무게중심의 좌표를 구하시오.%
+}
+
+\dmpnum{8}{%
+좌표평면 위의 세 점 $\mathrm{A}(1,\, 3)$,\ $\mathrm{B}(5,\, 1)$,\ $\mathrm{C}(a,\, b)$가 한 직선 위에 있을 때, $2a + b$의 값을 $a$로 나타내시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 5 · Level 2 (3문)
+% ══════════════════════════════════════════════════════════════
+\dmlevel{2}
+
+\dmpnum{1}{%
+좌표평면 위의 두 점 $\mathrm{A}(1,\, 2)$,\ $\mathrm{B}(5,\, -2)$에 대하여 선분 $\overline{\mathrm{AB}}$를 지름으로 하는 원의 중심의 좌표와 반지름의 길이를 구하시오.%
+}
+
+\dmpnum{2}{%
+좌표평면 위의 세 점 $\mathrm{A}(0,\, 0)$,\ $\mathrm{B}(6,\, 0)$,\ $\mathrm{C}(2,\, 4)$를 꼭짓점으로 하는 삼각형의 외심의 좌표를 구하시오.%
+}
+
+\dmpnum{3}{%
+두 점 $\mathrm{A}(-2,\, 1)$,\ $\mathrm{B}(4,\, 3)$에 대하여 $\overline{\mathrm{AP}}^{\,2} + \overline{\mathrm{BP}}^{\,2}$가 최소가 되는 점 $\mathrm{P}$의 좌표를 구하시오. (단, $\mathrm{P}$는 $x$축 위의 점)%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 6 · Level 3 (2문 · 조건 박스 시연)
+% ══════════════════════════════════════════════════════════════
+\dmlevel{3}
+
+\dmpnum{1}{%
+전체집합 $U = \{x \mid x \text{는 } 10 \text{ 이하의 자연수}\}$의 두 부분집합 $A = \{1,\, 2,\, 3,\, 4,\, 5\}$,\ $B = \{3,\, 4,\, 5,\, 6,\, 7\}$에 대하여 $U$의 부분집합 $X$가 다음 세 조건을 모두 만족시킬 때, $X$의 모든 원소의 합의 최솟값을 구하시오.
+\begin{dmoptionbox}
+(가) $n(X) = 6$
+
+(나) $A - X = B - X$
+
+(다) $(X - A) \cap (X - B) \ne \varnothing$
+\end{dmoptionbox}%
+}
+
+\dmpnum{2}{%
+집합 $X = \{1,\, 2,\, 3,\, 4\}$에서 $X$로의 세 함수 $f$,\ $g$,\ $h$가 다음 조건을 만족시킨다.
+\begin{dmoptionbox}
+(가) $f$는 항등함수이다.
+
+(나) $g$는 상수함수이고 $g(2) = 3$이다.
+
+(다) 모든 $x \in X$에 대하여 $f(x) + g(x) + h(x) = 10$이다.
+\end{dmoptionbox}
+$h(1) + h(4)$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 7 · 실전 페이지 (3문 · 조건 박스·보기 박스 시연)
+% ══════════════════════════════════════════════════════════════
+\dmrealtype
+
+\dmpnum{1}{%
+\dmkichul{2022학년도 11월 고1 학평 28번}
+전체집합 $U = \{1,\, 2,\, 4,\, 8,\, 16,\, 32\}$의 두 부분집합 $A$,\ $B$가 다음 조건을 만족시킨다.
+\begin{dmoptionbox}
+(가) 집합 $A \cup B^\mathrm{c}$의 모든 원소의 합은 집합 $B - A$의 모든 원소의 합의 $6$배이다.
+
+(나) $n(A \cup B) = 5$
+\end{dmoptionbox}
+$2 \le n(B - A) \le 4$일 때, 집합 $A$의 모든 원소의 합의 최솟값을 구하시오.%
+}
+
+\dmpnum{2}{%
+무리함수 $y = -\sqrt{6 - 3x} + 4$에 관한 다음 설명 중 옳은 것을 모두 고르시오.
+\begin{dmoptionbox}
+ㄱ. 평행이동에 의해 $y = -\sqrt{-3x}$의 그래프와 겹칠 수 있다.
+
+ㄴ. 정의역은 $\{x \mid x \le 2\}$이고 치역은 $\{y \mid y \le 4\}$이다.
+
+ㄷ. 그래프는 제$2$사분면을 지나지 않는다.
+\end{dmoptionbox}%
+}
+
+\dmpnum{3}{%
+실수 전체의 집합에서 실수 전체의 집합으로 정의된 다음 네 함수 중에서 일대일대응인 것의 개수를 $a$, 항등함수인 것의 개수를 $c$라 할 때, $a + c$의 값을 구하시오.
+\dmoptioninline{ㄱ. $f(x) = 4x$ \quad ㄴ. $f(x) = 3$ \quad ㄷ. $f(x) = x^{2}$ \quad ㄹ. $f(x) = x$}%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 8 · dmsolution 다중 문단 + equation 회귀 시연 (v5.6 · 세션 63)
+% 이전 버전(hangindent 기반)에서는 두 번째 문단·equation 뒤 텍스트가 좌측 여백까지 낙하
+% v5.6 list 기반 재설계로 매크로 종료까지 여백 유지
+% ══════════════════════════════════════════════════════════════
+\dmex{2}{다중 문단·display math 회귀 시연}
+
+\begin{dmproblem}
+두 점 $\mathrm{A}(1,\,2)$,\ $\mathrm{B}(4,\,6)$을 지나는 직선의 방정식을 구하고, 이 직선과 $x$축, $y$축으로 둘러싸인 삼각형의 넓이를 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+직선의 방정식을 두 점 형태로 세운 뒤, $x$절편과 $y$절편을 구해 삼각형 넓이를 계산한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+두 점 $\mathrm{A}(1,\,2)$,\ $\mathrm{B}(4,\,6)$을 지나는 직선의 기울기는
+\begin{equation*}
+  m = \frac{6 - 2}{4 - 1} = \frac{4}{3}
+\end{equation*}
+이다. 점 $\mathrm{A}(1,\,2)$를 지나므로 직선의 방정식은 $y - 2 = \dfrac{4}{3}(x - 1)$, 즉
+\begin{equation*}
+  y = \frac{4}{3}x + \frac{2}{3}
+\end{equation*}
+이다.
+
+이 직선의 $x$절편을 구하면 $y = 0$일 때
+\begin{equation*}
+  0 = \frac{4}{3}x + \frac{2}{3},
+  \quad x = -\frac{1}{2}
+\end{equation*}
+이므로 $x$절편은 $-\dfrac{1}{2}$이고, $y$절편은 $\dfrac{2}{3}$이다.
+
+따라서 이 직선과 두 축이 이루는 삼각형은 직각삼각형이고, 그 넓이는
+\begin{equation*}
+  S = \frac{1}{2} \times \frac{1}{2} \times \frac{2}{3} = \frac{1}{6}
+\end{equation*}
+이다.
+\dmanswer{$S = \dfrac{1}{6}$}
+\end{dmsolution}
+
+\end{document}

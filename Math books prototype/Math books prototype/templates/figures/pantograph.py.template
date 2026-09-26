@@ -1,0 +1,189 @@
+"""사도기 (pantograph) template · Phase 2 신설
+세션 36 골든 유래: 와부고 CM2 2회 예상 중간 #17
+
+기하 (마스터 확립):
+- 4-bar 평행사변형: A(0, 2), B(4, 4), C(4, 8), D(0, 6)  [k=3 기본]
+- 대각선 연결 나무 rod 없음 (F-P-Q 공선은 파선 개념선)
+- 모사펜 P: rod AB 중간 (2, 3) — C1 boundary 위
+- 연필 Q: rod DC 연장선 위 (6, 9) — C2 boundary 위
+- 고정 pivot O(0, 0): rod AD 연장선 아래
+- OQ = 3 * OP → k = 3
+
+# --- CONFIG ---
+k = 3                # 확대비 (변경 시 좌표 재계산 필요)
+rotation_deg = -40   # 시계방향 회전 각도 (0 = 회전 없음, -40 = 세션 36 마스터 승인)
+fig_width = 12.5     # inches
+fig_height = 8.5
+c1_center = (2, 2)   # 원본 도형 C1 중심 (문제에서 주어진 좌표)
+c1_radius = 1
+# ---
+
+의무 검증 (배포 전):
+  node scripts/figure-tip-boundary-check.mjs <name>.py
+  node scripts/figure-completeness-check.mjs <name>.py
+  node scripts/figure-label-overlap-check.mjs <name>.py
+"""
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle, Polygon, Circle, Arc
+import numpy as np
+
+plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['axes.unicode_minus'] = False
+
+# ── CONFIG (수정 지점) ──
+k = 3
+rotation_deg = -40
+fig_width = 12.5
+fig_height = 8.5
+c1_center_orig = np.array([2, 2])
+c1_radius = 1
+
+# ── 색상 (baked-in 규약) ──
+wood = '#8B5A2B'
+wood_dark = '#5A3818'
+wood_light = '#D9A574'
+primary = '#1959B8'    # C1 파랑 (베이스)
+accent = '#D92727'     # 모사펜 빨강
+secondary = '#C05A1A'  # 연필 오렌지
+axis_color = '#1A1A1A' # 좌표축 진함
+
+# ── 회전 행렬 ──
+theta = np.radians(rotation_deg)
+cos_t = np.cos(theta)
+sin_t = np.sin(theta)
+def rot(p):
+    return np.array([p[0] * cos_t - p[1] * sin_t, p[0] * sin_t + p[1] * cos_t])
+
+# ── 원본 좌표 (y=x 대칭 flip 후 · 세션 36 골든) ──
+F0 = np.array([0, 0])
+A0 = np.array([0, 2])
+B0 = np.array([4, 4])
+C0 = np.array([4, 8])
+D0 = np.array([0, 6])
+P0 = np.array([2, 3])       # 모사펜 tip (C1 boundary 위)
+Q0 = np.array([6, 9])       # 연필 tip (C2 boundary 위)
+c2_center_orig = k * c1_center_orig   # C2 중심 = k * C1 중심
+
+# ── 회전 적용 (mechanism만; C1·C2·axes 원본 유지) ──
+F = rot(F0); A = rot(A0); B = rot(B0); C = rot(C0); D = rot(D0)
+P = rot(P0); Q = rot(Q0)
+c1_center_rotated = rot(c1_center_orig)
+c2_center_rotated = rot(c2_center_orig)
+
+fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=150)
+ax.set_aspect('equal')
+
+# 범위 자동 계산 (원 boundary 포함)
+all_x = [F[0], A[0], B[0], C[0], D[0], P[0], Q[0],
+          c1_center_rotated[0] - c1_radius, c1_center_rotated[0] + c1_radius,
+          c2_center_rotated[0] - k*c1_radius, c2_center_rotated[0] + k*c1_radius]
+all_y = [F[1], A[1], B[1], C[1], D[1], P[1], Q[1],
+          c1_center_rotated[1] - c1_radius, c1_center_rotated[1] + c1_radius,
+          c2_center_rotated[1] - k*c1_radius, c2_center_rotated[1] + k*c1_radius]
+ax.set_xlim(min(all_x) - 1.5, max(all_x) + 2.0)
+ax.set_ylim(min(all_y) - 2.0, max(all_y) + 1.5)
+
+# ── 좌표축 (진하기 규약 §C1) ──
+xmax = max(all_x) + 2.0; ymax = max(all_y) + 1.5
+xmin = min(all_x) - 1.5; ymin = min(all_y) - 2.0
+ax.annotate('', xy=(xmax, 0), xytext=(xmin, 0),
+            arrowprops=dict(arrowstyle='->', color=axis_color, linewidth=1.6, alpha=0.95))
+ax.annotate('', xy=(0, ymax), xytext=(0, ymin),
+            arrowprops=dict(arrowstyle='->', color=axis_color, linewidth=1.6, alpha=0.95))
+ax.text(xmax - 0.2, -0.5, '$x$', color=axis_color, fontsize=13, fontweight='bold')
+ax.text(-0.5, ymax - 0.2, '$y$', color=axis_color, fontsize=13, fontweight='bold')
+
+# ── C1 (모사펜 트레이스, 파랑) — 원 라벨 bbox=white §L1 ──
+pen_circle = Circle(c1_center_rotated, c1_radius, fill=False, edgecolor=primary, linewidth=1.8)
+ax.add_patch(pen_circle)
+c1_label_pos = c1_center_rotated + np.array([-1.6, -0.2])
+ax.text(c1_label_pos[0], c1_label_pos[1], '$C_1$', color=primary, fontsize=12,
+        bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9), zorder=10)
+
+# ── C2 (연필 그리기, 오렌지, 반지름 k) ──
+pencil_circle = Circle(c2_center_rotated, k * c1_radius, fill=False, edgecolor=secondary, linewidth=1.8, alpha=0.85)
+ax.add_patch(pencil_circle)
+c2_label_pos = c2_center_rotated + np.array([-3.5, 0.5])
+ax.text(c2_label_pos[0], c2_label_pos[1], '$C_2$', color=secondary, fontsize=12,
+        bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9), zorder=10)
+
+# ── Rod (나무 두께) ──
+def draw_rod(ax, p1, p2, thickness=0.22):
+    direction = np.array(p2) - np.array(p1)
+    length = np.linalg.norm(direction)
+    unit = direction / length
+    perp = np.array([-unit[1], unit[0]]) * thickness
+    v = [p1 + perp, p2 + perp, p2 - perp, p1 - perp]
+    ax.add_patch(Polygon(v, closed=True, facecolor=wood, edgecolor=wood_dark, linewidth=0.7))
+    hp1 = p1 + 0.4 * perp; hp2 = p2 + 0.4 * perp
+    ax.plot([hp1[0], hp2[0]], [hp1[1], hp2[1]], color=wood_light, linewidth=0.7, alpha=0.75)
+
+draw_rod(ax, F, D)  # rod 1: F—A—D (좌 수직)
+draw_rod(ax, B, C)  # rod 2: B—C (우 수직)
+draw_rod(ax, A, B)  # rod 3: A—B (하 대각, 모사펜 부착)
+draw_rod(ax, D, Q)  # rod 4: D—C—Q (상 대각, 연필 연장)
+
+# ── 관절 (3D-look) ──
+def draw_joint(ax, p, size=0.30):
+    ax.add_patch(Circle(p, size, facecolor=wood_dark, edgecolor='black', linewidth=0.5, zorder=5))
+    ax.add_patch(Circle(p, size * 0.72, facecolor=wood, edgecolor='none', zorder=5))
+    ax.add_patch(Circle(p, size * 0.45, facecolor=wood_dark, edgecolor='none', zorder=5))
+    ax.add_patch(Circle(p, size * 0.28, facecolor='#DDDDDD', edgecolor='black', linewidth=0.3, zorder=5))
+
+for jp in [A, B, C, D]:
+    draw_joint(ax, jp)
+
+# 관절 라벨 (방사 방향 offset)
+def label_offset(center, joint, offset=0.55):
+    direction = joint - center
+    if np.linalg.norm(direction) < 0.01:
+        return joint + np.array([offset, offset])
+    return joint + (direction / np.linalg.norm(direction)) * offset
+
+for jp, name in [(A, 'A'), (B, 'B'), (C, 'C'), (D, 'D')]:
+    lp = label_offset(F, jp)
+    ax.text(lp[0], lp[1], name, color=wood_dark, fontsize=9, fontweight='bold', zorder=6, ha='center', va='center')
+
+# ── 고정 pivot O (clamp · 회전 없음) ──
+ax.add_patch(Rectangle((-0.7, -0.7), 1.4, 1.4, facecolor='#666666', edgecolor='black', linewidth=0.6, zorder=6))
+ax.add_patch(Rectangle((-0.65, -0.7), 0.18, 1.4, facecolor='#444444', edgecolor='none', zorder=6))
+ax.add_patch(Rectangle((0.47, -0.7), 0.18, 1.4, facecolor='#444444', edgecolor='none', zorder=6))
+ax.add_patch(Circle(F, 0.38, facecolor='black', edgecolor='none', zorder=7))
+ax.add_patch(Circle(F, 0.22, facecolor='#888888', edgecolor='none', zorder=7))
+ax.add_patch(Circle(F, 0.10, facecolor='black', edgecolor='none', zorder=7))
+ax.text(-1.05, -0.35, '$\\mathrm{O}$', color='black', fontsize=12, fontweight='bold', zorder=8)
+
+# ── 펜 (tip이 원 boundary 위) ──
+def draw_pen(ax, p_tip, color):
+    pen_up = rot(np.array([0, 1]))
+    pen_up_unit = pen_up / np.linalg.norm(pen_up)
+    perp = np.array([-pen_up_unit[1], pen_up_unit[0]])
+    body_w = 0.18; body_h = 0.55; tip_length = 0.5
+    body_bottom = p_tip + pen_up_unit * tip_length
+    body_top = body_bottom + pen_up_unit * body_h
+    corners = [body_bottom + perp*body_w, body_top + perp*body_w,
+               body_top - perp*body_w, body_bottom - perp*body_w]
+    ax.add_patch(Polygon(corners, closed=True, facecolor=color, edgecolor='black', linewidth=0.5, zorder=8))
+    tip_left = body_bottom + perp * body_w
+    tip_right = body_bottom - perp * body_w
+    ax.add_patch(Polygon([tip_left, tip_right, p_tip], closed=True, facecolor=color, edgecolor='black', linewidth=0.5, zorder=8))
+    ax.add_patch(Circle(p_tip, 0.08, facecolor='black', zorder=9))
+    return pen_up_unit, body_top
+
+pen_up_unit, _ = draw_pen(ax, P, accent)
+perp = np.array([-pen_up_unit[1], pen_up_unit[0]])
+ax.text(P[0] + perp[0]*0.5 + pen_up_unit[0]*0.9, P[1] + perp[1]*0.5 + pen_up_unit[1]*0.9,
+        '$\\mathrm{P}$', color=accent, fontsize=12, fontweight='bold', zorder=8)
+
+_, _ = draw_pen(ax, Q, secondary)
+ax.text(Q[0] + perp[0]*0.5 + pen_up_unit[0]*0.9, Q[1] + perp[1]*0.5 + pen_up_unit[1]*0.9,
+        '$\\mathrm{Q}$', color=secondary, fontsize=12, fontweight='bold', zorder=8)
+
+# O, P, Q 공선 (파선 · 라벨 없음)
+ax.plot([F[0], Q[0]], [F[1], Q[1]], color='gray', linewidth=0.5, linestyle=(0, (5, 3)), alpha=0.55, zorder=3)
+
+ax.set_xticks([]); ax.set_yticks([])
+for spine in ax.spines.values(): spine.set_visible(False)
+
+plt.tight_layout(pad=0.5)
+plt.savefig('pantograph.pdf', bbox_inches='tight', pad_inches=0.05)

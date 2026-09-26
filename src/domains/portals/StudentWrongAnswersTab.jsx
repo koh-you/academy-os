@@ -46,10 +46,10 @@ export function StudentWrongAnswersTab({ previewMode = false, sessionToken = "",
   }
 
   if (previewMode) {
-    return <EmptyState className="emptyPortalPanel" title="학생이 로그인하면 선생님이 기록한 오답 문항이 여기 나타납니다." />;
+    return <EmptyState title="학생이 로그인하면 선생님이 기록한 오답 문항이 여기 나타납니다." />;
   }
-  if (state.loading) return <EmptyState className="emptyPortalPanel" title="오답 목록을 불러오는 중…" />;
-  if (state.error) return <EmptyState className="emptyPortalPanel" title={state.error} />;
+  if (state.loading) return <EmptyState title="오답 목록을 불러오는 중…" tone="loading" />;
+  if (state.error) return <EmptyState title={state.error} tone="error" />;
 
   const books = state.books
     .map((book) => {
@@ -60,7 +60,7 @@ export function StudentWrongAnswersTab({ previewMode = false, sessionToken = "",
     })
     .filter((book) => book.wrongItems.length > 0);
 
-  if (books.length === 0) return <EmptyState className="emptyPortalPanel" title="아직 기록된 오답이 없습니다." />;
+  if (books.length === 0) return <EmptyState title="아직 기록된 오답이 없습니다." />;
 
   return (
     <div className="studentWrongAnswers">

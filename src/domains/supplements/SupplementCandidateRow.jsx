@@ -1,4 +1,5 @@
 import { ListCard } from "../../shared/components/ListCard.jsx";
+import "./supplementCandidateRow.css";
 
 export function SupplementCandidateRow({
   existingTask,
@@ -16,7 +17,7 @@ export function SupplementCandidateRow({
       density="compact"
     >
       <div>
-        <button className="textLinkButton" onClick={onOpen} type="button">
+        <button className="ghostButton link" onClick={onOpen} type="button">
           {studentName}
         </button>
         <span>{item.title}</span>
@@ -40,7 +41,7 @@ export function SupplementCandidateRow({
       </button>
       {existingTask ? (
         <button
-          className="primaryButton compact"
+          className="softButton compact"
           disabled={isPassBusy}
           onClick={onPass}
           title="보충 완료 처리"

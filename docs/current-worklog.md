@@ -1,5 +1,43 @@
 # Academy OS Current Worklog
 
+## 2026-09-26 수업 등록 모달 개편
+
+- 「삭제하거나 감춰주세요」 를 그대로 따랐으면 기능이 사라졌다. `큰 수업 틀` select 은 메타데이터 입력이 아니라 `lessonModalDraftTransitions.js` 의 패치 하나로 수업명·시간·색상·명단을 동시에 바꾼다. 사용자가 지우라고 한 것은 「폼 위쪽에 맥락 없이 놓인 드롭다운」 이지 「반 단위로 채우는 기능」 이 아니어서, 패치는 그대로 두고 진입점만 명단 옆으로 옮겼다.
+- 고정 푸터를 sticky 로 풀지 않고 공용 `Modal` 에 `footer` 슬롯을 넣은 이유: `.modalScrollBody` 가 `gap: 20px` 그리드라 sticky 로 두면 푸터 위 20px 틈으로 본문이 비친다. 그리드 행을 `auto minmax(0,1fr) auto` 로 두는 쪽이 저장바 있는 다른 모달에도 그대로 쓸 수 있다.
+- 오른쪽 열의 자체 스크롤은 열에 `overflow-y:auto` 를 걸지 않고 `.lessonStudentGroups` 에 `max-height: min(40dvh, 340px)` 로 준다. 모달이 스크롤 모드라 열 높이가 확정적이지 않아 열에 건 overflow 는 동작하지 않는다. 이 방식은 1열로 접힐 때도 그대로 쓴다.
+- `getByLabel("반 불러오기", { exact: true })` 가 안 잡혔다. 감싸는 `<label>` 의 텍스트에 `<select>` 의 선택된 option 글자까지 들어가 접근성 이름이 「반 불러오기직접 입력 일정」 이 된다. select 에 `aria-label` 을 명시해 고정했다(예전 코드는 `getByLabel` 을 부분일치로 써서 드러나지 않았다).
+- 자정 넘김은 `addMinutesToAttendanceTime` 가 24시간으로 돌아 22:30 → 01:30 을 주는데, 저장 검증은 `endTime > startTime` 을 요구해 저장이 막힌다. 사용자가 고칠 수 없는 실패를 만들지 않도록 23:59 로 묶고 단위 테스트로 잠갔다.
+- 보이는 것만 측정하면 틀린다: 처음엔 `document.documentElement.scrollHeight` 로 세로 넘침을 재려다 실패했는데, 그건 모달 뒤 달력 페이지 높이였다. 모달이 뷰포트에 들어가는지는 `.modalBackdrop` 의 `scrollHeight > clientHeight` 로 봐야 한다.
+- 공용 `SectionHeader` 의 aside 는 `flex: 0 0 auto` 라 좁은 열에 넣으면 제목을 한 글자씩 짓눌렀다. 좌측 열에서만 `flex-wrap: wrap` + `margin-left: 0` 으로 풀었다(공용 규칙은 그대로).
+
+## 2026-09-26 수업 등록 모달 — 검증 지적 반영
+
+- 「기본 선택을 0명으로」 와 「첫 반이 미리 선택된 채 열림」 이 겹치자 **반 불러오기가 죽은 컨트롤**이 됐다. 각각은 맞는 변경이었는데 조합이 틀렸다. 기본값을 바꿀 때는 그 값을 읽는 다른 컨트롤의 초기 상태까지 같이 봐야 한다.
+- 푸터 안내와 저장 검증이 각자 조건을 들고 있으면 반드시 갈라진다. 실제로 같은 `aria-live` 안에서 「저장 실패 / 신입생 보강 학생을 1명 이상 선택해 주세요. / 포함 학생 0명으로 저장됩니다.」 가 함께 읽혔다. 유형 목록(`lessonModalRosterRequiredTypes`)을 한 곳에 두고 두 함수가 그걸 보게 바꾼 뒤 단위 테스트로 잠갔다.
+- **퍼센트 `flex-basis` 는 줄바꿈을 보장하지 않는다.** `.sectionHeaderAside { flex: 1 1 100% }` 는 1440 에서는 동작했지만 390 에서는 그대로 제목 옆에 남아 283px 넘쳤다. 컨테이너 main 크기가 미정인 채로 배치되면 퍼센트 basis 가 content 로 되돌아간다(인라인으로 `flex-basis: 260px` 를 주면 즉시 줄바꿈 — 실측으로 확인). 1열 grid 로 바꿔 행을 명시했다.
+- 넘침 측정은 **무엇을 재는지**가 전부다. 이전 검사는 `document.documentElement.scrollWidth` 만 봤는데, 모달 카드는 뷰포트 안에 들어가므로 문서는 절대 넘치지 않는다. 실제로 스크롤된 건 `.modalScrollBody` 였다.
+- 390px 에서 `width: auto` 로는 전폭을 못 막았다. App.css 의 `@media (max-width: 640px) .modalFooter > button { flex: 1 1 140px }` 가 이기므로 `flex: 0 0 auto` 가 필요했다.
+- App.css 에서 도메인 css 로 옮긴 셀렉터가 **다른 화면까지 바꿨다**(`.lessonModalSection`·`.lessonModalFields` → 반 개설 모달). 이관은 범위 한정과 함께 해야 한다. 원래 값은 `classTemplateEditorModal.css` 에 명시적으로 복구했다(섹션 gap 12px · 반 이름 전폭 — 실측 재확인).
+- 시작→종료 자동 추종은 신규/편집을 갈라야 한다. 편집에서 「직전 시작 + 3시간」 과 같을 때만 따라가게 하니 16:00-17:45 수업의 시작만 옮겨도 종료가 유지된다. 비교와 계산이 같은 클램프(`getLessonModalFollowedEndTime`)를 공유해야 22:00-23:59 처럼 클램프된 값도 「따라가는 중」 으로 인식된다.
+
+## 2026-09-26 설명 문구 정리 (HelpTip 전환)
+
+- 스캔은 두 번에 걸쳤다. JSX 앵커(텍스트 노드·description 류 prop)만 보는 1차로 215건을 잡았는데 **모델 파일이 만드는 문구**(휴강 보충 보라색 박스 같은 것)를 놓쳐, 모든 문자열 리터럴을 훑는 2차로 64건을 보강해 275건이 됐다. 알림톡 발송 본문·샘플 데이터·에러 메시지는 컨텍스트 키워드로 걸러냈다.
+- 트리아지 판단은 에이전트에게 맡기되 **"애매하면 남긴다"** 를 규칙으로 못박았다. 결과적으로 대상의 60% 이상이 유지 판정이었고, 검증에서 걸린 것도 거의 전부 "숨기면 안 되는 것을 숨겼다" 쪽이었지 "남겨서 문제" 는 없었다.
+- 단위마다 적대적 검증을 붙였더니 실제 결함이 나왔다: 공용 컴포넌트의 말풍선이 `overflow: clip` 카드에서 잘림(#417 로 fixed 전환), 동적 건수 문구를 통째로 숨김, 저장 부작용 고지를 숨김, 확인 모달 부제를 숨김, 한 줄에 물음표 3개, `<label>` 안 버튼으로 입력 접근성 파손, 내용을 다 빼서 껍데기만 남은 안내 상자. 이 목록을 다음 단위 지침에 계속 누적해 넣었더니 3번째 배치부터 재발이 사라졌다.
+- 말풍선 잘림 판정은 **rect 비교로는 안 된다**. `position: fixed` 는 조상 밖으로 나가는 게 정상이라 조상 rect 와 비교하면 정상도 잘림으로 보인다. `document.elementFromPoint` 로 말풍선 9지점을 찍어 자기 자신을 집는지 보는 방식이 맞고, 모서리 2px 는 `border-radius` 때문에 오탐이 나므로 10px inset 으로 재야 한다.
+- 화면 CSS 의 포괄 규칙(`.card span { display: grid }` 류)이 공용 컴포넌트의 `display:none` 을 이겨서, 화면마다 열림/닫힘 상태 기계를 복제하는 패치가 붙기 시작했다. 특이도를 `.helpTip > …` 로 올리고 표시 축을 `visibility` 로 옮겨 그 패치들을 전부 지웠다 — 공용 컴포넌트가 화면 CSS 에 지면 같은 패치가 화면 수만큼 늘어난다.
+- `studio-width.spec.js` 가 CI 에서만 실패한 것은 `.appFrame` 의 `transition: grid-template-columns 180ms` 때문이었다(1024px 측정이 690=전환 전 / 898=전환 후 로 갈림). 샘플 두 번 비교로는 전환 시작 전을 안정으로 오인해서, 측정 테스트에서는 `page.addStyleTag` 로 전환을 껐다.
+
+## 2026-09-19 전체 UI 구조 정돈 (감사 → 14 PR)
+
+- 감사는 영역별 병렬 조사(13 에이전트) 뒤 발견별 3-렌즈 검증(831 에이전트)을 붙였다가 세션 한도로 절반이 실패 — 검증 설계가 조사 비용의 몇 배였다. 발견 JSON 을 본 세션이 직접 분류하고, 구현 에이전트가 첫 단계로 근거 file:line 을 확인하는 방식(검증을 구현의 부산물로)으로 바꿔 진행. 근거 불일치 4건은 그 자리에서 건너뛰고 보고서 §9 에 기록.
+- 단위 = PR 1개, 자기 worktree, 공통 지침 파일(`academy-os-ui-audit/agent-common.md`) + 단위 브리프. 처음엔 순차, 파일이 겹치지 않는 단위는 2개씩 병렬(U8/U9, U10/U11, U12/U13, U14/U15).
+- CI 왕복에서만 잡힌 잠금 4종(모달 인벤토리 개수 · css-hygiene 중복 셀렉터 · save-state audit `"saved"` 리터럴 · css-domain-split exclusiveClasses) 은 전부 `test:production` 전용이라 공통 지침에 "PR 전 test:production 1회" 를 넣은 뒤로는 CI 실패 0.
+- 같은 날 다른 세션이 App.css 를 도메인 css 로 대량 이관(#388 #396)해 App.css 삭제 단위마다 충돌 — origin/main 쪽 App.css 를 받고 삭제를 이관된 도메인 css 에 다시 적용, ratchet 은 실제 줄 수로. rebase+force 대신 merge 로 따라잡음(force push 금지).
+- 학생 프로필 저장 상태 헬퍼가 `"saved"` 리터럴을 잃자 `test-modal-save-state-audit` 가 실패 — 6종 어휘를 명시적으로 돌려주도록 고쳤다(패스스루가 아니라 `saved`/`idle` 분기).
+- 근거 불일치 사례: shots-10 숙제현황 가로 넘침은 메트릭 4열이 아니라 `.homeworkStatusContent` 의 `minmax(430px,…) minmax(520px,…)`; shots-17 포털 넘침은 h1 이 아니라 WorkspaceTabs nowrap min-content. 스크린샷 기반 발견은 원인 추정이 틀릴 수 있어 구현 시 실측(`scrollWidth`·`getBoundingClientRect`)으로 재확인하는 것이 맞았다.
+- Vercel 빌드 한도: 오후에 PR 미리보기 배포가 `Deployment rate limited`. GitHub checks 는 정상이라 병합은 계속했다.
 ## 2026-09-21 개념원리 OCR 6권 검수·반영·export
 
 - 윤곽선 PDF 의 좌표축은 두 점만 있는 선이라 상자 높이가 0 → 그림 후보에서 빠지고 크롭 위·오른쪽이 잘렸다(y축 화살표·x 라벨). 선에 0.6pt 두께를 주니 자동 크롭 45건(대수 기준)이 그대로 복구됐다. 반대로 라벨 붙이기 간격을 8pt 로 올리면 본문 글줄이 라벨 사슬로 딸려 오므로 「같은 줄에 4pt 안 이웃 토큰이 없는 고립 토큰」에만 8pt 를 준다.

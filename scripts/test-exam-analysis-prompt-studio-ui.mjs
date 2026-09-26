@@ -58,7 +58,11 @@ assert(component.includes("buildExamAnalysisSlideSequence"));
 assert(component.includes("createExamAnalysisPromptPack"));
 assert(component.includes("disabled={!promptPack.readyForAllGeneration}"));
 assert(component.includes("getRevisionPrompt(slide)"));
-assert(component.includes("disabled={!String(revisionRequests[slide.roleId] || \"\").trim()}"));
+// 2026-09-19 · 반복 슬라이드 안의 비활성 버튼을 렌더하지 않는다(docs/ui-row-actions.md R1): 수정 요청 입력이 있을 때만 '수정 프롬프트 복사' 를 그린다.
+assert(component.includes("{String(revisionRequests[slide.roleId] || \"\").trim() ? ("));
+// 2026-09-19 · 화면당 primary 1개: 슬라이드별 '처음 만들기 프롬프트 복사' 는 softButton compact 이고 generationAllowed 일 때만 렌더한다.
+assert(component.includes("{slide.generationAllowed ? ("));
+assert(!component.includes("className=\"primaryButton\" disabled={!slide.generationAllowed}"));
 assert(component.includes("import { InlineSaveStatus }"));
 assert(component.includes("<InlineSaveStatus label=\"프롬프트 작업본\" saveState={commonSaveState} />"));
 assert(component.includes("작업본 유지 · ${localState.error}"));

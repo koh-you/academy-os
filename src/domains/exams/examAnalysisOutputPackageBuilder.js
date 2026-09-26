@@ -13,6 +13,7 @@ import {
   examAnalysisCardNewsSlideTypes,
   examAnalysisChartPngExportScale
 } from "./examAnalysisChartSvg.js";
+import { academyName, getSessionBrandName } from "../../shared/utils/academyBrand.js";
 
 function formatExamAnalysisChecklistDistribution(items = [], maxItems = 6) {
   return (Array.isArray(items) ? items : [])
@@ -157,7 +158,7 @@ export function createExamAnalysisGptPlanningPacket({ activeRun = {}, model = {}
     "아직 이미지를 만들지 말고, 카드별 내용만 표로 정리해줘.",
     "",
     "[브랜드]",
-    "- 으뜸수학 고태영T",
+    `- ${getSessionBrandName()}`,
     "- 블루/화이트 중심",
     "- 전문적이고 차분한 내신 분석 카드뉴스",
     "- 벤치마킹 블로그의 정보 구조는 참고하되 문장/디자인/브랜드는 복제하지 않음",
@@ -344,7 +345,7 @@ function getExamAnalysisOutputCardPlan(outputDrafts = {}) {
 function createExamAnalysisPackageReadme({ activeRun = {}, outputDrafts = {}, chartFiles = [] } = {}) {
   const canvaCardPlan = getExamAnalysisOutputCardPlan(outputDrafts);
   return [
-    "으뜸수학학원 고태영T 시험분석 산출물 패키지",
+    `${getSessionBrandName().replace(`${academyName} `, `${academyName}학원 `)} 시험분석 산출물 패키지`,
     "",
     "사용 방법",
     "1. texts/blog-draft.txt 내용을 네이버 블로그 에디터에 붙여넣고 문장을 최종 수정합니다.",

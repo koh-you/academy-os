@@ -1,5 +1,4 @@
 import {
-  areLessonJournalHistoryHomeworksEqual,
   areLessonJournalHistoryTimestampsEqual,
   lessonJournalHistoryHomeworkFields
 } from "./lessonJournalHistoryPersistence.js";

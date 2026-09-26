@@ -106,6 +106,21 @@ export function createNotificationComposerViewModel({
   };
 }
 
+const noticeDispatchFailureMarkers = ["실패", "확인 필요", "이미 지났습니다"];
+const noticeDispatchCompletionMarkers = ["처리 완료", "예약 완료", "처리는 완료됐습니다"];
+
+// dispatchMessage 문자열은 발송 액션이 그대로 조립하므로(20h 잠금), 표시용 상태만 여기서 파생한다.
+export function resolveNoticeDispatchState({ dispatchMessage = "", isSending = false } = {}) {
+  if (isSending) return "loading";
+  const message = String(dispatchMessage ?? "").trim();
+  if (!message) return "idle";
+  const hasFailure = noticeDispatchFailureMarkers.some((marker) => message.includes(marker));
+  if (!hasFailure) return "success";
+  const isCompletion = noticeDispatchCompletionMarkers.some((marker) => message.includes(marker));
+  if (!isCompletion || message.includes("성공 0건")) return "error";
+  return "partial";
+}
+
 export function createNotificationRecipientViewModel({
   classFilter = "all",
   classTemplates = [],

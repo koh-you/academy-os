@@ -3,7 +3,9 @@ import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
 import { createTeacherViewAdapters, TeacherViewOutlet } from "./TeacherViewOutlet.js";
 import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";
-import { useAppSession } from "./useAppSession.js";
+import { createSessionDataIdentity, useAppSession } from "./useAppSession.js";
+import { useSessionActivityRefresh } from "./useSessionActivityRefresh.js";
+import { useIntegrationStatus } from "./useIntegrationStatus.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import { isViewAllowedForRole } from "./sidebarMenuModel.js";
@@ -30,20 +32,15 @@ import {
 } from "../domains/exams/examPrepRowsApi.js";
 import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSaveController.js";
 import { applyExamPrepDraftToLogicalGroup } from "../domains/exams/examPrepDraft.js";
-import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
-import { createStudentExamPrepRow } from "../domains/exams/studentExamPrepRow.js";
 import { createExamPrepCalendarCluster } from "../domains/exams/examPrepCalendarCluster.js";
 import { createWithdrawalStudentMutation } from "../domains/students/withdrawalLessonBoundary.js";
 import { getRosterEffectiveFromDate } from "../domains/students/rosterEffectiveDate.js";
 import {
-  compareStudentsByName,
   getActiveLessonStudents,
   getActiveStudentIdsFromSelection,
   getLessonJournalStudents,
   getLessonStudentIds,
-  isActiveStudent,
-  isWithdrawnStudent,
-  sortStudentsByName
+  isActiveStudent
 } from "../domains/students/lessonRosterSelectors.js";
 import {
   getTallyStudentReplacementChanges,
@@ -109,6 +106,14 @@ import { createLessonNotificationJob } from "../domains/lessons/lessonNotificati
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
+import {
+  activeLessonIdSet,
+  filterActiveLessons,
+  filterRecordsForLessons,
+  isActiveLesson,
+  upsertById,
+  upsertLessonStudentRecord
+} from "../domains/lessons/lessonRecordCollections.js";
 import { createLessonRetestStatusPayload } from "../domains/lessons/lessonRetestStatusPayload.js";
 import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMathEventExamPrepIdSelector.js";
 import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPeriodSundayDateSelector.js";
@@ -168,7 +173,6 @@ import {
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
 import {
-  getNotificationJobLabel,
   resolveNotificationJobStatusClass
 } from "../domains/notifications/notificationCenterConfig.js";
 import {
@@ -183,7 +187,6 @@ import {
   createNotificationMessageBlock as createMessageBlock,
   createNotificationMessageLine as createMessageLine,
   formatLessonNotificationAttendance as formatAttendanceForMessage,
-  getNotificationTextKey,
   joinNotificationMessageBlocks as joinMessageBlocks,
   normalizeNotificationText as normalizeMessageText,
   notificationTextIncludesBlock
@@ -193,7 +196,13 @@ import {
   parseHomeworkFollowupMemoLine,
   removeHomeworkFollowupMemoLines
 } from "../domains/notifications/lessonPreparationNotice.js";
-import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
+import {
+  getLessonContent,
+  getLessonMaterial,
+  getLessonTestResultLines,
+  getStudentSupplementScheduleTasks,
+  getStudentSupplementSchedules
+} from "../domains/notifications/lessonCommentSourceLines.js";
 import { saveLessonRecordAction } from "../domains/lessons/lessonRecordSaveApi.js";
 import { findSupplementTaskForCandidate } from "../domains/supplements/supplementCenterSelectionModel.js";
 import {
@@ -206,72 +215,24 @@ import {
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
   followUpTypeLabel,
-  formatSupplementHomeworkCheckSentence,
   getAbsenceMakeupHomeworkText,
   getSupplementTaskSourceLabel,
   normalizeSupplementMethodForTask,
   supplementDefaultMethod,
   supplementMethodLabel,
-  supplementMethodOptions,
-  supplementMethodsByType
+  supplementMethodOptions
 } from "../domains/supplements/supplementMethodLabel.js";
 import { getSupplementNotificationControlDisplay } from "../domains/supplements/supplementStatus.js";
-import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
-  createTestAttemptId,
-  createTestSessionIdForPaper,
-  getTestPaperKindLabel
-} from "../domains/tests/testManagerUtils.js";
-import {
-  SpecialLectureGuideBasicFields,
-  SpecialLectureGuideLinkFields,
-  SpecialLectureGuideSelector,
-  SpecialLectureGuideTextFields,
-  SpecialLectureHighlightEditor,
-  SpecialLectureNoSelection,
-  SpecialLectureNoticeMemoField,
-  SpecialLectureScheduleCalculator,
-  SpecialLectureSessionPlanEditor,
-  SpecialLectureSpecialNotesField,
-  SpecialLectureManagementBar
-} from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
-import {
-  SpecialLectureNoticeActionPanel,
-  SpecialLecturePreviewColumn,
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
 import {
-  SchoolAcademicOverviewPanel,
-  SchoolCalendarFilterBar,
-  SchoolCalendarHeader,
-  SchoolCalendarSaveNotice,
-  SchoolDateScheduleModal,
-  SchoolEventFormModal,
-  SchoolMonthGrid,
-  SchoolMonthHeader
-} from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
-import {
-  compactCalendarLabel,
-  formatCalendarEventLabel,
-  formatCalendarSummaryLabel,
-  formatDateRangeText,
-  formatPeriodSummaryLabel,
-  getSchoolCalendarEventColor,
-  getSchoolCalendarFilterGroup,
-  getSchoolCalendarSchoolColor,
-  isDateWithinEvent,
-  joinCalendarLabel,
   normalizeGradeLabel,
-  normalizeSchoolName,
   parseDateRangeText,
-  schoolNamesMatch,
-  updateDateRangeField
+  schoolNamesMatch
 } from "../domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   assignmentStatusLabels,
-  assignmentStatusOptions,
-  assignmentStatusParentMessages,
-  assignmentStatusStudentMessages,
   getAssignmentStatusMessage,
   getAssignmentStatusParentMessage,
   getAssignmentStatusStudentMessage,
@@ -285,8 +246,6 @@ import { buildMonthlyRegularLessonOpenPlan } from "../domains/lessons/monthlyReg
 import { openMonthlyRegularLessonsAction } from "../domains/lessons/monthlyRegularLessonOpenApi.js";
 import {
   clearAttendanceFields,
-  formatKoreaTimeFromIso,
-  formatShortDateLabel,
   getAttendanceDateMismatch,
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
@@ -315,28 +274,13 @@ import {
   mergeVerifiedLessonJournalRecords
 } from "../domains/lessons/lessonJournalDraftPersistenceState.js";
 import { createLessonJournalRecordFieldPatch } from "../domains/lessons/lessonJournalRecordDraft.js";
-import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
-import {
-  createLessonJournalHomeworkDraft,
-  createLessonJournalHomeworkDraftKey,
-  getLessonJournalHomeworkDraftTitle
-} from "../domains/lessons/lessonJournalHomeworkDraft.js";
-import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
 import {
   createLinkedPreviousHomework,
-  findNextLessonForStudent,
   findPreviousLessonsForStudent,
-  getLessonSortValue,
   isSpecialLectureLesson,
   selectLinkedPreviousHomework
 } from "../domains/lessons/lessonHomeworkContinuity.js";
-import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
 import { resolveLessonJournalEditableText } from "../domains/lessons/lessonJournalEditableFieldsModel.js";
-import {
-  getLessonJournalEditableRecord,
-  removeLessonJournalMakeupTaskDraft
-} from "../domains/lessons/lessonJournalDraftMap.js";
-import { getLessonJournalEffectiveCommentSendStatus } from "../domains/lessons/lessonJournalCommentSendStatus.js";
 import {
   getLessonJournalCommentButtonState,
   getLessonJournalCommentSendState,
@@ -344,26 +288,6 @@ import {
   getLessonJournalDisplayCommentSendStatus
 } from "../domains/lessons/lessonJournalCommentStatusModel.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
-import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
-import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
-import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js";
-import { applyCanceledLessonJournalReservationJob } from "../domains/lessons/lessonJournalReservationAuditTransitions.js";
-import { createLessonJournalReservationControlModel } from "../domains/lessons/lessonJournalReservationControlModel.js";
-import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js";
-import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js";
-import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
-import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js";
-import { useLessonJournalOverlayState } from "../domains/lessons/useLessonJournalOverlayState.js";
-import { useLessonJournalReservationState } from "../domains/lessons/useLessonJournalReservationState.js";
-import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
-import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
-import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
-import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
-import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
-import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudentRow.jsx";
-import { LessonJournalSaveBar } from "../domains/lessons/LessonJournalSaveBar.jsx";
-import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
-import { LessonJournalStudentPreviewModal } from "../domains/lessons/LessonJournalStudentPreviewModal.jsx";
 import { LessonJournalCommentComposer } from "../domains/lessons/LessonJournalCommentComposer.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
@@ -381,43 +305,15 @@ import {
 } from "../domains/lessons/lessonModalPayloadBuilders.js";
 import { saveLessonModalLessonsWithVerification } from "../domains/lessons/lessonModalSaveController.js";
 const LessonModal = lazy(() => import("../domains/lessons/LessonModal.jsx").then((module) => ({ default: module.LessonModal })));
-import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
+import { attendanceLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
-  buildSpecialLectureNoticeText,
-  calculateSpecialLectureTuition,
-  createDateFromKey,
-  createNextSpecialLectureSession,
-  createSpecialLectureGuideFromTemplate,
   defaultSpecialLectureGuides,
-  formatCurrencyWon,
-  formatSpecialLectureDateLabel,
-  formatSpecialLectureDaysFromRules,
-  formatSpecialLectureHours,
-  formatSpecialLectureLessonCount,
-  formatSpecialLectureTimeFromRules,
-  generateSpecialLectureSessions,
-  getDefaultSpecialLectureGuideId,
-  getSpecialLectureCalculatedFields,
-  getSpecialLectureGuideSlug,
-  getSpecialLecturePublicUrl,
-  getSpecialLectureSeasonShortLabel,
-  getSpecialLectureTotalHours,
-  getSpecialLectureWeekdayCounts,
-  getWeekdayLabel,
-  isSpecialLecturePrimaryGuide,
   isSpecialLectureRoute,
   normalizeSpecialLectureApplication,
   normalizeSpecialLectureApplications,
   normalizeSpecialLectureEnrollment,
   normalizeSpecialLectureEnrollments,
-  normalizeSpecialLectureGuide,
-  normalizeSpecialLectureGuides,
-  normalizeSpecialLectureScheduleRule,
-  normalizeSpecialLectureScheduleRules,
-  normalizeSpecialLectureSession,
-  replaceSpecialLectureToken,
-  replaceSpecialLectureYearInDateKey,
-  replaceSpecialLectureYearToken,
+  normalizeSpecialLectureGuides
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import {
   cancelAbsenceMakeupKeepSourceAction,
@@ -427,7 +323,6 @@ import {
   requestCommentAlimtalk,
   requestCommentPolish
 } from "../domains/lessons/lessonCommentApi.js";
-import { copyTextToClipboard } from "../domains/exams/outputPreview.js";
 import {
   createDefaultMonthlySettlementState,
   monthlySettlementStateKey,
@@ -439,19 +334,10 @@ import {
   normalizeSpecialLectureSettlementState,
   specialLectureSettlementStateKey
 } from "../domains/settlements/specialLectureSettlement.js";
-import { AsyncOperationStatus } from "../shared/components/AsyncOperationStatus.jsx";
-import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
-import { DataTableShell } from "../shared/components/DataTableShell.jsx";
-import { FilterBar } from "../shared/components/FilterBar.jsx";
 import {
-  getAggregateSaveState,
   normalizeSaveState
 } from "../shared/components/InlineSaveStatus.jsx";
 import { Modal, ModalFooter } from "../shared/components/Modal.jsx";
-import { PageHeader } from "../shared/components/PageHeader.jsx";
-import { SearchField } from "../shared/components/SearchField.jsx";
-import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
-import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { SessionExpiredOverlay } from "../shared/components/SessionExpiredOverlay.jsx";
 import {
   apiFetch,
@@ -462,51 +348,49 @@ import {
   getJsonWithTimeout,
   onApiUnauthorized,
   postJson,
-  postJsonWithHeaders,
   postJsonWithTimeout,
   setApiAuthToken,
   setCurrentTeacherRole,
   setViewTenantId as setApiViewTenantId
 } from "../shared/utils/apiClient.js";
-import { clearCacheOwner, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
+import { clearCacheOwner, createCacheOwnerId, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
 import { TeacherViewSwitcher } from "./TeacherViewSwitcher.jsx";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
+import { setTenantIdScope } from "../shared/utils/tenantIdScope.js";
+import { getSessionBrandName, setSessionBrandName } from "../shared/utils/academyBrand.js";
+import {
+  defaultTenantSettings,
+  normalizeTenantSettings,
+  resolveExamPrepAutoRowClassTemplateIds
+} from "../domains/settings/tenantSettings.js";
 import {
   deriveClassTemplateScheduleSummary,
   formatClassTemplateScheduleLabel,
   getClassTemplateScheduleRules,
   getClassTemplateTimesForDate
 } from "../shared/utils/classTemplateSchedule.js";
-import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 // 쎈 유형 카탈로그(api/data/ssenTypeIndex.json 284 KB)는 여기서 import 하지 않는다.
 // 수업연구 화면에서만 쓰는 데이터라 lazy 청크(src/domains/tests/ssenTypeCatalog.js)에 둔다.
 // 과목 목록만 필요하므로 작은 상수를 가져다 쓴다.
 import { TEST_ATTEMPT_SUBJECTS } from "../domains/tests/testPaperLibraryModel.js";
 import {
   academyBrandName,
-  academyOperationalStartDate,
   academyReminderPriorityOptions,
   academyReminderStatusLabels,
   academyReminderTypeOptions,
+  accountScopedCacheKeys,
   fallbackRegularLessonColors,
   legacySensitiveStorageKeys,
   lessonCalendarColors,
   lessonDeleteRetentionMs,
-  lessonResearchCategories,
-  lessonResearchStatuses,
   lessonResearchSubjects,
   regularLessonClassColors,
-  schoolCalendarGradeOptions,
-  schoolCalendarMathSubjectOptions,
-  schoolCalendarSchoolColorPalette,
   storageKeys,
-  testAttemptStatusOptions,
   testPaperKindOptions,
-  testPaperPreparationOptions,
-  testPaperProgressOptions,
   formatTeacherBrandName
 } from "./appConfig.js";
+import { getSessionTeacherId, setSessionActor } from "../shared/utils/sessionActor.js";
 
 const ReportModal = lazy(async () => ({
   default: (await import("../domains/reports/ReportModal.jsx")).ReportModal
@@ -535,14 +419,6 @@ function getAssignmentStatusForMessage(record, previousHomework, records = null)
   if (previousHomework?.teacherStatus === "unverified") return "not_checked";
   if (previousHomework?.teacherStatus === "partial") return "partial_50";
   return "";
-}
-
-function getLessonMaterial(record, student) {
-  return record?.lessonMaterial?.trim() || student?.textbook?.trim() || student?.currentTextbook?.trim() || "";
-}
-
-function getLessonContent(record) {
-  return record?.lessonProgress?.trim() || record?.progress?.trim() || record?.lessonContent?.trim() || "";
 }
 
 // 강의 교재·내용이 비어 있으면 지난 수업 것을 **시작값**으로 채운다. 그래야 매번 처음부터
@@ -701,7 +577,7 @@ function getHomeworkFollowupPatch(record = {}, method = "", homework = null) {
   };
 }
 
-function buildCommentPreviewText({ audience, comment, lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+function buildCommentPreviewText({ academyName = getSessionBrandName(), audience, comment, lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const isParent = audience === "parent";
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
@@ -724,7 +600,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
   });
 
   return joinMessageBlocks([
-    `#{학원명}: ${academyBrandName}`,
+    `#{학원명}: ${academyName}`,
     `#{학생명}: ${student.name}`,
     isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
     isParent ? "#{리포트본문}:" : "#{코멘트}:",
@@ -732,7 +608,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
   ]);
 }
 
-function buildCommentSourceText({ audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+function buildCommentSourceText({ academyName = getSessionBrandName(), audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
@@ -750,81 +626,6 @@ function buildCommentSourceText({ audience = "parent", lesson, nextHomework, not
     homeworkFollowupNotice || supplementText ? createMessageBlock("보충/확인 안내", [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
-}
-
-function formatSupplementScheduleLine(task = {}) {
-  const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
-  const method = supplementMethodLabel(task);
-  const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
-  const homeworkCheckSentence = formatSupplementHomeworkCheckSentence(task);
-  const schedulePrefix = schedule ? `${schedule}에 ` : "";
-
-  if (task.taskType === "homework_makeup") {
-    if ((task.supplementMethod || supplementDefaultMethod(task.taskType)) === "next_lesson") {
-      return `다음 수업 때 ${source}를 함께 확인하겠습니다.`;
-    }
-    return `${schedulePrefix}${method}으로 ${source} 보충을 진행하겠습니다.`;
-  }
-
-  if (task.taskType === "absence_makeup") {
-    return `${schedulePrefix}${method}으로 ${source} 결석 보강을 진행하겠습니다.${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}`;
-  }
-
-  if (task.taskType === "retest") {
-    return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;
-  }
-
-  return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
-}
-
-function getStudentSupplementScheduleTasks(makeupTasks = [], studentId = "", options = {}) {
-  const { lesson = null, mode = "all" } = options;
-  return makeupTasks
-    .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
-    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
-    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`));
-}
-
-function getStudentSupplementSchedules(makeupTasks = [], studentId = "", options = {}) {
-  return getStudentSupplementScheduleTasks(makeupTasks, studentId, options).map(formatSupplementScheduleLine);
-}
-
-function formatTestAttemptMessageLine(session = {}, attempt = {}) {
-  const title = normalizeMessageText(session.testTitle) || getTestPaperKindLabel(session.testKind);
-  if (attempt.status === "not_taken") {
-    const reason = normalizeMessageText(attempt.notTakenReason);
-    return `${title} · 미응시${reason ? ` (사유: ${reason})` : ""}`;
-  }
-
-  const hasCorrect = attempt.correctCount !== "" && attempt.correctCount !== null && attempt.correctCount !== undefined;
-  const total = session.totalQuestions !== "" && session.totalQuestions !== null && session.totalQuestions !== undefined
-    ? `${session.totalQuestions}문항 중 `
-    : "";
-  const passSuffix = attempt.passStatus === "failed"
-    ? " · 재시험"
-    : attempt.passStatus === "passed"
-      ? " · 통과"
-      : "";
-  return `${title} · ${hasCorrect ? `${total}${attempt.correctCount}문항 정답` : "응시"}${passSuffix}`;
-}
-
-function getLessonTestResultLines(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
-  const sessionById = new Map(testSessions.map((session) => [session.testSessionId, session]));
-  return testAttempts
-    .filter((attempt) => attempt.studentId === student.studentId)
-    .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
-    .filter(({ session }) => session && session.testDate === lesson.date)
-    // 시험대비 수업은 반이 지정돼 있지 않다. 그런 수업에서는 반이 정해진
-    // 응시 기록도 그날 그 학생의 결과이므로 명단 기준으로 붙인다. 반이 있는 수업은
-    // 같은 날 두 수업에 중복 발송되지 않도록 기존처럼 반이 일치할 때만 붙인다.
-    .filter(({ session }) => {
-      if (!session.classTemplateId) return true;
-      if (!lesson.classTemplateId) return (lesson.studentIds ?? []).includes(student.studentId);
-      return session.classTemplateId === lesson.classTemplateId;
-    })
-    .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
-    .map(({ session, attempt }) => formatTestAttemptMessageLine(session, attempt));
 }
 
 function hasIncompleteLessonTestAttempt(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
@@ -1533,9 +1334,10 @@ async function fetchPortalData(sessionToken) {
   return result;
 }
 
+// 로그인 응답이 이름을 주지 않을 때의 빈 기본값. 브랜드 문구는 academyBrand 가 채운다.
 const teacherAccount = {
   loginId: "teacher",
-  name: "고태영",
+  name: "",
   role: "teacher"
 };
 
@@ -1840,7 +1642,7 @@ function createProblemBookFolder(folderName, testKind = "daily", fallbackSubject
 
 const defaultAiPrompts = {
   commentPolish: [
-    "역할: 으뜸수학 고태영T의 수업 코멘트 편집자",
+    `역할: ${academyBrandName}의 수업 코멘트 편집자`,
     "목표: 강사가 대강 적은 메모를 실제 발송 가능한 자연스러운 문장으로 다듬는다.",
     "작성 원칙:",
     "- 입력된 사실만 사용하고 없는 내용은 만들지 않는다.",
@@ -1862,7 +1664,7 @@ const defaultAiPrompts = {
     "- 최종 교정문만 반환한다."
   ].join("\n"),
   noticeMessage: [
-    "역할: 으뜸수학 고태영T의 알림톡 공지문 편집자",
+    `역할: ${academyBrandName}의 알림톡 공지문 편집자`,
     "목표: 강사가 입력한 교재/보강/공지 초안을 실제 발송 가능한 짧고 명료한 알림톡 문장으로 다듬는다.",
     "작성 원칙:",
     "- 입력된 사실만 사용하고 없는 날짜, 금액, 준비물, 일정은 만들지 않는다.",
@@ -2123,6 +1925,24 @@ const defaultGeneratedLessonControls = {
   suppressedKeys: []
 };
 
+// 자동저장되는 app_state 키의 기본값. useStoredState 의 fallback 과 같아야 한다 —
+// 서버에 없는 키를 이 값으로 간주하므로, 여기와 fallback 이 다르면 저장할 것이 없는데도
+// 자동저장이 diff 를 만든다.
+function createDefaultSharedAppState() {
+  return {
+    aiSettings: defaultAiSettings,
+    attendanceSettings: defaultAttendanceSettings,
+    tenantSettings: defaultTenantSettings,
+    deletedLessonBundles: [],
+    generatedLessonControls: defaultGeneratedLessonControls,
+    lessonNotificationPlans: {},
+    notificationLogs: [],
+    examPostTargetStudentIds: {},
+    tallySubmissions: [],
+    tallySummaries: {}
+  };
+}
+
 function getAiPrompt(settings = {}, promptKey) {
   const prompts = normalizeAiPrompts(settings?.prompts);
   return prompts[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
@@ -2168,18 +1988,31 @@ export function App() {
   // #{학원명} 변수는 서버가 tenant 기준으로 한 번 더 바로잡지만, 본문에 직접 들어가는
   // 인사말("안녕하세요. ○○T입니다")은 화면에서 만들어지므로 여기서 정해야 한다.
   const sessionBrandName = formatTeacherBrandName(session?.name);
+  useEffect(() => {
+    setSessionBrandName(session?.name);
+  }, [session?.name]);
+  // 수업·기록의 updatedBy/teacherId 도장. 예전엔 원장 id 가 22곳에 글자로 박혀 있었다.
+  useEffect(() => {
+    setSessionActor({ teacherId: session?.teacherId });
+  }, [session?.teacherId]);
+  // 학생·학부모 포털 상단 학원명 — 서버가 학생의 tenant 선생님 이름으로 준다.
+  const [portalAcademyName, setPortalAcademyName] = useState("");
   // 원장이 지금 보고 있는 선생님의 테넌트. 빈 값이면 자기 자료를 본다.
   // 협력 교사는 이 값을 쓰지 않는다(서버도 owner 가 아니면 무시한다).
   const [viewTenantId, setViewTenantId] = useStoredState(storageKeys.viewTenantId, "");
   const activeViewTenantId = teacherRole === "owner" ? viewTenantId : "";
+  // 부트스트랩이 다시 돌아야 하는 경계. 토큰만 바뀌는 활동 중 갱신은 여기 안 들어간다.
+  const sessionDataIdentity = createSessionDataIdentity(session, activeViewTenantId);
   // 로그인 세션 토큰을 모든 API 요청 헤더에 싣는다(로그인·복원·로그아웃 모두 반영).
   useEffect(() => {
     setApiAuthToken(session?.sessionToken || "");
   }, [session?.sessionToken]);
   // 고른 선생님을 모든 요청 헤더에 싣는다. 서버가 owner 인지 다시 확인한다.
+  // 결정적 id(시험대비 수업·학사일정·테스트 세션)에 붙는 tenant 조각도 같은 값으로 맞춘다.
   useEffect(() => {
     setApiViewTenantId(activeViewTenantId);
-  }, [activeViewTenantId]);
+    setTenantIdScope(activeViewTenantId || session?.tenantId || "");
+  }, [activeViewTenantId, session?.tenantId]);
   // 화면이 기능 잠금을 판단할 수 있게 역할을 공유한다(알림톡 등).
   useEffect(() => {
     setCurrentTeacherRole(teacherRole);
@@ -2188,35 +2021,26 @@ export function App() {
   // 여기서 새로고침하지 않는다 — 첫 로그인에도 항상 걸려서 매번 페이지가 두 번 로드된다.
   // 저장소만 비우면 되고, 화면은 이어지는 부트스트랩이 새 계정 데이터로 덮어쓴다
   // (빈 응답도 그대로 반영하므로 이전 계정 데이터가 남지 않는다).
+  // 주인 식별자는 진입점(main.jsx)과 같은 함수로 만든다 — 다르면 매 로드마다 서로 지운다.
   useEffect(() => {
     if (typeof window === "undefined" || !session?.teacherId) return;
-    const cachedStateKeys = Object.entries(storageKeys)
-      .filter(([name]) => name !== "teacherSession")
-      .map(([, key]) => key);
-    resetCacheForAccount(window.localStorage, `${session.teacherId}:${activeViewTenantId}`, cachedStateKeys);
-  }, [session?.teacherId, activeViewTenantId]);
+    const cacheOwnerId = createCacheOwnerId({
+      teacherId: session.teacherId,
+      teacherRole,
+      viewTenantId: activeViewTenantId
+    });
+    resetCacheForAccount(window.localStorage, cacheOwnerId, accountScopedCacheKeys);
+  }, [session?.teacherId, teacherRole, activeViewTenantId]);
   // 어느 요청이든 401 이 오면 화면 전체에 재로그인을 안내한다. 이게 없으면 만료가
   // "저장 실패" 로만 보이고, 새로고침해도 같은 만료 토큰을 다시 보내 원인을 알 수 없다
   // (2026-09-08 수업일지·출결 장애).
   useEffect(() => onApiUnauthorized(() => setIsSessionExpired(true)), []);
-  // 교사 토큰은 8시간짜리인데 학원 하루는 그보다 길다. 화면을 실제로 쓰는 동안에만
-  // 연장한다 — 켜두기만 한 탭이 세션을 무한정 늘리면 만료 자체가 의미를 잃는다.
-  useEffect(() => {
-    if (session?.role !== "teacher" || !session?.sessionToken || isSessionExpired) return undefined;
-    const minimumIntervalMs = 30 * 60 * 1000;
-    let lastRefreshAt = Date.now();
-    function refreshIfStale() {
-      if (document.visibilityState === "hidden") return;
-      if (Date.now() - lastRefreshAt < minimumIntervalMs) return;
-      lastRefreshAt = Date.now();
-      refreshSession();
-    }
-    const events = ["visibilitychange", "focus", "pointerdown", "keydown"];
-    for (const eventName of events) document.addEventListener(eventName, refreshIfStale, { passive: true });
-    return () => {
-      for (const eventName of events) document.removeEventListener(eventName, refreshIfStale);
-    };
-  }, [isSessionExpired, refreshSession, session?.role, session?.sessionToken]);
+  // 교사 토큰(8시간)을 화면을 실제로 쓰는 동안에만 30분마다 연장한다.
+  useSessionActivityRefresh({
+    enabled: session?.role === "teacher" && !isSessionExpired,
+    refreshSession,
+    sessionToken: session?.sessionToken
+  });
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -2277,6 +2101,8 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  // tenant 별 운영 설정(시험대비 자동 생성 대상 반 등). 원장 전용 상수를 대신한다.
+  const [tenantSettings, setTenantSettings] = useStoredState(storageKeys.tenantSettings, defaultTenantSettings);
   const [monthlyInstructorSettlements, setMonthlyInstructorSettlements] = useStoredState(
     storageKeys.monthlyInstructorSettlements,
     createDefaultMonthlySettlementState()
@@ -2295,7 +2121,11 @@ export function App() {
     message: "",
     state: "idle"
   });
-  const [integrationStatus, setIntegrationStatus] = useState(null);
+  // 발송 설정(실번호 허용·dry-run). 교사 세션이 있을 때 읽고, 로그인·로그아웃·토큰 갱신에 따라간다.
+  const integrationStatus = useIntegrationStatus({
+    enabled: session?.role === "teacher",
+    sessionToken: session?.sessionToken
+  });
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
   const [attendanceSyncStatus, setAttendanceSyncStatus] = useState({
@@ -2404,6 +2234,7 @@ export function App() {
   const sharedAppState = useMemo(() => ({
     aiSettings,
     attendanceSettings,
+    tenantSettings,
     deletedLessonBundles,
     generatedLessonControls,
     lessonNotificationPlans,
@@ -2414,6 +2245,7 @@ export function App() {
   }), [
     aiSettings,
     attendanceSettings,
+    tenantSettings,
     deletedLessonBundles,
     generatedLessonControls,
     lessonNotificationPlans,
@@ -2426,6 +2258,50 @@ export function App() {
   const initialLessonResearchItemsRef = useRef(lessonResearchItems);
   const initialWrongProblemsRef = useRef(wrongProblems);
   const persistedSharedAppStateRef = useRef({});
+  // 보는 자료가 바뀌면(원장의 선생님 전환, 재로그인) 이전 자료가 메모리에 남지 않게 한다.
+  // 부트스트랩은 서버에 있는 키만 덮어쓰므로, 새 테넌트에 없는 키는 이전 테넌트 값이
+  // 그대로 남아 (1) 화면에 섞여 보이고 (2) 자동저장 diff 에 잡혀 그 테넌트로 저장된다 —
+  // 그래서 app_state 계열은 전부 기본값으로 되돌리고 "없는 키의 기본값" 기준도 함께 바꾼다.
+  // 알림 예약 목록은 새로고침이 합치기만 해서 비우고, 선택·복사·되돌리기의 수업 ID 도
+  // 이전 테넌트 것이라 그대로 두면 엉뚱한 자료에 붙여넣는다.
+  const previousSessionDataIdentityRef = useRef(sessionDataIdentity);
+  useEffect(() => {
+    if (previousSessionDataIdentityRef.current === sessionDataIdentity) return;
+    previousSessionDataIdentityRef.current = sessionDataIdentity;
+    const defaults = createDefaultSharedAppState();
+    initialSharedAppStateRef.current = defaults;
+    initialLessonResearchItemsRef.current = createDefaultLessonResearchItems();
+    initialWrongProblemsRef.current = [];
+    setAiSettings(defaults.aiSettings);
+    setAttendanceSettings(defaults.attendanceSettings);
+    setTenantSettings(defaults.tenantSettings);
+    setDeletedLessonBundles(defaults.deletedLessonBundles);
+    setGeneratedLessonControls(defaults.generatedLessonControls);
+    setLessonNotificationPlans(defaults.lessonNotificationPlans);
+    setNotificationLogs(defaults.notificationLogs);
+    setExamPostTargetStudentIds(defaults.examPostTargetStudentIds);
+    setTallySubmissions(defaults.tallySubmissions);
+    setTallySummaries(defaults.tallySummaries);
+    setLessonResearchItems(initialLessonResearchItemsRef.current);
+    setWrongProblems([]);
+    setReportSnapshots([]);
+    setAcademyTests([]);
+    setProblemBooks(createDefaultProblemBooks());
+    setTestPaperLibrary([]);
+    setScoreRecords([]);
+    setExamPostSubmissions([]);
+    setStudentQuestions([]);
+    setStudentConsultations([]);
+    setTeacherOperatingMemos({});
+    setSpecialLectureGuides(defaultSpecialLectureGuides);
+    setMonthlyInstructorSettlements(createDefaultMonthlySettlementState());
+    setSpecialLectureInstructorSettlements(createDefaultSpecialLectureSettlementState());
+    setNotificationJobs([]);
+    setSelectedLessonId("");
+    setLessonClipboard(null);
+    setLessonUndoStack([]);
+    setIsLessonJournalOpen(false);
+  }, [sessionDataIdentity]);
 
   function getAppStatePersistenceController() {
     if (!appStatePersistenceControllerRef.current) {
@@ -2438,8 +2314,8 @@ export function App() {
           };
         },
         onState: setAppStateSaveState,
-        read: () => getJsonWithTimeout(
-          `/api/app-state?includeRows=true&verify=autosave-${Date.now()}`,
+        read: ({ key }) => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=autosave-${Date.now()}&keys=${encodeURIComponent(key)}`,
           15000,
           "공통 설정 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
         ),
@@ -2454,8 +2330,8 @@ export function App() {
       wrongProblemPersistenceControllerRef.current = createAppStatePersistenceController({
         onError: (error) => console.error(error),
         onState: setWrongProblemSaveState,
-        read: () => getJsonWithTimeout(
-          `/api/app-state?includeRows=true&verify=wrong-problems-${Date.now()}`,
+        read: ({ key }) => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=wrong-problems-${Date.now()}&keys=${encodeURIComponent(key)}`,
           15000,
           "학생별 오답 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
         ),
@@ -2470,8 +2346,8 @@ export function App() {
       lessonResearchPersistenceControllerRef.current = createAppStatePersistenceController({
         onError: (error) => console.error(error),
         onState: setLessonResearchSaveState,
-        read: () => getJsonWithTimeout(
-          `/api/app-state?includeRows=true&verify=lesson-research-${Date.now()}`,
+        read: ({ key }) => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=lesson-research-${Date.now()}&keys=${encodeURIComponent(key)}`,
           15000,
           "수업연구 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
         ),
@@ -2495,7 +2371,9 @@ export function App() {
         setIsPortalDataReady(false);
         return;
       }
-      if (attendanceOnlyMode) setIsAppStateReady(false);
+      // 다시 도는 부트스트랩(원장이 보는 선생님 전환, 재로그인)은 새 자료가 올 때까지
+      // 자동저장·폴링·알림 갱신을 멈춘다. 첫 로드는 이미 false 라 달라지는 게 없다.
+      setIsAppStateReady(false);
       try {
         if (attendanceOnlyMode) {
           const attendanceDate = getKoreaDateString();
@@ -2530,6 +2408,7 @@ export function App() {
         }
         if (session && ["student", "parent"].includes(session.role)) {
           const portalData = await fetchPortalData(session.sessionToken);
+          setPortalAcademyName(String(portalData.academyName || ""));
           if (!isMounted) return;
           setStudents(portalData.students ?? []);
           setLessons(portalData.lessons ?? []);
@@ -2718,6 +2597,7 @@ export function App() {
           if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
           if (states.aiSettings) setAiSettings(states.aiSettings);
           if (states.attendanceSettings) setAttendanceSettings(normalizeAttendanceSettings(states.attendanceSettings));
+          if (states.tenantSettings) setTenantSettings(normalizeTenantSettings(states.tenantSettings));
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
@@ -2810,6 +2690,7 @@ export function App() {
     setAcademyTests,
     setAiSettings,
     setAttendanceSettings,
+    setTenantSettings,
     setDeletedLessonBundles,
     setExamPrepRows,
     setGeneratedLessonControls,
@@ -2835,7 +2716,7 @@ export function App() {
     setTallySubmissions,
     setTallySummaries,
     setWrongProblems,
-    session,
+    sessionDataIdentity,
     attendanceOnlyMode,
     specialLectureOnlyMode,
     attendanceReloadKey
@@ -3502,28 +3383,6 @@ export function App() {
   }
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadIntegrationStatus() {
-      try {
-        const response = await apiFetch("/api/integrations/status");
-        const result = await response.json();
-        if (isMounted && result.ok) {
-          setIntegrationStatus(result.result);
-        }
-      } catch (error) {
-        if (isMounted) setIntegrationStatus(null);
-        console.info("academy-os integration status skipped:", error.message);
-      }
-    }
-
-    loadIntegrationStatus();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
     if (session?.role !== "teacher" || !isAppStateReady || attendanceOnlyMode) return;
     refreshNotificationJobs({ scope: "active" });
     return () => getNotificationJobsRefreshController().invalidate("active");
@@ -3624,11 +3483,10 @@ export function App() {
     });
   }, [setStudents]);
 
-  // 학생이 바뀌면 학교·학년별 시험정보를 자동으로 만든다. 원장 tenant 는 내신반(월수금 7-10)
-  // 학생만 대상이고, 그 반이 없는 tenant(협력 교사)는 활성 학생 전체가 대상이다.
-  const examPrepAutoRowClassTemplateId = classTemplates.some((template) => template.classTemplateId === "template_mwf_7_10")
-    ? "template_mwf_7_10"
-    : "";
+  // 학생이 바뀌면 학교·학년별 시험정보를 자동으로 만든다. 대상 반은 tenant 설정
+  // (설정 → 운영 설정)이 정한다. 비어 있으면 활성 학생 전체. 원장의 "내신반만" 은 설정값이지
+  // 코드 상수가 아니다(2026-09-19).
+  const examPrepAutoRowClassTemplateId = resolveExamPrepAutoRowClassTemplateIds(tenantSettings, classTemplates).join(",");
   useEffect(() => {
     // 반 목록이 아직 없으면(첫 로딩·캐시 초기화 직후) 기다린다 — 이때 돌리면 원장 학생 전원의
     // 행이 생겨 버린다.
@@ -3830,6 +3688,7 @@ export function App() {
   if (sessionSurface === "student") {
     return (
       <StudentPortalV2
+        academyName={portalAcademyName || academyBrandName}
         examPrepRows={examPrepRows}
         examPostSaveStates={studentExamPostSaveStates}
         examPostSubmissions={examPostSubmissions}
@@ -3863,7 +3722,7 @@ export function App() {
     return (
       <ParentPortal
         homeworks={homeworks}
-        academyName={academyBrandName}
+        academyName={portalAcademyName || academyBrandName}
         filterMaterials={filterVisibleMaterials}
         getHomeworkStatusLabel={getHomeworkStatusLabel}
         getHomeworkStatusTone={getHomeworkStatusTone}
@@ -4193,7 +4052,7 @@ export function App() {
             ? `신입생 보강 수업일지 저장 완료${notificationResult}`
             : formValues.lessonType === "closureMakeup"
               ? `휴강 보충 수업일지 저장 완료${closureMakeupNotificationResult}`
-            : "수업일지 저장 완료"
+            : "수업 일정 저장 완료"
     };
   }
 
@@ -4272,7 +4131,7 @@ export function App() {
             ? `신입생 보강 수정 저장 완료${notificationResult}`
             : formValues.lessonType === "closureMakeup"
               ? `휴강 보충 수정 저장 완료${closureMakeupNotificationResult}`
-            : "수업일지 수정 저장 완료"
+            : "수업 일정 수정 저장 완료"
     };
   }
   function handleDeleteLesson(lessonId) {
@@ -4825,7 +4684,7 @@ export function App() {
         retestUpdates.push({
           ...(existingRecord ?? createEmptyRecord(lesson, student)),
           needsRetest: desiredNeedsRetest,
-          updatedBy: "instructor_owner_001"
+          updatedBy: getSessionTeacherId()
         });
       }
     }
@@ -5336,7 +5195,7 @@ export function App() {
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
   }
 
-  async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001", options = {}) {
+  async function saveAttendanceRecord(lesson, student, values, updatedBy = getSessionTeacherId(), options = {}) {
     const { nextAttendanceStatus, payload } = createManualAttendanceRequestPayload({
       lateGraceMinutes: attendanceSettings.lateGraceMinutes,
       lesson,
@@ -5381,7 +5240,7 @@ export function App() {
       needsRetest: false,
       ...(safeExistingRecord ?? {}),
       ...createLessonJournalRecordFieldPatch({ field, value }),
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: new Date().toISOString()
     };
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
@@ -5910,7 +5769,7 @@ export function App() {
       [field]: nextMuted,
       notificationMutedReason: nextMuted ? (reason || existingRecord.notificationMutedReason || "개별 알림 제외") : existingRecord.notificationMutedReason,
       [statusField]: nextMuted ? "알림 제외" : "",
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: new Date().toISOString()
     };
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
@@ -6428,6 +6287,7 @@ export function App() {
       aiSettings,
       appStateSaveState,
       attendanceSettings,
+      tenantSettings,
       attendanceSyncStatus,
       calendarLessons,
       classTemplates,
@@ -6605,6 +6465,7 @@ export function App() {
       setAiSettings,
       setAttendanceModal,
       setAttendanceSettings,
+      setTenantSettings,
       setExamPostTargetStudentIds,
       setSelectedLessonId,
       setTallySubmissions,
@@ -6645,6 +6506,7 @@ export function App() {
 
         {activeView === "studentPortal" ? (
           <StudentPortalV2
+            academyName={portalAcademyName || academyBrandName}
             examPrepRows={examPrepRows}
             examPostSaveStates={studentExamPostSaveStates}
             examPostSubmissions={examPostSubmissions}
@@ -6761,11 +6623,10 @@ export function App() {
         <AttendanceModal
           item={attendanceModal}
           lateGraceMinutes={attendanceSettings.lateGraceMinutes}
+          notificationJobs={notificationJobs}
           onClose={() => setAttendanceModal(null)}
           onSave={async (lesson, student, values, options = {}) => {
-            const { saved } = await saveAttendanceRecord(lesson, student, values, "instructor_owner_001", {
-              sendAlimtalk: Boolean(options.sendAlimtalk)
-            });
+            const { saved } = await saveAttendanceRecord(lesson, student, values, getSessionTeacherId(), { sendAlimtalk: Boolean(options.sendAlimtalk) });
             if (!saved) return false;
             setAttendanceModal(null);
             return true;
@@ -6894,7 +6755,7 @@ export function App() {
         studentId: student.studentId,
         [sourceField]: polishResult.polishedText,
         [statusField]: `완료 · ${polishResult.provider}`,
-        updatedBy: "instructor_owner_001",
+        updatedBy: getSessionTeacherId(),
         updatedAt: new Date().toISOString()
       };
       const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
@@ -6966,7 +6827,7 @@ export function App() {
           studentId: student.studentId,
           teacherCommentSendStatus: target === "parent" ? statusText : undefined,
           studentCommentSendStatus: target === "student" ? statusText : undefined,
-          updatedBy: "instructor_owner_001"
+          updatedBy: getSessionTeacherId()
         }).catch((error) => console.error(error));
       }
     };
@@ -7934,6 +7795,7 @@ function summarizeTallySubmissions(submissions) {
   ].filter(Boolean).join("\n");
 }
 function StudentPortalV2({
+  academyName = academyBrandName,
   examPrepRows = [],
   examPostSaveStates = {},
   examPostSubmissions = [],
@@ -8011,7 +7873,7 @@ function StudentPortalV2({
 
   return (
     <StudentPortalShell
-      academyName={academyBrandName}
+      academyName={academyName}
       activeTab={activeTab}
       allHomework={{
         getStatusLabel: getHomeworkStatusLabel,
@@ -8224,26 +8086,6 @@ function formatMonthTitle(dateString) {
 
 function sortByTime(a, b) {
   return a.startTime.localeCompare(b.startTime);
-}
-
-function isActiveLesson(lesson) {
-  return (
-    lesson?.date >= academyOperationalStartDate &&
-    !["canceled", "deleted"].includes(lesson?.status ?? "scheduled")
-  );
-}
-
-function activeLessonIdSet(lessons = []) {
-  return new Set(lessons.filter(isActiveLesson).map((lesson) => lesson.lessonId));
-}
-
-function filterActiveLessons(lessons = []) {
-  return lessons.filter(isActiveLesson);
-}
-
-function filterRecordsForLessons(records = [], lessons = []) {
-  const lessonIds = activeLessonIdSet(lessons);
-  return records.filter((record) => lessonIds.has(record.lessonId));
 }
 
 function filterHomeworksForLessons(homeworks = [], lessons = []) {
@@ -8703,28 +8545,6 @@ function findMatchingLessonStudentRecord(records = [], record = {}) {
   );
 }
 
-function upsertLessonStudentRecord(records = [], nextRecord = {}) {
-  if (!nextRecord?.lessonStudentRecordId && (!nextRecord?.lessonId || !nextRecord?.studentId)) {
-    return upsertById(records, nextRecord, "lessonStudentRecordId");
-  }
-  let didReplace = false;
-  const nextRecords = [];
-  records.forEach((record) => {
-    const isSameRecord =
-      (nextRecord.lessonStudentRecordId && record.lessonStudentRecordId === nextRecord.lessonStudentRecordId) ||
-      (record.lessonId === nextRecord.lessonId && record.studentId === nextRecord.studentId);
-    if (!isSameRecord) {
-      nextRecords.push(record);
-      return;
-    }
-    if (!didReplace) {
-      nextRecords.push(nextRecord);
-      didReplace = true;
-    }
-  });
-  return didReplace ? nextRecords : [...records, nextRecord];
-}
-
 function createEmptyRecord(lesson, student) {
   return {
     lessonStudentRecordId: createLessonStudentRecordId(lesson.lessonId, student.studentId),
@@ -8759,12 +8579,6 @@ function createEmptyRecord(lesson, student) {
     needsMakeup: false,
     needsRetest: false
   };
-}
-
-function upsertById(items, nextItem, idKey) {
-  return items.some((item) => item[idKey] === nextItem[idKey])
-    ? items.map((item) => (item[idKey] === nextItem[idKey] ? nextItem : item))
-    : [...items, nextItem];
 }
 
 function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null, { onlyRegularLessons = false } = {}) {

@@ -24,7 +24,6 @@
 @media(max-width:760px){.examWorkflowOverview ol{grid-template-columns:repeat(2,minmax(0,1fr))}.examWorkflowOverview li{font-size:14px;padding:10px}.examCurrentTask{align-items:stretch;flex-direction:column}.examOutputToolbar{flex-wrap:wrap}}
 
 .examWorkflowPage .workspaceTabs.examAnalysisWorkspaceTabs{flex-wrap:wrap;overflow:visible}
-.examWorkflowPage .examPromptFieldHint{font-size:14px;line-height:1.6}
 
 .examMobileStage{display:none}
 .examWorkflowPage .workspaceTabs.examOutputWorkTabs{flex-wrap:wrap;overflow:visible}

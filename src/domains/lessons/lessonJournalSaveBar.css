@@ -1,13 +1,10 @@
-/* 수업일지 하단 고정바. 상태 배지는 헤더 우상단이 그리므로 여기서는 숨기고
-   액션(알림톡 예약 · 편집/변경 저장 · ⋮)만 오른쪽에 둔다.
+/* 수업일지 하단 고정바. 상태 pill 은 헤더 우상단이 그리므로 여기서는 숨기고(StickySaveBar hideStatusPill),
+   저장 실패 사유·부분 저장·'저장 전 변경 N건' 메시지와 액션(알림톡 예약 · 편집 취소 · 편집/변경 저장 · ⋮)만 둔다.
+   그리드는 공용 .stickySaveBar 의 2열(메시지 · 액션)을 그대로 쓴다.
    App.css 가 파일 크기 상한에 걸려 있어 도메인 CSS 로 둔다. */
 
-.stickySaveBar.lessonJournalStickySaveBar {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.lessonJournalStickySaveBar .stickySaveBarStatus {
-  display: none;
+.lessonJournalStickySaveBar .stickySaveBarStatus > span {
+  white-space: normal;
 }
 
 .lessonJournalStickySaveBar .stickySaveBarActions {

@@ -165,14 +165,17 @@ const [
   controllerSource,
   notificationRouteSource,
   serverSource,
-  supplementDraftSource
+  supplementDraftSource,
+  lessonCommentSourceLinesSource
 ] = await Promise.all([
   read("src/app/App.jsx"),
   read("src/domains/notifications/useNotificationComposerState.js"),
   read("src/domains/notifications/useNotificationNoticeController.js"),
   read("api/routes/notifications.js"),
   read("api/server.js"),
-  read("src/domains/supplements/supplementTaskDraft.js")
+  read("src/domains/supplements/supplementTaskDraft.js"),
+  // 2026-09-19: 보충 일정 문장은 App/server 사본이 아니라 이 모듈 하나가 만든다.
+  read("src/domains/notifications/lessonCommentSourceLines.js")
 ]);
 
 assert.ok(composerSource.includes("noticeText: composerViewModel.noticeText"));
@@ -188,7 +191,9 @@ assert.ok(notificationRouteSource.includes("audience === \"student\" ? TEMPLATE_
 assert.ok(appSource.includes('if (task.taskType === "retest")'));
 assert.ok(appSource.includes("학생 재시험 안내입니다."));
 assert.ok(appSource.includes('message: task.notificationDraft || createNotificationDraft('));
-assert.ok(appSource.includes('return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;'));
+assert.ok(lessonCommentSourceLinesSource.includes('return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;'));
+assert.ok(appSource.includes('from "../domains/notifications/lessonCommentSourceLines.js"'));
+assert.ok(serverSource.includes('from "../src/domains/notifications/lessonCommentSourceLines.js"'));
 assert.ok(supplementDraftSource.includes("notificationDraft: String(task.notificationDraft ?? \"\")"));
 assert.ok(supplementDraftSource.includes('notificationDraft: "당일 학생 11시 알림톡 문구"'));
 

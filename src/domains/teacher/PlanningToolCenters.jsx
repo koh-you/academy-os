@@ -24,17 +24,21 @@ import {
 // 원천 JSON(284 KB)이 교사 첫 로딩이 아니라 이 lazy 청크에 담긴다.
 import { ssenTypeCatalog } from "../tests/ssenTypeCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { useUnsavedChangesGuard } from "../../shared/runtime/useUnsavedChangesGuard.js";
 import { safeIdPart } from "../../shared/utils/id.js";
 import { ClassTemplateEditorModal } from "./ClassTemplateEditorModal.jsx";
 import {
@@ -640,6 +644,7 @@ export function SchoolCalendarCenter({
             onUpdateEventDraft={setNewEvent}
             onUpdateMathExamItem={updateMathExamItem}
             safeExamCycleOptions={safeExamCycleOptions}
+            saveState={schoolCalendarSaveState}
             schools={schools}
           />
         ) : null}
@@ -690,6 +695,7 @@ export function SchoolCalendarCenter({
           onDeleteEvent={deleteAcademicEvent}
           onCreateEvent={openEventForm}
           onSaveEvent={saveAcademicEventDraft}
+          saveMessage={schoolCalendarSaveState.message}
           saveState={schoolCalendarSaveState.state}
           schools={schools}
           selectedDate={selectedDate}
@@ -751,7 +757,6 @@ export function ClassManager({ runtime, students, templates, onSaveClassTemplate
       <PageHeader
         actions={<button className="primaryButton" onClick={() => setTemplateEditorTarget("new")} type="button">+ 반 개설</button>}
         className="classManagerTop"
-        description="기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다."
         title="반관리"
       />
 
@@ -895,9 +900,16 @@ export function LessonResearchCenter({
   const [selectedItemId, setSelectedItemId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
   const [statusFilter, setStatusFilter] = useState("전체");
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const canSaveItems = ["dirty", "failed"].includes(lessonResearchSaveState) && !lessonResearchSaveBusy;
   const lessonResearchSaveMessage = lessonResearchSaveMessages[lessonResearchSaveState] ?? lessonResearchSaveMessages.idle;
   const catalogUnits = ssenTypeCatalog[selectedSubject] ?? [];
+  // 2026-09-19 · U11(research-07): 저장하지 않은 교안 변경이 새로고침·사이드바 이동으로 조용히 사라지지 않게 묻는다.
+  // 저장 로직·로드 시 서버 우선 규칙은 그대로다(저장 중에는 App 이 요청을 이어가므로 막지 않는다).
+  useUnsavedChangesGuard(
+    ["dirty", "failed"].includes(lessonResearchSaveState),
+    "저장하지 않은 수업연구 교안 변경이 있습니다. 이 화면을 나갈까요?"
+  );
 
   const filteredItems = useMemo(
     () =>
@@ -953,15 +965,20 @@ export function LessonResearchCenter({
         actions={(
           <>
           <InlineSaveStatus label="수업연구 교안" saveState={lessonResearchSaveState} />
-          <button className="primaryButton" disabled={!canSaveItems} onClick={onSaveItems} type="button">수업연구 저장</button>
           <button className="softButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
+          <button className="primaryButton" disabled={!canSaveItems} onClick={onSaveItems} type="button">수업연구 저장</button>
           </>
         )}
         actionsClassName="researchTopActions"
         className="lessonResearchHero"
-        description="유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다."
         eyebrow="LESSON RESEARCH"
         title="수업연구"
+        titleAdornment={(
+          <HelpTip
+            label="수업연구"
+            text="유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다."
+          />
+        )}
       />
 
       <p aria-live={lessonResearchSaveState === "failed" ? "assertive" : "polite"} className="wrongProblemSaveMessage">
@@ -997,7 +1014,6 @@ export function LessonResearchCenter({
           <div className="researchTypeTreePanel">
             <SectionHeader
               density="slim"
-              description="유형을 골라 바로 강의 교안 항목을 만듭니다."
               eyebrow="TYPE TREE"
               title="유형트리"
             />
@@ -1092,11 +1108,29 @@ export function LessonResearchCenter({
         <section className="panel researchEditor">
           {selectedItem ? (
             <>
+              {/* 2026-09-19 · U11(research-06): 교안 삭제는 ⋯ 메뉴(tone danger) → ConfirmDialog 를 거쳐 같은 onDeleteItem 을 부른다. */}
               <SectionHeader
-                actions={<button className="ghostButton dangerText" onClick={() => onDeleteItem(selectedItem.researchItemId)} type="button">삭제</button>}
+                actions={(
+                  <OverflowMenu
+                    items={[{ key: "delete", label: "교안 삭제", onSelect: () => setIsDeleteConfirmOpen(true), tone: "danger" }]}
+                    label={`${selectedItem.title || "교안"} 추가 작업`}
+                  />
+                )}
                 description={`마지막 수정일 ${selectedItem.updatedAt || selectedItem.createdAt}`}
                 eyebrow="EDIT"
                 title="강의 교안 정리"
+              />
+              <ConfirmDialog
+                confirmLabel="교안 삭제"
+                description="저장을 누르기 전까지 서버에는 남아 있습니다."
+                onCancel={() => setIsDeleteConfirmOpen(false)}
+                onConfirm={() => {
+                  setIsDeleteConfirmOpen(false);
+                  onDeleteItem(selectedItem.researchItemId);
+                }}
+                open={isDeleteConfirmOpen}
+                title={`${selectedItem.title || "이"} 교안을 삭제할까요?`}
+                tone="danger"
               />
 
               <div className="researchMetaGrid">
@@ -1334,12 +1368,17 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
     <section className="aiVariantPage">
       <PageHeader
         className="aiVariantHero"
-        description="학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다."
         eyebrow="AI TOOLS"
         title="AI 도구"
+        titleAdornment={(
+          <HelpTip
+            label="AI 도구"
+            text="학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다."
+          />
+        )}
       />
 
-      <WorkspaceTabs className="studentManagerTabs aiTabs" label="AI 도구 작업 구분" variant="secondary">
+      <WorkspaceTabs label="AI 도구 작업 구분">
         {[
           ["variant", "변형문항"]
         ].map(([id, label]) => (
@@ -1361,9 +1400,12 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
           <div className="aiVariantWorkbench">
             <section className="panel aiToolCard aiVariantInputCard">
               <div className="aiToolCardTitle">
-                <div>
+                <div className="helpTipTitleRow">
                   <h2>문항 입력</h2>
-                  <p className="muted">파일, 이미지, 텍스트로 받은 원본을 넣고 바로 변형 조건을 정합니다.</p>
+                  <HelpTip
+                    label="문항 입력"
+                    text="파일, 이미지, 텍스트로 받은 원본을 넣고 바로 변형 조건을 정합니다."
+                  />
                 </div>
                 <span className="readyPill">준비 완료</span>
               </div>
@@ -1486,6 +1528,7 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
                 <SelectionToolbar
                   actions={(
                     <>
+                      <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
                       <button
                         className="primaryButton compact"
                         disabled={selectedVariantCount === 0}
@@ -1494,7 +1537,6 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
                       >
                         HWPX 내보내기 ({selectedVariantCount})
                       </button>
-                      <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
                     </>
                   )}
                   className="variantResultToolbar"
@@ -1528,8 +1570,14 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
                       <strong>AI 생성 후 표시</strong>
                     </div>
                     <div className="variantSolutionBox">
-                      <span>해설</span>
-                      <p>선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다.</p>
+                      <div className="helpTipTitleRow">
+                        <span>해설</span>
+                        <HelpTip
+                          label="해설"
+                          text="선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다."
+                        />
+                      </div>
+                      <strong>AI 생성 후 표시</strong>
                     </div>
                   </article>
                 ))}
@@ -1557,7 +1605,6 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
             <section className="hwpxExportSection">
               <SectionHeader
                 density="slim"
-                description="다운로드 파일에 들어갈 기본 정보를 정합니다."
                 title="시험지 정보"
                 titleAs="h3"
               />
@@ -1582,7 +1629,6 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
             <section className="hwpxExportSection">
               <SectionHeader
                 density="slim"
-                description="수업용, 배부용, 해설용 시험지 형식을 나눠 저장할 수 있게 둡니다."
                 title="정답 · 풀이"
                 titleAs="h3"
               />

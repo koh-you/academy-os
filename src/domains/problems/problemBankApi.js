@@ -1,6 +1,6 @@
 // 문제은행 API 호출. 서버 라우트는 src/shared/server/problemBankRouteRegistry.js.
 
-import { apiUrl, getJsonWithTimeout, postJson, postJsonWithTimeout, withAuthHeaders } from "../../shared/utils/apiClient.js";
+import { apiFetch, apiUrl, getJsonWithTimeout, postJson, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 
 /**
  * 네트워크 단절(TypeError: Failed to fetch)이나 시간 초과는 API 서버가 재배포·절전에서 깨어나는 중일 때 난다.
@@ -64,10 +64,7 @@ export function updateProblemBankBook(bookId, patch) {
 
 /** 교재와 그 아래 문항·기록·이미지를 지운다. 되돌릴 수 없다. */
 export async function deleteProblemBankBook(bookId) {
-  const response = await fetch(apiUrl(`/api/problem-bank/book?bookId=${encodeURIComponent(bookId)}`), {
-    method: "DELETE",
-    headers: withAuthHeaders()
-  });
+  const response = await apiFetch(`/api/problem-bank/book?bookId=${encodeURIComponent(bookId)}`, { method: "DELETE" });
   const result = await response.json();
   if (!response.ok || !result.ok) throw new Error(result?.error || `교재 삭제 실패: ${response.status}`);
   return result;

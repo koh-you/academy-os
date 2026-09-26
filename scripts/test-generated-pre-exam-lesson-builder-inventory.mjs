@@ -354,7 +354,7 @@ const builderBoundaries = [
   'endTime: "21:00"',
   "color: getStandardLessonColor({",
   'lessonType: "preExam"',
-  'teacherId: "instructor_owner_001"',
+  "teacherId: getSessionTeacherId()",
   "studentIds: lessonStudents.map(",
   "(student) => student.studentId",
   'status: "scheduled"',

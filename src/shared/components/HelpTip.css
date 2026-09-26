@@ -1,0 +1,106 @@
+.helpTip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+/*
+ * 트리거는 공용 .iconButton 을 그대로 쓴다(배경·테두리·색·전역 focus-visible 링 상속).
+ * 글자 옆에 붙는 표시라 44px 정사각을 그대로 쓰면 줄 높이를 밀어내므로, 보이는 원은 24px 로
+ * 줄이고 ::before 로 히트 영역만 44px 로 넓힌다 — 터치 타깃은 지키면서 레이아웃은 건드리지 않는다.
+ *
+ * 2026-09-25 · 자식 결합자(`.helpTip > …`)로 특이도를 (0,2,0) 으로 올린다. 화면 css 에 흔한
+ * `.someCard span`·`.someCard > button` 같은 포괄 규칙이 (0,1,1) 이라 그냥 `.helpTipBubble`(0,1,0)
+ * 을 이겨 버렸고, 그래서 화면마다 `.someScreen .helpTipBubble { display: none }` 으로 열림/닫힘
+ * 상태 기계를 복제하는 패치가 붙었다. 여기서 이기면 그런 화면별 되돌리기 규칙이 필요 없다.
+ */
+.helpTip > .helpTipTrigger {
+  border-radius: var(--academy-radius-pill, 999px);
+  font-size: 13px;
+  font-weight: 900;
+  height: 24px;
+  line-height: 1;
+  padding: 0;
+  position: relative;
+  width: 24px;
+}
+
+/* 2026-09-25 · App.css 의 640px 이하 전역 규칙이 button 에 min-height 44px !important 를 걸어
+   트리거가 세로로 늘어난다. 히트 영역은 아래 ::before 가 44px 로 따로 보장하므로 여기서 되돌린다. */
+@media (max-width: 640px) {
+  .helpTip > .helpTipTrigger {
+    min-height: 24px !important;
+  }
+}
+
+.helpTip > .helpTipTrigger::before {
+  content: "";
+  inset: 50% auto auto 50%;
+  height: var(--academy-touch-target, 44px);
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: var(--academy-touch-target, 44px);
+}
+
+/*
+ * 2026-09-25 · 말풍선은 absolute 가 아니라 fixed 다.
+ * absolute 는 `overflow: clip|hidden|auto|scroll` 인 조상(시험분석 프롬프트 카드,
+ * 스크롤 모달 본문, StudioWorkspace 본문 …) 경계에서 잘린다. fixed 는 그 클리핑을 벗어난다 —
+ * 대신 좌표를 CSS 가 알 수 없으므로 HelpTip.jsx 가 열릴 때마다 트리거 사각형을 재서 left·top 을
+ * 직접 넣는다(여기 값은 측정 전 기준점일 뿐이다).
+ *
+ * 표시/숨김은 display 가 아니라 visibility 로 한다. 화면 css 의 `display: grid|flex|block` 포괄
+ * 규칙이 닫힘 상태를 깨뜨리지 못하게 하려는 것이고, fixed 라 어느 쪽이든 레이아웃에는 영향이 없다.
+ * 닫혀 있어도 문구는 DOM 에 남아 aria-describedby 가 항상 유효하다.
+ */
+.helpTip > .helpTipBubble {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: var(--academy-radius, 8px);
+  box-shadow: var(--academy-shadow, 0 12px 28px rgba(30, 64, 175, 0.06));
+  color: var(--academy-text, #0f172a);
+  font-size: 13px;
+  font-weight: 600;
+  left: 0;
+  letter-spacing: normal;
+  line-height: 1.6;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 10px 12px;
+  position: fixed;
+  text-align: left;
+  text-transform: none;
+  top: 0;
+  visibility: hidden;
+  white-space: normal;
+  width: max-content;
+  z-index: 40;
+}
+
+.helpTip > .helpTipBubble.helpTipBubble-open {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .helpTip > .helpTipBubble.helpTipBubble-open {
+    animation: helpTipBubbleReveal 120ms ease-out;
+  }
+}
+
+@keyframes helpTipBubbleReveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* 제목·라벨 옆에 물음표를 한 줄로 붙이는 공용 줄. 좁은 폭에서는 접힌다. */
+.helpTipTitleRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}

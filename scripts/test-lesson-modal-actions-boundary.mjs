@@ -17,7 +17,8 @@ const modalSource = await readFile(
 for (const requiredSource of [
   "export function LessonModalActions({",
   "InlineSaveStatus",
-  'label="수업일지"',
+  // 2026-09-19 · 이 모달은 수업 일정(lessons)을 저장하므로 라벨을 '수업 일정' 으로 바꿨다(수업일지=학생 기록과 구분).
+  'label="수업 일정"',
   "saveState={saveState}",
   "{saveMessage}",
   '"저장 중..."',
@@ -28,7 +29,13 @@ for (const requiredSource of [
   "disabled={isSaving || isSaved}",
   "onClick={onSave}",
   "onClick={onClose}",
-  'isSaved ? "달력에서 확인" : "취소"'
+  'isSaved ? "달력에서 확인" : "취소"',
+  // 2026-09-26(검증 반영) · 명단 안내는 저장 검증과 같은 순수 모델에서 나온다(문구가 갈라지지 않는다).
+  'import { getLessonModalRosterNotice } from "./lessonModalDraftModel.js";',
+  "const emptyRosterNotice = getLessonModalRosterNotice({",
+  "lessonType,",
+  "saveState,",
+  "selectedStudentCount"
 ]) {
   assert.ok(
     actionsSource.includes(requiredSource),
@@ -44,7 +51,10 @@ for (const forbiddenSource of [
   "apiUrl",
   "supabase",
   "notification_jobs",
-  "Solapi"
+  "Solapi",
+  // 명단 안내 문구를 이 컴포넌트가 직접 들고 있으면 검증 규칙과 다시 갈라진다.
+  "포함 학생 0명으로 저장됩니다.",
+  "학생을 1명 이상 선택해야 저장됩니다."
 ]) {
   assert.equal(
     actionsSource.includes(forbiddenSource),

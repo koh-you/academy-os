@@ -1,0 +1,30 @@
+/* 학생 프로필 모달(허브 → 섹션 모달) 전용 규칙 · 2026-09-19 UI U6.
+   App.css 와 같은 셀렉터를 두지 않는다(scripts/test-ui-css-hygiene.cjs). 허브 타일·행 그리드 등
+   기존 규칙은 App.css 에 남아 있고, 여기에는 섹션 모달 상단 도구줄과 행 끝 ⋯ 메뉴 배치만 둔다. */
+
+/* 섹션 모달 본문 첫 줄: 왼쪽 저장 상태(있을 때만), 오른쪽 [수정]/[수정 종료] 토글. */
+.studentProfileSectionModal .studentProfileSectionToolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  min-height: 32px;
+}
+
+/* 2026-09-25 · 운영 알림의 '슬랙 원본' 안내(.studentReminderSourceNote)는 제목 옆 물음표로 옮겼다.
+   도구줄 왼쪽에 남는 것은 저장 상태뿐이다. */
+.studentProfileSectionModal .studentProfileSectionToolbar > .inlineSaveStatus {
+  margin-inline-end: auto;
+}
+
+/* 반복 행의 ⋯ 메뉴는 행 끝에 붙인다(docs/ui-row-actions.md R3). 변경 저장 버튼이 없을 때도 위치가 같다. */
+.studentProfileSectionModal .studentProfileRowActions > .overflowMenu {
+  margin-inline-start: auto;
+}
+
+/* 운영 알림 composer 의 고정 6열 그리드(825px)가 720px 섹션 모달보다 넓어 본문 전체가 가로로 넘치고,
+   행 끝의 [완료]·⋯ 가 화면 밖으로 밀렸다. 열을 너비에 맞춰 접어 행 액션이 항상 보이게 한다(R3 도달 가능성). */
+.studentProfileSectionModal .studentReminderControls {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}

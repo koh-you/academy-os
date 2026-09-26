@@ -2,6 +2,9 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <!-- API 원본(src/shared/utils/apiClient.js productionApiBaseUrl)에 미리 연결해 첫 요청의
+         DNS·TLS 를 JS 내려받기와 겹친다. 주소가 바뀌면 apiClient 와 함께 고친다. -->
+    <link rel="preconnect" href="https://koh-you-math-academy-os-api.onrender.com" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>으뜸수학 고태영T 출결</title>
     <meta property="og:title" content="으뜸수학 고태영T 출결" />

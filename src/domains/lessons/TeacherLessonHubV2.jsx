@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { formatKoreaTimeFromIso } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
@@ -8,7 +9,7 @@ import { compareLessonCalendarDisplayOrder } from "./lessonCalendarDisplayOrder.
 import { LessonJournalErrorBoundary } from "./LessonJournalErrorBoundary.jsx";
 import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
-import { getLessonJournalStudents } from "../students/lessonRosterSelectors.js";
+import { getLessonJournalStudentIds } from "../students/lessonRosterSelectors.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
 import { CanceledLessonRestoreModal } from "./CanceledLessonRestoreModal.jsx";
 import { selectRecentRestorableLessons } from "./recentCanceledLessons.js";
@@ -93,7 +94,8 @@ export function TeacherLessonHubV2({
     nestedPanels,
     sortByTime
   } = runtime;
-  const getLessonStudentIds = (lesson) => getLessonJournalStudents(lesson, students).map((student) => student.studentId);
+  // 달력 pill 은 인원수만 쓴다 — 이름 정렬이 필요 없는 ID 선택자를 쓴다(퇴원 경계는 같다).
+  const getLessonStudentIds = useMemo(() => (lesson) => getLessonJournalStudentIds(lesson, students), [students]);
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   const [canceledLessonRestoreState, setCanceledLessonRestoreState] = useState({
     error: "",
@@ -173,7 +175,12 @@ export function TeacherLessonHubV2({
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal"
         title={`${followUpTypeLabel(selectedMakeupTask?.taskType)} 일정`}
-        subtitle="일반 수업일지가 아니라, 원 수업 참고와 보충 처리를 분리해 확인하는 전용 화면입니다."
+        titleAdornment={(
+          <HelpTip
+            label={`${followUpTypeLabel(selectedMakeupTask?.taskType)} 일정`}
+            text="일반 수업일지가 아니라, 원 수업 참고와 보충 처리를 분리해 확인하는 전용 화면입니다."
+          />
+        )}
         onClose={onBackToCalendar}
       >
         <SupplementMakeupLessonDetail
@@ -198,7 +205,12 @@ export function TeacherLessonHubV2({
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal examPrepModal"
         title="시험대비"
-        subtitle="시험기간 전후로 별도 개설한 시험대비 수업입니다."
+        titleAdornment={(
+          <HelpTip
+            label="시험대비"
+            text="시험기간 전후로 별도 개설한 시험대비 수업입니다."
+          />
+        )}
         onClose={onBackToCalendar}
       >
         <ExamPrepLessonDetail
@@ -271,7 +283,9 @@ export function TeacherLessonHubV2({
       </Modal>
     )
   ) : null;
-  const lessonCalendarViewModel = createLessonCalendarViewModel({
+  // 달력은 수업일지 모달이 덮고 있어도 마운트돼 있어, 출결 폴링(7초에 두 번)·저장 상태 변화마다
+  // 다시 그려진다. 달력 자료가 바뀌었을 때만 view model 을 다시 만든다.
+  const lessonCalendarViewModel = useMemo(() => createLessonCalendarViewModel({
     days: buildMonthDays(selectedDate),
     getLessonStudentIds,
     isExamPrepLesson,
@@ -282,7 +296,7 @@ export function TeacherLessonHubV2({
     selectedLessonId,
     sortLessons: (left, right) => compareLessonCalendarDisplayOrder(left, right, sortByTime),
     today
-  });
+  }), [buildMonthDays, getLessonStudentIds, isExamPrepLesson, isLegacyExamPrepLesson, lessons, lessonTypeFilter, selectedDate, selectedLessonId, sortByTime, today]);
   const shouldShowGeneratedLessonSaveNotice = generatedLessonSaveStatus?.state && generatedLessonSaveStatus.state !== "idle";
 
   return (

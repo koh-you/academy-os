@@ -1,0 +1,322 @@
+% figures-gm.sty — CM2-GM (도형의 방정식) 매크로 라이브러리 v1.0 (2026-07-11)
+% 목적: 좌표축·원·직선·점·각도·길이·대칭축·자취 표기 필체 표준화
+% 참조: 학평 답지 그래프 양식 · 고쟁이 그래프 · 와부고 2025 실기출 벤치마크
+% 단일 출처: bank/그래프-양식-카탈로그.md §"GM 단원 벤치마크"
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{figures-gm}[2026/07/11 GM figure macros v1.0]
+
+\RequirePackage{tikz}
+\RequirePackage{ifthen}
+\usetikzlibrary{calc,arrows.meta,decorations.pathreplacing,decorations.markings,angles,quotes,intersections,backgrounds,positioning}
+
+% ══════════════════════════════════════════════════════════════════
+% 1. 색 팔레트 (학평 흑백 우선 + 강조 최소 컬러)
+% ══════════════════════════════════════════════════════════════════
+% 기본: 흑백 우선 (학평 양식) — [[feedback_graph_design_style]]
+% 강조 필요 시 최소 컬러 (고쟁이 스타일)
+
+\definecolor{gm-ink}{HTML}{111111}         % 본문·축·라벨 기본 검정
+\definecolor{gm-primary}{HTML}{1E4A8F}     % 주 도형 (원 C_1 등) — vB-deep 계열
+\definecolor{gm-secondary}{HTML}{C44536}   % 부 도형 (원 C_2 등) — 붉은 계열
+\definecolor{gm-aux}{HTML}{6B7A8E}         % 보조선 (대칭축·중심선 등) — 회청
+\definecolor{gm-fill-p}{HTML}{E8EFF8}      % 주 도형 옅은 채움
+\definecolor{gm-fill-s}{HTML}{FBEEEC}      % 부 도형 옅은 채움
+\definecolor{gm-grid}{HTML}{D8DEE4}        % 격자 회색
+
+% ══════════════════════════════════════════════════════════════════
+% 2. 필체 표준 tikzset — 모든 GM 그림 공용
+% ══════════════════════════════════════════════════════════════════
+
+\tikzset{
+  % 좌표축 (얇고 정갈)
+  gm-axis/.style={line width=0.7pt, gm-ink, -{Stealth[length=2mm]}},
+  % 격자 (매우 옅음, 선택 사용)
+  gm-grid/.style={line width=0.25pt, gm-grid},
+  % 주 곡선·직선 (원·직선의 방정식)
+  gm-curve/.style={line width=1.2pt, gm-primary},
+  gm-curve-s/.style={line width=1.2pt, gm-secondary},
+  % 보조선 (대칭축·중심선·거리 표시선)
+  gm-dashed/.style={line width=0.7pt, dashed, gm-aux, dash pattern=on 3pt off 2pt},
+  % 점 (반경 표준)
+  gm-point/.style={circle, inner sep=0pt, minimum size=0.22cm, fill=gm-ink, draw=none},
+  gm-point-p/.style={circle, inner sep=0pt, minimum size=0.22cm, fill=gm-primary, draw=none},
+  gm-point-s/.style={circle, inner sep=0pt, minimum size=0.22cm, fill=gm-secondary, draw=none},
+  gm-point-hollow/.style={circle, inner sep=0pt, minimum size=0.22cm, fill=white, draw=gm-ink, line width=0.7pt},
+  % 채움 (반투명)
+  gm-fill-p/.style={fill=gm-primary, fill opacity=0.10},
+  gm-fill-s/.style={fill=gm-secondary, fill opacity=0.10},
+  % 라벨 폰트
+  gm-label/.style={font=\small, gm-ink, inner sep=1.5pt},
+  gm-label-small/.style={font=\scriptsize, gm-ink, inner sep=1pt},
+  gm-label-p/.style={font=\small, gm-primary, inner sep=1.5pt},
+  gm-label-s/.style={font=\small, gm-secondary, inner sep=1.5pt},
+  % 각도 호
+  gm-angle/.style={draw=gm-ink, line width=0.6pt, angle radius=5mm},
+  % 직각 표시
+  gm-right/.style={draw=gm-ink, line width=0.6pt},
+  % 길이 표시 브레이스
+  gm-brace/.style={decorate, decoration={brace, amplitude=4pt}, line width=0.5pt, gm-ink}
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 3. 좌표계 표준 매크로
+% ══════════════════════════════════════════════════════════════════
+
+% \gmaxes{xmin}{xmax}{ymin}{ymax} — 표준 좌표축 (화살표·O 라벨·x·y 라벨 자동)
+% 원점 O는 좌하 배치. 마진 0.5 자동 확장.
+\newcommand{\gmaxes}[4]{%
+  \pgfmathsetmacro{\gmxmin}{#1 - 0.5}%
+  \pgfmathsetmacro{\gmxmax}{#2 + 0.5}%
+  \pgfmathsetmacro{\gmymin}{#3 - 0.5}%
+  \pgfmathsetmacro{\gmymax}{#4 + 0.5}%
+  \draw[gm-axis] (\gmxmin, 0) -- (\gmxmax, 0) node[below=1pt, font=\small] {$x$};
+  \draw[gm-axis] (0, \gmymin) -- (0, \gmymax) node[left=1pt, font=\small] {$y$};
+  \node[below left=-1pt and 0pt, font=\small] at (0, 0) {$\mathrm{O}$};
+}
+
+% \gmaxesnoO{xmin}{xmax}{ymin}{ymax} — 원점 O 라벨 없음 (원점이 도형에 가려질 때)
+\newcommand{\gmaxesnoO}[4]{%
+  \pgfmathsetmacro{\gmxmin}{#1 - 0.5}%
+  \pgfmathsetmacro{\gmxmax}{#2 + 0.5}%
+  \pgfmathsetmacro{\gmymin}{#3 - 0.5}%
+  \pgfmathsetmacro{\gmymax}{#4 + 0.5}%
+  \draw[gm-axis] (\gmxmin, 0) -- (\gmxmax, 0) node[below=1pt, font=\small] {$x$};
+  \draw[gm-axis] (0, \gmymin) -- (0, \gmymax) node[left=1pt, font=\small] {$y$};
+}
+
+% \gmgrid{xmin}{xmax}{ymin}{ymax} — 격자 (선택 사용, 간격 1)
+\newcommand{\gmgrid}[4]{%
+  \draw[gm-grid] (#1, #3) grid[step=1] (#2, #4);
+}
+
+% \gmticks{axis:x|y}{value_list} — 눈금·값 라벨
+% 예: \gmticks{x}{-2,1,3,5}
+\newcommand{\gmticks}[2]{%
+  \ifthenelse{\equal{#1}{x}}{%
+    \foreach \gmtv in {#2} {%
+      \draw[line width=0.5pt, gm-ink] (\gmtv, -0.08) -- (\gmtv, 0.08);
+      \node[below=1pt, font=\scriptsize] at (\gmtv, -0.08) {$\gmtv$};
+    }%
+  }{%
+    \foreach \gmtv in {#2} {%
+      \draw[line width=0.5pt, gm-ink] (-0.08, \gmtv) -- (0.08, \gmtv);
+      \node[left=1pt, font=\scriptsize] at (-0.08, \gmtv) {$\gmtv$};
+    }%
+  }%
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 4. 점·라벨 매크로
+% ══════════════════════════════════════════════════════════════════
+
+% \gmpoint{label}{x}{y}{direction} — 점+라벨 (표준 검정)
+% direction: above|below|left|right|above right|... 또는 각도 (예: 45)
+\newcommand{\gmpoint}[4]{%
+  \node[gm-point] (#1) at (#2, #3) {};
+  \node[gm-label, #4=2pt of #1] {$\mathrm{#1}$};
+}
+
+% \gmpointp{label}{x}{y}{direction} — 주(파랑) 점
+\newcommand{\gmpointp}[4]{%
+  \node[gm-point-p] (#1) at (#2, #3) {};
+  \node[gm-label-p, #4=2pt of #1] {$\mathrm{#1}$};
+}
+
+% \gmpoints{label}{x}{y}{direction} — 부(붉음) 점
+\newcommand{\gmpoints}[4]{%
+  \node[gm-point-s] (#1) at (#2, #3) {};
+  \node[gm-label-s, #4=2pt of #1] {$\mathrm{#1}$};
+}
+
+% \gmpointcoord{label}{x}{y}{direction} — 점+라벨+좌표 (P(a, b) 형식)
+\newcommand{\gmpointcoord}[4]{%
+  \node[gm-point] (#1) at (#2, #3) {};
+  \node[gm-label, #4=2pt of #1] {$\mathrm{#1}(#2,\,#3)$};
+}
+
+% \gmnamedpoint{node-name}{x}{y} — 라벨 없는 점 (계산·참조용)
+\newcommand{\gmnamedpoint}[3]{%
+  \node[gm-point] (#1) at (#2, #3) {};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 5. 원 매크로 (라벨 자동 위치)
+% ══════════════════════════════════════════════════════════════════
+
+% \gmcircle{name}{cx}{cy}{r}{label}{label-angle} — 원+라벨
+% label-angle: 라벨을 곡선 위 어느 방향에 둘지 (deg, 0=우측, 90=위, ...)
+\newcommand{\gmcircle}[6]{%
+  \draw[gm-curve, name path=#1] (#2, #3) circle (#4);
+  \node[gm-label-p] at ({#2 + (#4 + 0.35)*cos(#6)}, {#3 + (#4 + 0.35)*sin(#6)}) {$#5$};
+}
+
+% \gmcircles{name}{cx}{cy}{r}{label}{label-angle} — 부(붉음) 원+라벨
+\newcommand{\gmcircles}[6]{%
+  \draw[gm-curve-s, name path=#1] (#2, #3) circle (#4);
+  \node[gm-label-s] at ({#2 + (#4 + 0.35)*cos(#6)}, {#3 + (#4 + 0.35)*sin(#6)}) {$#5$};
+}
+
+% \gmcirclefill{name}{cx}{cy}{r}{label}{label-angle} — 원+옅은 채움+라벨 (주)
+\newcommand{\gmcirclefill}[6]{%
+  \fill[gm-fill-p] (#2, #3) circle (#4);
+  \draw[gm-curve, name path=#1] (#2, #3) circle (#4);
+  \node[gm-label-p] at ({#2 + (#4 + 0.35)*cos(#6)}, {#3 + (#4 + 0.35)*sin(#6)}) {$#5$};
+}
+
+% \gmcirclefills{name}{cx}{cy}{r}{label}{label-angle} — 부 원+채움
+\newcommand{\gmcirclefills}[6]{%
+  \fill[gm-fill-s] (#2, #3) circle (#4);
+  \draw[gm-curve-s, name path=#1] (#2, #3) circle (#4);
+  \node[gm-label-s] at ({#2 + (#4 + 0.35)*cos(#6)}, {#3 + (#4 + 0.35)*sin(#6)}) {$#5$};
+}
+
+% \gmcenter{cx}{cy}{label}{direction} — 원의 중심 표시 (작은 점 + 라벨)
+\newcommand{\gmcenter}[4]{%
+  \fill[gm-ink] (#1, #2) circle (0.06);
+  \node[gm-label-small, #4=1pt] at (#1, #2) {#3};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 6. 직선·선분 매크로
+% ══════════════════════════════════════════════════════════════════
+
+% \gmline{name}{x1}{y1}{x2}{y2}{label}{label-side} — 두 점 지나는 직선 (양방향 연장)
+% 캔버스 범위 밖까지 자동 연장은 clip 활용
+% label-side: near start|midway|near end + optional above|below
+\newcommand{\gmline}[7]{%
+  \draw[gm-curve, name path=#1] ($(#2,#3)!-0.3!(#4,#5)$) -- ($(#4,#5)!-0.3!(#2,#3)$);
+  \node[gm-label-p, #7] at ($(#2,#3)!0.5!(#4,#5)$) {$#6$};
+}
+
+% \gmseg{name}{x1}{y1}{x2}{y2} — 선분 (라벨 없음)
+\newcommand{\gmseg}[5]{%
+  \draw[gm-curve, name path=#1] (#2, #3) -- (#4, #5);
+}
+
+% \gmsegdash{x1}{y1}{x2}{y2} — 보조 선분 (파선)
+\newcommand{\gmsegdash}[4]{%
+  \draw[gm-dashed] (#1, #2) -- (#3, #4);
+}
+
+% \gmaxisline{x1}{y1}{x2}{y2}{label} — 대칭축 (파선 + 라벨)
+\newcommand{\gmaxisline}[5]{%
+  \draw[gm-dashed] ($(#1,#2)!-0.2!(#3,#4)$) -- ($(#3,#4)!-0.2!(#1,#2)$);
+  \node[gm-label-small, above=1pt] at ($(#1,#2)!0.5!(#3,#4)$) {$#5$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 7. 특수 표시 (각도·직각·길이)
+% ══════════════════════════════════════════════════════════════════
+
+% \gmrightangle{p1-node}{center-node}{p2-node}{size} — 직각 기호
+% node 이름을 인자로 받음 (미리 정의된 점 참조)
+\newcommand{\gmrightangle}[4]{%
+  \path let \p1 = ($(#1) - (#2)$), \p2 = ($(#3) - (#2)$) in
+    coordinate (gmA) at ($(#2) + #4*({\p1}/{veclen(\p1)})$)
+    coordinate (gmB) at ($(#2) + #4*({\p2}/{veclen(\p2)})$)
+    coordinate (gmC) at ($(#2) + #4*({\p1}/{veclen(\p1)}) + #4*({\p2}/{veclen(\p2)})$);
+  \draw[gm-right] (gmA) -- (gmC) -- (gmB);
+}
+
+% \gmarcangle{center}{start-node}{end-node}{radius}{label} — 각도 호+라벨
+\newcommand{\gmarcangle}[5]{%
+  \draw[gm-angle, angle radius=#4] pic["$#5$", gm-label-small] {angle=#2--#1--#3};
+}
+
+% \gmlength{x1}{y1}{x2}{y2}{label}{offset} — 길이 표시 (외곽 브레이스)
+% offset: 브레이스가 선분과 떨어진 거리 (양수=우측 or 위쪽)
+\newcommand{\gmlength}[6]{%
+  \draw[gm-brace] ($(#1,#2)!#6!90:(#3,#4)$) -- ($(#3,#4)!#6!-90:(#1,#2)$);
+  \node[gm-label-small] at ($($(#1,#2)!#6!90:(#3,#4)$)!0.5!($(#3,#4)!#6!-90:(#1,#2)$)$) {#5};
+}
+
+% \gmarrow{x1}{y1}{x2}{y2}{label} — 화살표 벡터 (평행이동 표시 등)
+\newcommand{\gmarrow}[5]{%
+  \draw[line width=0.9pt, gm-primary, -{Stealth[length=2mm]}] (#1, #2) -- (#3, #4);
+  \node[gm-label-small, above right=0pt and 0pt] at ($(#1,#2)!0.5!(#3,#4)$) {$#5$};
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 8. 격자점·자취 표기 (집합 원소·궤적 시각화용)
+% ══════════════════════════════════════════════════════════════════
+
+% \gmlattice{xmin}{xmax}{ymin}{ymax} — 정수 격자점 표기 (작은 점)
+\newcommand{\gmlattice}[4]{%
+  \foreach \gmlx in {#1,...,#2} {%
+    \foreach \gmly in {#3,...,#4} {%
+      \fill[gm-ink] (\gmlx, \gmly) circle (0.05);
+    }%
+  }%
+}
+
+% \gmlocus{path-name}{color} — 자취 곡선 강조 (색 지정)
+\newcommand{\gmlocus}[2]{%
+  \draw[line width=1.6pt, #2] [name path=#1];
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 9. 대칭·평행이동 시각화 매크로
+% ══════════════════════════════════════════════════════════════════
+
+% \gmreflectpair{p1x}{p1y}{p2x}{p2y}{ax1}{ay1}{ax2}{ay2}{label1}{label2}
+% 두 점과 그 사이 대칭축을 그림 (대칭점 관계 시각화)
+\newcommand{\gmreflectpair}[9]{%
+  \node[gm-point] (gmRp1) at (#1, #2) {};
+  \node[gm-label, above right=1pt] at (gmRp1) {$#9$};
+  \node[gm-point] (gmRp2) at (#3, #4) {};
+  \node[gm-label, above right=1pt] at (gmRp2) {\csname gmreflectpair@second\endcsname};
+  \draw[gm-dashed] (gmRp1) -- (gmRp2);
+  \draw[gm-dashed] ($(#5,#6)!-0.2!(#7,#8)$) -- ($(#7,#8)!-0.2!(#5,#6)$);
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 10. 완성형 자주 쓰이는 조합 매크로
+% ══════════════════════════════════════════════════════════════════
+
+% \gmtwocircles{c1x}{c1y}{r1}{c2x}{c2y}{r2}{lbl1}{lbl2}
+% 두 원 (주·부 색상 자동 대비) — 위치관계·공통현·공통접선 문제용
+\newcommand{\gmtwocircles}[8]{%
+  \gmcircle{gmT1}{#1}{#2}{#3}{#7}{45}
+  \gmcircles{gmT2}{#4}{#5}{#6}{#8}{135}
+  \gmcenter{#1}{#2}{}{below left}
+  \gmcenter{#4}{#5}{}{below right}
+}
+
+% \gmcirclewithtangent{cx}{cy}{r}{px}{py}{lblC}{lblP}
+% 원과 접선 (외부 점 P에서 그은 접선) — 원·직선 위치관계 문제용
+\newcommand{\gmcirclewithtangent}[7]{%
+  \gmcirclefill{gmC}{#1}{#2}{#3}{#6}{90}
+  \gmpoint{#7}{#4}{#5}{above right}
+  % 접선 실제 계산은 문항별 좌표 지정. 이 매크로는 원+외부점 골격만.
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 11. 캡션·라벨 헬퍼
+% ══════════════════════════════════════════════════════════════════
+
+% \gmcaption{[번호] 캡션 본문} — 그림 상단 캡션 표준
+\newcommand{\gmcaption}[1]{%
+  \begin{center}{\small\textbf{#1}}\end{center}\vspace{-1mm}%
+}
+
+% \gmnote{설명 텍스트} — 그림 하단 이탤릭 주석
+\newcommand{\gmnote}[1]{%
+  \vspace{1mm}%
+  {\footnotesize\itshape #1}%
+}
+
+% ══════════════════════════════════════════════════════════════════
+% 사용 예 (주석)
+% ══════════════════════════════════════════════════════════════════
+% \begin{center}
+% \gmcaption{[그림 1] 두 원의 위치관계}
+% \begin{tikzpicture}[scale=0.7]
+%   \gmaxes{-2}{6}{-1}{5}
+%   \gmticks{x}{-1, 3, 5}
+%   \gmticks{y}{2, 4}
+%   \gmtwocircles{1}{2}{1.5}{4}{2}{1}{C_1}{C_2}
+%   \gmpoint{P}{2.3}{2.9}{above right}
+% \end{tikzpicture}
+% \gmnote{두 원 $C_1$, $C_2$의 공통현이 점 $\mathrm{P}$를 지난다.}
+% \end{center}

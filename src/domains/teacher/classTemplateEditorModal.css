@@ -1,4 +1,16 @@
 /* 반 개설·수정 모달 — 요일 묶음별 시간표 줄. */
+
+/* 2026-09-26 · 이 모달은 수업 등록 모달과 `.lessonModalSection`·`.lessonModalFields` 클래스를 함께 쓴다.
+   그 두 블록이 App.css 에서 lessonModal.css 로 옮겨가며 `.lessonModal` 아래로 한정됐으므로,
+   여기서 원래 값(섹션 gap 12px · 반 이름 입력 전폭)을 그대로 유지한다. */
+.classTemplateEditorModal .lessonModalSection {
+  gap: 12px;
+}
+
+.classTemplateEditorModal .lessonModalFields > label {
+  grid-column: 1 / -1;
+}
+
 .classTemplateDayTabs.typeTabs {
   gap: 6px;
   grid-template-columns: repeat(7, 1fr);

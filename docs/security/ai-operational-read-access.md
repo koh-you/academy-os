@@ -78,6 +78,28 @@ try {
 
 발급 명령의 stdout은 토큰이므로 AI 도구 출력이나 공유 로그에 노출하지 않는다. 에이전트가 서명 비밀을 Render에서 복사하거나 로컬에 상주시켜서는 안 된다. 서명 비밀이 없는 경우 운영자가 별도 보안 터미널에서 단기 read 토큰을 발급해 해당 작업 프로세스에만 주입하는 것이 사람 Gate다.
 
+### 3. 문제은행 전용 `bank-write` 토큰 — 교재 패키지 작업 (2026-09-26)
+
+교재 패키지 등록은 파일이 한 권에 1,700개가 넘어 브라우저 폴더 선택으로 자동화할 수 없고, 교사 세션 토큰은 로그인 후 8시간이라 작업할 때마다 사람이 새로 건네야 했다. 이 반복을 없애려고 문제은행 route 안에서만 동작하는 스코프를 두었다.
+
+```powershell
+node scripts/ops-mint-token.mjs --scope bank-write --tenant tenant_default --ttl 2160h --label claude-problem-bank
+```
+
+발급한 토큰은 운영자가 **자기 PC 사용자 환경변수** `ACADEMY_OPS_TOKEN`에 한 번만 넣는다. 서명 비밀은 발급 순간에만 쓰고 로컬에 남기지 않는다.
+
+이 스코프가 할 수 있는 것은 `/api/problem-bank/` 안이 전부다.
+
+- GET: 교재 목록·상세·저장 파일 대조(`book-audit`)
+- POST: `import` · `import-answers` · `images` · `book`(폴더·제목 등 메타데이터)
+
+할 수 없는 것:
+
+- `DELETE /api/problem-bank/book` — 교재 삭제는 문항·학생 기록·이미지가 함께 지워지므로 사람이 화면에서 한다.
+- 문제은행 밖은 **읽기도 불가**다. 학생·수업일지·알림 route는 GET도 `403 scope_forbidden`이다. 다른 ops 스코프의 「모든 GET 허용」 규칙보다 먼저 경로를 판정한다.
+
+기본 수명은 30일이고 `--ttl`로 조정한다. 토큰이 유출되면 `OPS_TOKEN_SIGNING_SECRET`을 교체해 전체를 무효화한다. 경계는 `scripts/test-api-access-policy.mjs`가 고정한다.
+
 ## 사용하지 않는 경로
 
 - 무인증 운영 API: 현재 `401 auth_required`이며 과거 기록은 폐기한다.

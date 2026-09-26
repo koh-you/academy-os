@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-04-F5
+source: bank/creation-archive/phase-a2/creations/creation-04.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-04-F5.tex
+flaw_type: F5
+flaw_name: 답 유일성 위반
+expected_verdict: LOSS
+ground_truth: flawed
+seed: false
+injection:
+  method: replace
+  find: "양수 $a$, $b$에 대하여"
+  replace: "$a$, $b$에 대하여"
+note: "양수 제약 제거 → a·b 다값 (부호·평행 두 경우) 답 비유일"
+date: 2026-07-28

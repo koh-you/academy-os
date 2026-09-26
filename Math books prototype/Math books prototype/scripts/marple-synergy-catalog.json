@@ -1,0 +1,117 @@
+{
+  "version": "v2.3",
+  "source": "마플시너지 공통수학1 2025 STEP 1",
+  "totals": {
+    "types": 272,
+    "problems": 1641,
+    "units": 13
+  },
+  "generated": "2026-06-24",
+  "note": "bank/4점-패턴-카탈로그/03-패턴-카탈로그.md §9 카탈로그에서 추출. 272 유형 메타데이터 — id, name, labels(BASIC/NORMAL/TOUGH), unit(CM1-PL/EQ/CB/MX), homebase_for_1x, core_slot(NORMAL·TOUGH 비중 높음).",
+  "units": [
+    {
+      "code": "I-01", "name": "다항식 연산", "subject_unit": "CM1-PL", "section": "§9.1",
+      "total_types": 17, "total_problems": 104,
+      "core_slots_normal_tough": ["MS-01-03","MS-01-07","MS-01-08","MS-01-13","MS-01-16","MS-01-17"],
+      "1x_links": {"1.46":["MS-01-13"],"1.33":["MS-01-16"],"1.8":["MS-01-14"]}
+    },
+    {
+      "code": "I-02", "name": "항등식·나머지정리", "subject_unit": "CM1-PL", "section": "§9.2",
+      "total_types": 24, "total_problems": 155,
+      "core_slots_normal_tough": ["MS-02-08","MS-02-09","MS-02-10","MS-02-12","MS-02-13","MS-02-16","MS-02-17","MS-02-18","MS-02-20","MS-02-24"],
+      "1x_links": {"1.33":["MS-02-13"],"1.41":["MS-02-16"],"1.46":["MS-02-20"]}
+    },
+    {
+      "code": "I-03", "name": "인수분해", "subject_unit": "CM1-PL", "section": "§9.3",
+      "total_types": 15, "total_problems": 78,
+      "core_slots_normal_tough": ["MS-03-04","MS-03-05","MS-03-07","MS-03-08","MS-03-11","MS-03-12","MS-03-14"],
+      "1x_links": {"1.3":["MS-03-04"],"1.4":["MS-03-08"],"1.8":["MS-03-10"],"1.46":["MS-03-12"]}
+    },
+    {
+      "code": "II-01", "name": "복소수", "subject_unit": "CM1-EQ", "section": "§9.4",
+      "total_types": 18, "total_problems": 127,
+      "core_slots_normal_tough": ["MS-04-09","MS-04-10","MS-04-12","MS-04-14","MS-04-16"],
+      "1x_links": {"1.46":["MS-04-16"],"1.34":["MS-04-09","MS-04-10"],"1.7":["MS-04-13"],"1.17":["MS-04-18"]}
+    },
+    {
+      "code": "II-02", "name": "이차방정식", "subject_unit": "CM1-EQ", "section": "§9.5",
+      "total_types": 28, "total_problems": 175,
+      "core_slots_normal_tough": ["MS-05-09","MS-05-12","MS-05-17","MS-05-18","MS-05-25"],
+      "1x_links": {"1.6":["MS-05-09"],"1.7":["MS-05-09"],"1.5":["MS-05-17","MS-05-19"],"1.46":["MS-05-25"],"1.4":["MS-05-24"]}
+    },
+    {
+      "code": "II-03", "name": "이차방정식과 이차함수", "subject_unit": "CM1-EQ", "section": "§9.6",
+      "total_types": 30, "total_problems": 183,
+      "core_slots_normal_tough": ["MS-06-04","MS-06-05","MS-06-07","MS-06-11","MS-06-15","MS-06-17","MS-06-21","MS-06-23","MS-06-25","MS-06-29","MS-06-30"],
+      "1x_links": {"1.4":["MS-06-05"],"1.6":["MS-06-13"],"1.7":["MS-06-13"],"1.14":["MS-06-17","MS-06-20","MS-06-21","MS-06-22"],"1.3":["MS-06-23"],"1.8":["MS-06-29","MS-06-30"],"1.43":["MS-06-29","MS-06-30"]}
+    },
+    {
+      "code": "II-04", "name": "여러 방정식", "subject_unit": "CM1-EQ", "section": "§9.7",
+      "total_types": 28, "total_problems": 164,
+      "core_slots_normal_tough": ["MS-II04-04","MS-II04-07","MS-II04-11","MS-II04-14","MS-II04-16","MS-II04-18","MS-II04-22","MS-II04-23","MS-II04-25"],
+      "1x_links": {"1.4":["MS-II04-11","MS-II04-14","MS-II04-15"],"1.3":["MS-II04-07","MS-II04-08","MS-II04-09","MS-II04-25"],"1.46":["MS-II04-16","MS-II04-17","MS-II04-18","MS-II04-19"],"1.18":["MS-II04-14","MS-II04-15","MS-II04-22"],"1.14":["MS-II04-23"],"1.40":["MS-II04-27"]},
+      "homebase_for_1x": {"1.46_재료_ω":["MS-II04-16","MS-II04-17","MS-II04-18","MS-II04-19"]}
+    },
+    {
+      "code": "II-05", "name": "일차부등식", "subject_unit": "CM1-EQ", "section": "§9.8",
+      "total_types": 14, "total_problems": 73,
+      "core_slots_normal_tough": ["MS-II05-04","MS-II05-06","MS-II05-07","MS-II05-08","MS-II05-11","MS-II05-12","MS-II05-13"],
+      "1x_links": {"1.6":["MS-II05-02"],"1.14":["MS-II05-04","MS-II05-08","MS-II05-14"],"1.7":["MS-II05-06","MS-II05-07"],"1.17":["MS-II05-08","MS-II05-11","MS-II05-12","MS-II05-13"],"1.3":["MS-II05-13"],"1.8":["MS-II05-09","MS-II05-10"],"1.40":["MS-II05-09","MS-II05-10"]},
+      "homebase_for_1x": {"1.17_절댓값분기":["MS-II05-11","MS-II05-12","MS-II05-13","MS-II05-14"]}
+    },
+    {
+      "code": "II-06", "name": "이차부등식", "subject_unit": "CM1-EQ", "section": "§9.9",
+      "total_types": 36, "total_problems": 203,
+      "core_slots_normal_tough": ["MS-II06-08","MS-II06-11","MS-II06-14","MS-II06-19","MS-II06-20","MS-II06-24","MS-II06-25","MS-II06-26","MS-II06-31","MS-II06-33","MS-II06-35"],
+      "1x_links": {"1.17":["MS-II06-03","MS-II06-23"],"1.4":["MS-II06-08"],"1.14":["MS-II06-11","MS-II06-12","MS-II06-14","MS-II06-15","MS-II06-16","MS-II06-20"],"1.6":["MS-II06-13"],"1.3":["MS-II06-20","MS-II06-23","MS-II06-35"],"1.7":["MS-II06-24","MS-II06-25","MS-II06-26"],"1.5":["MS-II06-31","MS-II06-32","MS-II06-33"],"1.43":["MS-II06-33","MS-II06-36"]}
+    },
+    {
+      "code": "III-01", "name": "경우의 수", "subject_unit": "CM1-CB", "section": "§9.10.1",
+      "total_types": 12, "total_problems": 72,
+      "core_slots_normal_tough": ["MS-III01-07","MS-III01-08","MS-III01-11","MS-III01-12"],
+      "1x_links": {"1.40":["MS-III01-04"],"1.38":["MS-III01-08","MS-III01-11"],"1.7":["MS-III01-12"]},
+      "homebase_for_1x": {"1.38_파이프격자":["MS-III01-08","MS-III01-11"]}
+    },
+    {
+      "code": "III-02", "name": "순열", "subject_unit": "CM1-CB", "section": "§9.10.2",
+      "total_types": 11, "total_problems": 74,
+      "core_slots_normal_tough": ["MS-III02-04","MS-III02-05","MS-III02-08","MS-III02-10","MS-III02-11"],
+      "1x_links": {"1.7":["MS-III02-04","MS-III02-05","MS-III02-06"],"1.40":["MS-III02-10","MS-III02-11"]}
+    },
+    {
+      "code": "III-03", "name": "조합", "subject_unit": "CM1-CB", "section": "§9.10.3",
+      "total_types": 14, "total_problems": 99,
+      "core_slots_normal_tough": ["MS-III03-09","MS-III03-11","MS-III03-13","MS-III03-14"],
+      "1x_links": {"1.39":["MS-III03-09"],"1.40":["MS-III03-11"],"1.8":["MS-III03-13","MS-III03-14"],"1.43":["MS-III03-13","MS-III03-14"]},
+      "homebase_for_1x": {"1.39_자동차분배":["MS-III03-09"]}
+    },
+    {
+      "code": "IV-01", "name": "행렬", "subject_unit": "CM1-MX", "section": "§9.11",
+      "total_types": 25, "total_problems": 134,
+      "audience_correction": {"X_u": 1.0, "note": "CM1-MX 신규 단원 친숙도 보정 자동 적용"},
+      "core_slots_normal_tough": ["MS-IV01-16","MS-IV01-17","MS-IV01-18","MS-IV01-22","MS-IV01-23","MS-IV01-24"],
+      "1x_links": {"1.5":["MS-IV01-13"],"1.14":["MS-IV01-14"],"1.41":["MS-IV01-16","MS-IV01-17","MS-IV01-18"],"1.42":["MS-IV01-19","MS-IV01-22"],"1.7":["MS-IV01-21","MS-IV01-23"],"1.46":["MS-IV01-24"],"1.8":["MS-IV01-25"]},
+      "homebase_for_1x": {"1.41_행렬직선":["MS-IV01-16","MS-IV01-17","MS-IV01-18"],"1.42_다중행렬방정식":["MS-IV01-19","MS-IV01-22"],"1.46_재료_CH":["MS-IV01-24"]}
+    }
+  ],
+  "homebase_1x_summary": {
+    "1.17_절댓값분기": {"homebase_unit":"II-05","types":["MS-II05-11","MS-II05-12","MS-II05-13","MS-II05-14"]},
+    "1.38_파이프격자경로": {"homebase_unit":"III-01","types":["MS-III01-08","MS-III01-11"]},
+    "1.39_자동차N명분배": {"homebase_unit":"III-03","types":["MS-III03-09"]},
+    "1.41_행렬직선표현": {"homebase_unit":"IV-01","types":["MS-IV01-16","MS-IV01-17","MS-IV01-18"]},
+    "1.42_다중행렬방정식": {"homebase_unit":"IV-01","types":["MS-IV01-19","MS-IV01-22"]},
+    "1.46_시판9_00TOP_재료": {"homebase_units":["II-04","IV-01"],"types":["MS-II04-16","MS-II04-17","MS-II04-18","MS-II04-19","MS-IV01-24"]}
+  },
+  "subject_unit_mapping": {
+    "CM1-PL": ["I-01","I-02","I-03"],
+    "CM1-EQ": ["II-01","II-02","II-03","II-04","II-05","II-06"],
+    "CM1-CB": ["III-01","III-02","III-03"],
+    "CM1-MX": ["IV-01"]
+  },
+  "label_to_star_mapping": {
+    "BASIC": 2,
+    "NORMAL": 3,
+    "TOUGH": 4,
+    "note": "STEP 1만 정독했으므로 ★ 5 거의 없음. ★ 5 출제 시 1.x v2.2 패턴 + 본거지 결합 필요"
+  }
+}

@@ -59,8 +59,10 @@ assert.deepEqual(repeatedWithinSameCascadeContext, [
 
 assert.ok(domainCss.includes("@media (max-width: 720px)"));
 assert.ok(domainCss.includes("@media (max-width: 640px)"));
-assert.equal(occurrences.length, 31);
+// 2026-09-26 · 31 -> 30. 상시 노출이던 '모바일에서는 … 카카오비즈니스 파트너센터 앱에서 …' 안내를
+// 섹션 제목 옆 HelpTip 으로 옮기면서 `.parentResponseContextTools p` 규칙이 쓰이지 않게 되어 지웠다.
+assert.equal(occurrences.length, 30);
 
 console.log(
-  "fourth-pass CSS domain split passed · parent response 31 selectors · App.css overlap 0 · one preserved complementary base selector"
+  "fourth-pass CSS domain split passed · parent response 30 selectors · App.css overlap 0 · one preserved complementary base selector"
 );

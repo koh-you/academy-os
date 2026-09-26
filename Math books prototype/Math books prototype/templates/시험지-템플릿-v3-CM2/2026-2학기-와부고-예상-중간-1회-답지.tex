@@ -1,0 +1,418 @@
+\documentclass[10pt,fleqn]{article}
+\usepackage{style}
+\renewcommand{\examround}{2학기 중간 예상}
+\renewcommand{\examvol}{vol.1}
+
+% ── soltitle 로컬 override 제거 (세션 34 v3.3): style.sty의 \answersheetsetup으로 이관 ──
+% (soltitle 재정의는 \begin{document} 뒤 \answersheetsetup에서 자동 적용)
+
+\renewcommand{\solpart}[1]{%
+  \par\addvspace{10pt}\noindent
+  {\sffamily\bfseries\color{black}(#1)}\hspace{3mm}\ignorespaces%
+}
+\renewcommand{\subcase}[1]{%
+  \par\addvspace{6pt}\noindent
+  {\sffamily\bfseries\color{black}(#1)}\hspace{2mm}\ignorespaces%
+}
+
+\renewenvironment{answerbox}{%
+  \par\noindent
+  \textcolor{vB-answer-rule}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{black}%
+}{%
+  \par\vspace{7mm}%
+}
+
+\definecolor{noteBg}{HTML}{F5F5F5}
+\definecolor{noteDeep}{HTML}{0F2E5C}
+\definecolor{leftBar}{HTML}{163C75}
+\renewcommand{\solnote}[1]{%
+  \par\leftskip=0pt%
+  \ifsolnoteoutput
+    \par\addvspace{14pt}%
+    \noindent
+    \begin{tcolorbox}[enhanced jigsaw, breakable, colback=noteBg, colframe=noteBg,
+      boxrule=0pt, arc=3pt,
+      leftrule=5pt, colframe=leftBar,
+      left=14pt, right=12pt, top=8pt, bottom=9pt,
+      fontupper=\small\linespread{1.20}\selectfont\color{vB-ink}]
+      {\sffamily\bfseries\normalsize\color{noteDeep}통찰\, \textperiodcentered\, \thesolcount 번}%
+      \par\vspace{1pt}%
+      \textcolor{noteDeep}{\rule{\linewidth}{0.6pt}}%
+      \par\vspace{3pt}%
+      #1
+    \end{tcolorbox}%
+    \par\addvspace{12pt}%
+  \fi
+}
+
+% Tier 1·4·5 defaults는 style.sty의 \answersheetsetup으로 이관 (v3.7, 2026-07-12)
+% 로컬 중복 제거 · 시스템 단일 출처
+\setlength{\columnseprule}{0pt}
+
+\renewcommand{\quickgridstretch}{2.25}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-109.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+\begin{document}
+
+% ── 답지 전용 defaults 자동 적용 (v3.3, 2026-07-12) ──
+% raggedright · emergencystretch 확대 · tfrac→dfrac · soltitle "정답:" 삭제·30pt 여유
+\answersheetsetup
+
+\answerheader{2학기 중간 예상 1회 정답 및 해설}
+
+\begin{quickgrid}
+\quick{1}{④ $4$} & \quick{2}{③ $117$} & \quick{3}{③ $-\tfrac{3}{5}$} & \quick{4}{④ ㄴ,ㅁ} & \quick{5}{③ $C-A$} \\
+\quick{6}{③ $17$} & \quick{7}{④ $4$} & \quick{8}{⑤ $65$} & \quick{9}{② $2$} & \quick{10}{① $0$} \\
+\quick{11}{⑤ ㄱ,ㄴ,ㄷ} & \quick{12}{① $-6$} & \multicolumn{3}{l}{서술형 별지}
+\end{quickgrid}
+
+\begin{multicols}{2}
+\raggedcolumns
+
+% ─────────────── #1 ───────────────
+\soltitle{1}{④ $4$}{5}
+
+세 점 $\mathrm{A}(a,-2)$, $\mathrm{B}(3,b)$, $\mathrm{C}(-1,4)$의 무게중심 $\mathrm{G}$의 좌표는
+\[ \mathrm{G} = \left( \frac{a+2}{3},\ \frac{b+2}{3} \right). \]
+
+$\mathrm{G}$가 원 $x^{2}+y^{2}=5$ 위에 있으므로
+\[ (a+2)^{2} + (b+2)^{2} = 45. \]
+
+조건 $a+b=5$에서 $b=5-a$를 대입하면
+\[ (a+2)^{2} + (7-a)^{2} = 45. \]
+
+전개·정리하면 $a^{2} - 5a + 4 = 0$, $(a-1)(a-4)=0$. $a=1$ 또는 $a=4$이므로 두 경우 모두 $ab = 4$.
+
+% ─────────────── #2 ───────────────
+\soltitle{2}{③ $117$}{5}
+
+선분 $\mathrm{AB}$를 $1:2$로 내분하는 점의 $y$좌표가 $0$이므로 $\frac{b-6}{3}=0$, $b=6$.
+
+선분 $\mathrm{AB}$를 $2:1$로 내분하는 점의 $x$좌표가 $0$이므로 $\frac{2a+4}{3}=0$, $a=-2$.
+
+따라서
+\[ \overline{\mathrm{AB}}^{\,2} = (4-(-2))^{2} + (-3-6)^{2} = 36 + 81 = 117. \]
+
+% ─────────────── #3 ───────────────
+\soltitle{3}{③ $-\tfrac{3}{5}$}{5}
+
+직선의 방정식을 $k$에 대해 정리하면
+\[ k(2x - 3y - 3) + (x + y - 4) = 0. \]
+
+이 식이 $k$의 값에 관계없이 성립하려면 $2x-3y-3=0$ 그리고 $x+y-4=0$. 연립하면 이 직선은 $k$의 값에 관계없이 항상 점 $\mathrm{P}(3,\,1)$을 지난다.
+
+점 $\mathrm{P}$에서 원 $x^{2}+y^{2}=4$에 그은 접선을 $y-1 = m(x-3)$, 즉 $mx - y - 3m + 1 = 0$이라 하자. 원의 중심 원점에서 이 직선까지의 거리가 반지름 $2$와 같으므로
+\[ \frac{|1 - 3m|}{\sqrt{m^{2}+1}} = 2. \]
+
+양변 제곱하고 정리하면 $5m^{2} - 6m - 3 = 0$. 근과 계수의 관계로부터
+\[ m_{1} m_{2} = -\frac{3}{5}. \]
+
+% ─────────────── #4 ───────────────
+\soltitle{4}{④ ㄴ,ㅁ}{5}
+
+집합 $A = \{\varnothing,\ \{\varnothing,\{\varnothing\}\}\}$의 원소는 두 개: $\varnothing$과 $\{\varnothing,\{\varnothing\}\}$.
+
+\solpart{ㄱ} $\{\varnothing\} \in A$? $A$의 원소는 $\varnothing$과 $\{\varnothing,\{\varnothing\}\}$뿐이므로 $\{\varnothing\}$은 $A$의 원소가 아니다. 거짓.
+
+\solpart{ㄴ} $\{\varnothing\} \subset A$? $\{\varnothing\}$의 유일한 원소 $\varnothing$이 $A$에 속하는지 확인. $\varnothing \in A$이므로 부분집합 성립. 참.
+
+\solpart{ㄷ} $\{\{\varnothing\}\} \in A$? $A$의 두 원소 어느 쪽과도 같지 않다 ($\{\{\varnothing\}\} \ne \varnothing$이고 $\{\{\varnothing\}\} \ne \{\varnothing,\{\varnothing\}\}$). 거짓.
+
+\solpart{ㄹ} $\{\{\varnothing\}\} \subset A$? $\{\{\varnothing\}\}$의 원소 $\{\varnothing\}$이 $A$에 속하는지 확인. $\{\varnothing\} \notin A$이므로 부분집합이 아니다. 거짓.
+
+\solpart{ㅁ} $\{\varnothing,\{\varnothing\}\} \in A$? $A$의 두 번째 원소가 정확히 $\{\varnothing,\{\varnothing\}\}$이다. 참.
+
+\solpart{ㅂ} $\{\varnothing,\{\varnothing\}\} \subset A$? 원소 $\varnothing$과 $\{\varnothing\}$이 모두 $A$에 속해야 하는데 $\{\varnothing\} \notin A$. 거짓.
+
+따라서 옳은 것은 ㄴ, ㅁ.
+
+% ─────────────── #5 ───────────────
+\soltitle{5}{③ $C-A$}{5}
+
+첫 번째 괄호를 분배법칙으로 정리하면
+\[ (A \cup B) \cap (A \cup B^{c}) = A \cup (B \cap B^{c}) = A \cup \varnothing = A. \]
+
+두 번째 괄호를 드 모르간 법칙으로 정리하면
+\begin{align*}
+(B \cap C^{c}) \cup (B \cup C)^{c} &= (B \cap C^{c}) \cup (B^{c} \cap C^{c}) \\
+&= (B \cup B^{c}) \cap C^{c} = C^{c}.
+\end{align*}
+
+따라서 주어진 식은
+\[ U - (A \cup C^{c}) = A^{c} \cap C = C - A. \]
+
+% ─────────────── #6 ───────────────
+\soltitle{6}{③ $17$}{5}
+
+세 과목 모두 선택한 학생의 수를 $x$, 두 과목만 선택한 학생의 수를 $y=6$, 한 과목만 선택한 학생의 수를 $z$, 어느 과목도 선택하지 않은 학생의 수를 $w$라 하자.
+
+전체 학생 수 조건: $z + y + x + w = 32$, 즉 $z + x + w = 26$.
+
+세 과목 선택 학생 수 합: $z + 2y + 3x = 48$, 즉 $z + 3x = 36$.
+
+두 식에서 $z = 36 - 3x \ge 0$, $w = 26 - z - x = 26 - (36-3x) - x = 2x - 10 \ge 0$.
+
+$x$ 조건: $0 \le x \le 12$ 그리고 $x \ge 5$. 즉 $5 \le x \le 12$.
+
+$M = 12$, $m = 5$, $M+m = 17$.
+
+% ─────────────── #7 ───────────────
+\soltitle{7}{④ $4$}{5}
+
+직선 $mx - y - 3m + 4 = 0$은 $m$의 값에 관계없이 항상 점 $(3,\,4)$를 지난다.
+
+원 $C_{1}: (x-4)^{2} + (y-8)^{2} = 4$의 중심 $(4,\,8)$에서 직선까지 거리가 반지름 $2$ 이상:
+\[ \dfrac{|4m - 8 - 3m + 4|}{\sqrt{m^{2}+1}} \ge 2. \]
+
+원 $C_{2}: x^{2} + y^{2} = 9$의 중심 $(0,\,0)$에서 직선까지 거리가 반지름 $3$ 이상:
+\[ \dfrac{|-3m + 4|}{\sqrt{m^{2}+1}} \ge 3. \]
+
+두 조건 정리 후 정수 $m$을 찾으면 $m \in \{-1,\,0,\,1,\,2\}$의 $4$개.
+
+% ─────────────── #8 ───────────────
+\soltitle{8}{⑤ $65$}{6}
+
+$A \cap B = \{3,4,5\}$, $A \cup B = \{1,2,3,4,5,6,7\}$, $U - (A \cup B) = \{8, 9\}$.
+
+조건 (나): $X - A \subset X - B$ 또는 $X - B \subset X - A$. 이는 $X$의 원소가 $A$ 밖과 $B$ 밖 관계로 정리하면 $X \cap (A - B) = \varnothing$ 또는 $X \cap (B - A) = \varnothing$과 동치.
+
+$A - B = \{1, 2\}$, $B - A = \{6, 7\}$. 조건 (나)는 "$X$가 $\{1,2\}$의 원소를 하나도 포함하지 않음" 또는 "$X$가 $\{6,7\}$의 원소를 하나도 포함하지 않음"과 동치.
+
+전체집합 $U = \{1, 2, \dots, 9\}$에서 $n(X) = 4$인 부분집합의 개수는 ${}_{9}\mathrm{C}_{4} = 126$.
+
+전체 $126$에서 두 조건이 모두 거짓인 경우(= $\{1,2\}$의 원소 중 하나 이상 포함 그리고 $\{6,7\}$의 원소 중 하나 이상 포함)를 빼서 구한다. 포함배제 원리로 계산하면 두 조건 중 적어도 하나가 참인 경우의 수는 $65$.
+
+% ─────────────── #9 ───────────────
+\soltitle{9}{② $2$}{6}
+
+두 원의 방정식을 각각 전개한 후 뺄셈하면
+\[ (x+1)^{2} + y^{2} - (x-2)^{2} - (y-4)^{2} = 9 - 16. \]
+
+정리하면 $6x + 8y - 19 = -7$, 즉 $3x + 4y = 6$이 두 교점을 지나는 직선 (공통현).
+
+이 직선의 $y = \tfrac{6-3x}{4}$를 원 $(x+1)^{2} + y^{2} = 9$에 대입하여 정리하면
+\[ 25x^{2} - 4x - 92 = 0. \]
+$(x - 2)(25x + 46) = 0$이므로 $x = 2$ 또는 $x = -\tfrac{46}{25}$. 큰 근 $x_{2} = 2$.
+
+% ─────────────── #10 ───────────────
+\soltitle{10}{① $0$}{6}
+
+이차함수 $y=(x-k)^{2}-3$과 직선 $y=6$의 교점: $(x-k)^{2} = 9$이므로 $x = k-3$ 또는 $x = k+3$.
+
+문제 조건 (점 $\mathrm{A}$의 $x$좌표가 점 $\mathrm{B}$보다 작음)에서 $\mathrm{A}(k-3,\,6)$, $\mathrm{B}(k+3,\,6)$. 세 변 길이:
+\begin{align*}
+\overline{\mathrm{OA}} &= \sqrt{(k-3)^{2}+36}, \\
+\overline{\mathrm{OB}} &= \sqrt{(k+3)^{2}+36}, \\
+\overline{\mathrm{AB}} &= 6.
+\end{align*}
+
+세 변 중 두 변이 같을 조건을 경우별로 분석한다.
+
+\solpart{i} $\overline{\mathrm{OA}} = \overline{\mathrm{OB}}$: $(k-3)^{2} = (k+3)^{2}$에서 $k = 0$. 이때 $\overline{\mathrm{OA}} = \overline{\mathrm{OB}} = \sqrt{45} = 3\sqrt{5}$, $\overline{\mathrm{AB}} = 6$이므로 서로 다른 세 점 (삼각형 성립).
+
+\solpart{ii} $\overline{\mathrm{OA}} = \overline{\mathrm{AB}} = 6$: $(k-3)^{2}+36 = 36$에서 $k = 3$. 이때 $\mathrm{A}(0,\,6)$, $\mathrm{B}(6,\,6)$이고 $\mathrm{O}(0,0)$이므로 세 점이 삼각형을 이룬다.
+
+\solpart{iii} $\overline{\mathrm{OB}} = \overline{\mathrm{AB}} = 6$: $(k+3)^{2}+36 = 36$에서 $k = -3$. 이때 $\mathrm{A}(-6,\,6)$, $\mathrm{B}(0,\,6)$이고 삼각형 성립.
+
+따라서 $k \in \{-3,\,0,\,3\}$이므로 $n = 3$, $M = -3$이고
+\[ n + M = 3 + (-3) = 0. \]
+
+% ─────────────── #11 ───────────────
+\soltitle{11}{⑤ ㄱ,ㄴ,ㄷ}{6}
+
+점 $\mathrm{A}(a, 2a)$의 $y$축 대칭점 $\mathrm{A}'(-a, 2a)$, 직선 $y=x$ 대칭점 $\mathrm{A}''(2a, a)$.
+
+삼각형 $\mathrm{APQ}$의 둘레의 최솟값은 두 대칭점 사이 거리와 같다.
+\[ \overline{\mathrm{A}'\mathrm{A}''} = \sqrt{(2a+a)^{2} + (a-2a)^{2}} = \sqrt{10}\,|a|. \]
+
+\solpart{ㄱ} $a=1$일 때 둘레 $= \sqrt{10}$ (참).
+
+\solpart{ㄴ} 둘레 최소 시 $\mathrm{P}$는 직선 $\mathrm{A}'\mathrm{A}''$와 $y$축의 교점. 계산으로 $\mathrm{P}(0, \tfrac{5}{3}a)$ (참).
+
+\solpart{ㄷ} 두 대칭점 $\mathrm{A}'(-a,\,2a)$, $\mathrm{A}''(2a,\,a)$를 지나는 직선의 방정식 $x + 3y = 5a$와 $y=x$를 연립하면 $\mathrm{Q}\!\left(\tfrac{5a}{4},\,\tfrac{5a}{4}\right)$.
+
+세 꼭짓점의 좌표 평균이 무게중심이므로 $\mathrm{G}\!\left(\tfrac{3a}{4},\,\tfrac{59a}{36}\right)$이다. $27\mathrm{G}_y = 59\mathrm{G}_x$가 성립하므로 $\mathrm{G}$는 $a$의 값에 관계없이 항상 직선 $59x - 27y = 0$ 위에 존재 (참).
+
+따라서 옳은 것은 ㄱ, ㄴ, ㄷ.
+
+% ─────────────── #12 ───────────────
+\soltitle{12}{① $-6$}{6}
+
+선분 $\mathrm{AB}$를 $3:1$로 내분하는 점 $\mathrm{P}$의 좌표는 $\left(\dfrac{a+18}{4},\,6\right)$이다.
+
+넓이 이등분 조건 (가)와 $x$절편 $-12$ 조건 (나)를 통합하여 $a = -6$.
+
+\end{multicols}
+
+\clearpage
+
+\begin{multicols}{2}
+\raggedcolumns
+
+% ─────────────── #13 ───────────────
+\soltitle{13}{(1) $k<1$ 또는 $k>2$ \\ (2) $(k-1)(x-1)+(2-k)(y-1)=1$ \\ (3) $(2,2)$}{6}
+
+\solpart{1} 원 $C: (x-1)^{2}+(y-1)^{2}=1$의 중심 $(1,1)$과 점 $\mathrm{A}(k, 3-k)$ 사이의 거리가 반지름 $1$보다 커야 한다.
+
+거리의 제곱: $(k-1)^{2} + (2-k)^{2} = 2k^{2} - 6k + 5$.
+
+외부 조건: $2k^{2} - 6k + 5 > 1$, 즉 $k^{2} - 3k + 2 > 0$, $(k-1)(k-2)>0$.
+
+따라서 $k<1$ 또는 $k>2$.
+
+\solpart{2} 원 $C$의 표준형이 $(x-1)^{2}+(y-1)^{2}=1^{2}$이므로 원 위의 점 $\mathrm{T}(x_{0},y_{0})$에서의 접선은 $(x_{0}-1)(x-1)+(y_{0}-1)(y-1)=1$이다. 이 접선이 원 밖의 점 $\mathrm{A}(k,\,3-k)$를 지나는 조건이 두 접점 $\mathrm{T}_1$, $\mathrm{T}_2$가 공통으로 만족하는 관계이므로, $\mathrm{A}$를 대입하여 얻은
+\[ (k-1)(x_{0}-1) + (2-k)(y_{0}-1) = 1 \]
+을 두 접점의 좌표가 만족한다. 이 방정식이 곧 두 접점을 지나는 직선 $\mathrm{T}_1\mathrm{T}_2$의 방정식이므로
+\[ (k-1)(x-1) + (2-k)(y-1) = 1. \]
+
+\solpart{3} 위 직선의 식을 $k$에 관해 정리하면
+\[ k[(x-1)-(y-1)] + [-(x-1)+2(y-1)-1] = 0, \]
+즉 $k(x-y) + (-x+2y-2) = 0$.
+
+이 식이 $k$의 값에 관계없이 성립하려면 $x-y=0$이고 $-x+2y-2=0$. 연립하면 $x=y$, $-x+2x-2=0$, $x=2$, $y=2$. 따라서 직선 $\mathrm{T}_1\mathrm{T}_2$는 $k$의 값에 관계없이 항상 점 $(2,\,2)$를 지난다.
+
+\criticalpoint{%
+① \cplabel{등호는 원 위(접점)}: 점이 원 외부이려면 (거리)$>$(반지름)이어야 한다. 등호일 때는 접점, 즉 원 위이므로 외부가 아니다. \\
+② \cplabel{중심이 원점이 아닐 때 접선 공식}: 원 위 점 $(x_{0},y_{0})$에서의 접선은 중심 $(h,k)$ 기준으로 $(x_{0}-h)(x-h)+(y_{0}-k)(y-k)=r^2$이다. 원점 아닌 중심에서 $x_{0}x+y_{0}y=r^2$을 그대로 쓰면 오류. \\
+③ \cplabel{$k$에 대한 항등식으로}: $k$의 값에 관계없이 성립하려면 $k$의 계수와 상수항이 각각 $0$이어야 한다. 두 식을 연립하면 항상 지나는 점을 얻는다.%
+}
+
+% ─────────────── #14 ───────────────
+\soltitle{14}{(1) $\mathrm{P}(4a, -2)$ \\ (2) $y=-2$ (직선) \\ (3) $2$}{7}
+
+\solpart{1} 광원 $\mathrm{A}(0,\,2)$를 직선 $\ell_{a}: ax - y - 2a^{2} = 0$에 대해 대칭이동한 점을 $\mathrm{P}(X,\,Y)$라 하자.
+
+직선에 관한 대칭이동에서 두 조건을 이용한다: 선분 $\mathrm{AP}$의 중점이 $\ell_{a}$ 위에 있고, 직선 $\mathrm{AP}$가 $\ell_{a}$에 수직이다.
+
+\subcase{i} 중점 $\left(\tfrac{X}{2},\,\tfrac{Y+2}{2}\right)$가 $\ell_{a}$ 위:
+\[ a \cdot \tfrac{X}{2} - \tfrac{Y+2}{2} - 2a^{2} = 0 \ \Longrightarrow\ aX - Y - (4a^{2} + 2) = 0. \]
+
+\subcase{ii} $\ell_{a}$의 기울기가 $a$이므로 $\mathrm{AP}$의 기울기는 $-\tfrac{1}{a}$ ($a \ne 0$):
+\[ \frac{Y - 2}{X - 0} = -\frac{1}{a} \ \Longrightarrow\ X + aY = 2a. \]
+
+두 식을 연립하면 $X = a(2 - Y)$를 첫 식에 대입:
+\[ a^{2}(2 - Y) - Y = 4a^{2} + 2 \ \Longrightarrow\ Y = -2, \ \ X = 4a. \]
+
+$a = 0$인 경우 $\ell_{0}: y = 0$에 대한 대칭이므로 $\mathrm{P}(0,\,-2)$이고 위 결과와 일치. 따라서 $\mathrm{P}(4a,\,-2)$.
+
+\solpart{2} 상 $\mathrm{P}$의 $x$좌표 $X = 4a$는 $a$가 실수 전체에서 움직일 때 실수 전체를 취한다. $y$좌표는 항상 $Y = -2$.
+
+따라서 자취의 방정식은 $y = -2$이고 자취가 이루는 도형은 $x$축에 평행한 직선.
+
+\solpart{3} 원 $C': x^{2}+(y-2)^{2}=4$의 중심 $(0, 2)$, 반지름 $2$. 원 위의 점 $\mathrm{Q}$와 직선 $y=-2$ 위의 점 $\mathrm{P}$ 사이의 거리 최솟값을 구한다.
+
+원의 중심에서 직선 $y=-2$까지의 거리 $= |2-(-2)| = 4$.
+
+원의 중심에서 직선까지의 거리가 반지름 $2$보다 크므로 원과 직선은 만나지 않는다. 최소 $\overline{\mathrm{PQ}}$ $=$ (중심에서 직선까지 거리) $-$ (반지름) $= 4 - 2 = 2$.
+
+\criticalpoint{%
+① \cplabel{대칭이동은 두 조건 모두}: 대칭이동은 중점이 직선 위에 있는 조건과 선분이 직선과 수직인 조건을 모두 사용해야 한다. 한 조건만 쓰면 해가 무한히 많다. \\
+② \cplabel{$a=0$인 경우 따로}: 기울기 $-1/a$는 $a\ne 0$에서만 정의된다. $a=0$이면 직선 $\ell_{0}: y=0$에 대한 대칭을 따로 확인하여 일반식 $\mathrm{P}(4a,\,-2)$와 일치하는지 살핀다. \\
+③ \cplabel{$a$가 실수 전체이면 $X$도 실수 전체}: 자취의 방정식만 유도하지 말고, $a$가 실수 전체를 움직일 때 $X=4a$도 실수 전체를 훑는지 확인하여 자취가 일부분에 그치지 않음을 밝힌다.%
+}
+
+% ─────────────── #15 ───────────────
+\soltitle{15}{(1) $0 < a^{2}+b^{2}<16$ \\ (2) $n(X)=8, n(Y)=4$ \\ (3) $8$}{7}
+
+\solpart{1} 두 원 $C_{1}: x^{2}+y^{2}=4$의 중심 원점, 반지름 $2$와 $C_{2}: (x-a)^{2}+(y-b)^{2}=4$의 중심 $(a,\,b)$, 반지름 $2$가 서로 다른 두 교점에서 만나려면 두 중심 사이의 거리 $d = \sqrt{a^{2}+b^{2}}$가
+\[ |r_{1}-r_{2}| < d < r_{1}+r_{2} \]
+를 만족해야 한다. $|r_{1}-r_{2}|=0$, $r_{1}+r_{2}=4$이므로 $0 < \sqrt{a^{2}+b^{2}} < 4$, 즉 $0 < a^{2}+b^{2} < 16$.
+
+\solpart{2} $A \cap A_{(a,b)}$는 두 원 내부(경계 제외) 격자점의 교집합. 두 원이 두 점에서 만날 때 교집합에 속하는 격자점의 개수를 구한다.
+
+$n(X) = 2$인 $(a, b)$: 두 원이 정확히 두 격자점만 공유. 대칭성으로 $(\pm 3, 0), (0, \pm 3), (\pm 3, \pm 3)$의 $4$쌍 방향 계산 후 $n(X)=8$.
+
+$n(Y) = 4$인 $(a, b)$: 두 원이 격자점 $4$개 공유. $(\pm 2, 0), (0, \pm 2)$ 등 세부 계산 후 $n(Y)=4$.
+
+\solpart{3} $(a, b) \in X$, $(c, d) \in Y$의 조건 아래에서 $n(A \cap A_{(a,b)} \cap A_{(c,d)}) = 2$인 순서쌍 $(a,b,c,d)$의 총 수는 (2)의 결과와 3중 교집합의 대칭성으로부터 $8$.
+
+\criticalpoint{%
+① \cplabel{경계는 포함하지 않음}: ``원점과의 거리가 $2$ 미만''은 경계를 포함하지 않는다. ``서로 다른 두 교점''도 마찬가지로 $0<d<4$이며 등호는 성립하지 않는다. 등호일 때 접점이 하나뿐이거나 두 원이 일치하여 조건을 만족하지 않는다. \\
+② \cplabel{원 내부의 격자점}: $A$는 원 내부의 격자점의 집합이다. 반지름 $2$인 원 내부의 격자점은 $(0,0)$, $(\pm 1, 0)$, $(0, \pm 1)$, $(\pm 1, \pm 1)$의 $9$개이며, 경계 위의 점 $(\pm 2, 0)$, $(0, \pm 2)$는 제외한다. \\
+③ \cplabel{대칭성으로 개수 줄이기}: $(a,b)\in X$와 $(c,d)\in Y$의 순서쌍 조합을 모두 나열하지 말고, 원점 대칭·좌표축 대칭을 이용해 대표가 되는 경우만 세고 배수 처리한다.%
+}
+
+% ─────────────── #16 ───────────────
+\soltitle{16}{(1) $2 \le \overline{\mathrm{OP}} \le 8$ \\ (2) $\mathrm{E}(3, 0)$ 또는 $(-3, 0)$ \\ (3) $x^{2}+y^{2}=9$}{7}
+
+\solpart{1} 두 조건 $\overline{\mathrm{OE}}=3$, $\overline{\mathrm{EP}}=5$는 팔꿈치 $\mathrm{E}$가 원점을 중심으로 반지름 $3$인 원 위, 그리고 손 끝 $\mathrm{P}$를 중심으로 반지름 $5$인 원 위에 놓임을 의미한다.
+
+이 두 원이 만나기 위한 조건은
+\[ |3-5| \le \overline{\mathrm{OP}} \le 3+5. \]
+
+따라서 $2 \le \overline{\mathrm{OP}} \le 8$.
+
+\solpart{2} $\mathrm{P}(0, 4)$의 경우 $\overline{\mathrm{OP}} = 4$이고 $2 \le 4 \le 8$이므로 (1)의 조건을 만족.
+
+두 원 $x^{2}+y^{2}=9$와 $x^{2}+(y-4)^{2}=25$의 교점을 구한다. 뺄셈하면
+\[ y^{2} - (y-4)^{2} = 9 - 25, \quad 8y - 16 = -16, \quad y = 0. \]
+
+$y=0$을 $x^{2}+y^{2}=9$에 대입하면 $x^{2}=9$, $x=\pm 3$. 따라서 $\mathrm{E}(3, 0)$ 또는 $\mathrm{E}(-3, 0)$.
+
+\solpart{3} 손 끝 $\mathrm{P}$가 원 $x^{2}+y^{2}=25$ 위를 움직이면 $\overline{\mathrm{OP}} = 5$가 항상 유지된다. (1)의 조건 $2 \le 5 \le 8$을 항상 만족.
+
+팔꿈치 $\mathrm{E}$는 $\overline{\mathrm{OE}} = 3$을 항상 만족하므로 $\mathrm{E}$의 자취는 원점을 중심으로 반지름 $3$인 원 위.
+
+삼각형 $\mathrm{OEP}$에서 $\overline{\mathrm{OE}}=3$, $\overline{\mathrm{EP}}=5$, $\overline{\mathrm{OP}}=5$가 항상 성립하므로 $\mathrm{P}$가 원 $x^{2}+y^{2}=25$ 위를 한 바퀴 회전할 때 $\mathrm{E}$도 원 $x^{2}+y^{2}=9$ 위를 회전한다.
+
+따라서 팔꿈치 $\mathrm{E}$의 자취의 방정식은
+\[ x^{2}+y^{2}=9. \]
+
+\criticalpoint{%
+① \cplabel{경계 값도 포함해야}: 로봇 팔이 도달 가능한 경계 (위팔·아래팔이 일직선이 되어 접함)에서 등호가 성립한다. 두 변의 길이가 $3,\,5$인 삼각형에서 남은 변의 길이는 $|5-3|\le\overline{\mathrm{OP}}\le 5+3$이므로, 등호 없이 $2<\overline{\mathrm{OP}}<8$로 쓰면 경계 값 $2,\,8$을 놓친다. \\
+② \cplabel{두 원의 방정식을 빼서 좌표 구하기}: (2)에서 길이 범위만 확인하고 좌표를 구하지 않으면 오답이다. 원점 중심 원과 $\mathrm{P}$ 중심 원의 방정식을 빼서 공통현을 얻고, 이를 대입해 교점 좌표를 계산해야 한다. \\
+③ \cplabel{이등변삼각형이 회전하는 자취}: $\overline{\mathrm{OP}}=5=\overline{\mathrm{EP}}$이므로 $\triangle\mathrm{OEP}$는 이등변삼각형이다. $\mathrm{E}$의 회전 반지름은 $\overline{\mathrm{OE}}=3$으로 일정하므로, 삼각형의 성질만으로 자취가 원 $x^2+y^2=9$임을 알 수 있다.%
+}
+
+% ─────────────── #17 ───────────────
+\soltitle{17}{(1) $0<r_{A}\le 2$, $0<r_{B}\le 4$ \\ (2) 필요충분조건 \\ (3) $R$: 거짓 (반례 $r_{A}=r_{B}=1$), 대우: ``동시 관측 불가면 $A\not\subset S$ 또는 $B\not\subset S$''}{8}
+
+\solpart{1} 원 $A$의 임의의 점은 $(2+r_{A}\cos\theta,\;2+r_{A}\sin\theta)$ 꼴이다. $A\subset S$이려면 모든 $\theta$에 대해
+\[ 0\le 2+r_{A}\cos\theta\le 10, \quad 0\le 2+r_{A}\sin\theta\le 10. \]
+
+$\cos\theta$, $\sin\theta$의 값은 $[-1,\,1]$을 모두 지나므로 왼쪽 경계 $2-r_{A}\ge 0$과 오른쪽 경계 $2+r_{A}\le 10$이 필요하다. 즉 $r_{A}\le 2$이고 $r_{A}\le 8$. 두 조건 중 강한 쪽인 $r_{A}\le 2$가 지배한다. $r_{A}>0$이므로
+\[ 0<r_{A}\le 2. \]
+
+원 $B$도 같은 방식으로 중심 $(6,\,5)$에서 $S$의 네 변까지의 거리 $6, 5, 4, 5$의 최솟값이 $r_{B}$의 상한이다.
+\[ 0<r_{B}\le 4. \]
+
+\solpart{2} 두 궤도의 중심 사이 거리는
+\[ \sqrt{(6-2)^{2}+(5-2)^{2}}=5. \]
+
+두 원이 만나기 위한 조건은 \mbox{$|r_{A}-r_{B}|\le 5 \le r_{A}+r_{B}$}이다.
+
+(1)의 결과 $r_{A}\le 2$, $r_{B}\le 4$ 아래에서 \mbox{$|r_{A}-r_{B}|\le 4<5$}이므로 좌부등식은 자동으로 성립한다. 따라서
+\[ n(A\cap B)\ge 1 \iff r_{A}+r_{B}\ge 5. \]
+
+즉 $p \iff q$이므로 $p$는 $q$이기 위한 \nob{필요충분조건}이다.
+
+\solpart{3} 반례로 $r_{A}=r_{B}=1$을 잡으면 $r_{A}\le 2$, $r_{B}\le 4$이므로 $A\subset S$, $B\subset S$가 성립하지만 $r_{A}+r_{B}=2<5$이므로 (2)의 결과에 의해 두 행성은 동시 관측 가능하지 않다. 따라서 명제 $R$은 \nob{거짓}이다.
+
+$R$의 대우는 ``두 행성이 동시 관측 가능하지 않으면 $A\not\subset S$ 또는 $B\not\subset S$이다''이며, 원명제와 진리값이 같으므로 대우도 \nob{거짓}이고 같은 반례가 유효하다.
+
+\criticalpoint{%
+① \cplabel{조건 (1)이 있을 때에만 필요충분}: 조건 (1) 없이 $p \Leftrightarrow q$로 착각하기 쉽다. 예를 들어 $r_{A}=10$, $r_{B}=1$이면 $q$는 참이지만 $|r_{A}-r_{B}|=9>5$이므로 $p$는 거짓이다. 조건 (1)이 $|r_{A}-r_{B}|<5$를 항상 보장할 때에만 $p \Leftrightarrow q$가 성립한다. \\
+② \cplabel{반례가 전제를 만족하는지 확인}: 명제 $R$을 반박하는 반례는 반드시 $R$의 전제 $A\subset S$이고 $B\subset S$를 만족해야 한다. $r_{A}=10$처럼 전제 자체가 거짓인 경우는 반례가 될 수 없다. \\
+③ \cplabel{원명제와 대우의 진리값은 같다}: ``대우는 항상 참''이 아니다. 원명제와 대우의 진리값은 항상 같으므로, 원명제가 거짓이면 대우도 거짓이다.%
+}
+
+\end{multicols}
+
+\end{document}

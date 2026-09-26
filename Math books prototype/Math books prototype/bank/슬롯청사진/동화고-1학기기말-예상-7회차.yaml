@@ -1,0 +1,348 @@
+# 동화고 7회차 슬롯 청사진 — v2.0 메커니즘 첫 시범 적용
+# 단일 출처: bank/시험범위/동화고-1학기기말-예상.yaml + bank/출제메커니즘-v2.0.md
+# 작성: 2026-06-25
+#
+# 마스터 명시 사항 반영:
+#   - ★ 3 이하 출제 금지 → ★ 4·5만
+#   - 단원 비율 EQ 45 : CB 40 : MX 15 (점수 기준)
+#   - ★ 5 = 7문 (분배 X)
+#   - 시험범위 외 (복소수·이차방정식·이차함수 주제) 금지
+#   - CM1 외 (가우스 기호) 금지
+#   - 5/6/7회차 자기복제 패턴 제거
+
+series: 동화고-1학기기말-예상
+round: 7
+version: v2
+audience: 상위권
+
+format:
+  total: 23
+  point_sum: 100
+  # 2026-06-25 v2 정정: 마스터 명시 — 논술형 섹션 폐지
+  layout:
+    objective: 14   # 객관식 #1~#14, 4점×14 = 56점
+    short:     9    # 단답형 #15~#23, 4.5×2 + 5×7 = 44점
+    essay:     0    # 폐지
+
+unit_distribution:
+  CM1-EQ: 10   # 45점
+  CM1-CB: 10   # 40점
+  CM1-MX: 3    # 15점
+
+# ─────────────────────────────────────────────────────────────
+# 슬롯 청사진 (23슬롯)
+# ─────────────────────────────────────────────────────────────
+
+slots:
+
+  # ─── 객관식 14문 (3.5점·4점·4.5점 차등, ★ 4 모두) ────────────
+  # EQ ease-in #1-#4 (3.5점) + CB #5-#14 (3.5→4→4.5 차등)
+
+  - slot: 1
+    star: 4
+    point: 3.5
+    unit: CM1-EQ
+    section: 여러 가지 부등식
+    section_id: EQ-multi-ineq
+    topic: 연립이차부등식 정수해 (★ 4 ease-in)
+    insight_cards: [UNIT:EQ, INSIGHT:SimulInequality]
+    structure: []
+    anchor_ref: []
+
+  - slot: 2
+    star: 4
+    point: 3.5
+    unit: CM1-EQ
+    section: 여러 가지 방정식
+    section_id: EQ-multi-eq
+    topic: 삼차방정식 인수분해 (조립제법)
+    insight_cards: [UNIT:EQ, INSIGHT:FactorTheorem]
+    structure: []
+    anchor_ref: []
+
+  - slot: 3
+    star: 4
+    point: 3.5
+    unit: CM1-EQ
+    section: 여러 가지 부등식
+    section_id: EQ-multi-ineq
+    topic: 절댓값 부등식 단일
+    insight_cards: [UNIT:EQ, INSIGHT:AbsInequality]
+    structure: []
+    anchor_ref: []
+
+  - slot: 4
+    star: 4
+    point: 3.5
+    unit: CM1-EQ
+    section: 여러 가지 방정식
+    section_id: EQ-multi-eq
+    topic: 연립이차방정식 (단순 직선 + 원)
+    insight_cards: [UNIT:EQ, INSIGHT:SystemEq]
+    structure: []
+    anchor_ref: []
+
+  - slot: 5
+    star: 4
+    point: 3.5
+    unit: CM1-CB
+    section: 조합
+    section_id: CB-comb
+    topic: 남녀 모두 포함 조합
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 6
+    star: 4
+    point: 3.5
+    unit: CM1-CB
+    section: 순열
+    section_id: CB-perm
+    topic: 일렬 + 양 끝 제외
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 7
+    star: 4
+    point: 4.0
+    unit: CM1-CB
+    section: 순열
+    section_id: CB-perm
+    topic: 양 끝 자리 제약
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 8
+    star: 4
+    point: 4.0
+    unit: CM1-CB
+    section: 조합
+    section_id: CB-comb
+    topic: 특정 포함·특정 제외 조합
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 9
+    star: 4
+    point: 4.0
+    unit: CM1-CB
+    section: 조합
+    section_id: CB-comb
+    topic: 합 홀수 조합 (홀짝 분류)
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 10
+    star: 4
+    point: 4.0
+    unit: CM1-CB
+    section: 순열
+    section_id: CB-perm
+    topic: 다섯 자리 자연수 (짝수)
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 11
+    star: 4
+    point: 4.5
+    unit: CM1-CB
+    section: 순열
+    section_id: CB-perm
+    topic: A-B 사이 1명 (자리 제약 변별)
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 12
+    star: 4
+    point: 4.5
+    unit: CM1-CB
+    section: 조합
+    section_id: CB-comb
+    topic: 곱 짝수 (홀짝 케이스)
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 13
+    star: 4
+    point: 4.5
+    unit: CM1-CB
+    section: 조합
+    section_id: CB-comb
+    topic: 4의 배수 조건 (mod 4 분류)
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  - slot: 14
+    star: 4
+    point: 4.5
+    unit: CM1-CB
+    section: 순열
+    section_id: CB-perm
+    topic: 세 명 이웃하지 않음 (분리)
+    insight_cards: [UNIT:CB]
+    structure: []
+    anchor_ref: []
+
+  # ─── 단답형 5문 (4.5×2 + 5×3 = 24점) ─────────────────────────
+
+  - slot: 15
+    star: 4
+    point: 4.5
+    unit: CM1-EQ
+    section: 여러 가지 부등식
+    section_id: EQ-multi-ineq
+    topic: 매개변수 이차부등식 정수해 조건
+    insight_cards: [UNIT:EQ, INSIGHT:SimulInequality]
+    structure: []
+    anchor_ref: []
+    note: SimulInequality 변형 — 매개변수 변동에 따른 정수해 개수
+
+  - slot: 16
+    star: 4
+    point: 4.5
+    unit: CM1-EQ
+    section: 여러 가지 방정식
+    section_id: EQ-multi-eq
+    topic: 사차방정식 + 인수분해 + 실근 조건
+    insight_cards: [UNIT:EQ, INSIGHT:QuarticSubst]
+    structure: []
+    anchor_ref: []
+    note: QuarticSubst 시리즈 20회 과다. 본 슬롯은 *형태 변경* — 인수분해형 (치환 X, 인수정리로 직접 분해)
+
+  - slot: 17
+    star: 5
+    point: 5.0
+    unit: CM1-EQ
+    section: 여러 가지 방정식
+    section_id: EQ-multi-eq
+    topic: 사차방정식 켤레무리수 근 (a+b√c 형태)
+    insight_cards: [UNIT:EQ, INSIGHT:ConjugateRoot]
+    structure: []
+    anchor_ref: []
+    note: ConjugateRoot 시리즈 2회로 신규풀. 단일 무리수 (CM1 허용) — 두 종류 무리수 금지
+
+  - slot: 18
+    star: 5
+    point: 5.0
+    unit: CM1-EQ
+    section: 여러 가지 부등식
+    section_id: EQ-multi-ineq
+    topic: 연립이차부등식 + 매개변수 + 정수해 개수 (매개변수 변동)
+    insight_cards: [UNIT:EQ, INSIGHT:SimulInequality, INSIGHT:ParamSweep]
+    structure: []
+    anchor_ref: []
+    note: 시리즈 신규 통찰 (ParamSweep — 매개변수 변동 추적). 가우스 기호 사용 금지
+
+  - slot: 19
+    star: 5
+    point: 5.0
+    unit: CM1-MX
+    section: 행렬의 정의·연산
+    section_id: MX-ops
+    topic: 자연수 행렬 A²=kA 조건 → 행렬 개수 (자유도 활용)
+    insight_cards: [UNIT:MX, INSIGHT:MatrixSpecial, INSIGHT:NaturalMatrix]
+    structure: []
+    anchor_ref: []
+    note: MatrixSpecial 신규풀 2회. NaturalMatrix는 시리즈 신규. 시리즈 #22·#23 위치 *아닌* 슬롯에서 출제 (위치 자기복제 회피)
+
+  # ─── 단답형 #20-#23 (5점·5.5점 ★ 5) ─────────────────────────
+  # 2026-06-25 v2 정정: 마스터 명시 — 논술형 폐지, 모두 단답형
+
+  - slot: 20
+    star: 5
+    point: 5.0
+    unit: CM1-EQ
+    section: 여러 가지 부등식
+    section_id: EQ-multi-ineq
+    topic: 분수부등식 + 매개변수 (★ 5 진정 변별 — 시리즈 신규)
+    insight_cards: [UNIT:EQ, INSIGHT:FracInequality]
+    structure: []
+    anchor_ref: []
+    note: 시리즈 1~7회차 *전무*한 통찰 — 분수부등식.
+
+  - slot: 21
+    star: 5
+    point: 5.0
+    unit: CM1-EQ
+    section: 여러 가지 방정식
+    section_id: EQ-multi-eq
+    topic: 사차방정식 인수분해 + 자연수 근 + 두 조건 (단답 — 개수)
+    insight_cards: [UNIT:EQ, INSIGHT:QuarticIntegerRoot, INSIGHT:I-CON]
+    structure: [STRUCT:GaNaDa]
+    anchor_ref: []
+
+  - slot: 22
+    star: 5
+    point: 5.5
+    unit: CM1-MX
+    section: 행렬의 정의·연산
+    section_id: MX-ops
+    topic: 행렬 주기 + 자기참조 (A²+A+E=O → A^2026 성분합)
+    insight_cards: [UNIT:MX, INSIGHT:MatrixPeriod, INSIGHT:I-PD]
+    structure: [STRUCT:GaNaDa]
+    anchor_ref: []
+    note: |
+      시리즈 #22 = CayleyHamilton (5·6회차) 자기복제 차단.
+      A²+A+E=O → A³=E 유도 + 자기참조 성분합 (시리즈 신규 결합).
+
+  - slot: 23
+    star: 5
+    point: 5.5
+    unit: CM1-MX
+    section: 행렬의 정의·연산
+    section_id: MX-ops
+    topic: 행렬 거듭제곱 누적합 (A+A²+...+A^2026, 6주기 활용)
+    insight_cards: [UNIT:MX, INSIGHT:MatrixPeriod, INSIGHT:I-PD]
+    structure: []
+    anchor_ref: []
+    note: |
+      시리즈 #23 = CardMatrixComp (4·5회차) 자기복제 차단.
+      A^6=E 주기 활용 + 누적합 (시리즈 신규 결합 — 다른 회차에 누적합 없음).
+
+# ─────────────────────────────────────────────────────────────
+# 자기복제 차단 명세 (시리즈 사용 카드와 충돌 차단)
+# ─────────────────────────────────────────────────────────────
+
+ban_sources_summary:
+  # 시리즈 1~7회차에서 *마지막 페이지 슬롯*의 사용 카드 (자기복제 추적)
+  5회차_#22: [INSIGHT:CayleyHamilton, STRUCT:TwoPart]
+  6회차_#22: [INSIGHT:CayleyHamilton, INSIGHT:MatrixSpecial, STRUCT:TwoPart]
+  7회차_#22_v1: [INSIGHT:CayleyHamilton, STRUCT:TwoPart]   # 폐기 예정
+  7회차_#22_v2: [INSIGHT:NonCommMult, STRUCT:GNGD]         # 신규 — 자기복제 차단
+
+  5회차_#23: [INSIGHT:CardMatrixComp, INSIGHT:VietaRelation]
+  6회차_#23: [INSIGHT:QuarticSubst, INSIGHT:VietaRelation]
+  7회차_#23_v1: [INSIGHT:CardMatrixComp]                   # 폐기 예정
+  7회차_#23_v2: [INSIGHT:MatrixPeriod, STRUCT:TwoPart]     # 신규 — 자기복제 차단
+
+# ─────────────────────────────────────────────────────────────
+# 시험범위 외 키워드 차단 자체 점검 (출제 시 사용 금지)
+# ─────────────────────────────────────────────────────────────
+
+forbidden_in_blueprint:
+  - 켤레복소수 / \bar{z} / z + \bar{z}
+  - i = \sqrt{-1}  # (단 사차방정식 켤레허근 단순 인용은 OK — 본 7회차에선 미사용)
+  - 이차방정식의 근과 계수의 관계 (단독 주제)
+  - 두 근의 합·곱 (단독 주제) — \alpha+\beta + \alpha\beta
+  - 이차함수의 그래프·최댓값·최솟값·꼭짓점
+  - \lfloor / \rfloor / ⌊ / ⌋ / 가우스 기호
+  - 산술평균·기하평균
+  - 등차수열·등비수열·수열·\sum
+  - sin/cos/tan/log/ln
+  - 도함수·미분·적분·극값
+  - 벡터 / \vec / \overrightarrow
+
+# 변경 이력
+changelog:
+  - 2026-06-25 v1 — 7회차 v2.0 메커니즘 첫 청사진. 분배 X (4×14+4.5×2+5×7=100) 기반.
+                    시리즈 5/6/7회차 #22·#23 자기복제 패턴 (CayleyHamilton+TwoPart, CardMatrixComp) 차단.
+                    신규 통찰 카드 8종 (SystemEq·ConjugateRoot·ParamSweep·MatrixSpecial·NaturalMatrix·FracInequality·QuarticIntegerRoot·NonCommMult).

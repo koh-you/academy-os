@@ -1,0 +1,17 @@
+/* 공용 확인 대화상자(ConfirmDialog) — 공용 Modal 위에 얹는 최소 규칙만 둔다. */
+.modalCard.confirmDialog {
+  gap: 16px;
+  max-width: 460px;
+}
+
+.confirmDialog .confirmDialogDescription {
+  color: var(--academy-text, #0f172a);
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.confirmDialog .confirmDialogDescription p {
+  margin: 0;
+}

@@ -8,6 +8,7 @@ export function LessonJournalCommentComposerView({
   draftSaveState,
   generatedPreviewText,
   hasUnsavedDraft,
+  isAiLocked = false,
   isSourceOpen,
   lesson,
   localAiStatus,
@@ -33,6 +34,7 @@ export function LessonJournalCommentComposerView({
   return (
     <Modal
       className="commentComposerModal"
+      closeDisabled={draftSaveState === "saving"}
       title={title}
       subtitle={`${lesson.date} · ${lesson.className}`}
       onClose={onClose}
@@ -74,8 +76,9 @@ export function LessonJournalCommentComposerView({
           <div className="commentComposerActions">
             <button
               className="softButton"
-              disabled={localAiStatus === "AI 수정 중"}
+              disabled={isAiLocked || localAiStatus === "AI 수정 중"}
               onClick={onPolish}
+              title={isAiLocked ? "AI 수정은 이 계정에 열려 있지 않습니다. 원장님께 문의해 주세요." : undefined}
               type="button"
             >
               {localAiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}

@@ -1,5 +1,6 @@
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SpecialLectureCalendarPreview } from "./SpecialLecturePublicPage.jsx";
 import {
@@ -8,49 +9,9 @@ import {
   formatSpecialLectureHours,
   getSpecialLectureStatusBadge,
   getWeekdayLabel,
-  isSpecialLectureArchived,
   specialLectureSeasonOptions,
   specialLectureWeekdayOptions
 } from "./specialLectureGuideUtils.js";
-
-export function SpecialLectureManagementBar({
-  guide,
-  isManaging = false,
-  onArchive,
-  onDelete,
-  onRestore
-}) {
-  if (!guide) {
-    return null;
-  }
-
-  const status = getSpecialLectureStatusBadge(guide);
-  const archived = isSpecialLectureArchived(guide);
-
-  return (
-    <div className="specialLectureManagementBar">
-      <div>
-        <span>선택 안내문</span>
-        <strong>{guide.title || "제목 미입력"}</strong>
-        {status ? <small>{status.label} · {guide.periodStart || "시작일 미입력"} ~ {guide.periodEnd || "종료일 미입력"}</small> : null}
-      </div>
-      <div>
-        {archived ? (
-          <button className="softButton compact" disabled={isManaging} onClick={onRestore} type="button">
-            {isManaging ? "저장 중" : "보관 해제"}
-          </button>
-        ) : (
-          <button className="softButton compact" disabled={isManaging} onClick={onArchive} type="button">
-            {isManaging ? "저장 중" : "보관"}
-          </button>
-        )}
-        <button className="dangerSoftButton compact" disabled={isManaging} onClick={onDelete} type="button">
-          {isManaging ? "삭제 중" : "삭제"}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export function SpecialLectureGuideBasicFields({
   guide,
@@ -128,11 +89,9 @@ export function SpecialLectureGuideLinkFields({
 
   return (
     <section className="specialLectureLinkSettings">
-      <div className="sectionTitle">
-        <div>
-          <h3>링크 설정</h3>
-          <p>공개 안내문 주소와 Tally 신청 버튼 연결을 관리합니다.</p>
-        </div>
+      <div className="sectionTitle helpTipTitleRow">
+        <h3>링크 설정</h3>
+        <HelpTip label="링크 설정" text="공개 안내문 주소와 Tally 신청 버튼 연결을 관리합니다." />
       </div>
       <div className="specialLectureFormGrid">
         <label>
@@ -198,13 +157,16 @@ export function SpecialLectureHighlightEditor({
               value={highlight}
               onChange={(event) => onUpdateHighlight?.(index, event.target.value)}
             />
-            <button
-              className="dangerSoftButton compact"
-              onClick={() => onRemoveHighlight?.(index)}
-              type="button"
-            >
-              삭제
-            </button>
+            {highlights.length > 1 ? (
+              <button
+                aria-label={`${index + 1}번째 수업 방향 카드 제거`}
+                className="iconButton"
+                onClick={() => onRemoveHighlight?.(index)}
+                type="button"
+              >
+                ×
+              </button>
+            ) : null}
           </div>
         ))}
       </div>

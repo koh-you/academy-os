@@ -44,6 +44,7 @@
 6. 저장과 알림 발송/예약, 삭제, 유료 AI 실행은 별도 행동으로 분리한다. 실제 범위가 버튼 문구와 일치해야 한다.
 7. 오류를 감추는 filter/fallback/normalize가 겹치면 패치를 중단하고 원천 데이터·저장 경계·마이그레이션을 재검토한다.
 8. 요청과 무관한 대규모 리팩터링을 섞지 않는다. 기능 수정이 먼저 main에 들어간 뒤 별도 리팩터링이 따라간다.
+9. 화면·모달·폼·피드백·반응형은 `docs/ui-principles.md`(12개 원칙), 버튼 종류는 `docs/ui-button-hierarchy.md`, 행 액션은 `docs/ui-row-actions.md` 를 따른다. 확인 대화상자는 `ConfirmDialog`, 새 `window.confirm` 금지.
 
 ## 정답 위치 · 2026-08-16
 

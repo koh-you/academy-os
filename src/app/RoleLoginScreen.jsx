@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { WorkspaceTabs } from "../shared/components/WorkspaceTabs.jsx";
-import { getRememberedLoginId, saveRememberedLoginId } from "./rememberedLoginIds.js";
+import { getLastLoginRole, getRememberedLoginId, saveRememberedLoginId } from "./rememberedLoginIds.js";
 
 export function RoleLoginScreen({
   academyBrandName,
-  initialRole = "student",
+  initialRole: fallbackRole = "student",
   onLogin,
   windowTarget = typeof window === "undefined" ? null : window
 }) {
+  // 마지막으로 로그인에 성공한 역할이 있으면 그 탭으로 연다(2026-09-19). 교사 토큰은 8시간이라
+  // 매일 재로그인하는데 매번 '학생' 탭에서 시작할 이유가 없다. 아이디·기억 체크 초기값도 같은
+  // 역할 기준이어야 탭과 아이디 칸이 어긋나지 않으므로 여기서 한 번만 정한다.
+  const [initialRole] = useState(() => getLastLoginRole(windowTarget) || fallbackRole);
   const [role, setRole] = useState(initialRole);
   const [loginId, setLoginId] = useState(() => getRememberedLoginId(windowTarget, initialRole));
   const [shouldRememberLoginId, setShouldRememberLoginId] = useState(
@@ -60,9 +64,11 @@ export function RoleLoginScreen({
         <WorkspaceTabs label="로그인 유형 선택" variant="primary">
           {["student", "parent", "teacher"].map((item) => (
             <button
+              aria-selected={role === item}
               className={role === item ? "active" : ""}
               key={item}
               onClick={() => selectRole(item)}
+              role="tab"
               type="button"
             >
               {roleLabels[item]}

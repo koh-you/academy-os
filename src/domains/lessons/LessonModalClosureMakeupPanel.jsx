@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 
 export function LessonModalClosureMakeupPanel({
@@ -64,7 +63,7 @@ export function LessonModalClosureMakeupNotificationModal({
     !config.checked || String(notificationDrafts?.[config.field] || "").trim()
   ));
   return (
-    <Modal className="supplementNotificationControlModal wide closureMakeupNotificationModal" onClose={isSaving ? () => {} : onClose} scrollable title="휴강 보충 알림 관리">
+    <Modal className="supplementNotificationControlModal wide closureMakeupNotificationModal" closeDisabled={isSaving} onClose={onClose} scrollable title="휴강 보충 알림 관리">
       <p className="muted">선택 학생 {selectedStudentCount}명의 수업을 먼저 저장·재확인한 뒤 알림을 예약합니다.</p>
       <section className="supplementNotificationDraftWorkspace">
         <div className="supplementNotificationDraftHeader">
@@ -101,10 +100,10 @@ export function LessonModalClosureMakeupNotificationModal({
         <span>선택한 문구만 예약하며 같은 수업·학생·대상은 다시 시도해도 중복 생성하지 않습니다.</span>
       </div>
       <ModalFooter>
+        <button className="softButton" disabled={isSaving} onClick={onClose} type="button">취소</button>
         <button className="primaryButton" disabled={isSaving || (notificationAudiences.length === 0 && !includeStudentReminder) || !enabledDraftsHaveText} onClick={onConfirm} type="button">
           {isSaving ? "저장·예약 중" : "일정 저장 후 알림 예약"}
         </button>
-        <button className="softButton" disabled={isSaving} onClick={onClose} type="button">취소</button>
       </ModalFooter>
     </Modal>
   );

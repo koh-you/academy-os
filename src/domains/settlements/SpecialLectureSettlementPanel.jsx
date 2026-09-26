@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -397,9 +398,7 @@ export function SpecialLectureSettlementPanel({
       ))}
 
       {!rows.length ? (
-        <div className="monthlySettlementEmpty">
-          특강관리에서 확정하거나 검토할 수강 계획이 없습니다.
-        </div>
+        <EmptyState title="특강관리에서 확정하거나 검토할 수강 계획이 없습니다." />
       ) : null}
 
       <StickySaveBar

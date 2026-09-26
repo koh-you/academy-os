@@ -1,0 +1,67 @@
+# 2026 1학기 기말 예상 1회 청사진 v2.0 (2026-07-02)
+# 동화고 2025 기말 시험지(23문 100점) 1:1 대응 — 숫자만 변형 (최소변형 정책 1순위)
+# 자산 풀: 동화고 2025 기말 원본 유형 (EX-DH-2025F)
+# 사용자 지시 (2026-07-02): "새 통합 형태 창작 X, 있는 유형에서 만들어 출제"
+# 단일 출처: 참고자료/학교기출/고1/동화고/1학기기말/2025 동화고1 1학기 기말 수학 기출.pdf
+
+round: "1회"
+version: v2.0
+generated: 2026-07-02
+applies_gates: [G1, G2, G3, G4, G4.5]
+distribution_id: dist-DH-2025-mirror
+distribution_check: 100
+title: "1학기 기말 예상 — 1회"
+school_format: 동화고 2025 기말 원본 1:1 대응 (숫자만 변형)
+total_problems: 23
+total_points: 100
+
+book_meta:
+  audience: 상위권
+  series: 2026-1학기-기말예상
+  origin: EX-DH-2025F 원본 양식 · 유형·구조 100% 보존
+
+distribution:
+  # 배점: 3.5·3.5·3.7·3.7·3.9·3.9·4.1·4.1·4.3·4.3·4.5·4.5·4.5·4.6·4.6·4.6·4.7·4.7·4.7·4.8·4.8·5.0·5.0 = 100
+  point_3_5_count: 2       # 3.5 × 2 = 7.0
+  point_3_7_count: 2       # 3.7 × 2 = 7.4
+  point_3_9_count: 2       # 3.9 × 2 = 7.8
+  point_4_1_count: 2       # 4.1 × 2 = 8.2
+  point_4_3_count: 2       # 4.3 × 2 = 8.6
+  point_4_5_count: 3       # 4.5 × 3 = 13.5
+  point_4_6_count: 3       # 4.6 × 3 = 13.8
+  point_4_7_count: 3       # 4.7 × 3 = 14.1
+  point_4_8_count: 2       # 4.8 × 2 = 9.6
+  point_5_0_count: 2       # 5.0 × 2 = 10.0
+
+unit_distribution:
+  # 동화고 원본 대비 유지
+  PL: 1     # #16 (나머지정리 확장)
+  EQ: 9     # #3, #6, #7, #8, #11, #13, #15, #22, #23
+  CB: 8     # #1, #2, #5, #9, #10, #12, #17, #18, #19
+  MX: 5     # #4, #14, #20, #21 + #14 (허근·행렬 결합)
+
+slots:
+  # 각 슬롯 = 동화고 원본 유형 → 숫자·계수·변수만 변경 (최소변형 정책 1순위)
+  - {n: 1, unit: CB, point: 3.5, type: 주사위-차-합의법칙, source: DH-2025F-01}
+  - {n: 2, unit: CB, point: 3.5, type: 이웃X-순열, source: DH-2025F-02}
+  - {n: 3, unit: EQ, point: 3.7, type: 연립부등식-정수합, source: DH-2025F-03}
+  - {n: 4, unit: MX, point: 3.7, type: 행렬곱-성분대응, source: DH-2025F-04}
+  - {n: 5, unit: CB, point: 3.9, type: 순열조합-방정식, source: DH-2025F-05}
+  - {n: 6, unit: EQ, point: 3.9, type: 삼차-켤레복소근, source: DH-2025F-06}
+  - {n: 7, unit: EQ, point: 4.1, type: 연립이차-인수분해, source: DH-2025F-07}
+  - {n: 8, unit: EQ, point: 4.1, type: 절댓값부등식-정수해, source: DH-2025F-08}
+  - {n: 9, unit: CB, point: 4.3, type: 정육면체-경로셈, source: DH-2025F-09}
+  - {n: 10, unit: CB, point: 4.3, type: 자리배치-빼기, source: DH-2025F-10}
+  - {n: 11, unit: EQ, point: 4.5, type: 삼차-서로다른세실근, source: DH-2025F-11}
+  - {n: 12, unit: CB, point: 4.5, type: 지불방법-금액수, source: DH-2025F-12}
+  - {n: 13, unit: EQ, point: 4.5, type: 사차-근대입-값, source: DH-2025F-13}
+  - {n: 14, unit: MX+EQ, point: 4.6, type: 사차허근-행렬결합, source: DH-2025F-14, insight: I-XU}
+  - {n: 15, unit: EQ, point: 4.6, type: 연립부등식-해없음, source: DH-2025F-15}
+  - {n: 16, unit: PL, point: 4.6, type: 나머지정리-세제곱관계, source: DH-2025F-16}
+  - {n: 17, unit: CB, point: 4.7, type: 색깔공-상자분배, source: DH-2025F-17}
+  - {n: 18, unit: CB, point: 4.7, type: 카드이웃-곱짝수, source: DH-2025F-18}
+  - {n: 19, unit: CB, point: 4.7, type: 점과직선-개수, source: DH-2025F-19}
+  - {n: 20, unit: MX, point: 4.8, type: 행렬곱-실용해석, source: DH-2025F-20, insight: I-XU}
+  - {n: 21, unit: MX, point: 4.8, type: 행렬거듭제곱-주기성, source: DH-2025F-21}
+  - {n: 22, unit: EQ, point: 5.0, type: 이차일차-조건결정, source: DH-2025F-22, star_premium: true}
+  - {n: 23, unit: EQ, point: 5.0, type: 두 식으로 정의된 함수-부등식정수해, source: DH-2025F-23, star_premium: true}

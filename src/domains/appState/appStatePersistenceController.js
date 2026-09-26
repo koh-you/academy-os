@@ -55,7 +55,8 @@ export function createAppStatePersistenceController({
       states: { [key]: value }
     });
     if (!disposed) onState("verifying");
-    const verification = await read();
+    // 재조회는 저장한 키만 읽으면 된다(read 가 { key } 를 받아 ?keys= 로 좁힌다). 대조 항목은 그대로다.
+    const verification = await read({ key });
     const verifiedRow = (verification.stateRows ?? []).find((row) => row?.key === key);
     const hasVerifiedValue = Object.prototype.hasOwnProperty.call(
       verification.states ?? {},

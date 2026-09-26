@@ -2,9 +2,11 @@ import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
 import { ModalFooter } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { findStudentPartialDefaultLessonOverlaps, parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
@@ -12,6 +14,7 @@ import { getCurrentKoreaMonthKey } from "../settlements/monthlySettlement.js";
 import { buildStudentMonthlyAttendanceSummary } from "../settlements/settlementAttendance.js";
 import { StudentMonthlyReportModal } from "./StudentMonthlyReportModal.jsx";
 import { getRosterEffectiveFromDate, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
+import "./studentProfileModal.css";
 const consultationTypeOptions = [
   { value: "student", label: "학생 상담" },
   { value: "parent", label: "학부모 상담" }
@@ -173,11 +176,13 @@ function formatStudentReminderDateTime(reminder = {}) {
     .join(" ");
 }
 
-function saveActionLabel(defaultLabel, saveState) {
-  if (saveState === "saving") return "저장 중";
-  if (saveState === "failed") return "저장 실패";
-  if (saveState === "saved") return "저장 완료";
-  return defaultLabel;
+// 섹션 헤더·허브 타일에 보여줄 저장 상태. 버튼 라벨에 상태를 섞지 않고(R6) 이 값 하나를
+// InlineSaveStatus 로 그린다. 진행 중·실패는 그대로, 아니면 초안 유무로 '변경됨' 을 판단한다.
+function getSectionSaveState(saveState, hasDraftChanges) {
+  if (saveState === "saving" || saveState === "verifying" || saveState === "failed") return saveState;
+  if (hasDraftChanges) return "dirty";
+  // 저장 직후는 '저장 완료', 그 밖(초기·알 수 없는 값)은 '저장 전' 으로 6종 어휘 안에 둔다.
+  return saveState === "saved" ? "saved" : "idle";
 }
 
 export class StudentProfileErrorBoundary extends Component {
@@ -448,6 +453,27 @@ export function StudentProfileModal({
     setIsEditingProfile(false);
   }
 
+  function startProfileEdit() {
+    setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
+    setIsEditingProfile(true);
+  }
+
+  // 저장하지 않은 초안(기본정보·상담·성적·테스트·운영 알림)이 있을 때만 한 번 묻는다(2026-09-19).
+  // 확인 창 한 겹만 더할 뿐 저장은 호출하지 않는다. 섹션 모달을 닫는 것은 초안을 버리지 않으므로 묻지 않는다.
+  function confirmDiscardDrafts() {
+    return !hasAnyEditingDraftChanges || window.confirm("저장하지 않은 변경이 있습니다. 닫을까요?");
+  }
+
+  function handleRequestClose() {
+    if (!confirmDiscardDrafts()) return;
+    onClose?.();
+  }
+
+  function requestCancelProfileEdit() {
+    if (!confirmDiscardDrafts()) return;
+    cancelProfileEdit();
+  }
+
   function updateScoreDraft(scoreRecordId, field, value) {
     setProfileActionError("");
     setScoreDrafts((current) => ({
@@ -587,27 +613,25 @@ export function StudentProfileModal({
   const profileDirtyFieldCount = studentProfileFields.filter(
     (field) => String(student[field] ?? "") !== String(profileDraft[field] ?? "")
   ).length;
+  const hasConsultationDraftChanges = Object.keys(consultationDrafts).length > 0 || hasNewConsultationDraftChanges;
+  const hasScoreDraftChanges = Object.keys(scoreDrafts).length > 0 || hasNewScoreDraftChanges;
+  const hasAcademyTestDraftChanges = Object.keys(academyTestDrafts).length > 0 || hasNewAcademyTestDraftChanges;
   const separateDirtyLabels = [
     hasNewReminderDraftChanges ? "운영 알림" : "",
-    Object.keys(consultationDrafts).length > 0 || hasNewConsultationDraftChanges ? "상담" : "",
-    Object.keys(scoreDrafts).length > 0 || hasNewScoreDraftChanges ? "성적" : "",
-    Object.keys(academyTestDrafts).length > 0 || hasNewAcademyTestDraftChanges ? "테스트" : ""
+    hasConsultationDraftChanges ? "상담" : "",
+    hasScoreDraftChanges ? "성적" : "",
+    hasAcademyTestDraftChanges ? "테스트" : ""
   ].filter(Boolean);
   const hasRecordDraftChanges =
-    Object.keys(scoreDrafts).length > 0 ||
-    Object.keys(academyTestDrafts).length > 0 ||
-    Object.keys(consultationDrafts).length > 0 ||
-    hasNewScoreDraftChanges ||
-    hasNewAcademyTestDraftChanges ||
-    hasNewConsultationDraftChanges ||
+    hasScoreDraftChanges ||
+    hasAcademyTestDraftChanges ||
+    hasConsultationDraftChanges ||
     hasNewReminderDraftChanges;
   const hasAnyEditingDraftChanges = isProfileDirty || hasRecordDraftChanges;
-  const effectiveProfileSaveState =
-    studentProfileSaveState === "saving" || studentProfileSaveState === "failed"
-      ? studentProfileSaveState
-      : isProfileDirty
-        ? "dirty"
-        : studentProfileSaveState;
+  const effectiveProfileSaveState = getSectionSaveState(studentProfileSaveState, isProfileDirty);
+  const consultationSectionSaveState = getSectionSaveState(studentConsultationSaveState, hasConsultationDraftChanges);
+  const scoreSectionSaveState = getSectionSaveState(scoreRecordSaveState, hasScoreDraftChanges);
+  const academyTestSectionSaveState = getSectionSaveState(academyTestSaveState, hasAcademyTestDraftChanges);
   const isProfileSaving = effectiveProfileSaveState === "saving";
   const profileScheduleRows = createStudentScheduleRows(profileDraft.scheduleOverride);
   const hasUnparsedScheduleText = Boolean(String(profileDraft.scheduleOverride ?? "").trim()) && profileScheduleRows.length === 0;
@@ -630,9 +654,11 @@ export function StudentProfileModal({
     { ...student, ...profileDraft }
   );
   const pendingReminderCount = academyReminders.filter((reminder) => reminder.status !== "done").length;
+  // saveState 가 있는 타일은 idle('저장 전')이면 상태 줄을 그리지 않는다(shots-03). 메타 타일은 항상 그린다.
   const profileTileConfig = [
     {
       key: "basic",
+      saveState: effectiveProfileSaveState,
       status: <InlineSaveStatus label="기본정보" saveState={effectiveProfileSaveState} />,
       subtitle: "연락처 · 로그인 · 개별 스케줄",
       title: "기본정보"
@@ -651,68 +677,53 @@ export function StudentProfileModal({
     },
     {
       key: "consultation",
-      status: <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />,
+      saveState: consultationSectionSaveState,
+      status: <InlineSaveStatus label="상담기록" saveState={consultationSectionSaveState} />,
       subtitle: "학생·학부모 상담",
       title: "상담기록"
     },
     {
       key: "score",
-      status: <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />,
+      saveState: scoreSectionSaveState,
+      status: <InlineSaveStatus label="성적" saveState={scoreSectionSaveState} />,
       subtitle: "내신·모의고사",
       title: "성적"
     },
     {
       key: "test",
-      status: <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />,
+      saveState: academyTestSectionSaveState,
+      status: <InlineSaveStatus label="테스트" saveState={academyTestSectionSaveState} />,
       subtitle: "학원 자체 테스트",
       title: "테스트"
     }
   ];
 
-  return (
-    <ModalComponent
-      className="wideModal"
-      closeDisabled={isProfileSaving}
-      title={`${student.name} 학생 프로파일`}
-      subtitle="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
-      onClose={onClose}
-      scrollable
-    >
-      <div className="studentProfileModalWrap">
-        <SectionHeader
-          actions={(
-            <>
-            <span className="countBadge">{className}</span>
-            {isEditingProfile ? (
-              <>
-                <button className="softButton" disabled={isProfileSaving} onClick={cancelProfileEdit} type="button">
-                  {hasAnyEditingDraftChanges ? "취소" : "수정 종료"}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className="softButton"
-                  onClick={() => {
-                    setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
-                    setIsEditingProfile(true);
-                  }}
-                  type="button"
-                >수정</button>
-                {/* 목록의 ⋯ 메뉴를 없애고 퇴원을 이 모달로 옮겼다(2026-09-17 요청). 드물고
-                    되돌리기 어려운 작업이라 톤을 구분하고, 확인 모달은 종전대로 거친다. */}
-                {onWithdraw ? (
-                  <button className="dangerSoftButton" onClick={onWithdraw} type="button">퇴원 처리</button>
-                ) : null}
-              </>
-            )}
-            </>
-          )}
-          actionsClassName="profileHeaderActions"
-          density="slim"
-          eyebrow="STUDENT PROFILE"
-          title={student.name}
-        />
+  // 허브와 각 섹션 모달이 같은 isEditingProfile 을 토글한다(modals-03). 섹션 모달은 자기 backdrop 으로
+  // 허브 헤더를 덮기 때문에, 섹션 안에서도 같은 버튼이 있어야 닫았다 여는 왕복이 없다.
+  function renderProfileEditToggle(buttonClassName = "softButton") {
+    return isEditingProfile ? (
+      <button className={buttonClassName} disabled={isProfileSaving} onClick={requestCancelProfileEdit} type="button">
+        {hasAnyEditingDraftChanges ? "취소" : "수정 종료"}
+      </button>
+    ) : (
+      <button className={buttonClassName} onClick={startProfileEdit} type="button">수정</button>
+    );
+  }
+
+  function renderSectionToolbar(statusNode = null) {
+    return (
+      <div className="studentProfileSectionToolbar">
+        {statusNode}
+        {renderProfileEditToggle("softButton compact")}
+      </div>
+    );
+  }
+
+  // 저장·삭제 실패 배너는 한 곳에만 그린다: 섹션 모달이 열려 있으면 그 본문 최상단, 아니면 허브(students-02).
+  function renderProfileErrorBanner() {
+    if (!profileSaveError && !profileActionError) return null;
+    return (
+      <>
         {profileSaveError ? (
           <div className="profileSaveError" role="alert">
             기본정보 저장 실패 · {profileSaveError}
@@ -723,12 +734,46 @@ export function StudentProfileModal({
             {profileActionError}
           </div>
         ) : null}
+      </>
+    );
+  }
+
+  return (
+    <ModalComponent
+      className="wideModal"
+      closeDisabled={isProfileSaving}
+      title={`${student.name} 학생 프로파일`}
+      titleAdornment={(
+        <HelpTip label="학생 프로파일" text="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다." />
+      )}
+      onClose={handleRequestClose}
+      scrollable
+    >
+      <div className="studentProfileModalWrap">
+        <SectionHeader
+          actions={(
+            <>
+            <span className="countBadge">{className}</span>
+            {renderProfileEditToggle()}
+            {/* 목록의 ⋯ 메뉴를 없애고 퇴원을 이 모달로 옮겼다(2026-09-17 요청). 드물고
+                되돌리기 어려운 작업이라 톤을 구분하고, 확인 모달은 종전대로 거친다. */}
+            {!isEditingProfile && onWithdraw ? (
+              <button className="dangerSoftButton" onClick={onWithdraw} type="button">퇴원 처리</button>
+            ) : null}
+            </>
+          )}
+          actionsClassName="profileHeaderActions"
+          density="slim"
+          eyebrow="STUDENT PROFILE"
+          title={student.name}
+        />
+        {openSectionKey ? null : renderProfileErrorBanner()}
         <div aria-label={`${student.name} 프로필 섹션`} className="studentProfileTileGrid" role="group">
           {profileTileConfig.map((tile) => (
             <button className="studentProfileTile" key={tile.key} onClick={() => setOpenSectionKey(tile.key)} type="button">
               <strong>{tile.title}</strong>
               <p>{tile.subtitle}</p>
-              {tile.status}
+              {tile.saveState === "idle" ? null : tile.status}
             </button>
           ))}
         </div>
@@ -737,9 +782,9 @@ export function StudentProfileModal({
           <ModalComponent
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
-            subtitle="정규 수업과 특강 수업일지 출결을 한곳에서 확인합니다."
             title={`${student.name} · 월별 출결`}
           >
+            {renderProfileErrorBanner()}
             <div className="studentAttendanceSectionActions">
               <input
                 aria-label={`${student.name} 출결 조회 월`}
@@ -748,7 +793,8 @@ export function StudentProfileModal({
                 type="month"
                 value={attendanceMonth}
               />
-              <button className="primaryButton compact" onClick={() => setIsMonthlyReportOpen(true)} type="button">
+              {/* 저장이 아니라 다른 모달을 여는 이동 액션이라 primary 가 아니다(students-10). */}
+              <button className="softButton compact" onClick={() => setIsMonthlyReportOpen(true)} type="button">
                 수업일정표
               </button>
             </div>
@@ -775,9 +821,11 @@ export function StudentProfileModal({
             closeDisabled={isProfileSaving}
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="연락처, 로그인, 개별 스케줄을 관리합니다."
             title={`${student.name} · 기본정보`}
           >
+            {renderProfileErrorBanner()}
+            {/* 기본정보 상태 pill 은 편집 중 하단 StickySaveBar 가 그리므로 여기서는 토글만 둔다. */}
+            {renderSectionToolbar()}
             <div className="studentProfileSectionBody">
             <Disclosure className="studentTallySubmissionPanel" trigger={(
               <>
@@ -796,9 +844,9 @@ export function StudentProfileModal({
             </Disclosure>
             <section className="teacherOperatingMemoPanel">
               <div className="teacherOperatingMemoHeader">
-                <div>
+                <div className="helpTipTitleRow">
                   <strong>강사 운영 메모</strong>
-                  <p>진도, 교재, 특이사항, 다음 수업 계획을 교사용으로만 기록합니다.</p>
+                  <HelpTip label="강사 운영 메모" text="진도, 교재, 특이사항, 다음 수업 계획을 교사용으로만 기록합니다." />
                 </div>
                 <div className="teacherOperatingMemoActions">
                   {teacherOperatingMemoSaveState !== "idle" ? <InlineSaveStatus label="강사 메모" saveState={teacherOperatingMemoSaveState} /> : null}
@@ -811,7 +859,7 @@ export function StudentProfileModal({
                 <>
                   <textarea aria-label={`${student.name} 강사 운영 메모`} className="profileEditInput teacherOperatingMemoInput" rows="5" value={teacherOperatingMemoDraft} onChange={(event) => { setTeacherOperatingMemoDraft(event.target.value); setTeacherOperatingMemoError(""); }} placeholder="예) 3-2 진도: 개념플러스유형, 쎈 완료. 다음 수업은 RPM 진행." />
                   <div className="teacherOperatingMemoSaveRow">
-                    <button className="primaryButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={saveTeacherOperatingMemo} type="button">강사 운영 메모 저장</button>
+                    <button className="softButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={saveTeacherOperatingMemo} type="button">강사 운영 메모 저장</button>
                     <span>학생·학부모 포털과 알림톡에는 노출되지 않습니다.</span>
                   </div>
                 </>
@@ -883,7 +931,14 @@ export function StudentProfileModal({
                 )}
               </div>
               <div className="wideProfileItem">
-                <small>개별 스케줄</small>
+                <div className="helpTipTitleRow">
+                  <small>개별 스케줄</small>
+                  <HelpTip label="개별 스케줄" text="선택한 요일과 시간이 기본 반보다 우선합니다." />
+                </div>
+                {/* 2026-09-26 · 저장하면 무엇이 바뀌는지는 고치는 그 자리에 보여야 한다(물음표 뒤로 보내지 않는다). */}
+                {isEditingProfile ? (
+                  <small className="studentScheduleSaveEffect">저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</small>
+                ) : null}
                 {isEditingProfile ? (
                   <div className="studentScheduleEditor">
                     {hasUnparsedScheduleText ? (
@@ -964,7 +1019,6 @@ export function StudentProfileModal({
                 ) : (
                   <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
                 )}
-                <span className="muted">선택한 요일과 시간이 기본 반보다 우선합니다. 저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</span>
               </div>
             </div>
             </div>
@@ -991,10 +1045,7 @@ export function StudentProfileModal({
                   onClick={saveProfileDraft}
                   type="button"
                 >
-                  {saveActionLabel(
-                    forceRosterReconcile && profileDirtyFieldCount === 0 ? "명단 재계산 저장" : "기본정보만 저장",
-                    effectiveProfileSaveState
-                  )}
+                  {forceRosterReconcile && profileDirtyFieldCount === 0 ? "명단 재계산 저장" : "기본정보만 저장"}
                 </button>
               </StickySaveBar>
             ) : null}
@@ -1006,10 +1057,16 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다."
             title={`${student.name} · 학생별 운영 알림`}
+            titleAdornment={(
+              <HelpTip
+                label="학생별 운영 알림"
+                text="상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다. 이 알림은 매일 09:00 슬랙 메시지 원본과 같은 내용입니다."
+              />
+            )}
           >
-            <p className="studentProfileTileMeta studentReminderSourceNote">이 알림은 매일 09:00 슬랙 메시지 원본과 같은 내용입니다.</p>
+            {renderProfileErrorBanner()}
+            {renderSectionToolbar()}
             {isEditingProfile ? (
               <section className="studentReminderComposer">
             <div className="studentReminderControls">
@@ -1073,9 +1130,7 @@ export function StudentProfileModal({
               placeholder="예: 상담에서 확인할 내용, 학부모 요청, 다음 수업 전 확인할 특이사항"
             />
               </section>
-            ) : (
-              <div className="profileEditHint">수정 버튼을 누르면 이 학생의 운영 알림을 추가할 수 있습니다.</div>
-            )}
+            ) : null}
             <div className="studentReminderList">
               {academyReminders.length === 0 ? (
                 <EmptyState title="이 학생에게 연결된 운영 알림이 없습니다." />
@@ -1092,27 +1147,32 @@ export function StudentProfileModal({
                 <p className="studentConsultationContent">{reminder.content || reminder.memo || "내용 없음"}</p>
                 {isEditingProfile ? (
                   <ListCardActions className="studentProfileRowActions">
-                    <button
-                      className="softButton"
-                      disabled={reminder.status === "done"}
-                      onClick={() =>
-                        runProfileAction("운영 알림 완료", () =>
-                          onSaveAcademyReminder?.({ ...reminder, status: "done", completedAt: new Date().toISOString() }) ?? Promise.resolve()
-                        )
-                      }
-                      type="button"
-                    >
-                      완료
-                    </button>
-                    <button
-                      className="dangerSoftButton"
-                      onClick={() =>
-                        runProfileAction("운영 알림 삭제", () => onDeleteAcademyReminder?.(reminder.reminderId) ?? Promise.resolve())
-                      }
-                      type="button"
-                    >
-                      삭제
-                    </button>
+                    {/* 대시보드 AcademyReminderList 와 같은 배치: 완료는 done 이 아닐 때만, 삭제는 ⋯ 안(R1·R3). */}
+                    {reminder.status !== "done" ? (
+                      <button
+                        className="softButton"
+                        onClick={() =>
+                          runProfileAction("운영 알림 완료", () =>
+                            onSaveAcademyReminder?.({ ...reminder, status: "done", completedAt: new Date().toISOString() }) ?? Promise.resolve()
+                          )
+                        }
+                        type="button"
+                      >
+                        완료
+                      </button>
+                    ) : null}
+                    <OverflowMenu
+                      items={[
+                        {
+                          key: "delete",
+                          label: "삭제",
+                          onSelect: () =>
+                            runProfileAction("운영 알림 삭제", () => onDeleteAcademyReminder?.(reminder.reminderId) ?? Promise.resolve()),
+                          tone: "danger"
+                        }
+                      ]}
+                      label={`${reminder.title || "운영 알림"} 추가 작업`}
+                    />
                   </ListCardActions>
                 ) : null}
                   </ListCard>
@@ -1127,9 +1187,15 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다."
             title={`${student.name} · 상담 기록`}
+            titleAdornment={(
+              <HelpTip label="상담 기록" text="학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다." />
+            )}
           >
+            {renderProfileErrorBanner()}
+            {renderSectionToolbar(
+              consultationSectionSaveState === "idle" ? null : <InlineSaveStatus label="상담기록" saveState={consultationSectionSaveState} />
+            )}
             {isEditingProfile ? (
               <section className="studentConsultationComposer">
             <div className="studentConsultationControls">
@@ -1154,7 +1220,7 @@ export function StudentProfileModal({
                 onClick={() => runProfileAction("상담 저장", saveNewConsultationDraft)}
                 type="button"
               >
-                {hasNewConsultationContent ? saveActionLabel("상담 저장", studentConsultationSaveState) : "상담 저장"}
+                상담 저장
               </button>
             </div>
             <textarea
@@ -1164,9 +1230,7 @@ export function StudentProfileModal({
               placeholder="상담 내용을 정리하세요. 예: 학습 태도, 숙제 습관, 학부모 요청사항, 다음 조치"
             />
               </section>
-            ) : (
-              <div className="profileEditHint">수정 버튼을 누르면 새 상담 입력과 기존 상담 수정이 열립니다.</div>
-            )}
+            ) : null}
             <div className="studentConsultationList">
               {consultations.length === 0 ? (
                 <EmptyState title="아직 상담 기록이 없습니다." />
@@ -1211,23 +1275,29 @@ export function StudentProfileModal({
                   )}
                   {isEditingProfile ? (
                     <div className="studentProfileRowActions">
-                      <button
-                        className="softButton"
-                        disabled={!isDirty || studentConsultationSaveState === "saving"}
-                        onClick={() => runProfileAction("상담 변경 저장", () => saveConsultationDraft(item))}
-                        type="button"
-                      >
-                        {isDirty ? saveActionLabel("변경 저장", studentConsultationSaveState) : "저장됨"}
-                      </button>
-                      <button
-                        className="dangerSoftButton"
-                        onClick={() =>
-                          runProfileAction("상담 삭제", () => onDeleteStudentConsultation?.(item.consultationId) ?? Promise.resolve())
-                        }
-                        type="button"
-                      >
-                        삭제
-                      </button>
+                      {/* 변경된 행에만 저장 버튼, 삭제는 ⋯ 안(R1·R3). 저장 상태는 섹션 상단 InlineSaveStatus 가 맡는다. */}
+                      {isDirty ? (
+                        <button
+                          className="softButton"
+                          disabled={studentConsultationSaveState === "saving"}
+                          onClick={() => runProfileAction("상담 변경 저장", () => saveConsultationDraft(item))}
+                          type="button"
+                        >
+                          변경 저장
+                        </button>
+                      ) : null}
+                      <OverflowMenu
+                        items={[
+                          {
+                            key: "delete",
+                            label: "삭제",
+                            onSelect: () =>
+                              runProfileAction("상담 삭제", () => onDeleteStudentConsultation?.(item.consultationId) ?? Promise.resolve()),
+                            tone: "danger"
+                          }
+                        ]}
+                        label={`${student.name} ${item.consultationDate || "상담"} 상담 추가 작업`}
+                      />
                     </div>
                   ) : null}
                 </article>
@@ -1243,9 +1313,15 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다."
             title={`${student.name} · 성적 기록`}
+            titleAdornment={(
+              <HelpTip label="성적 기록" text="학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다." />
+            )}
           >
+            {renderProfileErrorBanner()}
+            {renderSectionToolbar(
+              scoreSectionSaveState === "idle" ? null : <InlineSaveStatus label="성적" saveState={scoreSectionSaveState} />
+            )}
             <DataTableShell className="managementTable studentScoreModalTable" label="학생 성적 기록">
               <div className="managementRow scoreRow managementHead">
             <span>구분</span>
@@ -1273,12 +1349,10 @@ export function StudentProfileModal({
                 onClick={() => runProfileAction("성적 저장", saveNewScoreDraft)}
                 type="button"
               >
-                {hasNewScoreDraftChanges ? saveActionLabel("성적 저장", scoreRecordSaveState) : "성적 저장"}
+                성적 저장
               </button>
                 </div>
-              ) : (
-                <div className="profileEditHint">수정 버튼을 누르면 성적 입력과 기존 성적 수정이 열립니다.</div>
-              )}
+              ) : null}
               {scores.length === 0 ? (
                 <EmptyState title="아직 저장된 성적이 없습니다." />
               ) : (
@@ -1299,21 +1373,27 @@ export function StudentProfileModal({
                       <input aria-label={`${student.name} ${item.examDate || "성적"} 등급`} value={draft.grade ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "grade", event.target.value)} />
                       <input aria-label={`${student.name} ${item.examDate || "성적"} 메모`} value={draft.note ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "note", event.target.value)} />
                       <div className="studentProfileRowActions">
-                        <button
-                          className="softButton"
-                          disabled={!isDirty || scoreRecordSaveState === "saving"}
-                          onClick={() => runProfileAction("성적 변경 저장", () => saveScoreDraft(item))}
-                          type="button"
-                        >
-                          {isDirty ? saveActionLabel("변경 저장", scoreRecordSaveState) : "저장됨"}
-                        </button>
-                        <button
-                          className="dangerSoftButton"
-                          onClick={() => runProfileAction("성적 삭제", () => onDeleteScore?.(item.scoreRecordId) ?? Promise.resolve())}
-                          type="button"
-                        >
-                          삭제
-                        </button>
+                        {isDirty ? (
+                          <button
+                            className="softButton"
+                            disabled={scoreRecordSaveState === "saving"}
+                            onClick={() => runProfileAction("성적 변경 저장", () => saveScoreDraft(item))}
+                            type="button"
+                          >
+                            변경 저장
+                          </button>
+                        ) : null}
+                        <OverflowMenu
+                          items={[
+                            {
+                              key: "delete",
+                              label: "삭제",
+                              onSelect: () => runProfileAction("성적 삭제", () => onDeleteScore?.(item.scoreRecordId) ?? Promise.resolve()),
+                              tone: "danger"
+                            }
+                          ]}
+                          label={`${student.name} ${item.examDate || "성적"} 성적 추가 작업`}
+                        />
                       </div>
                     </>
                   ) : (
@@ -1324,7 +1404,7 @@ export function StudentProfileModal({
                       <span>{draft.score || "-"}</span>
                       <span>{draft.grade || "-"}</span>
                       <span>{draft.note || "-"}</span>
-                      <span className="profileSavedText">저장됨</span>
+                      <span aria-hidden="true" />
                     </>
                   )}
                 </div>
@@ -1340,9 +1420,15 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다."
             title={`${student.name} · 테스트 성적`}
+            titleAdornment={(
+              <HelpTip label="테스트 성적" text="학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다." />
+            )}
           >
+            {renderProfileErrorBanner()}
+            {renderSectionToolbar(
+              academyTestSectionSaveState === "idle" ? null : <InlineSaveStatus label="테스트" saveState={academyTestSectionSaveState} />
+            )}
             <DataTableShell className="managementTable studentProfileDataTable" label="학생 학원 테스트 기록">
               <div className="managementRow academyTestProfileRow managementHead">
             <span>날짜</span>
@@ -1367,12 +1453,10 @@ export function StudentProfileModal({
                 onClick={() => runProfileAction("테스트 저장", saveNewAcademyTestDraft)}
                 type="button"
               >
-                {hasNewAcademyTestDraftChanges ? saveActionLabel("테스트 저장", academyTestSaveState) : "테스트 저장"}
+                테스트 저장
               </button>
                 </div>
-              ) : (
-                <div className="profileEditHint">수정 버튼을 누르면 테스트 입력과 기존 테스트 수정이 열립니다.</div>
-              )}
+              ) : null}
               {academyTests.length === 0 ? (
                 <EmptyState title="아직 저장된 테스트 성적이 없습니다." />
               ) : (
@@ -1390,21 +1474,27 @@ export function StudentProfileModal({
                       <input aria-label={`${student.name} ${item.title || "테스트"} 평균`} value={draft.averageScore ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "averageScore", event.target.value)} placeholder="평균" />
                       <input aria-label={`${student.name} ${item.title || "테스트"} 메모`} value={draft.note ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "note", event.target.value)} />
                       <div className="studentProfileRowActions">
-                        <button
-                          className="softButton"
-                          disabled={!isDirty || academyTestSaveState === "saving"}
-                          onClick={() => runProfileAction("테스트 변경 저장", () => saveAcademyTestDraft(item))}
-                          type="button"
-                        >
-                          {isDirty ? saveActionLabel("변경 저장", academyTestSaveState) : "저장됨"}
-                        </button>
-                        <button
-                          className="dangerSoftButton"
-                          onClick={() => runProfileAction("테스트 삭제", () => onDeleteAcademyTest?.(item.testId) ?? Promise.resolve())}
-                          type="button"
-                        >
-                          삭제
-                        </button>
+                        {isDirty ? (
+                          <button
+                            className="softButton"
+                            disabled={academyTestSaveState === "saving"}
+                            onClick={() => runProfileAction("테스트 변경 저장", () => saveAcademyTestDraft(item))}
+                            type="button"
+                          >
+                            변경 저장
+                          </button>
+                        ) : null}
+                        <OverflowMenu
+                          items={[
+                            {
+                              key: "delete",
+                              label: "삭제",
+                              onSelect: () => runProfileAction("테스트 삭제", () => onDeleteAcademyTest?.(item.testId) ?? Promise.resolve()),
+                              tone: "danger"
+                            }
+                          ]}
+                          label={`${student.name} ${item.title || "테스트"} 테스트 추가 작업`}
+                        />
                       </div>
                     </>
                   ) : (
@@ -1415,7 +1505,7 @@ export function StudentProfileModal({
                       <span>{draft.score || "-"}</span>
                       <span>{draft.averageScore || "-"}</span>
                       <span>{draft.note || "-"}</span>
-                      <span className="profileSavedText">저장됨</span>
+                      <span aria-hidden="true" />
                     </>
                   )}
                 </div>

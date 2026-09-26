@@ -30,6 +30,7 @@ export const storageKeys = {
   specialLectureGuides: "academy-os.specialLectureGuides.v1",
   aiSettings: "academy-os.aiSettings.v1",
   attendanceSettings: "academy-os.attendanceSettings.v1",
+  tenantSettings: "academy-os.tenantSettings.v1",
   monthlyInstructorSettlements: "academy-os.monthlyInstructorSettlements.v1",
   specialLectureInstructorSettlements: "academy-os.specialLectureInstructorSettlements.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
@@ -40,6 +41,16 @@ export const storageKeys = {
 };
 
 export const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
+
+// 계정(또는 원장이 보는 선생님)이 바뀌면 지워야 하는 화면 캐시 키.
+// teacherSession 은 로그인 자체라 남기고, viewTenantId 는 "누구 자료를 보는지" 라는
+// 선택이지 그 선생님의 자료가 아니므로 남긴다 — 캐시 주인 식별자의 입력이기도 해서
+// 함께 지우면 새로고침 때마다 자기 자료로 되돌아간다.
+export const accountScopedCacheKeys = Object.freeze(
+  Object.entries(storageKeys)
+    .filter(([name]) => name !== "teacherSession" && name !== "viewTenantId")
+    .map(([, key]) => key)
+);
 
 // 브랜드 문구는 서버(알림톡 #{학원명})와 공유하므로 shared 에 산다.
 export { academyBrandName, academyName, formatTeacherBrandName } from "../shared/utils/academyBrand.js";

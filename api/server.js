@@ -5,6 +5,7 @@ import {
   cancelNotificationJob,
   deleteLesson,
   deleteExamPrepLessonForReconcile,
+  deleteExpiredCanceledLessons,
   deleteLessonsBefore,
   deleteDuplicateExamPrepRows,
   deleteExamPrepRow,
@@ -110,7 +111,9 @@ import {
   upsertRows,
   uploadStorageObjectWithBucketRetry
 } from "./lib/supabaseRest.js";
-import { enterTenantContext, getCurrentTenantId, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
+import { DEFAULT_TENANT_ID, enterTenantContext, getCurrentTenantId, isTenantScopingEnabled, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
+import { createCanceledLessonRetentionSweep } from "../src/shared/server/canceledLessonRetentionSweep.js";
+import { createNotificationDispatchTenantFanout } from "../src/shared/server/notificationDispatchTenantFanout.js";
 import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
 import { evaluateApiAccess, mayAuthenticateAsKiosk, resolveViewAsTenantId } from "../src/shared/server/apiAccessPolicy.js";
 import {
@@ -262,16 +265,16 @@ import {
   normalizeNotificationText
 } from "../src/domains/notifications/notificationMessageRenderer.js";
 import { parseHomeworkFollowupMemoLine } from "../src/domains/notifications/lessonPreparationNotice.js";
+// 알림톡 원천 줄(교재·진도·보충 일정·테스트 결과)은 화면 미리보기와 같은 모듈을 쓴다 — 두 사본이
+// 갈라져 미리보기와 발송 문구가 달랐던 2026-09-19 이전 상태로 돌아가지 않게, 여기에 사본을 두지 않는다.
 import {
-  followUpTypeLabel,
-  formatSupplementHomeworkCheckSentence,
-  getSupplementTaskSourceLabel,
-  supplementMethodLabel
-} from "../src/domains/supplements/supplementMethodLabel.js";
-import { getTestPaperKindLabel } from "../src/domains/tests/testManagerUtils.js";
-import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
+  getLessonContent,
+  getLessonMaterial,
+  getLessonTestResultLines,
+  getStudentSupplementSchedules
+} from "../src/domains/notifications/lessonCommentSourceLines.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
-import { normalizeGradeLabel, normalizeSchoolName, schoolNamesMatch } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { normalizeGradeLabel, schoolNamesMatch } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
@@ -301,6 +304,7 @@ import {
   scheduleSlackDailyScheduleSummary,
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
+  resolveAcademyName,
   sendLessonCommentAlimtalk,
   setTenantAcademyNameResolver,
   sendSlackDailyScheduleSummary,
@@ -1832,7 +1836,7 @@ async function authenticateStudentOrParent(role, loginId, password) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) return null;
   const rows = await listRows(
     "students",
-    `select=student_id,name,login_id,pin,status&status=eq.active&limit=1000`,
+    `select=student_id,name,login_id,pin,status,tenant_id&status=eq.active&limit=1000`,
     { requireServiceRole: true }
   );
   const student = rows.find((row) => {
@@ -1845,7 +1849,10 @@ async function authenticateStudentOrParent(role, loginId, password) {
     role,
     studentId: student.student_id,
     loginId: student.login_id,
-    name: student.name
+    name: student.name,
+    // 포털 토큰에 실어 두면 이후 요청이 그 학생의 tenant 안에서만 돈다(2026-09-19 감사:
+    // 포털은 tenant 를 몰라 원장 시험정보가 협력 교사 학생에게 보이고 app_state 삭제가 500).
+    tenantId: student.tenant_id || "tenant_default"
   };
 }
 
@@ -1880,6 +1887,8 @@ async function getPortalData(session) {
   const states = appStateResult.states ?? {};
   return {
     source: studentsResult.source,
+    // 포털 상단 학원명. 학생이 속한 tenant 의 선생님 이름("으뜸수학 최경석T").
+    academyName: await resolveAcademyName({}),
     students: [student],
     lessons,
     records: (recordsResult.records ?? []).filter((record) => record.studentId === session.studentId && lessonIds.has(record.lessonId)),
@@ -2470,14 +2479,6 @@ function getLatestNotificationRecord(context, lesson = {}, student = {}) {
   );
 }
 
-function getNotificationLessonMaterial(record = {}, student = {}) {
-  return compactText(record.lessonMaterial) || compactText(student.textbook) || compactText(student.currentTextbook);
-}
-
-function getNotificationLessonContent(record = {}) {
-  return compactText(record.lessonProgress) || compactText(record.progress) || compactText(record.lessonContent);
-}
-
 function getAssignmentStatusForNotification(record = {}, previousHomework = null, records = []) {
   const recordStatus = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
   if (recordStatus) return recordStatus;
@@ -2518,72 +2519,6 @@ function getLessonHomeworkForNotification(homeworks = [], lessons = [], lesson =
     records,
     studentId: student.studentId
   });
-}
-
-function formatSupplementScheduleLineForNotification(task = {}) {
-  const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
-  const method = supplementMethodLabel(task);
-  const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
-  const homeworkCheckSentence = formatSupplementHomeworkCheckSentence(task);
-  const schedulePrefix = schedule ? `${schedule}에 ` : "";
-
-  if (task.taskType === "homework_makeup") {
-    const methodId = task.supplementMethod || "arrival_makeup";
-    if (methodId === "next_lesson") {
-      return `다음 수업 때 ${source}를 함께 확인하겠습니다.`;
-    }
-    return `${schedulePrefix}${method}으로 ${source} 보충을 진행하겠습니다.`;
-  }
-
-  if (task.taskType === "absence_makeup") {
-    return `${schedulePrefix}${method}으로 ${source} 결석 보강을 진행하겠습니다.${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}`;
-  }
-
-  if (task.taskType === "retest") {
-    return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;
-  }
-
-  return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
-}
-
-function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "", options = {}) {
-  const { lesson = null, mode = "all" } = options;
-  return makeupTasks
-    .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
-    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
-    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
-    .map(formatSupplementScheduleLineForNotification);
-}
-
-function formatTestAttemptLineForNotification(session = {}, attempt = {}) {
-  const title = compactText(session.testTitle) || getTestPaperKindLabel(session.testKind);
-  if (attempt.status === "not_taken") {
-    const reason = compactText(attempt.notTakenReason);
-    return `${title} · 미응시${reason ? ` (사유: ${reason})` : ""}`;
-  }
-
-  const correct = attempt.correctCount === "" || attempt.correctCount === null || attempt.correctCount === undefined
-    ? ""
-    : `${attempt.correctCount}문항 정답`;
-  const total = session.totalQuestions === "" || session.totalQuestions === null || session.totalQuestions === undefined
-    ? ""
-    : `${session.totalQuestions}문항 중 `;
-  return `${title} · ${correct ? `${total}${correct}` : "응시"}`;
-}
-
-function getStudentTestResultLinesForNotification(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
-  const sessionById = new Map(testSessions.map((session) => [session.testSessionId, session]));
-  return testAttempts
-    .filter((attempt) => attempt.studentId === student.studentId)
-    .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
-    .filter(({ session }) => session && session.testDate === lesson.date)
-    .filter(({ session }) => {
-      if (!session.classTemplateId) return true;
-      return session.classTemplateId === lesson.classTemplateId;
-    })
-    .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
-    .map(({ session, attempt }) => formatTestAttemptLineForNotification(session, attempt));
 }
 
 function getHomeworkFollowupNoticeForNotification(record = {}, target = "parent", notificationTemplates = {}) {
@@ -2630,8 +2565,8 @@ function buildLatestLessonCommentPreview({ audience, commentBody, homeworkFollow
     assignmentStatus: getAssignmentStatusMessage(audience, assignmentStatus),
     audience,
     homeworkFollowupNotice: omitPreviousHomework ? "" : homeworkFollowupNotice,
-    lessonContent: getNotificationLessonContent(record),
-    lessonMaterial: getNotificationLessonMaterial(record, student),
+    lessonContent: getLessonContent(record),
+    lessonMaterial: getLessonMaterial(record, student),
     nextHomework: nextHomework?.title ?? "",
     omitPreviousHomework,
     previousHomework: omitPreviousHomework ? "" : previousHomework?.title ?? "",
@@ -2758,11 +2693,11 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
 
   const previousHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "previous", context.records);
   const nextHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "next", context.records);
-  const supplementSchedules = getStudentSupplementSchedulesForNotification(context.makeupTasks, student.studentId, {
+  const supplementSchedules = getStudentSupplementSchedules(context.makeupTasks, student.studentId, {
     lesson,
     mode: "lesson_comment"
   });
-  const testResultLines = getStudentTestResultLinesForNotification(context.testSessions, context.testAttempts, lesson, student);
+  const testResultLines = getLessonTestResultLines(context.testSessions, context.testAttempts, lesson, student);
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = buildInitialNotificationComment({
     existingComment: record[sourceField] ?? ""
@@ -2786,10 +2721,10 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     commentBodyOverride: commentBody,
     homeworkFollowupNotice: omitPreviousHomework ? "" : homeworkFollowupNotice,
     lateMinutes: record.lateMinutes ?? "",
-    lessonContent: getNotificationLessonContent(record),
+    lessonContent: getLessonContent(record),
     lessonDate: lesson.date,
     lessonId: lesson.lessonId,
-    lessonMaterial: getNotificationLessonMaterial(record, student),
+    lessonMaterial: getLessonMaterial(record, student),
     lessonName: lesson.className,
     message: commentBody,
     nextHomework: nextHomework?.title ?? "",
@@ -4737,8 +4672,10 @@ async function refineExamAnalysisQuestionRowsWithAi({ analysisRunId, operations,
 // registry wiring and runInternalNotificationDispatch's 60s-interval call
 // both resolve the hoisted name before this line executes; the body only
 // runs once notificationSolapiDispatchService has been constructed below.
+// 2026-09-20: 요청 tenant 가 없는 호출(내부 루프 · dispatch 토큰 cron)은 tenant 마다 한 바퀴씩 —
+// 없이 돌면 claim PATCH 가 스코프 오류로 던져진다(notificationDispatchTenantFanout.js 머리말).
 function dispatchDueNotificationJobs(options) {
-  return notificationSolapiDispatchService.dispatchDueNotificationJobs(options);
+  return notificationDispatchTenantFanout.dispatchDueNotificationJobsAcrossTenants(options);
 }
 
 const notificationSolapiDispatchService = createNotificationSolapiDispatchService({
@@ -4752,6 +4689,11 @@ const notificationSolapiDispatchService = createNotificationSolapiDispatchServic
   refreshLessonCommentJobBeforeSend,
   sendNotificationJob,
   upsertNotificationJob
+});
+
+const notificationDispatchTenantFanout = createNotificationDispatchTenantFanout({
+  defaultTenantId: DEFAULT_TENANT_ID, getCurrentTenantId, isTenantScopingEnabled, listKnownTeacherTenantIds, runWithTenant,
+  dispatchDueNotificationJobs: (options) => notificationSolapiDispatchService.dispatchDueNotificationJobs(options)
 });
 
 const internalDispatchEnabled = process.env.NOTIFICATION_INTERNAL_DISPATCH_LOOP !== "false";
@@ -4781,6 +4723,16 @@ async function runInternalNotificationDispatch(reason = "interval") {
     internalDispatchRunning = false;
   }
 }
+
+// 취소 수업 7일 보존 뒤 삭제는 조회(listLessons)가 아니라 이 주기 작업이 한다(2026-09-19).
+const canceledLessonRetentionSweep = createCanceledLessonRetentionSweep({
+  defaultTenantId: DEFAULT_TENANT_ID,
+  deleteExpiredCanceledLessons,
+  isSupabaseConfigured: () => isSupabaseConfigured({ requireServiceRole: true }),
+  isTenantScopingEnabled,
+  listKnownTeacherTenantIds,
+  runWithTenant
+});
 
 function isSupplementLesson(lesson = {}) {
   return (
@@ -4932,6 +4884,17 @@ async function reserveTodayTeacherScheduleSlack({
   return { ...schedulePayload, notificationJob: saved.notificationJob, result };
 }
 
+// 옛 공용 키오스크 토큰의 읽기 범위: 등록된 교사 tenant 전부. 계정 표를 못 읽으면(로컬·
+// 미설정) 원장 tenant 하나로 돌아간다 — 빈 목록이면 학생을 아무도 못 찾는다.
+async function resolveLegacyKioskReadTenantIds() {
+  try {
+    const known = await listKnownTeacherTenantIds();
+    return known.size > 0 ? [...known] : ["tenant_default"];
+  } catch {
+    return ["tenant_default"];
+  }
+}
+
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
 
@@ -4952,6 +4915,9 @@ const server = http.createServer(async (request, response) => {
     Boolean(kioskToken) && timingSafeEqualText(kioskToken, expectedKioskToken);
   const kioskOk = Boolean(kioskDevice) || legacyKioskOk;
   const dispatchOk = !teacherSession && !opsSession && !kioskOk && getDispatchAuthState(request, {}).ok;
+  // 학생·학부모 포털 토큰. 공개 경로(/api/portal-*)라 권한 판정은 그대로 통과하지만,
+  // tenant 컨텍스트는 학생의 tenant 로 잡아야 조회·저장이 그 학원 자료 안에서만 돈다.
+  const portalSession = !teacherSession && !opsSession && !kioskOk && !dispatchOk ? getPortalSession(request) : null;
   const auth = teacherSession
     ? { kind: "teacher", teacherRole: teacherSession.teacherRole || "owner", tenantId: teacherSession.tenantId || "tenant_default" }
     : opsSession
@@ -4966,15 +4932,20 @@ const server = http.createServer(async (request, response) => {
             readTenantIds: kioskDevice.tenantIds
           }
         : legacyKioskOk
+          // 옛 공용 토큰 태블릿도 등록된 모든 선생님의 학생을 받는다. 쓰기 tenant 는 학생을
+          // 고른 뒤 handleAttendanceCheck 가 setWriteTenant 로 정한다(기기 등록 태블릿과 같은 길).
+          // 원장 tenant 로 고정돼 있던 동안 협력 교사 학생은 "전화번호를 찾지 못했습니다" 였다.
           ? {
               kind: "kiosk",
               kioskId: "legacy_shared_token",
-              tenantId: "tenant_default",
-              readTenantIds: ["tenant_default"]
+              tenantId: null,
+              readTenantIds: await resolveLegacyKioskReadTenantIds()
             }
           : dispatchOk
             ? { kind: "dispatch" }
-            : { kind: "none" };
+            : portalSession
+              ? { kind: "portal", studentId: portalSession.studentId, tenantId: portalSession.tenantId || "tenant_default" }
+              : { kind: "none" };
   // 원장이 "다른 선생님으로 보기" 를 켜면 그 선생님 테넌트로 작업한다(조회·수정 모두).
   // 협력 교사가 같은 헤더를 보내도 resolveViewAsTenantId 가 자기 테넌트로 되돌린다.
   const requestedTenantId = String(getRequestHeader(request, "x-view-tenant-id") || "").trim();
@@ -5014,7 +4985,9 @@ const server = http.createServer(async (request, response) => {
       })
     );
     if (enforcing) {
-      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden" });
+      // code 를 같이 보낸다 — 화면(apiClient.createApiError)이 code 로 "권한 없음" 문장을 고른다.
+      // error 만 보내던 동안 협력 교사는 영문 "role_forbidden" 을 그대로 봤다(2026-09-19 감사).
+      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden", code: verdict.code || "forbidden" });
       return;
     }
   }
@@ -5475,5 +5448,6 @@ server.listen(port, host, () => {
     runInternalNotificationDispatch("startup");
     setInterval(() => runInternalNotificationDispatch("interval"), 60 * 1000).unref?.();
   }
+  canceledLessonRetentionSweep.start();
 });
 

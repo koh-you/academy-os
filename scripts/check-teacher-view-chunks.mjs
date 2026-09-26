@@ -66,6 +66,19 @@ assert.ok(
   `출결 태블릿 CSS 가 예산을 넘었다: ${attendanceStyleBytes.toLocaleString()} bytes (${attendanceStyles.join(", ")})`
 );
 
+// 교사 첫 로딩의 차단 CSS(main-*.css). JS 처럼 예산을 둔다 — 4-6 의 "initial main CSS 예산 고정" 은
+// 지금까지 지켜지지 않아 338 KB → 414 KB → 352 KB 를 오갔다. 2026-09-19 LessonNestedPanels 셀렉터
+// 12 KB 를 lazy 청크로 옮겨 334,613 B, 같은 날 죽은 import 가 끌어오던 lazy 화면 CSS 6개를 떼어 324,778 B,
+// StudentManager 셀렉터 23 KB 를 옮겨 301,787 B. 실측 + 10 KB 여유. 화면 전용 셀렉터를 새로 App.css 에
+// 넣기 전에 그 화면의 CSS 파일로 갈 수 있는지 먼저 본다(scripts/test-*-css-domain-split.mjs 패턴).
+const mainStylesheet = assetNames.find((name) => /^main-[^.]+\.css$/.test(name));
+assert.ok(mainStylesheet, "production build must emit one hashed main stylesheet");
+const mainStyleBytes = (await stat(resolve(assetsDirectory, mainStylesheet))).size;
+assert.ok(
+  mainStyleBytes <= 312_000,
+  `initial main CSS exceeded the 312 KB budget: ${mainStyleBytes.toLocaleString()} bytes`
+);
+
 const expectedLazyChunks = [
   "BlogContentStudio",
   "DashboardAuxiliaryPanels",
@@ -88,8 +101,28 @@ for (const chunkName of expectedLazyChunks) {
   );
 }
 
+// react·react-dom·scheduler 는 배포 사이에 바뀌지 않으므로 따로 떼어(vite.config.js manualChunks)
+// 해시가 유지되게 한다. 예전에는 자주 바뀌는 공용 app 모듈과 한 청크(224 KB)여서 apiClient 한 줄
+// 고칠 때마다 교사 브라우저와 로비 태블릿이 React 를 다시 받았다. 두 진입점이 같은 파일을 가리켜야
+// 캐시가 공유되고, 크기가 이 범위를 벗어나면 app 코드가 벤더 청크에 섞였거나 React 가 빠진 것이다.
+const vendorReactJavaScript = assetNames.find((name) => /^vendor-react-[^.]+\.js$/.test(name));
+assert.ok(vendorReactJavaScript, "production build must emit one hashed vendor-react chunk");
+const vendorReactBytes = (await stat(resolve(assetsDirectory, vendorReactJavaScript))).size;
+assert.ok(
+  vendorReactBytes >= 150_000 && vendorReactBytes <= 230_000,
+  `vendor-react chunk size is outside the React-only range: ${vendorReactBytes.toLocaleString()} bytes`
+);
+const teacherHtml = await readFile(resolve("dist", "index.html"), "utf8");
+for (const [label, html] of [["index.html", teacherHtml], ["attendance.html", attendanceHtml]]) {
+  assert.ok(html.includes(`/assets/${vendorReactJavaScript}`), `${label} must load the shared vendor-react chunk`);
+  assert.ok(
+    html.includes('rel="preconnect" href="https://koh-you-math-academy-os-api.onrender.com"'),
+    `${label} must preconnect to the API origin so the first request does not wait for JS to finish`
+  );
+}
+
 console.log(
-  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · ` +
+  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · main CSS ${(mainStyleBytes / 1000).toFixed(1)} kB · vendor-react ${(vendorReactBytes / 1000).toFixed(1)} kB · ` +
   `lazy ${expectedLazyChunks.length} · ` +
   `태블릿 JS ${(attendanceBytes / 1000).toFixed(1)} kB + CSS ${(attendanceStyleBytes / 1000).toFixed(1)} kB`
 );

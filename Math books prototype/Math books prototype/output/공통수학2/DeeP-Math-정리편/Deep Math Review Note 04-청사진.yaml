@@ -1,0 +1,578 @@
+# CM2-GM-04 도형의 이동 청사진 v6.1 (2026-07-20 · Phase 1 신규)
+# 통합 문제출제 시스템 v1.0 · schema.md v3.0 · Gate 5.0 대상
+# CM2-GM-03 원의 방정식 v1.0 골든 계승 · 정독 파일 8종
+
+series_type: jeongribyeon
+series_name: DeeP Math 정리편
+book_title: 공통수학2 정리편 · CM2-GM-04 도형의 이동
+unit_code: CM2-GM
+target_audience: 상위권
+version: v1.0
+established: 2026-07-20
+
+jeongribyeon_meta:
+  page_count_est: 18            # 세션 55 3문/페이지 통합 규약 적용 (L3 1p·실전 2~3p 유연)
+  개념_count: 3
+  대표예제_count: 6
+  확인_count: 12
+  Level1_count: 12
+  Level2_count: 12
+  Level3_count: 3
+  실전_count: 3
+  total_problem_slots: 48
+
+# ── 정독 원본 은행 8종 (세션 55 확립) ─
+source_banks:
+  - bank/mechanism-데이터-개념원리-CM2-GM-이동.md            # 61 항목 · star 3~5 (예제 9 + 유제 32 + 연습 20)
+  - bank/mechanism-데이터-RPM-CM2-GM-이동.md                  # 다수 · star 1~5 (유형 01~13)
+  - bank/mechanism-데이터-고쟁이-CM2-CH04-도형이동-STEP1.md   # 19 항목 · star 3·4 (#201~#219)
+  - bank/mechanism-데이터-고쟁이-CH04-도형이동.md             # STEP2·3 42 항목 · star_5·premium (#220~#261)
+  - bank/mechanism-데이터-전국연합-CM2-GM.md                  # 이동 관련 학평 star_5·premium (유형 10·11·12·13·15 · 1008~1300 라인)
+  - bank/mechanism-데이터-ebs-올림포스-CM2.md                 # CH07 도형의 방정식(2) · 이동 관련 확장
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP2.md               # 이동 파트 star_5
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP3.md               # 이동 파트 star_premium
+
+# ══════════════════════════════════════════════════════════════
+# §1. 개념 슬롯 (3개 · 원본 pick 아님 · 2022 개정 표준 용어)
+# ══════════════════════════════════════════════════════════════
+concept_slots:
+  - slot_id: C1
+    slot_type: 개념
+    sub_section: 평행이동
+    page_placement: {page_num: 1, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 점의 평행이동 ((x,y) → (x+a, y+b) · 이동 벡터 (a,b))
+      - dmsub 2: 도형의 평행이동 (f(x,y)=0 → f(x-a, y-b)=0 · 역방향 대입 원리)
+      - dmsub 3: 직선의 평행이동 (ax+by+c=0 → a(x-p)+b(y-q)+c=0 · 기울기 불변 · 절편 변화)
+      - dmsub 4: 원·포물선의 평행이동 (중심·꼭짓점 이동 · 반지름·이차항 계수 불변)
+    signature: {defBox: true, primary_axis: 평행이동}
+
+  - slot_id: C2
+    slot_type: 개념
+    sub_section: 원점·좌표축에 대한 대칭이동
+    page_placement: {page_num: 4, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 점의 대칭이동 (x축 → (x,-y) · y축 → (-x,y) · 원점 → (-x,-y))
+      - dmsub 2: 도형의 대칭이동 (x축 → f(x,-y)=0 · y축 → f(-x,y)=0 · 원점 → f(-x,-y)=0)
+      - dmsub 3: 원의 대칭이동 (중심 대칭 · 반지름 불변)
+      - dmsub 4: 자기 자신과 일치 (도형이 축 대칭이면 대응 좌표 변수 대입 시 원식과 동치)
+    signature: {defBox: true, primary_axis: 축·원점 대칭}
+
+  - slot_id: C3
+    slot_type: 개념
+    sub_section: 직선 y=x·y=-x 대칭 · 점·직선에 대한 대칭이동
+    page_placement: {page_num: 7, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 직선 y=x 대칭 · y=-x 대칭 (좌표 swap · (x,y) → (y,x) · (-y,-x))
+      - dmsub 2: 점 (p,q)에 대한 대칭 ((x,y) → (2p-x, 2q-y) · 중점 조건)
+      - dmsub 3: 직선 l에 대한 대칭 (P·P' 중점이 l 위 + PP'⊥l 두 조건 연립)
+      - dmsub 4: 대칭이동을 이용한 최단 거리 (한 점을 축·직선에 대칭 → 두 점 직선 거리 · 여러 축 결합)
+    signature: {defBox: true, primary_axis: 임의 축·직선 대칭}
+
+# ══════════════════════════════════════════════════════════════
+# §2. 대표예제 슬롯 (6개 · 개념당 2문 · 풀이 포함 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+representative_slots:
+  - slot_id: E1
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-GM-이동-예제-02, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 두 점 대응 → 이동 벡터 결정 · 직선 방정식 역대입 (x→x-a, y→y-b), insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 점 (-3, 4)를 (-1, 1)로 옮기는 평행이동에 의해
+      직선 3x - y + 2 = 0이 직선 ax - y + b = 0으로 옮겨질 때 a+b.
+    answer: "a+b=-4"   # 이동 (2, -3) · 3(x-2)-(y+3)+2=0 → 3x-y-7=0 · a=3, b=-7 (예제-02 원문)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 2, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 평행이동, layout_hint: dmex+problem+approach+solution}
+
+  - slot_id: E2
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-이동-예제-03, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 원의 평행이동 중심 이동 + 반지름 조건 · 표준형 변환, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      평행이동 (x, y) → (x + 3, y - 4)에 의해 원 x²+y²+4x-2y+a=0이
+      원 (x-1)²+(y+b)²=3으로 옮겨질 때 상수 a, b의 값.
+    answer: "a=2, b=3"   # 원 표준형 (x+2)²+(y-1)²=5-a · 중심 (-2,1) → (1,-3) · b=3 · r²=5-a=3 → a=2 (예제-03 (2) 원문)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 3, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 평행이동}
+
+  - slot_id: E3
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-GM-이동-예제-04, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: x축·y축 대칭 좌표 · 두 점 지나는 직선의 방정식, insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      점 (4, 6)을 x축에 대하여 대칭이동한 점을 P, y축에 대하여
+      대칭이동한 점을 Q라 할 때, 두 점 P, Q를 지나는 직선의 방정식.
+    answer: "y = -3x/2"   # P(4,-6), Q(-4,6) · 기울기 -3/2 · y+6 = -3/2(x-4) → y=-3x/2 (예제-04 원문)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 5, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 축 대칭}
+
+  - slot_id: E4
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-이동-예제-06, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 직선 평행이동 후 원점 대칭 순차 적용 · 지나는 점 조건, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      직선 y = 3x + 2를 x축의 방향으로 a만큼 평행이동한 후 원점에 대하여
+      대칭이동한 직선이 점 (2, 1)을 지날 때, 상수 a의 값.
+    answer: "a=-1"   # 평행이동 y=3(x-a)+2 · 원점 대칭 -y=3(-x-a)+2 → y=3x+3a-2 · (2,1): 1=6+3a-2 → a=-1 (예제-06 원문)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 6, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 대칭·평행 순차}
+
+  - slot_id: E5
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-이동-예제-07, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 한 점을 축 대칭 → 두 점 사이 직선거리 = 두 선분 합의 최솟값, insight_type: 통찰형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 점 A(0, 2), B(6, 3)과 x축 위의 점 P에 대하여
+      선분 AP와 선분 BP의 길이의 합의 최솟값.
+    answer: "AP+BP = √61"   # B의 x축 대칭 B'(6,-3) · AB' = √(36+25) = √61 (예제-07 원문)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 8, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 대칭 최단거리}
+
+  - slot_id: E6
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-이동-예제-09, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 점을 직선에 대칭 · 중점 조건 + 수직 조건 연립, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      점 P(1, 4)를 직선 y = 2x - 3에 대하여 대칭이동한 점 P'의 좌표.
+    answer: "P'(5, 2)"   # 중점 조건 2a-b=-8 · 수직 조건 a+2b=9 · 연립 a=5, b=2 (예제-09 (1) 원문)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 9, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 임의 직선 대칭}
+
+# ══════════════════════════════════════════════════════════════
+# §3. 확인 슬롯 (12개 · 대표예제 페이지 하단 · 발문만 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+check_slots:
+  # 페이지 2 (E1 뒤 · 이동 벡터 결정·직선 평행이동)
+  - slot_id: CHK1
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 개념원리-CM2-GM-이동-유제-234, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      점 (2, -4)를 점 (1, -3)으로 옮기는 평행이동에 의해
+      점 (-3, 6)이 옮겨지는 점의 좌표.
+    answer: "(-4, 7)"   # 이동 (-1, 1) · (-3-1, 6+1) = (-4, 7) (유제-234 원문)
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK2
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 고쟁이-CM2-CH04-STEP1-#204, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      평행이동 (x, y) → (x - 1, y + 4)에 의해 직선 y = 2x - 1이 옮겨지는
+      직선의 방정식이 y = ax + b일 때, ab의 값.
+    answer: "ab=10"   # y=2x-1 · (x,y)→(x-1, y+4) 역대입 x→x+1, y→y-4 · y-4=2(x+1)-1 → y=2x+5 · a=2, b=5 · ab=10 (세션 57 3차 정정 · 이전 -14 오기재)
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  # 페이지 3 (E2 뒤 · 원의 평행이동·조건 결합)
+  - slot_id: CHK3
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 3
+    source: {source_id: 개념원리-CM2-GM-이동-유제-240, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      원 x²+y²+6x+2y+8=0을 x축의 방향으로 a만큼, y축의 방향으로 b만큼
+      평행이동하니 원 x²+y²-4x-4y+6=0과 일치할 때 ab.
+    answer: "ab=15"   # 중심 (-3,-1) → (2,2) · 이동 (5, 3) · a·b=15 (유제-240 원문)
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK4
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-이동-연습-247, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      직선 4x + 3y - 5 = 0을 y축의 방향으로 k만큼 평행이동한 직선이
+      원 (x - 1)²+y²=4에 접할 때 양수 k.
+    answer: "k=3"   # |4-5-3k|/5=2 → |1+3k|=10 · 양수 k=3 (연습-247 원문)
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  # 페이지 5 (E3 뒤 · 축 대칭 좌표·직선)
+  - slot_id: CHK5
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 3
+    source: {source_id: 개념원리-CM2-GM-이동-유제-259, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      점 (k, 3)을 y축에 대하여 대칭이동한 점을 P,
+      직선 y=x에 대하여 대칭이동한 점을 Q라 할 때, PQ = 2√5인 양수 k.
+    answer: "k=1"   # P(-k,3), Q(3,k) · PQ² = (3+k)²+(k-3)² = 2k²+18 = 20 → k=1 (유제-259 원문)
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK6
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-이동-유제-260, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      직선 y = -3x + 6을 y축에 대하여 대칭이동한 직선에 수직이고
+      점 (-3, 4)를 지나는 직선의 방정식.
+    answer: "y = -x/3 + 3"   # y축 대칭 y=3x+6 · 기울기 3 · 수직 -1/3 · y-4=-1/3(x+3) (유제-260 원문)
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  # 페이지 6 (E4 뒤 · 대칭·평행 순차·조건 결합)
+  - slot_id: CHK7
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 3
+    source: {source_id: 개념원리-CM2-GM-이동-유제-261, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      직선 2x - 3y + 1 = 0을 x축에 대하여 대칭이동한 직선이
+      원 (x - 4)²+(y + k)²=3의 넓이를 이등분할 때 상수 k.
+    answer: "k=3"   # x축 대칭 2x+3y+1=0 · 중심 (4, -k) 지남 8-3k+1=0 → k=3 (유제-261 원문)
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK8
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-이동-유제-265, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      원 x²+y²-4x=0을 y축에 대하여 대칭이동한 후 y축의 방향으로 1만큼
+      평행이동한 원이 직선 y = mx - 2에 접할 때 상수 m.
+    answer: "m=-5/12"   # 이동 후 (x+2)²+(y-1)²=4 · d=|-2m-1-2|/√(m²+1)=2 → (2m+3)²=4(m²+1) → 12m=-5 (유제-265 원문)
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  # 페이지 8 (E5 뒤 · 대칭 최단거리)
+  - slot_id: CHK9
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-이동-유제-266, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 점 A(2, 4), B(3, -5)와 y축 위의 점 P에 대하여
+      선분 AP와 선분 BP의 길이의 합의 최솟값.
+    answer: "AP+BP = √106"   # A의 y축 대칭 A'(-2,4) · A'B=√(25+81)=√106 (유제-266 원문)
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK10
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-이동-유제-268, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 점 A(2, 3), B(6, 1)과 y축 위의 점 P, x축 위의 점 Q에 대하여
+      AP + PQ + QB의 최솟값.
+    answer: "AP+PQ+QB = 4√5"   # A의 y축 대칭 A'(-2,3), B의 x축 대칭 B'(6,-1) · A'B'=√(64+16)=√80=4√5 (유제-268 원문)
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  # 페이지 9 (E6 뒤 · 점·직선 대칭이동)
+  - slot_id: CHK11
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 3
+    source: {source_id: 개념원리-CM2-GM-이동-유제-269, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      점 (a, 3)을 점 (4, 5)에 대하여 대칭이동한 점의 좌표가 (-2, b)일 때
+      ab의 값.
+    answer: "ab=70"   # (8-a, 7) = (-2, b) → a=10, b=7 · ab=70 (유제-269 원문)
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK12
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-이동-유제-272, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 점 P(-3, 4)와 Q(1, 8)이 직선 y = ax + b에 대하여 서로 대칭일 때
+      a+b의 값 (a, b 상수).
+    answer: "a+b=4"   # 중점 (-1, 6) 위 6=-a+b · 수직 a·1=-1 → a=-1, b=5 (유제-272 원문)
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+# ══════════════════════════════════════════════════════════════
+# §4. Level 1 슬롯 (12개 · ★ 3·4 · 기초·응용 · 발문만 · 답지 별도)
+# ══════════════════════════════════════════════════════════════
+level1_slots:
+  # 평행이동 (4문)
+  - {slot_id: L1-1, target_star: 3, source: {source_id: 개념원리-CM2-GM-이동-유제-233, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 이동 후 직선 위 조건, insight_type: 절차형, depth: 1}, problem_summary: "평행이동 (x,y) → (x-3, y+2)에 의해 점 (a, -1)이 직선 y=2x-3 위로 옮겨질 때 상수 a", answer: "a=5"}   # (a-3, 1) · 1=2(a-3)-3 → a=5 (유제-233 원문)
+  - {slot_id: L1-2, target_star: 3, source: {source_id: 개념원리-CM2-GM-이동-유제-236, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 직선 평행이동 · 점 대입, insight_type: 절차형, depth: 1}, problem_summary: "직선 2x-3y+k=0을 x축의 방향으로 1만큼, y축의 방향으로 -2만큼 평행이동한 직선이 점 (1, -4)를 지날 때 상수 k", answer: "k=-6"}   # 2(x-1)-3(y+2)+k=0 · (1,-4) 대입 2+12-8+k=0 → k=-6 (유제-236 원문)
+  - {slot_id: L1-3, target_star: 3, source: {source_id: 고쟁이-CM2-CH04-STEP1-#206, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 원의 중심 대응 → 이동 벡터, insight_type: 절차형, depth: 1}, problem_summary: "원 x²+y²-2x+4y-6=0을 x축의 방향으로 p, y축의 방향으로 q만큼 평행이동한 도형이 x²+y²+6x-2y-1=0일 때 p×q의 값", answer: "pq=-12"}   # 중심 (1,-2) → (-3,1) · 이동 (-4, 3) · pq=-12 (#206 원문)
+  - {slot_id: L1-4, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-연습-242, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 직선 자기 일치 조건, insight_type: 통찰형, depth: 2}, problem_summary: "직선 2x - y + 4 = 0을 x축의 방향으로 a만큼, y축의 방향으로 b만큼 평행이동한 직선이 원래 직선과 일치할 때 a/b (ab≠0)", answer: "a/b = 1/2"}   # 2(x-a)-(y-b)+4=0 → -2a+b=0 → b=2a (연습-242 원문)
+  # 대칭이동 (4문)
+  - {slot_id: L1-5, target_star: 3, source: {source_id: 개념원리-CM2-GM-이동-유제-254, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 직선 축 대칭, insight_type: 절차형, depth: 1}, problem_summary: "직선 3x - 2y + 1 = 0을 원점에 대하여 대칭이동한 직선의 방정식", answer: "3x - 2y - 1 = 0"}   # x→-x, y→-y 대입 · -3x+2y+1=0 → 3x-2y-1=0 (유제-254 (3) 원문)
+  - {slot_id: L1-6, target_star: 3, source: {source_id: 개념원리-CM2-GM-이동-유제-257, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 원점 대칭 · 직선 대입, insight_type: 절차형, depth: 1}, problem_summary: "점 (3, -5)를 원점에 대하여 대칭이동한 점이 직선 ax - 2y + 1 = 0 위에 있을 때 상수 a", answer: "a=-3"}   # 대칭점 (-3,5) · -3a-10+1=0 → a=-3 (유제-257 원문)
+  - {slot_id: L1-7, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-유제-262, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 포물선 꼭짓점 원점 대칭, insight_type: 조건통합형, depth: 2}, problem_summary: "포물선 y = x² - 2mx + m² - 5를 원점에 대하여 대칭이동한 포물선의 꼭짓점이 (-2, k)일 때 m + k (m 상수)", answer: "m+k=7"}   # 꼭짓점 (m, -5) · 원점 대칭 (-m, 5) · m=2, k=5 (유제-262 원문)
+  - {slot_id: L1-8, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-유제-263, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: y=x 대칭 후 평행이동 순차 · 계수 정리, insight_type: 조건통합형, depth: 2}, problem_summary: "직선 4x - 2y + 3 = 0을 직선 y = x에 대하여 대칭이동한 후 x축의 방향으로 -1, y축의 방향으로 2만큼 평행이동한 직선의 방정식", answer: "2x - 4y + 7 = 0"}   # y=x 대칭 -2x+4y+3=0 · 이동 -2(x+1)+4(y-2)+3=0 → -2x+4y-7=0 (유제-263 원문)
+  # 점·직선 대칭·최단거리 (4문)
+  - {slot_id: L1-9, target_star: 3, source: {source_id: 개념원리-CM2-GM-이동-유제-271, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 원 중심 점 대칭 · 반지름 불변, insight_type: 절차형, depth: 1}, problem_summary: "원 (x - 3)²+(y + 1)²=4를 점 (1, 2)에 대하여 대칭이동한 원의 방정식", answer: "(x+1)²+(y-5)² = 4"}   # 중심 (3,-1) → (2·1-3, 2·2-(-1)) = (-1, 5) · r=2 (유제-271 원문)
+  - {slot_id: L1-10, target_star: 4, source: {source_id: 고쟁이-CM2-CH04-STEP1-#215, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 임의 직선 대칭 · 중점+수직 연립, insight_type: 조건통합형, depth: 2}, problem_summary: "점 (3, 4)를 직선 y = -x + 2에 대하여 대칭이동한 점의 좌표가 (p, q)일 때 p²+q²의 값", answer: "p²+q²=5"}   # PP' 수직 조건 (q-4)/(p-3)·(-1)=-1 → q=p+1 · 중점 y=-x+2 위 → p+q=-3 · p=-2, q=-1 · p²+q²=5 (세션 57 3차 정정 · 이전 17 오기재)
+  - {slot_id: L1-11, target_star: 3, source: {source_id: 고쟁이-CM2-CH04-STEP1-#217, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: y축 대칭 후 두 점 직선 거리 = 최단 경로, insight_type: 통찰형, depth: 2}, problem_summary: "점 A(-3, 2)에서 y축 위의 점 P를 거쳐 점 B(-1, -2)까지 가는 최단 거리", answer: "최단거리 = 4√2"}   # A의 y축 대칭 A'(3,2) · A'B=√(16+16)=4√2 (#217 원문)
+  - {slot_id: L1-12, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-연습-279, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: y축 대칭 · 최솟값 조건 → 미지수 결정, insight_type: 조건통합형, depth: 2}, problem_summary: "두 점 A(3, 1), B(a, 4)와 y축 위의 점 P에 대하여 선분 AP와 선분 BP의 길이의 합의 최솟값이 5일 때 양수 a", answer: "a=1"}   # A의 y축 대칭 A'(-3,1) · A'B=5 → (a+3)²+9=25 → a+3=4 (양수) → a=1 (연습-279 원문)
+
+# ══════════════════════════════════════════════════════════════
+# §5. Level 2 슬롯 (12개 · ★ 4·5 · 실전적 심화 · 발문만)
+# ══════════════════════════════════════════════════════════════
+level2_slots:
+  # star 4 (5문)
+  - {slot_id: L2-1, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-연습-245, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 원 대응으로 이동 결정 · 직선 이동, insight_type: 조건통합형, depth: 2}, problem_summary: "원 x²+(y-1)²=9를 원 (x-1)²+y²=9로 옮기는 평행이동에 의해 직선 x+2y-4=0이 x+ay+b=0으로 옮겨질 때 a+b", answer: "a+b=-1"}   # 중심 (0,1) → (1,0) · 이동 (1,-1) · a=2, b=-3 (연습-245 원문)
+  - {slot_id: L2-2, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-연습-248, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 포물선 이동으로 이동 결정 · 평행선 사이 거리, insight_type: 통찰형, depth: 2}, problem_summary: "포물선 y=x²+8x+9를 y=x²으로 옮기는 평행이동에 의해 직선 l: 2x-3y-2=0이 직선 l'으로 옮겨질 때 l과 l' 사이의 거리", answer: "l과 l' 사이 거리 = √13"}   # 꼭짓점 (-4,-7) → (0,0) · 이동 (4,7) · l': 2x-3y+11=0 · 거리 13/√13 (연습-248 원문)
+  - {slot_id: L2-3, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-연습-249, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 원 중심 이동 · 두 중심 거리 조건, insight_type: 조건통합형, depth: 2}, problem_summary: "원 C₁: x²+y²-6x+2y+2=0을 x축의 방향으로 -2, y축의 방향으로 p (p>0)만큼 평행이동한 원 C₂에 대하여 C₁과 C₂의 중심 사이의 거리가 3일 때 C₂의 중심의 좌표", answer: "(1, √5-1)"}   # C₁ 중심 (3,-1) · C₂ 중심 (1, p-1) · d²=4+p²=9 → p=√5 (연습-249 원문)
+  - {slot_id: L2-4, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-연습-250, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 원 이동 · 축 접 조건 · 조건 두 개 연립, insight_type: 조건통합형, depth: 2}, problem_summary: "원 (x-a)²+(y-b)²=b² (a>0, b>0)를 x축의 방향으로 3, y축의 방향으로 -8만큼 평행이동한 원이 x축과 y축에 모두 접할 때 a+b", answer: "a+b=5"}   # 이동 후 중심 (a+3, b-8), r=b · |a+3|=|b-8|=b · b=4, a=1 (연습-250 · 교육청 기출)
+  - {slot_id: L2-5, target_star: 4, source: {source_id: 개념원리-CM2-GM-이동-유제-274, tier: star_4, variation_type: equivalent_transform}, variation_status: modified, mechanism: {primary: 대칭이동+평행이동 결합 방정식 규칙 도출, insight_type: 통찰형, depth: 2}, problem_summary: "직선 y = x + 3을 직선 y = x에 대하여 대칭이동한 후 x축의 방향으로 -1, y축의 방향으로 1만큼 평행이동한 직선의 y절편", answer: "y절편 = -1"}   # y=x+3 y=x 대칭 (swap) → x=y+3 → y=x-3 · 이동 (x+1)에서 y+1: y-1=(x+1)-3 → y=x-1 · y절편=-1 (세션 57 정정)
+  # star 5 (7문)
+  - {slot_id: L2-6, target_star: 5, source: {source_id: 개념원리-CM2-GM-이동-연습-252, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 도형 전체 평행이동 → 내접원 이동, insight_type: 절차형, depth: 2}, problem_summary: "세 점 O(0, 0), A(3, 0), B(0, 4)를 꼭짓점으로 하는 삼각형 OAB의 평행이동에 의한 삼각형 O'A'B'에서 B'(6, 2)일 때 삼각형 O'A'B'에 내접하는 원의 방정식", answer: "(x-7)²+(y+1)² = 1"}   # 이동 (6,-2) · 3-4-5 직각 · 내접원 r=1 · 중심 (7,-1) (연습-252 실력UP · 원문)
+  - {slot_id: L2-7, target_star: 5, source: {source_id: 고쟁이-CH04-STEP2-#221, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 평행이동 후 원-직선 접선 조건 · 절댓값 두 해 곱, insight_type: 통찰형, depth: 3}, problem_summary: "평행이동 (x, y) → (x + k, y - 2)에 의해 원 x²+y²+2x-6y-6=0이 직선 3x+4y+10=0과 접하도록 하는 모든 상수 k 값의 곱", answer: "곱 = -31"}   # 중심 (k-1, 1) · |3(k-1)+4+10|/5=4 → |3k+11|=20 · k=3, -31/3 · 곱 -31 (STEP2-#221 원문)
+  - {slot_id: L2-8, target_star: 5, source: {source_id: 고쟁이-CH04-STEP2-#227, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 다중 조건 분기 이동 규칙 반복 시뮬레이션, insight_type: 통찰형, depth: 3}, problem_summary: "좌표평면 위의 점 P(x, y)에 다음과 같은 이동 규칙을 적용한다. xy > 0이면 x > y일 때 y=x 대칭, x ≤ y일 때 (x + 4, y - 6) 이동, xy < 0이면 x축 대칭, xy = 0이면 정지. 점 P(5, 2)에서 시작하여 n번 이동 후 (a, b)에서 정지할 때 a+b+n", answer: "a+b+n = 10"}   # 시뮬레이션 5번 이동 → (5,0) 정지 (STEP2-#227 원문)
+  - {slot_id: L2-9, target_star: 5, source: {source_id: 고쟁이-CH04-STEP2-#231, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 평행이동 후 곡선-직선 교점의 원점 대칭 조건 → 근합=0, insight_type: 통찰형, depth: 3}, problem_summary: "곡선 y=x²+3x를 x축의 방향으로 a만큼 평행이동하면 직선 y=-x와 두 점 P, Q에서 만나고 두 점 P, Q가 원점에 대하여 대칭일 때 두 점 P, Q의 x좌표의 곱", answer: "곱 = -2"}   # x²+(4-2a)x+a²-3a=0 · 근합=0 → a=2 · 근곱=a²-3a=-2 (STEP2-#231 원문)
+  - {slot_id: L2-10, target_star: 5, source: {source_id: 개념원리-CM2-GM-이동-연습-281, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 이동 후 대칭 후 접함 · 순차 변환, insight_type: 조건통합형, depth: 3}, problem_summary: "원 (x-1)²+(y-a)²=4를 x축의 방향으로 3, y축의 방향으로 -2만큼 평행이동한 후 직선 y=x에 대하여 대칭이동한 원이 y축에 접할 때 양수 a", answer: "a=4"}   # 이동 (x-4)²+(y-a+2)²=4 · y=x 대칭 중심 (a-2, 4) · |a-2|=2 · 양수 a=4 (연습-281 원문)
+  - {slot_id: L2-11, target_star: 5, source: {source_id: 개념원리-CM2-GM-이동-연습-282, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 축 대칭 → 삼각형 세 변 합 최소 = 두 대칭점 거리, insight_type: 통찰형, depth: 3}, problem_summary: "점 A(3, 1)과 직선 y=x 위의 점 P, x축 위의 점 Q에 대하여 삼각형 APQ의 둘레의 길이의 최솟값", answer: "둘레 최솟값 = 2√5"}   # A₁(1,3) [y=x 대칭] · A₂(3,-1) [x축 대칭] · 둘레≥A₁A₂=√(4+16)=2√5 (연습-282 원문)
+  - {slot_id: L2-12, target_star: 5, source: {source_id: 개념원리-CM2-GM-이동-연습-285, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 원 중심 대칭축 = 수직이등분선, insight_type: 통찰형, depth: 3}, problem_summary: "원 x²+y²-4x-8y=0을 직선 y=ax+b에 대하여 대칭이동하니 원 x²+y²=c일 때 abc의 값", answer: "abc = -25"}   # 두 원 중심 (2,4) → (0,0) · 축 = 수직이등분선 · a=-1/2, b=5/2, c=20 (연습-285 원문)
+
+# ══════════════════════════════════════════════════════════════
+# §6. Level 3 슬롯 (3문 · ★ 5 심화 · 통찰 정점 · 세션 55 3문/페이지 통합)
+# ══════════════════════════════════════════════════════════════
+level3_slots:
+  - slot_id: L3-1
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 고쟁이-CH04-STEP2-#225, tier: star_5, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 포물선 평행이동으로 이동 벡터 추출 · 두 원 상호 위치 (마름모 성질 · 반지름·현·중심거리 관계), insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      포물선 y=x²+2ax+2a²을 y=x²+a²-a로 옮기는 평행이동에 의해
+      원 C₁: x²+(y-5)²=9를 옮긴 원을 C₂라 하자. 두 원 C₁, C₂가 서로 다른
+      두 점 A, B에서 만나고 선분 AB의 길이가 2일 때 양수 a의 값.
+    answer: "a=4"   # 두 포물선 꼭짓점 (-a, a²) → (0, a²-a) · 이동 (a, -a) · C₂ 중심 (a, 5-a) · O₁O₂=a√2 · AH=1, r=3 · O₁H=2√2 · 마름모 O₁O₂=2·O₁H=4√2 · a=4 (STEP2-#225 원문)
+    signature: {defBox: false, primary_axis: 이동+두 원 상호작용}
+
+  - slot_id: L3-2
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 고쟁이-CH04-STEP2-#230, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 3중 대칭이동 → 세 점 자동 직각삼각형 · 넓이=½|a²-b²|, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      제2사분면에 있는 직선 y=-2x+3 위의 점 P(a, b)를 직선 y=x에 대하여
+      대칭이동한 점을 Q, 원점에 대하여 대칭이동한 점을 R이라 하자.
+      삼각형 PQR의 넓이가 45일 때 a+b의 값.
+    answer: "a+b=5"   # b=-2a+3 (a<0) · Q(b,a), R(-a,-b) · ∠PQR=90° · 넓이 |a²-b²|=|3a²-12a+9|=45 · a=-2, b=7 (STEP2-#230 원문)
+
+  - slot_id: L3-3
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 고쟁이-CH04-STEP2-#233, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 곡선 위 y=x 대칭 두 점 → 대칭식 변변 빼기 → 이차방정식 근과 계수 관계, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      포물선 y=x²-2x-2 위의 서로 다른 두 점 A, B가 직선 y=x에 대하여
+      대칭일 때 선분 AB의 길이.
+    answer: "AB=√26"   # A(p,q), B(q,p) · 변변 빼기 (p+q-1)(p-q)=0 · p+q=1 · p²-p-3=0 · pq=-3 · AB=√2·√((p+q)²-4pq)=√2·√13=√26 (STEP2-#233 원문)
+
+# ══════════════════════════════════════════════════════════════
+# §7. 실전유형 슬롯 (3문 · ★ 5 premium · 학평 기출 · verbatim_kichul)
+#     R-1: 전국연합-2022-3월-고2-27번 (원 평행이동 · 원-원 통과 · 공통 접선 · 조건통합)
+#     R-2: 전국연합-2024-9월-고1-27번 (y=x·x축 대칭 · 두 외접원 반지름 곱 · 그림 있음)
+#     R-3: 전국연합-2023-9월-고1-16번 (두 원·두 직선 대칭 최단 경로 · 그림 있음)
+# ══════════════════════════════════════════════════════════════
+real_slots:
+  - slot_id: R-1
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2022-3월-고2-27번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 원 평행이동 후 두 원 상호 통과 조건 + 두 원에 대한 공통 접선 조건 · 두 방정식 연립, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 3, unknowns_count: 3, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 양수 a, b에 대하여 원 C: (x-1)²+y²=r² (r>0)을 x축의 방향으로 a만큼,
+      y축의 방향으로 b만큼 평행이동한 원을 C'이라 하자. 두 원 C, C'이
+      다음 조건을 만족시킬 때 a+b+r의 값.
+      (가) 원 C'은 원 C의 중심을 지난다.
+      (나) 직선 4x-3y+21=0은 두 원 C, C'에 모두 접한다.
+    answer: "a+b+r=12"   # a²+b²=r², r=5, 4a-3b=0 → a=3, b=4 · 3+4+5=12 (2022.3월 고2 27번 · 학평 원문)
+    peak_qualification: {C_gm04_pure_scope: true, C_translation_condition_integration: true, C_common_tangent: true}
+
+  - slot_id: R-2
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2024-9월-고1-27번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: y=x 대칭 + x축 대칭 순차 · 두 외접원 반지름 곱 = 18√2 조건 · 외접원 반지름 R=abc/(4S) 공식, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: true}   # Phase 4 확인: 원문 그림 있음 (좌표평면 위 A·B·C·O 4점 삼각형 도해)
+    problem_summary: |
+      좌표평면 위의 점 A(a, 2) (a>2)를 직선 y=x에 대하여 대칭이동한 점을 B,
+      점 B를 x축에 대하여 대칭이동한 점을 C라 하자. 두 삼각형 ABC와 AOC의
+      외접원의 반지름의 길이를 각각 r₁, r₂라 할 때, r₁ × r₂ = 18√2를
+      만족시키는 a²의 값. (단, O는 원점)
+    answer: "a² = 32"   # B(2,a), C(2,-a) · r₁=√(a²+4), r₂=√2·√(a²+4)/2 · r₁r₂=√2(a²+4)/2=18√2 · a²+4=36 · a²=32 (2024.9월 고1 27번 · 학평 원문 · 그림 있음)
+    peak_qualification: {C_gm04_pure_scope: true, C_symmetric_transform_composite: true, C_circumcircle_formula: true, C_visualization_complex: true}
+
+  - slot_id: R-3
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2023-9월-고1-16번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 두 원의 두 축 (x축·y=x) 대칭 · 다중 대칭 최단 경로 · 두 원 사이 거리 = |중심거리|-r₁-r₂, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 4, unknowns_count: 0, subquestion_count: 0, figure_needed: true}   # Phase 4 확인: 원문 그림 있음 (좌표평면 위 두 원 C₁·C₂·직선 y=x 도해)
+    problem_summary: |
+      좌표평면 위에 두 원 C₁: (x-8)²+(y-2)²=4와 C₂: (x-3)²+(y+4)²=4,
+      직선 y=x가 있다. 원 C₁ 위의 점 A, 원 C₂ 위의 점 B, x축 위의 점 P,
+      직선 y=x 위의 점 Q에 대하여 AP+PQ+QB의 최솟값.
+    answer: "최솟값 = 9"   # C₁'의 x축 대칭 (8,-2), C₂의 y=x 대칭 (-4,3) · 두 중심 거리 √(144+25)=13 · 최소 13-2-2=9 (2023.9월 고1 16번 · 학평 원문 · 그림 있음)
+    peak_qualification: {C_gm04_pure_scope: true, C_multi_symmetry: true, C_circle_symmetry: true, C_visualization_complex: true}
+
+# ══════════════════════════════════════════════════════════════
+# §8. 정점 자격 (Level3 + 실전 6문 총합)
+# ══════════════════════════════════════════════════════════════
+peak_qualification_summary:
+  peak_slots: [L2-6, L2-7, L2-8, L2-9, L2-10, L2-11, L2-12, L3-1, L3-2, L3-3, R-1, R-2, R-3]
+  qualified_count: 13
+  criteria_coverage:
+    C1_translation_condition_integration: true       # R-1 (원 평행이동 3조건 연립)
+    C2_multi_symmetry_shortest_path: true            # L2-11·L2-6·R-3 (두 축 대칭 최단)
+    C3_symmetric_composite_transform: true           # L2-5·L2-10·R-2 (대칭+평행 순차)
+    C4_locus_via_symmetry: true                      # L3-3 (곡선 위 y=x 대칭점 쌍)
+    C5_iterative_move_rule: true                     # L2-8 (조건 분기 반복 이동)
+    C6_circle_after_translation: true                # L2-7·L3-1 (평행이동 후 원-직선·원-원)
+    C7_visualization_complex: true                   # R-2·R-3·L3-2 (다중 대칭 도해)
+  distribution_target: {star_3: 14, star_4: 21, star_5: 10, star_5_premium: 3}
+
+# ══════════════════════════════════════════════════════════════
+# §9. 페이지 배치 요약 (세션 55 규약 · 18p 목표 · 3문/페이지 통합 유연)
+# ══════════════════════════════════════════════════════════════
+page_layout:
+  # 개념+대표+확인 (p1~p9)
+  p1: {content: [C1], type: 개념}
+  p2: {content: [E1, CHK1, CHK2], type: 대표+확인}
+  p3: {content: [E2, CHK3, CHK4], type: 대표+확인}
+  p4: {content: [C2], type: 개념}
+  p5: {content: [E3, CHK5, CHK6], type: 대표+확인}
+  p6: {content: [E4, CHK7, CHK8], type: 대표+확인}
+  p7: {content: [C3], type: 개념}
+  p8: {content: [E5, CHK9, CHK10], type: 대표+확인}
+  p9: {content: [E6, CHK11, CHK12], type: 대표+확인}
+  # Level 1 · 12문 · 4문/페이지 · 3페이지 (배지 p10만)
+  p10: {content: [L1-1, L1-2, L1-3, L1-4], type: Level1, banner: true}
+  p11: {content: [L1-5, L1-6, L1-7, L1-8], type: Level1, banner: false, banner_space: true}
+  p12: {content: [L1-9, L1-10, L1-11, L1-12], type: Level1, banner: false, banner_space: true}
+  # Level 2 · 12문 · 4문/페이지 · 3페이지 (배지 p13만)
+  p13: {content: [L2-1, L2-2, L2-3, L2-4], type: Level2, banner: true}
+  p14: {content: [L2-5, L2-6, L2-7, L2-8], type: Level2, banner: false, banner_space: true}
+  p15: {content: [L2-9, L2-10, L2-11, L2-12], type: Level2, banner: false, banner_space: true}
+  # Level 3 · 3문 · 1페이지 (세션 55 3문/페이지 · 그림 없음 확인 · 최대 3문)
+  p16: {content: [L3-1, L3-2, L3-3], type: Level3, banner: true}
+  # 실전 · 3문 · R-2·R-3 그림 있음 (좌표평면 대응 도해)
+  #   R-1 (그림 없음·짧음) 단독 or R-1 상단 + 짧은 확장 · R-2 (도해) 단독 · R-3 (도해) 단독
+  #   → p17: R-1 단독 (배지) · p18: R-2 (도해) · p19: R-3 (도해) → 총 19p
+  #   또는 세션 55 3문/페이지 통합 규약 하 R-1+R-2 페어 (도해 슬림) · R-3 단독 → 총 18p
+  #   조판 시 실측 판단 · 목표 18p (그림 크기에 따라 19p 허용)
+  p17: {content: [R-1, R-2], type: 실전, banner: true, figure_reproduction: true, source_badge: true, layout_hint: 2문/페이지_도해슬림}
+  p18: {content: [R-3], type: 실전, banner: false, banner_space: true, figure_reproduction: true, source_badge: true, layout_hint: 1문/페이지_도해}
+  total_pages_est: 18
+
+# ══════════════════════════════════════════════════════════════
+# §10. Gate 5.0 준비 · 검증 대기 항목
+# ══════════════════════════════════════════════════════════════
+gate5_readiness:
+  source_id_all_present: true
+  tier_all_specified: true
+  target_star_all_specified: true
+  answer_verified: false            # concept-author 조판 후 mathjs 자체 검증 의무 (Phase 2)
+  copyright_similarity_pending: true
+  mechanism_all_specified: true
+  peak_qualification_documented: true
+
+# ══════════════════════════════════════════════════════════════
+# §11. 마스터 정책 준수 확인 (세션 55 신정책 4종 포함)
+# ══════════════════════════════════════════════════════════════
+master_policy_compliance:
+  policy_no_textbook_recap: true            # 개념 슬롯은 표준 정의 (교과 회고 아님)
+  policy_slot_size_uniform: N/A             # 정리편 · 시험지 pair×2 제약 무관
+  cm1_curriculum_scope: N/A                 # CM2 단원
+  star_notation_spacing: true               # 청사진 내부 필드는 star_5 등 YAML 형식 (학생 자료 노출 없음)
+  cm2_calculus_terms_check_pending: true    # Phase 2·3 답지 작성 시 매개변수·극한·삼각함수·벡터 등 자연어화 검증
+  no_proof_problems: true                   # 2026-07-19 마스터 지시 · 증명 문제 편입 제외 (모두 값 구하기)
+  verbatim_kichul_R1R2R3: true              # 실전 3문 학평 원본 인용 · \dmkichul 배지
+  # 세션 55 신정책 4종 (feedback_figure_source_original_only, feedback_figure_point_size_rule, feedback_figure_frame_screen_fill, feedback_page_layout_flexible_rule)
+  figure_source_original_only: true         # R-2·R-3 원문 그림 있음 · R-1 원문 그림 없음 (Phase 2 PDF 재확인)
+  figure_point_size_rule_pending: true      # Phase 2 TikZ 조판 시 주요 정점 2.2pt · 파생점 2pt 표준 적용
+  figure_frame_screen_fill_pending: true    # Phase 2 R-2·R-3 조판 시 평면도형 여백 ≥20% 확인
+  page_layout_flexible_rule: true           # 실전 R-1+R-2 페어 (2문/페이지·도해슬림) · R-3 단독 (1문/페이지·도해) 유연 적용
+
+# ══════════════════════════════════════════════════════════════
+# §12. 각 슬롯 figure_needed 필드 (원본 은행 problem_summary 조회 기반)
+# ══════════════════════════════════════════════════════════════
+figure_needed_summary:
+  # 개념 (자체 도식 정도만 · 원본 그림 무관 · 필요 시 평행이동 벡터·대칭축 개념 도해 최소한)
+  # 대표·확인·L1·L2·L3: 원본 은행 대조 결과 원문 그림 없음 (텍스트 발문 완결) → 조판 금지
+  #   예외: 고쟁이 STEP1 #210 (그래프 변환 4문항) · STEP2 #234·#235·#237 (도형 그림 있음)은 본 청사진 미선정
+  # 실전:
+  R-1_figure: {status: 원문없음_유력, note: "학평 2022.3월 고2 27번 · 원 평행이동+두 원+직선 · 원문 도해 없이 텍스트 발문 완결 유력 · Phase 2 PDF 재확인 필수"}
+  R-2_figure: {status: 원문있음, note: "학평 2024.9월 고1 27번 · 좌표평면 위 A·B·C·O 4점 삼각형 도해 원문 제공 · Phase 2 TikZ 재현 (좌표평면 대응 · 세션 55 4대 정책 준수)"}
+  R-3_figure: {status: 원문있음, note: "학평 2023.9월 고1 16번 · 좌표평면 위 두 원 C₁·C₂와 직선 y=x 도해 원문 제공 · Phase 2 TikZ 재현 (좌표평면 대응 · 세션 55 4대 정책 준수)"}
+  # Phase 2 (2026-07-20~) 세션 55 정합 정정: R-2·R-3만 원문 그림 있음 · R-1 원문 그림 없음 유력 (본편 헤더와 통일 · 조판 전 PDF 크롭 재확인)
+
+# ══════════════════════════════════════════════════════════════
+# §13. 다음 Phase (본편·답지 작성) 착수 준비
+# ══════════════════════════════════════════════════════════════
+next_phase:
+  phase_2_main_tex:
+    priority_check:
+      - 각 슬롯 mathjs 답 자체 검증 재실행 (특히 CHK2·L1-10·L2-5 자체 정정 값 재확인)
+      - 대표예제 6문 (E1·E2·E3·E4·E5·E6) 풀이 dmapproach + dmsolution + dmanswer 조판
+      - R-1·R-2·R-3 verbatim 발문 원문 확보 (2022.3·2024.9·2023.9 학평 pdf 크롭·읽기)
+      - R-2·R-3 좌표평면 대응 도해 TikZ 조판 (bank/도해-카탈로그.md archive 검색 → 신규 · 세션 55 4대 정책 준수)
+      - R-1 원문 그림 유무 PDF 재확인 (2022.3월 고2 27번)
+    tex_template: templates/deep-math.sty (CM2-GM-01·02·03 정리편 골든 계승)
+    build_directory: output/공통수학2/DeeP-Math-정리편/
+  phase_3_answer_sheet:
+    priority_check:
+      - Critical Point 서술 스타일 (feedback_critical_point_style)
+      - CM2 답지 자연어 규정 (매개변수·극한·삼각함수·벡터 우회)
+      - 학평 3문 답지 (R-1·R-2·R-3) 그림 재현 (R-2·R-3)·풀이 완결
+      - quickgrid 답만 표기 (feedback_answer_display_final_value_only)
+  master_review_items:
+    - 개념 3분 배분 (C1 평행이동·C2 축·원점 대칭·C3 y=x·y=-x·점·직선 대칭+최단) 승인 요청
+    - R-1 원문 그림 유무 · Phase 2 조판 전 PDF 확인
+    - L1-10·L2-5 자체 정정 답 (p²+q²=5, y절편=-1) 조판 시 재검증
+    - 세션 55 3문/페이지 규약 하 실전 R-1+R-2 페어 (2문/페이지·도해슬림) 승인 or R-1·R-2·R-3 각 단독 (총 19p) 선택
+    - L2-8 (반복 이동 규칙) star_5 심화형 편입 승인 (Level2 상단 · 논리 분기 부담)

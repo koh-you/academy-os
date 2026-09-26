@@ -1,0 +1,53 @@
+/* 출결 체크 모달의 확인 단계. App.css 가 파일 크기 상한에 걸려 있어 도메인 CSS 로 둔다. */
+
+/* 저장될 값 요약 한 줄(상태 · 등원 · 하원 · 사유). 확인 단계 동안 위 입력은 잠기므로 여기서 값을 읽는다. */
+.attendanceConfirmPanel .attendanceConfirmSummary {
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* 2단계는 [취소][저장만][저장 후 발송] 세 버튼이라 공용 2열 그리드 대신 한 줄로 두고, 좁으면 줄바꿈한다. */
+.attendanceConfirmPanel .attendanceConfirmActions.saveMode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attendanceConfirmPanel .attendanceConfirmActions.saveMode > button {
+  flex: 1 1 auto;
+}
+
+.attendanceConfirmPanel .attendanceConfirmActions.saveMode > .softButton:first-child {
+  flex: 0 0 auto;
+}
+
+/* 2026-09-25 · 이미 예약된 결석 알림톡 경고. 확인 패널 자체가 pending 톤이라 그 안에서는 danger 톤으로 구분한다.
+   여기서 예약을 취소하지는 않는다 — 취소 위치(알림관리 › 예약)를 알려주는 문구일 뿐이다. */
+.attendanceConfirmPanel .attendanceReservedAbsenceWarning {
+  background: var(--status-danger-bg);
+  border: 1px solid var(--status-danger-border);
+  border-radius: 8px;
+  color: var(--status-danger-text);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  padding: 10px 12px;
+}
+
+/* 2026-09-25 · 출결 상태 탭은 '대기' 가 늘어 5개다. 여러 모달이 함께 쓰는 .typeTabs(3열)는 그대로 두고
+   이 모달만 한 줄에 놓는다. 좁은 화면에서는 공용 3열 배치로 되돌아간다. */
+.typeTabs.attendanceStatusTabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 640px) {
+  .typeTabs.attendanceStatusTabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 2026-09-25 · 대기로 되돌릴 때 잠기는 입력이 눌러도 되는 칸처럼 보이지 않게 한다. */
+.attendanceModal .fieldGrid input:disabled {
+  background: var(--academy-surface-muted, #f8fafc);
+  color: var(--academy-muted, #64748b);
+  cursor: not-allowed;
+}
