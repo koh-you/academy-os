@@ -4,6 +4,7 @@ export function LessonModalBasics({
   color,
   date,
   endTime,
+  isEditingExistingLesson = false,
   isFormLocked,
   isLessonTypeChoiceDisabled,
   lessonColorOptions,
@@ -105,9 +106,13 @@ export function LessonModalBasics({
           />
         </label>
       </div>
-      {/* 2026-09-26 · 시작 시간을 바꾸면 종료가 +3시간으로 따라온다(사용자가 종료를 직접 고치면 그 값이 남는다). */}
+      {/* 2026-09-26(검증 반영) · 힌트를 실제 동작과 맞춘다.
+          신규 등록은 시작을 바꿀 때마다 종료를 +3시간으로 다시 맞추고,
+          기존 수업 편집은 사람이 정해 둔 종료를 덮지 않는다. */}
       <small className="muted lessonModalFieldHint">
-        시작 시간을 바꾸면 종료 시간이 3시간 뒤로 맞추어집니다. 종료 시간은 직접 고칠 수 있습니다.
+        {isEditingExistingLesson
+          ? "시작 시간을 바꾸면 3시간짜리 수업일 때만 종료가 따라 움직입니다. 직접 정해 둔 종료 시간은 그대로 둡니다."
+          : "시작 시간을 바꾸면 종료 시간이 3시간 뒤로 맞추어집니다. 종료 시간은 직접 고칠 수 있습니다."}
       </small>
     </>
   );

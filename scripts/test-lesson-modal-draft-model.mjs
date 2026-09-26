@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import {
   createLessonModalSubmitPayload,
-  getLessonModalValidationError
+  getLessonModalRosterNotice,
+  getLessonModalValidationError,
+  isLessonModalRosterRequired,
+  lessonModalRosterRequiredTypes
 } from "../src/domains/lessons/lessonModalDraftModel.js";
 
 const normalizeTimeInput = (value) => (/^\d{2}:\d{2}$/.test(value) ? value : "");
@@ -176,5 +179,71 @@ assert.equal(
   false,
   "non-closure lessons must not submit closure makeup creation"
 );
+
+// 2026-09-26(검증 반영) · 푸터의 명단 안내와 저장 검증이 갈라지지 않게 잠근다.
+// 예전에는 lessonType 을 보지 않아 저장이 막히는 유형에서도 "포함 학생 0명으로 저장됩니다." 를 띄웠고,
+// 같은 aria-live 안에서 "저장 실패 / 신입생 보강 학생을 1명 이상 선택해 주세요." 와 정반대의 말을 했다.
+for (const lessonType of lessonModalRosterRequiredTypes) {
+  assert.equal(isLessonModalRosterRequired(lessonType), true);
+  assert.equal(
+    getLessonModalRosterNotice({ lessonType, saveState: "idle", selectedStudentCount: 0 }),
+    "학생을 1명 이상 선택해야 저장됩니다.",
+    `${lessonType} must not promise a 0-student save`
+  );
+  // 같은 규칙에서 나온 검증 오류가 실제로 저장을 막는지 함께 확인한다.
+  assert.notEqual(
+    getLessonModalValidationError({
+      ...validDraft,
+      lessonType,
+      name: "보강",
+      studentIds: []
+    }),
+    "",
+    `${lessonType} must block an empty roster save`
+  );
+}
+
+for (const lessonType of ["class", "preExam", "exam", "makeup", "examPrep", "closure"]) {
+  assert.equal(isLessonModalRosterRequired(lessonType), false);
+  assert.equal(
+    getLessonModalRosterNotice({ lessonType, saveState: "idle", selectedStudentCount: 0 }),
+    "포함 학생 0명으로 저장됩니다."
+  );
+  assert.equal(
+    getLessonModalValidationError({ ...validDraft, lessonType, studentIds: [] }),
+    "",
+    `${lessonType} must still allow an empty roster save`
+  );
+}
+
+// 1명이라도 고르면 안내는 사라진다.
+assert.equal(
+  getLessonModalRosterNotice({ lessonType: "class", saveState: "idle", selectedStudentCount: 1 }),
+  ""
+);
+assert.equal(
+  getLessonModalRosterNotice({
+    lessonType: "newStudentMakeup",
+    saveState: "idle",
+    selectedStudentCount: 2
+  }),
+  ""
+);
+
+// 저장 중·완료·실패에는 그리지 않는다 — 실패 메시지가 같은 aria-live 에서 이미 같은 말을 한다.
+for (const saveState of ["saving", "verifying", "saved", "failed"]) {
+  assert.equal(
+    getLessonModalRosterNotice({ lessonType: "class", saveState, selectedStudentCount: 0 }),
+    ""
+  );
+  assert.equal(
+    getLessonModalRosterNotice({
+      lessonType: "newStudentMakeup",
+      saveState,
+      selectedStudentCount: 0
+    }),
+    ""
+  );
+}
 
 console.log("lesson modal validation and submit payload model passed");

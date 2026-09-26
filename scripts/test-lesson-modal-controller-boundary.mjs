@@ -40,6 +40,10 @@ for (const requiredSource of [
   "createLessonModalSubmitPayload",
   "getLessonClosureBlockingNotificationJobs",
   "await onSubmit(",
+  // 2026-09-26(검증 반영) · 신규 등록은 반을 고르지 않은 상태로 연다(목록 첫 반을 미리 선택하지 않는다).
+  // 미리 선택해 두면 「반 불러오기」가 첫 반에서 죽은 컨트롤이 되고 저장 payload 가 고르지 않은 반을 참칭한다.
+  'useState(initialLesson?.classTemplateId || "")',
+  "isEditingExistingLesson",
   "<LessonModalBasics",
   "<LessonModalClosurePanel",
   "<LessonModalStudentPicker",
@@ -59,7 +63,8 @@ for (const forbiddenSource of [
   "supabase",
   "notification_jobs",
   "Solapi",
-  "localStorage"
+  "localStorage",
+  'normalizedTemplates[0]?.classTemplateId || ""'
 ]) {
   assert.equal(
     controllerSource.includes(forbiddenSource),

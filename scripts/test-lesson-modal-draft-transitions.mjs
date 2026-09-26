@@ -4,7 +4,8 @@ import {
   createLessonModalDateChangePatch,
   createLessonModalStartTimeChangePatch,
   createLessonModalTemplateChangePatch,
-  createLessonModalTypeChangePatch
+  createLessonModalTypeChangePatch,
+  getLessonModalFollowedEndTime
 } from "../src/domains/lessons/lessonModalDraftTransitions.js";
 
 const templates = [
@@ -159,7 +160,7 @@ assert.deepEqual(
   "a manually touched closure makeup date must be preserved"
 );
 
-// 2026-09-26 · 사용자가 시작 시간을 직접 바꾸면 종료는 기본 +3시간이다.
+// 2026-09-26 · 신규 등록은 시작 시간을 바꾸면 종료가 항상 +3시간이다.
 assert.deepEqual(
   createLessonModalStartTimeChangePatch({ nextStartTime: "16:00" }),
   { endTime: "19:00", startTime: "16:00" }
@@ -169,10 +170,13 @@ assert.deepEqual(
   { endTime: "12:30", startTime: "09:30" }
 );
 
-// 종료를 손으로 고친 뒤에 시작을 다시 바꾸면 다시 +3시간으로 맞춘다 — 패치가 순수함수라
-// 이전 종료값과 무관하게 같은 결과가 나온다(예측 가능함을 우선한 선택).
+// 신규 등록에서는 종료를 손으로 고친 뒤에 시작을 다시 바꿔도 +3시간으로 다시 맞춘다(사용자 요청 그대로).
 assert.deepEqual(
-  createLessonModalStartTimeChangePatch({ nextStartTime: "14:00" }),
+  createLessonModalStartTimeChangePatch({
+    currentEndTime: "11:00",
+    nextStartTime: "14:00",
+    previousStartTime: "09:30"
+  }),
   { endTime: "17:00", startTime: "14:00" }
 );
 
@@ -191,6 +195,20 @@ assert.deepEqual(
   { endTime: "23:59", startTime: "20:59" }
 );
 
+// 2026-09-26(검증 반영) · 클램프 결과가 시작보다 같거나 작으면 종료를 건드리지 않는다.
+// 23:59 로 시작하면 종료도 23:59 가 되어 endTime > startTime 검증에 걸리는데,
+// 종료 상한이 23:59 라 사용자가 고칠 방법이 없는 저장 실패가 된다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ currentEndTime: "19:00", nextStartTime: "23:59" }),
+  { startTime: "23:59" },
+  "a 23:59 start must leave the previous end time alone"
+);
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ currentEndTime: "19:00", nextStartTime: "23:00" }),
+  { endTime: "23:59", startTime: "23:00" },
+  "a 23:00 start still clamps to 23:59 because it stays after the start"
+);
+
 // 시간이 비어 있거나 망가졌으면 종료를 건드리지 않는다(입력 중인 값을 덮지 않는다).
 assert.deepEqual(createLessonModalStartTimeChangePatch({ nextStartTime: "" }), { startTime: "" });
 assert.deepEqual(createLessonModalStartTimeChangePatch({ nextStartTime: "abc" }), { startTime: "abc" });
@@ -200,5 +218,71 @@ assert.deepEqual(
   createLessonModalStartTimeChangePatch({ lessonMinutes: 90, nextStartTime: "16:00" }),
   { endTime: "17:30", startTime: "16:00" }
 );
+
+// 2026-09-26(검증 반영) · 기존 수업 편집은 사람이 정해 둔 종료를 조용히 덮지 않는다.
+// 실측 버그: 저장돼 있던 16:00-17:45 수업에서 시작만 16:30 으로 옮기니 종료가 19:30(3시간)이 됐다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({
+    currentEndTime: "17:45",
+    isEditingExistingLesson: true,
+    nextStartTime: "16:30",
+    previousStartTime: "16:00"
+  }),
+  { startTime: "16:30" },
+  "an edited lesson must keep a human-chosen end time"
+);
+
+// 종료가 "직전 시작 + 3시간" 그대로였다면 편집 중에도 따라 움직인다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({
+    currentEndTime: "19:00",
+    isEditingExistingLesson: true,
+    nextStartTime: "16:30",
+    previousStartTime: "16:00"
+  }),
+  { endTime: "19:30", startTime: "16:30" },
+  "an edited lesson that still matches start + 3h keeps following the start"
+);
+
+// 직전 시작이 비어 있으면(편집 중 입력이 망가진 상태) 종료를 건드리지 않는다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({
+    currentEndTime: "19:00",
+    isEditingExistingLesson: true,
+    nextStartTime: "16:30",
+    previousStartTime: ""
+  }),
+  { startTime: "16:30" },
+  "an unreadable previous start must not move the end time"
+);
+
+// 직전 종료가 클램프된 23:59 였다면 같은 클램프 기준으로 비교한다(22:00 + 3시간 = 23:59).
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({
+    currentEndTime: "23:59",
+    isEditingExistingLesson: true,
+    nextStartTime: "14:00",
+    previousStartTime: "22:00"
+  }),
+  { endTime: "17:00", startTime: "14:00" },
+  "a clamped end time still counts as following the start"
+);
+
+// 편집이어도 클램프 결과가 시작 이하이면 종료는 그대로 둔다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({
+    currentEndTime: "19:00",
+    isEditingExistingLesson: true,
+    nextStartTime: "23:59",
+    previousStartTime: "16:00"
+  }),
+  { startTime: "23:59" }
+);
+
+// 파생 헬퍼는 따로도 쓸 수 있어야 한다(같은 클램프 규칙을 비교와 계산이 공유한다).
+assert.equal(getLessonModalFollowedEndTime("16:00"), "19:00");
+assert.equal(getLessonModalFollowedEndTime("22:00"), "23:59");
+assert.equal(getLessonModalFollowedEndTime(""), "");
+assert.equal(getLessonModalFollowedEndTime("16:00", 105), "17:45");
 
 console.log("lesson modal draft transition model passed");

@@ -30,7 +30,12 @@ for (const requiredSource of [
   "onNameChange(event.target.value)",
   "onDateChange(event.target.value)",
   "onStartTimeChange(event.target.value)",
-  "onEndTimeChange(event.target.value)"
+  "onEndTimeChange(event.target.value)",
+  // 2026-09-26(검증 반영) · 힌트 문구가 실제 동작과 갈라지지 않게 잠근다.
+  // 신규 등록은 항상 +3시간, 기존 수업 편집은 사람이 정해 둔 종료를 유지한다.
+  "isEditingExistingLesson",
+  "시작 시간을 바꾸면 3시간짜리 수업일 때만 종료가 따라 움직입니다. 직접 정해 둔 종료 시간은 그대로 둡니다.",
+  "시작 시간을 바꾸면 종료 시간이 3시간 뒤로 맞추어집니다. 종료 시간은 직접 고칠 수 있습니다."
 ]) {
   assert.ok(
     basicsSource.includes(requiredSource),

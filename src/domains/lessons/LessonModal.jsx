@@ -82,7 +82,11 @@ export function LessonModal({
   });
   const normalizedTemplates = normalizeClassTemplates(templates);
   const fallbackTemplate = normalizedTemplates[0] ?? { name: "", startTime: "16:00", endTime: "17:00", color: lessonCalendarColors.regular };
-  const [classTemplateId, setClassTemplateId] = useState(initialLesson ? initialLesson.classTemplateId || "" : normalizedTemplates[0]?.classTemplateId || "");
+  // 2026-09-26 · 신규 등록은 반을 고르지 않은 상태("직접 입력 일정")로 연다.
+  // 목록 첫 반을 미리 선택해 두면 명단은 0명인데 반만 골라져 있는 상태가 되고,
+  // 같은 항목을 다시 골라도 <select> 가 change 를 쏘지 않아 「반 불러오기」가 죽은 컨트롤이 된다.
+  // 저장 payload 도 사용자가 고르지 않은 반을 참칭하게 된다. 기존 수업 편집은 그 수업의 반을 그대로 쓴다.
+  const [classTemplateId, setClassTemplateId] = useState(initialLesson?.classTemplateId || "");
   const activeTemplate = normalizedTemplates.find((template) => template.classTemplateId === classTemplateId) ?? fallbackTemplate;
   const initialDraft = createLessonModalInitialDraft({
     activeStudents,
@@ -131,6 +135,7 @@ export function LessonModal({
   const [closureMakeupNotificationDrafts, setClosureMakeupNotificationDrafts] = useState({});
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
+  const isEditingExistingLesson = Boolean(initialLesson);
   const isSaving = saveState === "saving";
   const isSaved = saveState === "saved";
   const isFormLocked = isSaving || isSaved;
@@ -242,8 +247,14 @@ export function LessonModal({
 
   // 2026-09-26 · 사용자가 시작 시간을 직접 바꿀 때만 종료를 +3시간으로 다시 맞춘다.
   // 모달을 열 때·반을 불러올 때·날짜를 바꿀 때는 각각의 기존 경로가 종료를 정한다.
+  // 기존 수업 편집에서는 사람이 정해 둔 종료(직전 시작+3시간이 아닌 값)를 덮지 않는다.
   function handleStartTimeChange(nextStartTime) {
-    const patch = createLessonModalStartTimeChangePatch({ nextStartTime });
+    const patch = createLessonModalStartTimeChangePatch({
+      currentEndTime: endTime,
+      isEditingExistingLesson,
+      nextStartTime,
+      previousStartTime: startTime
+    });
     setStartTime(patch.startTime);
     if (patch.endTime !== undefined) setEndTime(patch.endTime);
   }
@@ -390,7 +401,7 @@ export function LessonModal({
       footer={(
         <LessonModalActions
           closureMakeupEnabled={closureMakeupEnabled}
-          isEditing={Boolean(initialLesson)}
+          isEditing={isEditingExistingLesson}
           isSaved={isSaved}
           isSaving={isSaving}
           lessonType={lessonType}
@@ -413,6 +424,7 @@ export function LessonModal({
             color={color}
             date={date}
             endTime={endTime}
+            isEditingExistingLesson={isEditingExistingLesson}
             isFormLocked={isFormLocked}
             isLessonTypeChoiceDisabled={isLessonTypeChoiceDisabled}
             lessonColorOptions={lessonColorOptions}

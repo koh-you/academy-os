@@ -23,6 +23,9 @@ export function LessonModalStudentPicker({
 }) {
   // 2026-09-26 · 「전체 선택/전체 해제」는 학년 그룹마다 두지 않고 이 헤더의 토글 하나로 모은다(docs/ui-row-actions.md R1).
   const isEverySelected = activeStudentCount > 0 && selectedStudentIds.length >= activeStudentCount;
+  // 2026-09-26(검증 반영) · 검색 중에는 이 토글을 숨긴다. 대상이 재원생 전원이라 화면에 보이지 않는 학생까지
+  // 해제해 버린다 — 검색 중의 일괄 조작은 아래 「검색 결과 N명만 선택」 하나만 남긴다.
+  const isSearching = Boolean(search.trim());
 
   return (
     <div className="modalSection lessonModalSection lessonStudentPicker">
@@ -53,14 +56,16 @@ export function LessonModalStudentPicker({
               label="반 불러오기"
               text="반을 고르면 수업명·시작/종료 시간·달력 색상과 그 반에 배정된 학생 명단이 한 번에 채워집니다. 채워진 뒤에도 학생은 하나씩 켜고 끌 수 있습니다."
             />
-            <button
-              className="softButton compact lessonRosterSelectAllButton"
-              disabled={isRosterLocked}
-              onClick={isEverySelected ? onClearAll : onSelectAll}
-              type="button"
-            >
-              {isEverySelected ? "전체 해제" : "전체 선택"}
-            </button>
+            {isSearching ? null : (
+              <button
+                className="softButton compact lessonRosterSelectAllButton"
+                disabled={isRosterLocked}
+                onClick={isEverySelected ? onClearAll : onSelectAll}
+                type="button"
+              >
+                {isEverySelected ? `전체 ${activeStudentCount}명 해제` : `전체 ${activeStudentCount}명 선택`}
+              </button>
+            )}
           </div>
         )}
         meta={<span className="muted">선택 {selectedStudentIds.length}명</span>}
@@ -77,7 +82,7 @@ export function LessonModalStudentPicker({
           value={search}
         />
         {/* 2026-09-26 · 검색 중일 때만 렌더한다. 검색어가 없으면 이 버튼은 헤더의 「전체 선택」과 같은 일을 한다. */}
-        {search.trim() ? (
+        {isSearching ? (
           <button
             className="softButton"
             disabled={isRosterLocked}
@@ -96,7 +101,7 @@ export function LessonModalStudentPicker({
       <div className="lessonStudentGroups">
         {groupedStudents.length === 0 ? (
           <EmptyState
-            action={search.trim() ? (
+            action={isSearching ? (
               <button
                 className="softButton compact"
                 disabled={isRosterLocked}
@@ -107,10 +112,10 @@ export function LessonModalStudentPicker({
               </button>
             ) : null}
             className="lessonStudentSearchEmpty"
-            description={search.trim()
+            description={isSearching
               ? "학생 이름·학년·학교를 다시 확인하세요."
               : "학생관리에서 재원생을 등록하면 명단에 표시됩니다."}
-            title={search.trim() ? "검색 결과가 없습니다." : "선택 가능한 학생이 없습니다."}
+            title={isSearching ? "검색 결과가 없습니다." : "선택 가능한 학생이 없습니다."}
           />
         ) : groupedStudents.map((group) => (
           <div className="lessonStudentGroup" key={group.grade}>

@@ -1,5 +1,6 @@
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ModalFooter } from "../../shared/components/Modal.jsx";
+import { getLessonModalRosterNotice } from "./lessonModalDraftModel.js";
 
 export function LessonModalActions({
   closureMakeupEnabled,
@@ -28,11 +29,14 @@ export function LessonModalActions({
                 ? "신입생 보강 등록 후 알림톡 예약"
                 : "수업 등록"
         }`;
-  // 2026-09-26 · 기본 선택이 전원에서 0명으로 바뀌었다. 저장 자체는 기존 계약 그대로 허용하고(휴강처럼 명단 없는 수업이 있다),
-  // 명단이 비어 있다는 사실만 저장 경계 문구 옆에 알린다. 1명 이상이 필요한 유형은 getLessonModalValidationError 가 그대로 막는다.
-  const emptyRosterNotice = !isSaving && !isSaved && selectedStudentCount === 0
-    ? "포함 학생 0명으로 저장됩니다."
-    : "";
+  // 2026-09-26 · 기본 선택이 전원에서 0명으로 바뀌었다. 명단이 비어 있다는 사실을 저장 경계 문구 옆에 알리되,
+  // 1명 이상이 필요한 유형(신입생 보강·휴강 보충)에서는 "0명으로 저장됩니다" 가 아니라 저장이 막힌다고 말해야 한다.
+  // 판정은 getLessonModalValidationError 와 같은 lessonModalRosterRequiredTypes 를 본다(문구가 갈라지지 않는다).
+  const emptyRosterNotice = getLessonModalRosterNotice({
+    lessonType,
+    saveState,
+    selectedStudentCount
+  });
 
   // 2026-09-26 · 상태바와 액션을 공용 ModalFooter 하나로 묶어 모달 하단에 고정한다(본문만 스크롤).
   // 순서는 docs/ui-principles.md §3: [파괴적 왼쪽 끝] … [soft 취소] [primary 확정].
