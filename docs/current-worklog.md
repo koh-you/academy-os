@@ -1,5 +1,25 @@
 # Academy OS Current Worklog
 
+## 2026-09-26 수업 등록 모달 개편
+
+- 「삭제하거나 감춰주세요」 를 그대로 따랐으면 기능이 사라졌다. `큰 수업 틀` select 은 메타데이터 입력이 아니라 `lessonModalDraftTransitions.js` 의 패치 하나로 수업명·시간·색상·명단을 동시에 바꾼다. 사용자가 지우라고 한 것은 「폼 위쪽에 맥락 없이 놓인 드롭다운」 이지 「반 단위로 채우는 기능」 이 아니어서, 패치는 그대로 두고 진입점만 명단 옆으로 옮겼다.
+- 고정 푸터를 sticky 로 풀지 않고 공용 `Modal` 에 `footer` 슬롯을 넣은 이유: `.modalScrollBody` 가 `gap: 20px` 그리드라 sticky 로 두면 푸터 위 20px 틈으로 본문이 비친다. 그리드 행을 `auto minmax(0,1fr) auto` 로 두는 쪽이 저장바 있는 다른 모달에도 그대로 쓸 수 있다.
+- 오른쪽 열의 자체 스크롤은 열에 `overflow-y:auto` 를 걸지 않고 `.lessonStudentGroups` 에 `max-height: min(40dvh, 340px)` 로 준다. 모달이 스크롤 모드라 열 높이가 확정적이지 않아 열에 건 overflow 는 동작하지 않는다. 이 방식은 1열로 접힐 때도 그대로 쓴다.
+- `getByLabel("반 불러오기", { exact: true })` 가 안 잡혔다. 감싸는 `<label>` 의 텍스트에 `<select>` 의 선택된 option 글자까지 들어가 접근성 이름이 「반 불러오기직접 입력 일정」 이 된다. select 에 `aria-label` 을 명시해 고정했다(예전 코드는 `getByLabel` 을 부분일치로 써서 드러나지 않았다).
+- 자정 넘김은 `addMinutesToAttendanceTime` 가 24시간으로 돌아 22:30 → 01:30 을 주는데, 저장 검증은 `endTime > startTime` 을 요구해 저장이 막힌다. 사용자가 고칠 수 없는 실패를 만들지 않도록 23:59 로 묶고 단위 테스트로 잠갔다.
+- 보이는 것만 측정하면 틀린다: 처음엔 `document.documentElement.scrollHeight` 로 세로 넘침을 재려다 실패했는데, 그건 모달 뒤 달력 페이지 높이였다. 모달이 뷰포트에 들어가는지는 `.modalBackdrop` 의 `scrollHeight > clientHeight` 로 봐야 한다.
+- 공용 `SectionHeader` 의 aside 는 `flex: 0 0 auto` 라 좁은 열에 넣으면 제목을 한 글자씩 짓눌렀다. 좌측 열에서만 `flex-wrap: wrap` + `margin-left: 0` 으로 풀었다(공용 규칙은 그대로).
+
+## 2026-09-26 수업 등록 모달 — 검증 지적 반영
+
+- 「기본 선택을 0명으로」 와 「첫 반이 미리 선택된 채 열림」 이 겹치자 **반 불러오기가 죽은 컨트롤**이 됐다. 각각은 맞는 변경이었는데 조합이 틀렸다. 기본값을 바꿀 때는 그 값을 읽는 다른 컨트롤의 초기 상태까지 같이 봐야 한다.
+- 푸터 안내와 저장 검증이 각자 조건을 들고 있으면 반드시 갈라진다. 실제로 같은 `aria-live` 안에서 「저장 실패 / 신입생 보강 학생을 1명 이상 선택해 주세요. / 포함 학생 0명으로 저장됩니다.」 가 함께 읽혔다. 유형 목록(`lessonModalRosterRequiredTypes`)을 한 곳에 두고 두 함수가 그걸 보게 바꾼 뒤 단위 테스트로 잠갔다.
+- **퍼센트 `flex-basis` 는 줄바꿈을 보장하지 않는다.** `.sectionHeaderAside { flex: 1 1 100% }` 는 1440 에서는 동작했지만 390 에서는 그대로 제목 옆에 남아 283px 넘쳤다. 컨테이너 main 크기가 미정인 채로 배치되면 퍼센트 basis 가 content 로 되돌아간다(인라인으로 `flex-basis: 260px` 를 주면 즉시 줄바꿈 — 실측으로 확인). 1열 grid 로 바꿔 행을 명시했다.
+- 넘침 측정은 **무엇을 재는지**가 전부다. 이전 검사는 `document.documentElement.scrollWidth` 만 봤는데, 모달 카드는 뷰포트 안에 들어가므로 문서는 절대 넘치지 않는다. 실제로 스크롤된 건 `.modalScrollBody` 였다.
+- 390px 에서 `width: auto` 로는 전폭을 못 막았다. App.css 의 `@media (max-width: 640px) .modalFooter > button { flex: 1 1 140px }` 가 이기므로 `flex: 0 0 auto` 가 필요했다.
+- App.css 에서 도메인 css 로 옮긴 셀렉터가 **다른 화면까지 바꿨다**(`.lessonModalSection`·`.lessonModalFields` → 반 개설 모달). 이관은 범위 한정과 함께 해야 한다. 원래 값은 `classTemplateEditorModal.css` 에 명시적으로 복구했다(섹션 gap 12px · 반 이름 전폭 — 실측 재확인).
+- 시작→종료 자동 추종은 신규/편집을 갈라야 한다. 편집에서 「직전 시작 + 3시간」 과 같을 때만 따라가게 하니 16:00-17:45 수업의 시작만 옮겨도 종료가 유지된다. 비교와 계산이 같은 클램프(`getLessonModalFollowedEndTime`)를 공유해야 22:00-23:59 처럼 클램프된 값도 「따라가는 중」 으로 인식된다.
+
 ## 2026-09-26 설명 문구 정리 (HelpTip 전환)
 
 - 스캔은 두 번에 걸쳤다. JSX 앵커(텍스트 노드·description 류 prop)만 보는 1차로 215건을 잡았는데 **모델 파일이 만드는 문구**(휴강 보충 보라색 박스 같은 것)를 놓쳐, 모든 문자열 리터럴을 훑는 2차로 64건을 보강해 275건이 됐다. 알림톡 발송 본문·샘플 데이터·에러 메시지는 컨텍스트 키워드로 걸러냈다.

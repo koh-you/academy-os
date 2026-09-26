@@ -27,7 +27,8 @@ test("new student makeup selects a student and explicitly reserves schedule noti
   const modal = page.getByRole("dialog", { name: "수업 등록" });
   await modal.getByRole("button", { name: "🌱 신입생 보강" }).click();
   await expect(modal.getByLabel("수업명")).toHaveValue("신입생 보강");
-  await expect(modal.getByLabel("큰 수업 틀")).toHaveValue("");
+  // 2026-09-26 · 「큰 수업 틀」 select 은 포함 학생 옆의 「반 불러오기」 로 옮겨졌다.
+  await expect(modal.getByLabel("반 불러오기", { exact: true })).toHaveValue("");
   await expect(modal.getByText("선택 0명")).toBeVisible();
   const notificationCheckbox = modal.getByLabel("수업 저장 후 알림톡을 다음 정각에 예약");
   await expect(notificationCheckbox).toHaveCSS("width", "16px");

@@ -169,6 +169,9 @@ button:disabled {
   max-height: calc(100dvh - 48px);
   overflow: hidden;
 }
+.modalCard.modalScrollable.modalHasFooter {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
 
 .modalScrollBody {
   display: grid;

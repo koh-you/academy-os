@@ -43,6 +43,9 @@ export const allowedClasses = new Set([
   // 공용 프리미티브 (AttendanceKiosk.jsx / Modal.jsx)
   "eyebrow", "muted", "primaryButton", "iconButton",
   "modalBackdrop", "modalCard", "modalScrollable", "modalHeader", "modalScrollBody",
+  // 2026-09-26 · 공용 Modal 이 footer 슬롯을 받을 때 붙는다(본문만 스크롤·푸터 고정).
+  // 키오스크는 footer 를 넘기지 않지만 규칙은 App.css 에 있으므로 두 번들의 모달 규칙을 같게 유지한다.
+  "modalHasFooter",
   "modalFooter", "align-end", "align-center", "align-start", "align-between",
   "tone-default", "tone-danger", "tone-warning",
   // 2026-09-25 · 공용 Modal 이 titleAdornment(제목 옆 HelpTip)를 받을 때만 쓰는 줄이다.

@@ -13,9 +13,9 @@ export function createLessonModalInitialDraft({
 }) {
   const initialDate = initialLesson?.date ?? today;
   const initialTemplateTimes = getTemplateLessonTimes(activeTemplate, initialDate);
-  const initialStudentIds =
-    initialLesson?.studentIds ??
-    activeStudents.map((student) => student.studentId);
+  // 2026-09-26 · 신규 등록은 아무도 선택되지 않은 상태로 시작한다(전원 선택 시드 제거).
+  // 기존 수업 편집은 그 수업의 명단을 그대로 유지한다.
+  const initialStudentIds = initialLesson?.studentIds ?? [];
 
   return {
     closureMakeupDate: addDaysInKorea(initialDate, 7),
