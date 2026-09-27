@@ -1240,3 +1240,8 @@ pm-중3-2-수학` 을 고친 CLI 로 다시 만들었다(0126번류 17건 하단
 
 - 4-7반 22:30 Solapi 예약 8건이 Render UTC 요일 오판으로 전부 명단 제외 취소됐다. 날짜-only 요일 계산과 UTC 회귀 fixture를 추가했다.
 - 코드 배포 뒤 실제 예약은 교사가 `Solapi 예약 업데이트` 1회로 실행하고, 상단 `Solapi 반영 완료` 및 예약 확인의 학부모 4건·학생 4건을 대조한다.
+## 2026-09-27 Render 로그인 장애 — 서버 부팅 PDF 엔진 지연 로드
+
+- Render API가 Failed 상태가 되어 로그인 불가. 수동 재배포는 build 성공 뒤 포트 준비 15분 timeout.
+- `api/server.js` 최상단의 `pdfjs-dist`를 제거하고 실제 시험 PDF 텍스트 추출 시점에만 동적 import하도록 변경했다. 로그인·일반 API가 PDF 엔진보다 먼저 기동한다.
+- 로컬 `/health` 200과 API boot/system/auth/session, runtime lint, scenario 829/829 통과. 배포 후 운영 `/health`와 로그인 API smoke 확인 필요.
