@@ -1,5 +1,6 @@
 ﻿import http from "node:http";
 import { readFile } from "node:fs/promises";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   cancelNotificationJob,
   deleteLesson,
@@ -4216,7 +4217,6 @@ function normalizePdfPageText(items = []) {
 }
 
 async function extractPdfTextPages(buffer) {
-  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const pdf = await getDocument({
     data: new Uint8Array(buffer),
     disableWorker: true,

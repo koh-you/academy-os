@@ -1,11 +1,5 @@
 # Academy OS Current Status
 
-## 2026-09-27 Render 로그인 장애 — 서버 부팅 PDF 엔진 지연 로드
-
-- 운영 Vercel은 정상이나 Render API가 `/health`와 로그인 요청에 응답하지 않았고, 수동 재배포도 build 성공 뒤 포트 준비 단계에서 15분 timeout으로 실패했다.
-- 같은 main을 로컬에서 재현해 `api/server.js`의 최상단 `pdfjs-dist` 정적 import 동안 포트가 열리지 않는 것을 확인했다. 시험 PDF 텍스트 추출 요청에서만 동적 import하도록 바꿔 일반 로그인·상태 확인 서버가 먼저 기동한다.
-- 로컬 서버는 수정 뒤 20초 부팅 fixture 안에서 `/health` 200을 반환했다. API boot, system/auth/session fixture, runtime lint, scenario 829/829를 통과했다. 운영 배포 뒤 `/health`와 로그인 API smoke가 남는다.
-
 ## 2026-09-26 수업 등록 모달 개편 — 가로 2열 · 고정 푸터 · 명단 0명 시작
 
 - 사용자 요청 5건을 한 단위로 처리했다. 기준선(1440×950): 모달이 640×1285px 라 뷰포트를 335px 넘겨 페이지가 통째로 스크롤됐고, 상태바·저장 버튼이 첫 화면 밖에 있었으며, 버튼 폭이 뒤집혀 있었다(취소 431px / ✅ 수업 등록 137px).
