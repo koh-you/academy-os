@@ -1,5 +1,9 @@
 # Daily Development Handoff
 
+## 2026-09-27 PDF 기동 변경 원복
+
+- 사용자 요청으로 #430 원복. runtime·부팅 테스트는 변경 전과 동일하며 부팅 검사 통과. PDF가 장애 원인이라는 이전 기록은 삭제·정정했다. Render Oregon 장애 공지: https://status.render.com/incidents/km2970vv6n18 .
+
 ## 2026-09-26 수업 등록 모달 개편
 
 - 사람 확인: ① 수업일지 › `+ 수업 등록` 에서 오른쪽 「반 불러오기」 로 반을 고르면 수업명·시간·색상·명단이 예전 「큰 수업 틀」처럼 채워지는지. ② 시작 시간을 바꿀 때 종료가 3시간 뒤로 가는 것이 실제 수업 길이와 맞는지(아니면 기본값을 알려달라 — `lessonModalDefaultLessonMinutes` 한 줄이다). ③ 신규 등록이 명단 0명으로 시작하는 것이 편한지, 아니면 다른 기본값을 원하는지.
@@ -1240,8 +1244,3 @@ pm-중3-2-수학` 을 고친 CLI 로 다시 만들었다(0126번류 17건 하단
 
 - 4-7반 22:30 Solapi 예약 8건이 Render UTC 요일 오판으로 전부 명단 제외 취소됐다. 날짜-only 요일 계산과 UTC 회귀 fixture를 추가했다.
 - 코드 배포 뒤 실제 예약은 교사가 `Solapi 예약 업데이트` 1회로 실행하고, 상단 `Solapi 반영 완료` 및 예약 확인의 학부모 4건·학생 4건을 대조한다.
-## 2026-09-27 Render 로그인 장애 — 서버 부팅 PDF 엔진 지연 로드
-
-- Render API가 Failed 상태가 되어 로그인 불가. 수동 재배포는 build 성공 뒤 포트 준비 15분 timeout.
-- `api/server.js` 최상단의 `pdfjs-dist`를 제거하고 실제 시험 PDF 텍스트 추출 시점에만 동적 import하도록 변경했다. 로그인·일반 API가 PDF 엔진보다 먼저 기동한다.
-- 로컬 `/health` 200과 API boot/system/auth/session, runtime lint, scenario 829/829 통과. 배포 후 운영 `/health`와 로그인 API smoke 확인 필요.

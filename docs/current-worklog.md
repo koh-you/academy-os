@@ -1,5 +1,9 @@
 # Academy OS Current Worklog
 
+## 2026-09-27 PDF 기동 변경 원복
+
+- #430의 변경을 revert해 runtime·부팅 테스트를 변경 전과 동일하게 복구했다. 부팅 `/health` 검사 통과. Render Oregon 장애 공지와 실제 장애 시간이 일치하며 PDF 원인 단정은 철회한다.
+
 ## 2026-09-26 수업 등록 모달 개편
 
 - 「삭제하거나 감춰주세요」 를 그대로 따랐으면 기능이 사라졌다. `큰 수업 틀` select 은 메타데이터 입력이 아니라 `lessonModalDraftTransitions.js` 의 패치 하나로 수업명·시간·색상·명단을 동시에 바꾼다. 사용자가 지우라고 한 것은 「폼 위쪽에 맥락 없이 놓인 드롭다운」 이지 「반 단위로 채우는 기능」 이 아니어서, 패치는 그대로 두고 진입점만 명단 옆으로 옮겼다.
@@ -1611,8 +1615,3 @@
 - 9월 6일 일요시험대비 수업을 운영 Supabase 원천에서 `scheduled`로 복구하고 활성 목록 재조회까지 확인했다. 알림 작업은 변경하지 않았다.
 - 달력에 최근 7일 취소 수업 복구 모달을 추가했다. 서버 원천 조회, reload 뒤 복구, CAS·재조회 성공, 7일 필터를 focused fixture와 browser로 검증했다.
 - 운영 화면 재조회에서 복구된 시험대비 수업의 생성 숨김 키가 남는 경계를 발견했다. 복구 성공 시 숨김을 해제하고, 이미 수업만 복구된 항목은 모달의 `달력 표시 복구`로 app_state 원천까지 정리하도록 보강했다.
-## 2026-09-27 Render 로그인 장애 — 서버 부팅 PDF 엔진 지연 로드
-
-- 증상: 로그아웃 뒤 재로그인 불가. Vercel은 200이지만 Render API `/health`가 90초 이상 무응답했고 서비스는 Failed 상태였다. 수동 재배포도 build 성공 뒤 애플리케이션 시작 로그 없이 15분 timeout.
-- 재현/원인: 최신 main을 clean `npm ci` 뒤 로컬 기동하자 `academy-os api server listening` 전에 무거운 `pdfjs-dist` 정적 import 지연이 재현됐다. 시험분석 PDF 추출에서만 필요한 엔진을 `extractPdfTextPages` 내부 동적 import로 옮겼다.
-- 검증: 수정 뒤 로컬 `/health` 200, `test:api-server-boot`, system/auth/session fixture, runtime lint, scenario 829/829 통과. 데이터·알림 발송·DB/API 계약 변경 없음.

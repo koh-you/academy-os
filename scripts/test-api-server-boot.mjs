@@ -14,22 +14,10 @@
 // 한다 — Render 의 헬스체크가 보는 것과 같은 수준이다.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const serverPath = fileURLToPath(new URL("../api/server.js", import.meta.url));
 const port = 8799;
-const serverSource = await readFile(serverPath, "utf8");
-
-assert.ok(
-  !/^import .*pdfjs-dist\/legacy\/build\/pdf\.mjs/m.test(serverSource),
-  "pdfjs-dist를 서버 기동 때 정적 import하면 저사양 Render 인스턴스가 포트 준비 제한을 넘길 수 있습니다."
-);
-assert.match(
-  serverSource,
-  /async function extractPdfTextPages[\s\S]*?await import\("pdfjs-dist\/legacy\/build\/pdf\.mjs"\)/,
-  "시험 PDF 추출 경로에서만 pdfjs-dist를 지연 로드해야 합니다."
-);
 
 const child = spawn(process.execPath, [serverPath], {
   env: { ...process.env, PORT: String(port), ACADEMY_API_PORT: String(port), NODE_ENV: "test" },

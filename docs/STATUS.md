@@ -1,10 +1,9 @@
 # Academy OS Current Status
 
-## 2026-09-27 Render 로그인 장애 — 서버 부팅 PDF 엔진 지연 로드
+## 2026-09-27 로그인 장애 진단 정정·PDF 변경 원복
 
-- 운영 Vercel은 정상이나 Render API가 `/health`와 로그인 요청에 응답하지 않았고, 수동 재배포도 build 성공 뒤 포트 준비 단계에서 15분 timeout으로 실패했다.
-- 같은 main을 로컬에서 재현해 `api/server.js`의 최상단 `pdfjs-dist` 정적 import 동안 포트가 열리지 않는 것을 확인했다. 시험 PDF 텍스트 추출 요청에서만 동적 import하도록 바꿔 일반 로그인·상태 확인 서버가 먼저 기동한다.
-- 로컬 서버는 수정 뒤 20초 부팅 fixture 안에서 `/health` 200을 반환했다. API boot, system/auth/session fixture, runtime lint, scenario 829/829를 통과했다. 운영 배포 뒤 `/health`와 로그인 API smoke가 남는다.
+- 사용자 요청으로 #430의 PDF 지연 로드·추가 검사·잘못된 원인 기록을 원복했다. 수정 전 코드도 동일 환경 4회 측정에서 1.23~1.29초에 기동했고 원복 후 `/health` 부팅 검사를 통과했다.
+- 장애 시간·지역·무료 서비스 조건은 Render Oregon 공급자 장애 공지와 일치한다: https://status.render.com/incidents/km2970vv6n18 . PDF 엔진을 장애 원인으로 확정한 이전 설명은 철회한다.
 
 ## 2026-09-26 수업 등록 모달 개편 — 가로 2열 · 고정 푸터 · 명단 0명 시작
 
