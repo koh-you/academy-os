@@ -51,3 +51,12 @@
   color: var(--academy-muted, #64748b);
   cursor: not-allowed;
 }
+
+/* 2026-09-28 · 등·하원 시각 칸은 상시 <small> 안내를 물음표로 옮기면서 <label> 대신 <div> 로 감싼다
+   (label 안의 <button> 은 label 의 연결 대상을 가로채 입력칸의 접근 가능한 이름을 없앤다).
+   공용 label 이 주던 세로 배치·간격만 이 래퍼로 되살린다 — 제목 글자 스타일은 안쪽 <label> 이 그대로 받는다. */
+.attendanceModal .fieldGrid > .attendanceTimeField {
+  display: grid;
+  gap: 8px;
+  justify-items: stretch;
+}
