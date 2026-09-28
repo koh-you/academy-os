@@ -50,8 +50,26 @@ for (const unit of bank.units ?? []) {
 // 지시문 상자는 그 묶음의 첫 쪽에만 인쇄되므로, 뒤 조각을 맡은 전사자는 담당 쪽에서 지시문을 볼 수 없어
 // 규칙대로 비워 둔다(보고마다 「병합 때 앞 그룹과 이어 붙일지 확인 바람」이라고 남겼다). 그대로 두면
 // 오답지로 뽑을 때 그 문항들만 발문 없이 식만 나온다 — 검수 02 가 12-48 에서 지적했다.
-// 같은 구역이고 뒤 그룹의 지시문이 비어 있을 때만 물려받는다(그림이 걸린 그룹은 건드리지 않는다).
+//
+// **조각 경계에서만 물려받는다.** 같은 조각 안에서 전사자가 그룹을 둘로 나눴다면 그는 두 그룹을 다 보고
+// 나눈 것이므로, 뒤 그룹이 지시문 없이 비어 있는 것이 원문 그대로다. 이 가드가 없으면 멀쩡한 독립 문항에
+// 남의 지시문이 붙는다 — 베이직쎈 미적분1 U1-PD15(23-14~16)에 U1-PD14 의 지시문이 붙어 23-16 은 조건까지
+// 어긋났다(검수 06 지적, 2026-09-28). 조각 경계는 work/out-*.json 의 그룹 소속으로 판정한다.
+const batchOfGroup = new Map();
+if (args.work) {
+  const workDir = path.resolve(args.work);
+  for (const file of fs.readdirSync(workDir).filter((f) => /^out-.*\.json$/.test(f))) {
+    try {
+      const batch = JSON.parse(fs.readFileSync(path.join(workDir, file), "utf8"));
+      for (const group of batch.groups ?? []) if (group.id) batchOfGroup.set(group.id, file);
+    } catch {}
+  }
+  console.log(`조각 경계 판정: work/out-*.json ${new Set(batchOfGroup.values()).size}개에서 그룹 ${batchOfGroup.size}개`);
+} else {
+  console.log("[주의] --work 를 안 주면 조각 경계를 알 수 없어 지시문 물려받기를 건너뛴다.");
+}
 let inherited = 0;
+const skipped = [];
 for (const unit of bank.units ?? []) {
   const groups = unit.groups ?? [];
   for (let i = 1; i < groups.length; i += 1) {
@@ -59,10 +77,19 @@ for (const unit of bank.units ?? []) {
     if (a.section !== b.section) continue;
     if (!String(a.passage ?? "").trim() || String(b.passage ?? "").trim()) continue;
     if (a.figure || b.figure) continue;
-    console.log(`  지시문 물려받음 ${unit.code} / ${b.id} ← ${a.id}: 「${String(a.passage).slice(0, 34)}」`);
+    const batchA = batchOfGroup.get(a.id), batchB = batchOfGroup.get(b.id);
+    if (!batchA || !batchB || batchA === batchB) {
+      skipped.push(`${unit.code} / ${b.id} ← ${a.id} (${batchA ?? "?"} 안에서 나뉜 그룹)`);
+      continue;
+    }
+    console.log(`  지시문 물려받음 ${unit.code} / ${b.id} ← ${a.id} (${batchA} → ${batchB}): 「${String(a.passage).slice(0, 34)}」`);
     if (!dry) b.passage = a.passage;
     inherited += 1;
   }
+}
+if (skipped.length) {
+  console.log(`  같은 조각 안에서 나뉜 그룹이라 물려받지 않음 ${skipped.length}건(전사자가 보고 나눈 것이다):`);
+  for (const s of skipped) console.log(`    ${s}`);
 }
 
 // 제목을 채우고 나면 앞 그룹과 제목·지시문이 똑같아지는 자리가 생긴다. merge-batches 는 병합 시점에
