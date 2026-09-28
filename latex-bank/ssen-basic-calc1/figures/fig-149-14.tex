@@ -1,0 +1,24 @@
+% 149-14(149쪽) — 풀이 과정 상자 안 그림 · 두 곡선 $y=f(x)$, $y=g(x)$ 가 직선 $y=x$ 에 대하여 대칭임을 보이는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 두 곡선 · 직선 $y=x$ · 안내 점선 네 줄 · 색칠(직사각형 $0\le x\le 1$, $0\le y\le 2$ 와 곡선 $y=f(x)$ 아래 부분 A) · 라벨 A, B, C, O, 1·2(두 축), x, y, $y=g(x)$, $y=x$, $y=f(x)$.
+\begin{tikzpicture}[x=0.85cm, y=0.85cm, line width=0.6pt]
+  \fill[black!12] (0,0) rectangle (1,2);
+  \fill[black!12] plot[domain=1:2, samples=41, smooth] (\x,{sqrt((\x)-1)}) -- (2,0) -- (1,0) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-0.55,0) -- (3.0,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.55) -- (0,3.25) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (1,2) -- (1,0);
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (2,1) -- (2,0);
+  \draw[line width=0.5pt] (-0.5,-0.5) -- (2.2,2.2);
+  \draw[domain=0:1.25, samples=61, smooth] plot (\x,{(\x)*(\x)+1});
+  \draw[domain=1:2.85, samples=81, smooth] plot (\x,{sqrt((\x)-1)});
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below right=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[font=\small] at (0.42,1.6) {$B$};
+  \node[font=\small] at (0.3,0.5) {$C$};
+  \node[font=\small] at (1.6,0.35) {$A$};
+  \node[anchor=west, font=\small] at (0.35,3.0) {$y=g(x)$};
+  \node[anchor=west, font=\small] at (1.9,2.45) {$y=x$};
+  \node[anchor=west, font=\small] at (2.05,1.62) {$y=f(x)$};
+\end{tikzpicture}

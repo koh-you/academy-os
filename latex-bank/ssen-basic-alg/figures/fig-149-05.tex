@@ -1,0 +1,39 @@
+% 149-05(149쪽) — 높이가 각각 12 m, 8 m 인 두 탑(AC, BD)과 지면 위의 지점 P · 올려본각이 모두 $30^\circ$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문의 탑 그림은 연한 기둥으로만 남겼다). 원문과 같이 왼쪽 탑을 높게 두었고 축척은 원문 그대로다.
+% 라벨은 원문에 있는 A·B·C·D·P·$12\,\mathrm{m}$·$8\,\mathrm{m}$·$30^\circ$ 와 직각 표시만 둔다 — $\seg{AB}$ 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.58, >=stealth]
+  \coordinate (C) at (0,0);
+  \coordinate (D) at (5.375,0);
+  \coordinate (P) at (3.225,0);
+  \coordinate (A) at (0,1.825);
+  \coordinate (B) at (5.375,1.25);
+  \fill[yellow!30] (-0.55,-0.26) rectangle (6.35,0);
+  \fill[black!12] (0,0) rectangle (0.3,1.825);
+  \fill[black!12] (5.375,0) rectangle (5.675,1.25);
+  \draw[line width=0.5pt] (-0.55,0) -- (6.35,0);
+  \draw[line width=0.55pt] (A) -- (C);
+  \draw[line width=0.55pt] (B) -- (D);
+  \draw[line width=0.55pt] (A) -- (P) -- (B);
+  \draw[line width=0.55pt] (A) -- (B);
+  \coordinate (Q1) at ([shift=(90:0.16)]C);
+  \coordinate (Q2) at ([shift=(0:0.16)]C);
+  \coordinate (Q3) at ([shift=(0:0.16)]Q1);
+  \draw[line width=0.35pt] (Q1) -- (Q3) -- (Q2);
+  \coordinate (S1) at ([shift=(90:0.16)]D);
+  \coordinate (S2) at ([shift=(180:0.16)]D);
+  \coordinate (S3) at ([shift=(180:0.16)]S1);
+  \draw[line width=0.35pt] (S1) -- (S3) -- (S2);
+  \draw[line width=0.4pt] ([shift=(150:0.5)]P) arc (150:180:0.5);
+  \node[font=\footnotesize] at ([shift=(166:1.05)]P) {$30^\circ$};
+  \draw[line width=0.4pt] ([shift=(0:0.45)]P) arc (0:30:0.45);
+  \node[font=\footnotesize] at ([shift=(18:1.0)]P) {$30^\circ$};
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(180:0.18)]C) to[bend left=10]
+    node[midway, left=-1.5pt, font=\footnotesize] {$12\,\mathrm{m}$} ([shift=(180:0.18)]A);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(0:0.46)]D) to[bend right=10]
+    node[midway, right=-1.5pt, font=\footnotesize] {$8\,\mathrm{m}$} ([shift=(0:0.46)]B);
+  \node[above left=-3.5pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[above right=-3.5pt and -3pt, font=\small] at (B) {$\pt{B}$};
+  \node[below=0pt, font=\small] at (C) {$\pt{C}$};
+  \node[below=0pt, font=\small] at (D) {$\pt{D}$};
+  \node[below=0pt, font=\small] at (P) {$\pt{P}$};
+\end{tikzpicture}

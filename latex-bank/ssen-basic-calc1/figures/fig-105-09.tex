@@ -1,0 +1,16 @@
+% 105-09(105쪽) — 원점을 출발한 점 P 의 시각 t 에서의 위치 x(t) 의 그래프(t=b 에서 극소, t=c 에서 0, t=d 에서 극대, t=e 에서 t축에 닿았다가 다시 증가). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 안내 점선 세 줄(a, b, d) · 라벨 x(t), t, O, a, b, c, d, e. 원문에 눈금값이 없으므로 적지 않는다.
+\begin{tikzpicture}[x=0.32cm, y=0.32cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (7.75,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.75) -- (0,3.05) node[left=1pt, font=\small] {$x(t)$};
+  \draw[densely dashed, line width=0.4pt] (1.05,0) -- (1.05,-1.12);
+  \draw[densely dashed, line width=0.4pt] (1.60,0) -- (1.60,-1.25);
+  \draw[densely dashed, line width=0.4pt] (4.25,0) -- (4.25,1.30);
+  \draw plot[smooth, tension=0.7] coordinates {(0,0) (0.45,-0.55) (0.80,-0.94) (1.20,-1.19) (1.60,-1.25) (2.05,-1.15) (2.55,-0.85) (3.15,0) (3.60,0.62) (4.00,1.13) (4.25,1.30) (4.65,1.18) (5.05,0.76) (5.32,0.34) (5.48,0.11) (5.60,0) (5.74,0.08) (5.95,0.32) (6.25,0.90) (6.70,1.88) (7.00,2.70)};
+  \node[below left=-2pt and -2.5pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=0.5pt, font=\small] at (1.05,0) {$a$};
+  \node[above=0.5pt, font=\small] at (1.60,0) {$b$};
+  \node[below=1pt, font=\small] at (3.15,0) {$c$};
+  \node[below=1pt, font=\small] at (4.25,0) {$d$};
+  \node[below=1pt, font=\small] at (5.60,0) {$e$};
+\end{tikzpicture}

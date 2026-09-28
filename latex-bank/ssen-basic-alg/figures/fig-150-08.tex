@@ -1,0 +1,22 @@
+% 150-08(150쪽) — 평행사변형 ABCD 와 대각선 AC · $\seg{AD}=6$, $\seg{AC}=3\sqrt{3}$, $D=60^\circ$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 A·D 를 위쪽 변에, B 를 왼쪽 아래, C 를 오른쪽 아래에 두고 안쪽을 연하게 칠했다.
+% 라벨은 원문에 있는 A·B·C·D·$6$·$3\sqrt{3}$·$60^\circ$ 만 둔다 — 평행사변형의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.41, >=stealth]
+  \coordinate (A) at (0,0);
+  \coordinate (D) at (6,0);
+  \coordinate (C) at (4.5,-2.598);
+  \coordinate (B) at (-1.5,-2.598);
+  \fill[yellow!25] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (C);
+  \draw[line width=0.4pt] ([shift=(180:0.9)]D) arc (180:240:0.9);
+  \node[font=\footnotesize] at ([shift=(202:1.6)]D) {$60^\circ$};
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(90:0.28)]A) to[bend left=9]
+    node[midway, above=-2.5pt, font=\footnotesize] {$6$} ([shift=(90:0.28)]D);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-120:0.32)]A) to[bend right=10]
+    node[midway, below left=-3.5pt and -3pt, font=\footnotesize] {$3\sqrt{3}$} ([shift=(-120:0.32)]C);
+  \node[above left=-3.5pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[left=1pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-3pt and -3pt, font=\small] at (C) {$\pt{C}$};
+  \node[above right=-3.5pt and -3pt, font=\small] at (D) {$\pt{D}$};
+\end{tikzpicture}

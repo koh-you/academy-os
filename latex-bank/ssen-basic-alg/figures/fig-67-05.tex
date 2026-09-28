@@ -1,0 +1,17 @@
+% 67-05(67쪽) — $y=\log_2 x$ 의 그래프 · $y$축의 $5$·$a$, $x$축의 $1$·$4$·$b$ 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문도 눈금 없는 개형($1$ 과 $4$ 를 붙이고 $b$ 를 멀리 둔 배치)이라 그 배치를 그대로 따랐다.
+% 라벨은 원문에 있는 것($y=\log_2 x$ · $5$ · $a$ · $1$ · $4$ · $b$ · O · $x$ · $y$)만 둔다 — $b-a$ 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.5cm, y=0.55cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (6.6,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.85) -- (0,3.3) node[left=1pt, font=\small] {$y$};
+  \draw[domain=0.3:6.35, samples=160, smooth] plot (\x, {1.5*ln(\x)});
+  \draw[densely dashed, line width=0.4pt] (0,2.5571) -- (5.5,2.5571) -- (5.5,0);
+  \draw[densely dashed, line width=0.4pt] (0,1.1828) -- (2.2,1.1828) -- (2.2,0);
+  \node[left=1pt, font=\small] at (0,2.5571) {$5$};
+  \node[left=1pt, font=\small] at (0,1.1828) {$a$};
+  \node[below left=-2.5pt and -1.5pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2.2,0) {$4$};
+  \node[below=1pt, font=\small] at (5.5,0) {$b$};
+  \node[anchor=west, font=\small] at (3.3,3.05) {$y=\log_2 x$};
+\end{tikzpicture}

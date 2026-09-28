@@ -1,0 +1,20 @@
+% 145-13(145쪽) — 13~18번 공통 그림 · 원점을 출발한 점 P 의 시각 t (0≤t≤5) 에서의 속도 v(t) 의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 꺾은선 (0,0)-(1,1)-(2,1)-(4,-1)-(5,0) · 안내 점선 다섯 줄 · 라벨 v(t), t, O, 1~5, 1, -1. 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[x=0.44cm, y=0.44cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (5.9,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,2.1) node[left=1pt, font=\small] {$v(t)$};
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+  \draw[densely dashed, line width=0.4pt] (1,1) -- (1,0);
+  \draw[densely dashed, line width=0.4pt] (2,1) -- (2,0);
+  \draw[densely dashed, line width=0.4pt] (0,-1) -- (4,-1);
+  \draw[densely dashed, line width=0.4pt] (4,-1) -- (4,0);
+  \draw (0,0) -- (1,1) -- (2,1) -- (4,-1) -- (5,0);
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (2.82,0) {$3$};
+  \node[above=1pt, font=\small] at (4,0) {$4$};
+  \node[above=1pt, font=\small] at (5,0) {$5$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,-1) {$-1$};
+\end{tikzpicture}

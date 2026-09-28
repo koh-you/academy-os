@@ -1,0 +1,10 @@
+% 48-41(48쪽) — $x=a$에서 뾰족한 점(V 자 꺾임)이 있고 꺾인 자리가 x축 위에 있는 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 라벨 O, a, x, y, y=f(x). 눈금값·안내 점선은 원문에 없다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (3.7,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,3.0) node[left=1pt] {$y$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt] (-1.1,2.05) -- (1,0) -- (3.05,2.05);
+  \node[below=1pt, font=\small] at (1,0) {$a$};
+  \node[font=\small] at (2.5,2.5) {$y=f(x)$};
+\end{tikzpicture}

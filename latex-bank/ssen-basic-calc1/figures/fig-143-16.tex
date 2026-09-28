@@ -1,0 +1,16 @@
+% 143-16(143쪽) — 두 곡선 $y=x^2(x-2)$, $y=ax(x-2)$ 가 둘러싸는 두 도형(원점과 가운데 교점 사이 · 가운데 교점과 $x=2$ 사이)에 색칠. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 두 곡선 · 색칠한 두 도형 · 라벨 O, 2, x, y, $y=x^2(x-2)$, $y=ax(x-2)$. 눈금값은 원문에 없으므로 적지 않았고, 답이 그림에서 읽히지 않도록 $a$ 를 답과 같은 값이 아닌 일반적인 위치(1 과 2 사이의 교점)로 그렸다.
+\begin{tikzpicture}[x=0.6cm, y=0.6cm, line width=0.6pt]
+  \fill[black!12] plot[domain=0:1.15, samples=41, smooth] (\x,{(\x)*(\x)*((\x)-2)}) -- plot[domain=1.15:0, samples=41, smooth] (\x,{1.15*(\x)*((\x)-2)}) -- cycle;
+  \fill[black!12] plot[domain=1.15:2, samples=41, smooth] (\x,{(\x)*(\x)*((\x)-2)}) -- plot[domain=2:1.15, samples=41, smooth] (\x,{1.15*(\x)*((\x)-2)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (2.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.95) -- (0,2.55) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-0.85:2.3, samples=121, smooth] plot (\x,{(\x)*(\x)*((\x)-2)});
+  \draw[domain=-0.62:2.55, samples=121, smooth] plot (\x,{1.15*(\x)*((\x)-2)});
+  \node[above right=-3pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=-1pt and -3pt, font=\small] at (2,0) {$2$};
+  \node[anchor=west, font=\small] at (0.12,2.2) {$y=x^2(x-2)$};
+  \draw[->, >=stealth, line width=0.4pt] (2.12,1.85) to[out=-70, in=55] (2.28,1.23);
+  \node[anchor=west, font=\small] at (0.2,-1.7) {$y=ax(x-2)$};
+  \draw[->, >=stealth, line width=0.4pt] (0.42,-1.4) to[out=95, in=-105] (0.55,-0.83);
+\end{tikzpicture}

@@ -1,0 +1,15 @@
+% 유형 027 48-18(인쇄 48쪽) — 가로 6칸 · 세로 4칸 도로망. A 는 왼쪽 위 꼭짓점, B 는 오른쪽 아래 꼭짓점,
+%   P 는 A 에서 오른쪽 1칸 · 아래 2칸 지점. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 점 크기: 정점 2.2pt · 파생점 2pt. 답(경우의 수·확률)은 그림에 넣지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[line width=0.5pt] (0,0) grid (6,4);
+  \coordinate (A) at (0,4);
+  \coordinate (B) at (6,0);
+  \coordinate (P) at (1,2);
+  \fill (A) circle (2.2pt);
+  \fill (B) circle (2.2pt);
+  \fill (P) circle (2pt);
+  \node[left, font=\small] at (A) {$\mathrm{A}$};
+  \node[right, font=\small] at (B) {$\mathrm{B}$};
+  \node[above left=-2pt and -2pt, font=\small] at (P) {$\mathrm{P}$};
+\end{tikzpicture}

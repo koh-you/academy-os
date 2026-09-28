@@ -1,0 +1,18 @@
+% 142-09(142쪽) — 삼각형 ABC · $\seg{AB}=\sqrt{19}$, $\seg{BC}=2$, $C=120^\circ$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 B 를 왼쪽 아래, C 를 그 오른쪽, A 를 오른쪽 위에 두었다.
+% 라벨은 원문에 있는 A·B·C·$\sqrt{19}$·$2$·$120^\circ$ 만 둔다 — $\seg{AC}$ 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.85, >=stealth]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2,0);
+  \coordinate (A) at (3.5,2.598);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ([shift=(60:0.30)]C) arc (60:180:0.30);
+  \node[font=\footnotesize] at ([shift=(124:0.58)]C) {$120^\circ$};
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(140:0.16)]B) to[bend left=20]
+    node[midway, above left=-3pt and -2pt, font=\footnotesize] {$\sqrt{19}$} ([shift=(200:0.16)]A);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-80:0.16)]B) to[bend right=24]
+    node[midway, below=-2.5pt, font=\footnotesize] {$2$} ([shift=(-100:0.16)]C);
+  \node[above right=-3pt and -2pt, font=\small] at (A) {$\pt{A}$};
+  \node[left=1pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-3pt and -2pt, font=\small] at (C) {$\pt{C}$};
+\end{tikzpicture}

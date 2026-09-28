@@ -1,0 +1,12 @@
+% 90-22(90쪽) — y=9-x^2 의 그래프와 x축으로 둘러싸인 도형에 내접하고 한 변이 x축 위에 있는 사다리꼴(색칠). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 포물선 · 사다리꼴 · 라벨 9, y=9-x^2, O, x, y. 사다리꼴은 원문 그림의 위치 그대로 그려 넓이가 최대가 되는 자리를 알려 주지 않는다.
+\begin{tikzpicture}[x=0.36cm, y=0.215cm, line width=0.6pt]
+  \fill[gray!25] (-3,0) -- (3,0) -- (1.4,7.04) -- (-1.4,7.04) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-4.3,0) -- (4.6,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.2) -- (0,11.2) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.5pt] (-3,0) -- (-1.4,7.04) -- (1.4,7.04) -- (3,0);
+  \draw[domain=-3.4:3.4, samples=120, smooth] plot (\x, {9-(\x)*(\x)});
+  \node[left=2pt, font=\small] at (0,9) {$9$};
+  \node[anchor=west, font=\small] at (0.3,9.9) {$y=9-x^2$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

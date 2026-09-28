@@ -1,0 +1,16 @@
+% 150-09(150쪽) — 원에 내접하는 삼각형 ABC · $\seg{AB}=4\sqrt{6}$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 A 를 왼쪽 위, B 를 왼쪽 아래, C 를 오른쪽 아래에 두었다.
+% 라벨은 원문에 있는 A·B·C·$4\sqrt{6}$ 만 둔다 — 호의 비와 $\seg{BC}$ 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=1.45, >=stealth]
+  \coordinate (O) at (0,0);
+  \coordinate (A) at (119:1);
+  \coordinate (B) at (208:1);
+  \coordinate (C) at (332:1);
+  \draw[line width=0.6pt] (O) circle (1);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- cycle;
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(343:0.15)]A) to[bend left=12]
+    node[midway, right=-1.5pt, font=\footnotesize] {$4\sqrt{6}$} ([shift=(343:0.15)]B);
+  \node[above left=-3.5pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[below left=-3.5pt and -3pt, font=\small] at (B) {$\pt{B}$};
+  \node[right=1pt, font=\small] at (C) {$\pt{C}$};
+\end{tikzpicture}

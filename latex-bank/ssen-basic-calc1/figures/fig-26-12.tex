@@ -1,0 +1,16 @@
+% 26-12(26쪽) — 곡선 y=x^2 위의 원점이 아닌 점 P 와 원점 O 를 지나며 중심 C 가 y축 위에 있는 원. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 y=x^2, P, C, O, x, y 와 중심의 점. 눈금·좌표값은 없다(답 a 가 그림에서 읽히지 않게).
+\begin{tikzpicture}[x=0.36cm, y=0.36cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.3,0) -- (4.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.3) -- (0,7.9) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  % y=x^2
+  \draw[line width=0.6pt, domain=-2.60:2.60, samples=110, smooth] plot (\x, {\x*\x});
+  % 원점 O 와 점 P(t, t^2) 를 지나고 중심이 y축 위에 있는 원
+  \draw[line width=0.6pt] (0,2.60125) circle (2.60125);
+  \fill (0,2.60125) circle (2pt);
+  \node[anchor=east, font=\small, inner sep=3pt] at (0,2.60125) {$\pt{C}$};
+  \fill (2.05,4.2025) circle (2pt);
+  \node[anchor=west, font=\small, inner sep=2pt] at (2.18,4.45) {$\pt{P}$};
+  \node[anchor=west, font=\small] at (2.30,7.35) {$y=x^2$};
+\end{tikzpicture}

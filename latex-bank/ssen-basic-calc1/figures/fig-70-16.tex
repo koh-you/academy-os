@@ -1,0 +1,13 @@
+% 70-16(70쪽) — 삼차함수 꼴 $y=f(x)$ 의 그래프(왼쪽 아래에서 올라와 원점 왼쪽에서 $x$축을 지나 극대·극소를 거쳐 오른쪽 위로) · $x=a$, $x=b$ 의 안내 점선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선 · 안내 점선 둘 · 라벨 O, a, b, x, y, y=f(x)(눈금 수치·함수값·c 의 위치는 원문에 없다).
+\begin{tikzpicture}[scale=0.5, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.30,0) -- (4.65,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,3.50) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0.32,0.94) -- (0.32,0);
+  \draw[densely dotted, line width=0.4pt] (3.78,2.22) -- (3.78,0);
+  \draw[smooth] plot coordinates {(-1.05,-1.15) (-0.80,-0.55) (-0.55,0.00) (-0.15,0.42) (0.25,0.85) (0.65,1.35) (1.10,1.86) (1.50,1.82) (1.90,1.52) (2.30,1.15) (2.65,0.96) (3.05,1.18) (3.45,1.68) (3.78,2.22) (4.10,2.88)};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (0.32,0) {$a$};
+  \node[below=1pt, font=\small] at (3.78,0) {$b$};
+  \node[font=\small] at (3.25,3.15) {$y=f(x)$};
+\end{tikzpicture}

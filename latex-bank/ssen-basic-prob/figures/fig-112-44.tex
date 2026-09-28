@@ -1,0 +1,24 @@
+% 112-44(인쇄 112쪽) — 개념 34 44번의 표준화 그림: 왼쪽은 정규분포 N(10, 2^2) 곡선에서 10~14 를 색칠한 것,
+% 오른쪽은 같은 부분을 표준정규분포 곡선 위에 옮겨 a, b 로 표시한 것. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문에 있는 것만(10, 14, x / a, b, z)이고 a, b 의 값은 그림에 적지 않는다.
+\begin{tikzpicture}[x=0.52cm, y=0.95cm, line width=0.55pt, font=\small]
+  \fill[yellow!45] plot[domain=0:2, samples=60, smooth] ({\x},{exp(-\x*\x/2)}) -- (2,0) -- (0,0) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-3.6,0) -- (3.9,0) node[below=1pt] {$x$};
+  \draw plot[domain=-3.2:3.2, samples=110, smooth] ({\x},{exp(-\x*\x/2)});
+  \draw[line width=0.45pt] (0,0) -- (0,1);
+  \draw[line width=0.45pt] (2,0) -- (2,{exp(-2)});
+  \node[below=1pt] at (0,0) {$10$};
+  \node[below=1pt] at (2,0) {$14$};
+  \node[below=1pt, align=center] at (0.2,-0.55) {정규분포 $\mathrm{N}(10,\,2^2)$을\\ 따르는 확률변수 $X$};
+  \draw[->, >=stealth, line width=1.2pt, blue!45] (4.9,0.7) -- (6.6,0.7);
+  \begin{scope}[shift={(11.2,0)}]
+    \fill[yellow!45] plot[domain=0:2, samples=60, smooth] ({\x},{exp(-\x*\x/2)}) -- (2,0) -- (0,0) -- cycle;
+    \draw[->, >=stealth, line width=0.7pt] (-3.6,0) -- (3.9,0) node[below=1pt] {$z$};
+    \draw plot[domain=-3.2:3.2, samples=110, smooth] ({\x},{exp(-\x*\x/2)});
+    \draw[line width=0.45pt] (0,0) -- (0,1);
+    \draw[line width=0.45pt] (2,0) -- (2,{exp(-2)});
+    \node[below=1pt] at (0,0) {$a$};
+    \node[below=1pt] at (2,0) {$b$};
+    \node[below=1pt, align=center] at (0.2,-0.55) {표준정규분포 $\mathrm{N}(0,\,1)$을\\ 따르는 확률변수 $Z$};
+  \end{scope}
+\end{tikzpicture}

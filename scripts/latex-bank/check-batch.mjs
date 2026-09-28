@@ -25,7 +25,38 @@ const name = path.basename(file, path.extname(file)).replace(/[^\w-]/g, "_");
 const tempDir = path.join(path.dirname(bankDir), `_batch-${path.basename(bankDir)}-${name}`);
 await rm(tempDir, { recursive: true, force: true });
 await mkdir(tempDir, { recursive: true });
-await cp(path.join(bankDir, "figures"), path.join(tempDir, "figures"), { recursive: true });
+// figures/ 통째 복사는 다른 배치 에이전트가 같은 순간에 그림을 쓰면 깨진다(조각을 작게 쪼개 20개가 동시에
+// 도니 남이 쓰는 중인 `fig-*.tex.tmp…` 를 복사하려다 ENOENT 로 죽는다 — ssen-basic-calc1 F2 에서 실제 발생).
+// 남의 임시 파일은 건너뛰고, 그래도 걸리면 한 번 더 시도한다.
+const copyFigures = () => cp(path.join(bankDir, "figures"), path.join(tempDir, "figures"), {
+  recursive: true,
+  filter: (src) => !/\.tmp/i.test(path.basename(src)),
+});
+await copyFigures().catch(async (error) => {
+  if (!["ENOENT", "EBUSY", "EPERM"].includes(error?.code)) throw error;
+  await new Promise((done) => setTimeout(done, 500));
+  await copyFigures();
+});
+// 이 배치가 쓰는 그림이 실제로 복사됐는지 확인한다. 빠지면 조판이 조용히 빈칸으로 나가므로 먼저 알린다.
+{
+  const need = new Set([
+    ...(batch.figures ?? []),
+    ...Object.values(batch.items ?? {}).map((item) => item?.figure).filter(Boolean),
+  ]);
+  const lost = [];
+  for (const fig of need) {
+    // items 의 figure 값은 `tikz:fig-33-34` 처럼 종류 접두가 붙어 있다. 접두를 떼야 파일 이름이 된다
+    // (안 떼면 멀쩡한 그림을 「복사 안 됨」으로 잘못 알린다 — ssen-basic-calc1 F3 이 지적).
+    const name = String(fig).replace(/^[a-z]+:/i, "").replace(/\.(tex|jpg|png|pdf)$/i, "");
+    const candidates = [`${name}.tex`, `${name}.jpg`, `${name}.png`, `${name}.pdf`];
+    let ok = false;
+    for (const candidate of candidates) {
+      try { await readFile(path.join(tempDir, "figures", candidate)); ok = true; break; } catch {}
+    }
+    if (!ok) lost.push(name);
+  }
+  if (lost.length) console.log(`⚠ 그림 파일이 복사되지 않았다(다시 돌려볼 것): ${lost.join(", ")}`);
+}
 const base = JSON.parse(await readFile(path.join(bankDir, "items.json"), "utf8"));
 const unitLabel = batch.unit ?? "00 배치";
 const [, code = "00", title = unitLabel] = unitLabel.match(/^(\d{2})\s*(.*)$/) ?? [];

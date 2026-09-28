@@ -1,0 +1,23 @@
+% 98-01(인쇄 98쪽) — 3등분한 서로 다른 두 원판과 위쪽의 빨간 바늘. 스캔 삽화라 TikZ 로 다시 그림.
+% 두 원판 모두 1(위) · 2(왼쪽 아래) · 3(오른쪽 아래)의 세 칸으로 나뉘어 있고 칸 색만 서로 다르다(원문과 같은 자리·같은 차례).
+\begin{tikzpicture}[line width=0.5pt, font=\small]
+  \def\R{1.0}
+  \begin{scope}
+    \filldraw[fill=red!16]    (0,0) -- (30:\R)  arc[start angle=30,  end angle=150, radius=\R] -- cycle;
+    \filldraw[fill=blue!18]   (0,0) -- (150:\R) arc[start angle=150, end angle=270, radius=\R] -- cycle;
+    \filldraw[fill=yellow!55] (0,0) -- (270:\R) arc[start angle=270, end angle=390, radius=\R] -- cycle;
+    \node at (90:0.52) {$1$};
+    \node at (210:0.55) {$2$};
+    \node at (330:0.55) {$3$};
+    \fill[red!85!black] (-0.15,1.22) -- (0.15,1.22) -- (0,0.66) -- cycle;
+  \end{scope}
+  \begin{scope}[shift={(2.9,0)}]
+    \filldraw[fill=green!25]  (0,0) -- (30:\R)  arc[start angle=30,  end angle=150, radius=\R] -- cycle;
+    \filldraw[fill=purple!14] (0,0) -- (150:\R) arc[start angle=150, end angle=270, radius=\R] -- cycle;
+    \filldraw[fill=orange!25] (0,0) -- (270:\R) arc[start angle=270, end angle=390, radius=\R] -- cycle;
+    \node at (90:0.52) {$1$};
+    \node at (210:0.55) {$2$};
+    \node at (330:0.55) {$3$};
+    \fill[red!85!black] (-0.15,1.22) -- (0.15,1.22) -- (0,0.66) -- cycle;
+  \end{scope}
+\end{tikzpicture}

@@ -1,0 +1,13 @@
+% 개념 25 85-35(인쇄 85쪽) — 확률밀도함수가 될 수 있는지 묻는 그래프: (0,0)-(1,1)-(2,0) 을 잇는 꺾은선과 점선 보조선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 축 0.7pt · 그래프 0.6pt · 라벨은 원문에 있는 것만(O · x · y · 1 · 2 · y=f(x)).
+\begin{tikzpicture}[scale=0.75, line width=0.6pt]
+  \draw[->, line width=0.7pt] (-0.45,0) -- (2.95,0) node[below, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-0.6) -- (0,1.75) node[right, font=\small] {$y$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[dotted, line width=0.6pt] (0,1) -- (1,1) -- (1,0);
+  \draw (0,0) -- (1,1) -- (2,0);
+  \node[left, font=\small] at (0,1) {$1$};
+  \node[below, font=\small] at (1,0) {$1$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[right, font=\small] at (1.1,1.05) {$y=f(x)$};
+\end{tikzpicture}

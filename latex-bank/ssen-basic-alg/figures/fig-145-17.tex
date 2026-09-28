@@ -1,0 +1,19 @@
+% 145-17(145쪽) — 사각형 ABCD · 두 대각선 AC=9, BD=4 가 수직으로 만난다(직각 표시). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 4 · 9 · 직각 표시만 둔다(각의 크기 숫자는 원문에도 없다).
+\begin{tikzpicture}[line width=0.6pt, x=0.50cm, y=0.50cm]
+  \coordinate (A) at (-3.405,1.240);
+  \coordinate (B) at (-0.709,-1.949);
+  \coordinate (C) at (5.051,-1.839);
+  \coordinate (D) at (0.688,1.890);
+  \coordinate (P) at (0,0);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw[line width=0.35pt] (0.154,0.423) -- (-0.269,0.577) -- (-0.423,0.154);
+  \draw[densely dotted, line width=0.35pt] (-0.56,-2.03) to[bend right=16] node[pos=0.72, right=-2.5pt, font=\footnotesize] {$4$} (0.83,1.82);
+  \draw[densely dotted, line width=0.35pt] (-3.31,1.08) to[bend right=13] node[pos=0.58, below=-2.5pt, font=\footnotesize] {$9$} (5.0,-2.0);
+  \node[left=-2pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[above right=-3pt and -3.5pt, font=\footnotesize] at (D) {$\pt{D}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

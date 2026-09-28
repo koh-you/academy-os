@@ -1,0 +1,23 @@
+% 150-12(150쪽) — 삼각형 ABC 와 변 BC 위의 점 D · $\seg{AB}=5$, $\seg{BD}=6$, $\seg{DC}=3$, $\seg{AC}=7$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 B 를 왼쪽 아래, C 를 오른쪽 아래, D 를 그 사이, A 를 위쪽에 두었다.
+% 라벨은 원문에 있는 A·B·C·D·$5$·$6$·$3$·$7$ 만 둔다 — $\seg{AD}$ 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.34, >=stealth]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (9,0);
+  \coordinate (D) at (6,0);
+  \coordinate (A) at (3.167,3.868);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.55pt] (A) -- (D);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(141:0.42)]B) to[bend left=12]
+    node[midway, above left=-3.5pt and -3pt, font=\footnotesize] {$5$} ([shift=(141:0.42)]A);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(57:0.42)]A) to[bend left=12]
+    node[midway, above right=-3.5pt and -3pt, font=\footnotesize] {$7$} ([shift=(57:0.42)]C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-90:1.05)]B) to[bend right=10]
+    node[midway, below=-2.5pt, font=\footnotesize] {$6$} ([shift=(-96:1.05)]D);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-84:1.05)]D) to[bend right=10]
+    node[midway, below=-2.5pt, font=\footnotesize] {$3$} ([shift=(-90:1.05)]C);
+  \node[above=0pt, font=\small] at (A) {$\pt{A}$};
+  \node[left=1pt, font=\small] at (B) {$\pt{B}$};
+  \node[right=1pt, font=\small] at (C) {$\pt{C}$};
+  \node[below=-1pt, font=\small] at (D) {$\pt{D}$};
+\end{tikzpicture}

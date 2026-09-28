@@ -1,0 +1,24 @@
+% 26-14(26쪽) — 곡선 y=½x² 위의 점 P(t, ½t²)(t>2) 와 세 점 A(2, 0), B(0, 2), C(2, 2) · 색칠한 삼각형 PBC 와 삼각형 PCA. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 2(두 축) · 라벨 y=½x², P(t, ½t²), A, B, C, O, x, y · 두 삼각형의 옅은 색칠 · A P 를 잇는 점선.
+\begin{tikzpicture}[x=0.42cm, y=0.42cm, line width=0.5pt]
+  \fill[black!15] (0,2) -- (2,2) -- (3,4.5) -- cycle;
+  \fill[black!15] (2,2) -- (2,0) -- (3,4.5) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (4.8,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.0) -- (0,7.1) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  % y=½x²
+  \draw[line width=0.6pt, domain=-1.70:3.25, samples=90, smooth] plot (\x, {0.5*\x*\x});
+  \draw[line width=0.6pt] (0,2) -- (2,2);
+  \draw[line width=0.6pt] (2,0) -- (2,2);
+  \draw[line width=0.6pt] (0,2) -- (3,4.5);
+  \draw[line width=0.6pt] (2,2) -- (3,4.5);
+  \draw[densely dashed, line width=0.5pt] (2,0) -- (3,4.5);
+  \fill (3,4.5) circle (2.2pt);
+  \node[anchor=west, font=\small, inner sep=2pt] at (3.10,4.5) {$\pt{P}\!\left(t,\,\dfrac{1}{2}t^2\right)$};
+  \node[anchor=east, font=\small, inner sep=2pt] at (-0.02,2) {$2$};
+  \node[anchor=north west, font=\small, inner sep=1pt] at (0.06,1.94) {$\pt{B}$};
+  \node[anchor=south east, font=\small, inner sep=1pt] at (1.94,2.06) {$\pt{C}$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (2.22,0.32) {$\pt{A}$};
+  \node[anchor=west, font=\small] at (1.35,6.45) {$y=\dfrac{1}{2}x^2$};
+\end{tikzpicture}

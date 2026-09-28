@@ -1,0 +1,18 @@
+% 143-19(143쪽) — 지면 위 40 m 떨어진 두 지점 A, B 에서 비행 중인 비행기를 올려다본 각 75°·60°.
+% 스캔 삽화(비행기 그림·흙바닥 무늬)는 화질이 낮아 TikZ 로 기하만 다시 그렸다.
+% 라벨은 원문에 있는 A·B·75°·60°·40 m 만 두고 A 지점에서 비행기까지의 거리(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, >=stealth]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (4,0);
+  \coordinate (P) at (1.268,4.732);
+  \draw[line width=0.7pt] (-0.55,0) -- (4.55,0);
+  \draw (A) -- (P) -- (B);
+  \draw[line width=0.45pt] ([shift=(0:0.55)]A) arc (0:75:0.55);
+  \draw[line width=0.45pt] ([shift=(180:0.55)]B) arc (180:120:0.55);
+  \node[font=\footnotesize] at ([shift=(36:0.95)]A) {$75^\circ$};
+  \node[font=\footnotesize] at ([shift=(152:1.0)]B) {$60^\circ$};
+  \node[left=1pt, font=\small] at (A) {$\pt{A}$};
+  \node[right=1pt, font=\small] at (B) {$\pt{B}$};
+  \draw[densely dashed, line width=0.3pt, <->] (0,-0.28)
+    to[bend right=12] node[midway, fill=white, inner sep=1pt, font=\footnotesize] {$40\,\mathrm{m}$} (4,-0.28);
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 116-16(116쪽) — 도함수 $y=f'(x)$ 의 그래프(위로 볼록한 포물선 · $x=-2,\ 0$ 에서 $x$축과 만나고 꼭짓점 $(-1,\,2)$). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 꼭짓점에서 축으로 가는 점선 둘 · 눈금 -2, -1, 2 · 라벨 O, x, y, y=f'(x). 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[x=0.62cm, y=0.40cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (1.15,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,3.0) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-1,2) -- (0,2);
+  \draw[densely dashed, line width=0.4pt] (-1,2) -- (-1,0);
+  \draw plot[smooth, tension=0.7] coordinates {(-2.55,-2.81) (-2.4,-1.92) (-2.2,-0.88) (-2,0) (-1.8,0.72) (-1.6,1.28) (-1.4,1.68) (-1.2,1.92) (-1,2) (-0.8,1.92) (-0.6,1.68) (-0.4,1.28) (-0.2,0.72) (0,0) (0.2,-0.88) (0.4,-1.92) (0.55,-2.81)};
+  \node[below left=-1pt and -2pt, font=\small] at (-2,0) {$-2$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[right=1pt, font=\small] at (0,2) {$2$};
+  \node[anchor=south east, font=\small] at (-1.05,2.2) {$y=f'(x)$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 30-03(30쪽) — 원점이 꼭짓점인 포물선 y=f(x) 의 그래프에서 (1,1) 만 뚫린 모양. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 빈 점 (1,1) · 안내 점선 두 줄 · 라벨 1, O, 1, x, y, y=f(x).
+\begin{tikzpicture}[x=0.72cm, y=0.68cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.3,0) -- (2.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,3.45) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (0,1) -- (1,1);
+  \draw[densely dotted, line width=0.4pt] (1,1) -- (1,0);
+  \draw[line width=0.6pt, domain=-1.78:1.8, samples=80, smooth] plot (\x, {\x*\x});
+  \draw[fill=white, line width=0.5pt] (1,1) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[font=\small] at (1.45,3.3) {$y=f(x)$};
+\end{tikzpicture}

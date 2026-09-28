@@ -77,9 +77,10 @@ const LAYOUTS = {
     template: "ssen-answer-icon.png", iconDark: 185, iconGray: false, iconNcc: 0.3, bodyTop: 0.068, bodyBottom: 0.952,
     columns: [[0.075, 0.508], [0.523, 0.952]], columnsEven: [[0.039, 0.474], [0.485, 0.918]], columnsAuto: true,
     badgeInset: 2, badgeDigits: 3, badgeSpread: 18, badgeColored: true, badgeColorRatio: 0.45, colorBadgeFallback: false,
+    halfColumnGrid: false,
     skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5
   },
-  // ssenbc: 쎈B(고등) 별책 답지 가운데 「답」 상자가 검정이 아니라 청회색(rgb≈91,123,143)인 판 — 쎈B 미적분1.
+  // ssenbc: 쎈B(고등) 별책 답지 가운데 「답」 상자가 검정이 아니라 청회색(rgb≈91,123,143)인 판 — 쎈B 미적분1 · 쎈B 대수.
   // ssenb 와 다른 점은 둘뿐이다: (1) 「답」 상자가 색이라 iconColored 로 무채색 조건을 뺀다, (2) 세로 단원 탭이
   // 쪽 너비의 0.946 부터 시작해 기본 20pt 여백으로는 안 걸러지므로 tabMargin 을 50pt 로 넓힌다.
   ssenbc: {
@@ -87,6 +88,7 @@ const LAYOUTS = {
     bodyTop: 0.068, bodyBottom: 0.952, tabMargin: 50,
     columns: [[0.091, 0.498], [0.515, 0.917]], columnsEven: [[0.080, 0.487], [0.502, 0.902]], columnsAuto: true,
     badgeInset: 2, badgeDigits: 3, badgeSpread: 18, badgeColored: true, badgeColorRatio: 0.45, colorBadgeFallback: false,
+    halfColumnGrid: false,
     skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5
   }
 };
@@ -751,13 +753,16 @@ async function main() {
       // 왼쪽 배지와 같은 줄의 오른쪽에 굵은 번호가 있고 그 x 자리가 둘 이상의 줄에서 겹치면 그 줄들은 반 컬럼 격자다:
       // 각 배지는 자기 x 부터 다음 격자 열 앞까지 오리고, 순서는 줄(위→아래) 안에서 왼쪽→오른쪽이다(순번 정렬이 어긋나
       // 오른쪽 열 번호가 통째로 빠지던 것).
-      const gridTokens = numberTokens
+      // halfColumnGrid: 반 컬럼 격자가 있는 판(베이직쎈 개념 쪽)에서만 쓴다. 쎈B(고등) 별책 답지에는 격자가 없고
+      // 풀이 첫 줄의 수식 토큰(「2θ」→「20」 같은 오독)이 격자 열로 잡혀 컬럼이 28pt 폭으로 쪼개지던 것을 막는다.
+      const gridTokens = (layout.halfColumnGrid ?? true) ? numberTokens
         // 격자 번호는 배지처럼 두 자리(「02」「15」)다 — 풀이 글 속의 한 자리 숫자(「2」)는 세지 않는다.
         .filter((token) => token.text.replace(/^O/, "0").length >= 2 && token.h >= layout.badgeMinH && token.x >= badgeLeft + 25 && token.x <= column.x1 - 20 && token.y > bodyTop && token.y + token.h < bodyBottom)
         .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && hasTextRight(token))
         .filter((token) => badges.some((badge) => Math.abs(badge.y - token.y) < 5))
         .sort((a, b) => a.x - b.x || a.y - b.y)
-        .filter((token, index, list) => !list.slice(0, index).some((other) => Math.abs(other.x - token.x) < 4 && Math.abs(other.y - token.y) < 4));
+        .filter((token, index, list) => !list.slice(0, index).some((other) => Math.abs(other.x - token.x) < 4 && Math.abs(other.y - token.y) < 4))
+        : [];
       const gridClusters = [];
       for (const token of gridTokens) {
         const cluster = gridClusters.find((entry) => Math.abs(entry.x - token.x) < 10);

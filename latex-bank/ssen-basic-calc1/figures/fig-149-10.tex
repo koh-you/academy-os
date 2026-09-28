@@ -1,0 +1,20 @@
+% 149-10(149쪽) — 원점을 출발한 점 P 의 시각 t 에서의 속도 v(t) 의 그래프(꺾은선 (0,0)-(2,2)-(4,-2)-(5,-2)-(6,0)). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 꺾은선 · 안내 점선 다섯 줄 · 라벨 v(t), t, O, 2·$-2$(세로축), 2(가로축 아래), 3 4 5 6(가로축 위). 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[x=0.36cm, y=0.36cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (6.9,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,3.1) node[left=1pt, font=\small] {$v(t)$};
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (2,2);
+  \draw[densely dashed, line width=0.4pt] (2,2) -- (2,0);
+  \draw[densely dashed, line width=0.4pt] (0,-2) -- (4,-2);
+  \draw[densely dashed, line width=0.4pt] (4,0) -- (4,-2);
+  \draw[densely dashed, line width=0.4pt] (5,0) -- (5,-2);
+  \draw (0,0) -- (2,2) -- (4,-2) -- (5,-2) -- (6,0);
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+  \node[below left=-2pt and -2.5pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[above=1pt, font=\small] at (3.3,0) {$3$};
+  \node[above=1pt, font=\small] at (4.05,0) {$4$};
+  \node[above=1pt, font=\small] at (5,0) {$5$};
+  \node[above=1pt, font=\small] at (6,0) {$6$};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 69-18(69쪽) — $y=3^x$ 의 그래프와 그 역함수 $y=f(x)$ 의 그래프, 직선 $y=x$ 위의 세 점 A, B, C 와 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그림은 눈금도 비례도 없는 개형이라(그려진 곡선이 실제 $3^x$ 이 아니다)
+% 구조(두 그래프가 $y=x$ 에 대칭 · A 는 $y=f(x)$ 의 $x$절편 · B 는 A 바로 위의 지수함수 위의 점 ·
+% C 는 B 와 같은 높이의 $y=f(x)$ 위의 점)만 지키고 배치 비율은 원문을 따랐다.
+% 눈금·좌표값은 적지 않는다 — $a+b$ 의 값(답)이 그림에서 읽히지 않게 한다.
+\begin{tikzpicture}[line width=0.6pt, x=0.55cm, y=0.55cm]
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (5.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,4.85) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.5pt] (-1.15,-1.15) -- (3.45,3.45);
+  \draw[domain=-1.65:2.15, samples=140, smooth] plot (\x, {exp(0.6931*\x)});
+  \draw[domain=0.3:5.5, samples=160, smooth] plot (\x, {1.4427*ln(\x)});
+  \draw[densely dotted, line width=0.4pt] (1,2) -- (1,0);
+  \draw[densely dotted, line width=0.4pt] (1,2) -- (4,2);
+  \node[below right=-2pt and -1pt, font=\small] at (1,0) {$\mathrm{A}$};
+  \node[above left=-2.5pt and -1pt, font=\small] at (1,2) {$\mathrm{B}$};
+  \node[below=1pt, font=\small] at (4,2) {$\mathrm{C}$};
+  \node[font=\small] at (-1.0,-0.35) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (2.3,4.45) {$y=3^x$};
+  \node[anchor=west, font=\small] at (3.5,3.55) {$y=x$};
+  \node[anchor=west, font=\small] at (4.3,2.85) {$y=f(x)$};
+\end{tikzpicture}

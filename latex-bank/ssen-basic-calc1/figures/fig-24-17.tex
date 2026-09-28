@@ -1,0 +1,19 @@
+% 24-17(24쪽) — 왼쪽 컬럼 공통 그림: 곡선 y=x^2 위의 점 P(t, t^2) · 직선 OP · P 를 지나고 OP 에 수직인 직선이 y축과 만나는 점의 y좌표 f(t). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 y=x^2, f(t), P(t, t^2), O, x, y 와 P 의 직각 표시. 눈금·수치는 없다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[x=0.40cm, y=0.40cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.0,0) -- (4.9,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.0) -- (0,7.7) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  % y=x^2
+  \draw[line width=0.6pt, domain=-1.98:2.18, samples=90, smooth] plot (\x, {\x*\x});
+  % 직선 OP (P 위쪽까지 연장)
+  \draw[line width=0.5pt] (-1.00,-1.930) -- (3.10,5.983);
+  % P 를 지나고 OP 에 수직인 직선 (y축과 만나는 점의 y좌표가 f(t))
+  \draw[line width=0.5pt] (-3.70,6.642) -- (4.40,2.445);
+  % P 의 직각 표시
+  \draw[line width=0.4pt] (1.7234,3.3262) -- (1.3238,3.5332) -- (1.5304,3.9319);
+  \fill (1.93,3.7249) circle (2.2pt);
+  \node[anchor=south west, font=\small, inner sep=1.5pt] at (2.22,3.62) {$\pt{P}(t,\,t^2)$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (0.10,4.7249) {$f(t)$};
+  \node[anchor=west, font=\small] at (1.55,7.20) {$y=x^2$};
+\end{tikzpicture}

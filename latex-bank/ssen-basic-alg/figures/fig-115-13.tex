@@ -1,0 +1,20 @@
+% 115-13(115쪽) — 중심이 같은 두 부채꼴 AOB, A'OB' 와 그 사이의 색칠한 부분(고리 모양 부채꼴).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그대로 반지름 3 : 2, 중심각은 호 AB 가 2π 가 되는 크기로 그렸다.
+% 라벨은 원문에 있는 O·A·A'·B·B'·2·3·2π 만 둔다 — 색칠한 부분의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, >=stealth]
+  \filldraw[fill=violet!20, draw=none] (-60:3) arc (-60:60:3) -- (60:2) arc (60:-60:2) -- cycle;
+  \draw (0,0) -- (60:3);
+  \draw (0,0) -- (-60:3);
+  \draw (60:3) arc (60:-60:3);
+  \draw (60:2) arc (60:-60:2);
+  % 원문의 길이 안내 점선(OA'=2, OA=3)과 호 AB 의 길이 표시
+  \draw[densely dotted, line width=0.35pt, <->] (-60:0.3) -- node[midway, above right=-3.5pt and -2.5pt, font=\footnotesize] {$2$} (-60:1.82);
+  \draw[densely dotted, line width=0.35pt, <->] (-0.18,-0.22) to[bend right=42] node[midway, left=-2.5pt, font=\footnotesize] {$3$} (1.3,-2.66);
+  \draw[densely dotted, line width=0.35pt, <->] (60:3.24) arc (60:-60:3.24);
+  \node[right=0pt, font=\footnotesize] at (0:3.26) {$2\pi$};
+  \node[left=1pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[above left=-3.5pt and -2.5pt, font=\footnotesize] at (60:3) {$\pt{B}$};
+  \node[above left=-3.5pt and -1.5pt, font=\footnotesize] at (60:2) {$\pt{B'}$};
+  \node[below=-1.5pt, font=\footnotesize] at (-60:3) {$\pt{A}$};
+  \node[below left=-3.5pt and -2.5pt, font=\footnotesize] at (-60:2) {$\pt{A'}$};
+\end{tikzpicture}

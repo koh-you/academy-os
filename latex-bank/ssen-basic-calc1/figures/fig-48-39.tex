@@ -1,0 +1,11 @@
+% 48-39(48쪽) — $x=a$에서 미분가능한 곡선($x=a$가 아래로 볼록한 곡선의 꼭짓점). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 라벨 O, a, x, y, y=f(x) 와 꼭짓점에서 x축으로 내린 안내 점선. 눈금값은 원문에 없으므로 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.1,0) -- (3.7,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,3.0) node[left=1pt] {$y$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[domain=-0.52:2.52, smooth, variable=\x, line width=0.6pt] plot ({\x},{0.89*(\x-1)*(\x-1)+0.4});
+  \draw[densely dotted, line width=0.4pt] (1,0.4) -- (1,0);
+  \node[below=1pt, font=\small] at (1,0) {$a$};
+  \node[font=\small] at (2.25,2.7) {$y=f(x)$};
+\end{tikzpicture}

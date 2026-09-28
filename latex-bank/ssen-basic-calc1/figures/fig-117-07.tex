@@ -1,0 +1,13 @@
+% 117-07(117쪽) — 도함수 $y=f'(x)$ 의 그래프(원점과 점 $(3,\,2)$ 를 지나는 직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 안내 점선 · 눈금 2($y$축) 3($x$축) · 라벨 $y=f'(x)$, O, x, y.
+\begin{tikzpicture}[x=0.60cm, y=0.60cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (4.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.0) -- (0,3.5) node[left=1pt] {$y$};
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (3,2);
+  \draw[densely dashed, line width=0.4pt] (3,2) -- (3,0);
+  \draw (-0.8,-0.5333) -- (3.95,2.6333);
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (1.75,3.05) {$y=f'(x)$};
+\end{tikzpicture}

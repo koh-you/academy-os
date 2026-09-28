@@ -1,0 +1,12 @@
+% 86-43(인쇄 86쪽) — 개념 25 지시문의 확률밀도함수 y=f(x) 그래프: 0≤x≤4 에서 y=k 인 수평 선분(오른쪽 끝 안내 파선).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 것만(k, O, 4, x, y, y=f(x)) · 답(k의 값)은 그림에 넣지 않는다.
+\begin{tikzpicture}[x=0.45cm, y=1.15cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (5.4,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.45) -- (0,1.35) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (4,0) -- (4,1);
+  \draw (0,1) -- (4,1);
+  \node[left=2pt, font=\small] at (0,1) {$k$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (0.5,1.22) {$y=f(x)$};
+\end{tikzpicture}

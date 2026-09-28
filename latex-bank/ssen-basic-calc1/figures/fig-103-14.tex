@@ -1,0 +1,15 @@
+% 103-14(103쪽) — 수직선 위를 움직이는 점 P 의 시각 t 에서의 위치 x(t) 의 그래프(t=0 에서 양수, t=1 에서 극대, t=2·4 에서 0, t=3 에서 극소, 4와 5 사이에서 다시 극대 후 감소). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 안내 점선 두 줄(t=1, t=3) · 라벨 x(t), t, O, 1, 2, 3, 4, 5. 세로축에는 원문처럼 눈금값을 적지 않는다.
+\begin{tikzpicture}[x=0.40cm, y=0.66cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.62,0) -- (6.3,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.28) -- (0,1.55) node[left=1pt, font=\small] {$x(t)$};
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,1.05);
+  \draw[densely dashed, line width=0.4pt] (3,0) -- (3,-0.80);
+  \draw plot[smooth, tension=0.7] coordinates {(0,0.40) (0.35,0.78) (0.70,0.99) (1,1.05) (1.35,0.93) (1.70,0.55) (2,0) (2.35,-0.50) (2.70,-0.75) (3,-0.80) (3.40,-0.63) (3.70,-0.35) (4,0) (4.30,0.33) (4.60,0.44) (4.90,0.32) (5.15,0) (5.50,-0.55) (5.78,-0.98)};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[above=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+\end{tikzpicture}

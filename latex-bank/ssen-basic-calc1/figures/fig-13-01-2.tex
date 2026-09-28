@@ -1,0 +1,10 @@
+% 13-01(13쪽) — 보기 ㄴ 의 그래프(꼭짓점이 $(0,\,-2)$ 인 V 자 그래프). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: y축 눈금 -2 · 두 반직선 · 라벨 O, x, y, y=f(x).
+\begin{tikzpicture}[baseline=(current bounding box.north), x=0.38cm, y=0.38cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.55,0) -- (2.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.4) -- (0,2.6) node[left=1pt] {$y$};
+  \draw (-1.5,1.75) -- (0,-2) -- (1.55,1.9);
+  \node[above left=-3pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[left=2pt, font=\small] at (0,-2) {$-2$};
+  \node[anchor=west, font=\small] at (0.45,2.35) {$y=f(x)$};
+\end{tikzpicture}

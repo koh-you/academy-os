@@ -1,0 +1,24 @@
+% 34-04(34쪽) — $y=f(x)$ 의 그래프(구간 $(-2,\,2)$ 안의 극한·연속을 묻는 문항). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 빈 점 $(-1,\,1)$·$(0,\,2)$ · 채운 점 $(-1,\,0)$·$(0,\,1)$ · 점선 · 라벨 $-2$, $-1$, $1$, $2$, $1$, $2$, O, x, y, $y=f(x)$(눈금은 만들지 않는다).
+\begin{tikzpicture}[x=0.66cm, y=0.66cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.75,0) -- (2.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,2.8) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-2,0) -- (-2,1);
+  \draw[densely dashed, line width=0.4pt] (-1,0) -- (-1,1);
+  \draw[densely dashed, line width=0.4pt] (2,0) -- (2,1);
+  \draw[densely dashed, line width=0.4pt] (-2,1) -- (2,1);
+  \draw[domain=-2.45:-1, samples=60, smooth] plot (\x, {(\x+1)*(\x+1)});
+  \draw (-1,1) -- (0,2) -- (1,0) -- (2.6,1.6);
+  \fill (-1,0) circle (2.2pt);
+  \draw[fill=white] (-1,1) circle (2.2pt);
+  \draw[fill=white] (0,2) circle (2.2pt);
+  \fill (0,1) circle (2.2pt);
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[left=2pt, font=\small] at (0,2) {$2$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,1) {$1$};
+  \node[anchor=west, font=\small] at (1.05,2.45) {$y=f(x)$};
+\end{tikzpicture}

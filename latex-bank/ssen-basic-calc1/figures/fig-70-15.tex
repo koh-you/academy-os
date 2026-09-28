@@ -1,0 +1,13 @@
+% 70-15(70쪽) — 삼차함수 $y=f(x)$ 의 그래프(왼쪽 위에서 내려와 $x=a$ 에서 극소, 원점 오른쪽에서 극대를 지나 오른쪽 아래로) · $x=a$, $x=b$ 의 안내 점선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선 · 안내 점선 둘 · 라벨 a, O, b, x, y, y=f(x)(눈금 수치·함수값·c 의 위치는 원문에 없다).
+\begin{tikzpicture}[scale=0.55, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.85,0) -- (2.15,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.10) -- (0,2.75) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-1.467,-1.408) -- (-1.467,0);
+  \draw[densely dotted, line width=0.4pt] (1.2,0.615) -- (1.2,0);
+  \draw[domain=-2.5:1.58, samples=130, smooth] plot (\x, {-0.85*((\x)*(\x)*(\x) + 1.4*(\x)*(\x) - 2.35*(\x)) + 1.4});
+  \node[above=1pt, font=\small] at (-1.467,0) {$a$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.2,0) {$b$};
+  \node[font=\small] at (1.35,2.45) {$y=f(x)$};
+\end{tikzpicture}

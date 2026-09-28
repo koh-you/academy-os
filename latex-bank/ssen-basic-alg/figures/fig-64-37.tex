@@ -1,0 +1,19 @@
+% 64-37(64쪽) — 「다음 로그함수의 그래프에서 a, b의 값을 구하시오.」 첫 그림: y=log_3 x 의 그래프와 x축 위의 1/3·b, y축 위의 a·3.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문도 눈금 없는 개형(1/3 과 b 사이를 압축해 그린 배치)이라 그 배치를 그대로 따랐다.
+% 라벨은 원문에 있는 것(y=log_3 x · 3 · a · 1/3 · b · O · x · y)만 둔다 — a, b 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.45cm, y=0.42cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (7.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.95) -- (0,3.15) node[left=1pt, font=\small] {$y$};
+  % 표시 좌표의 로그 개형: u=0.55 에서 높이 -0.7(=a 자리), u=5.52 에서 높이 2(=3 자리).
+  \draw[domain=0.113:6.9, samples=160, smooth] plot (\x, {1.1709*ln(\x)});
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (5.52,2);
+  \draw[densely dotted, line width=0.4pt] (5.52,2) -- (5.52,0);
+  \draw[densely dashed, line width=0.4pt] (0,-0.7) -- (0.55,-0.7);
+  \draw[densely dotted, line width=0.4pt] (0.55,0) -- (0.55,-0.7);
+  \node[left=1pt, font=\small] at (0,2) {$3$};
+  \node[left=1pt, font=\small] at (0,-0.7) {$a$};
+  \node[above left=-2.5pt and -1.5pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[above=-1pt, font=\small] at (0.55,0) {$\dfrac{1}{3}$};
+  \node[below=1pt, font=\small] at (5.52,0) {$b$};
+  \node[anchor=west, font=\small] at (2.7,2.66) {$y=\log_3 x$};
+\end{tikzpicture}

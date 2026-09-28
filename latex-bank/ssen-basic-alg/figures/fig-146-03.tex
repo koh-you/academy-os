@@ -1,0 +1,15 @@
+% 146-03(146쪽) — 삼각형 ABC · AB=√13, BC=3, ∠C=60°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 √13 · 3 · 60° 만 적는다(AC 의 길이·넓이는 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.70cm, y=0.70cm]
+  \coordinate (A) at (1,3.464);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (3,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[densely dotted, line width=0.35pt] (0.88,3.5) to[bend right=16] node[midway, left=-2.5pt, font=\footnotesize] {$\sqrt{13}$} (-0.16,0.04);
+  \draw[densely dotted, line width=0.35pt] (0.04,-0.2) to[bend right=14] node[midway, below=-2.5pt, font=\footnotesize] {$3$} (2.96,-0.2);
+  \draw[line width=0.4pt] ([shift=(120:0.55)]C) arc (120:180:0.55);
+  \node[font=\footnotesize] at ([shift=(150:1.05)]C) {$60^\circ$};
+  \node[above=-2.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

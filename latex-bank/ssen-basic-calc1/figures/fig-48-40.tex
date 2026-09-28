@@ -1,0 +1,12 @@
+% 48-40(48쪽) — 기울기가 일정한 직선 위 $x=a$ 자리에 빈 점(○)이 있는 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 빈 점(○) 위치와 안내 점선(빈 점 → x축)을 그대로 옮겼다. 눈금값은 원문에 없으므로 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.15,0) -- (3.7,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.85) -- (0,3.0) node[left=1pt] {$y$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt] (-0.95,-0.74) -- (1.75,2.36);
+  \draw[densely dotted, line width=0.4pt] (1,1.5) -- (1,0);
+  \draw[fill=white, line width=0.5pt] (1,1.5) circle (2.2pt);
+  \node[below=1pt, font=\small] at (1,0) {$a$};
+  \node[font=\small] at (2.3,2.7) {$y=f(x)$};
+\end{tikzpicture}

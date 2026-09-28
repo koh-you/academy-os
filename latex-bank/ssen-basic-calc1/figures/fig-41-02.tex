@@ -1,0 +1,27 @@
+% 41-02(41쪽) — x=1·x=2 에서 끊어진 y=f(x) 의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 채운 점 (1,1)·(2,0) · 빈 점 (1,-1)·(2,1) · 안내 점선 여섯 줄 · 라벨 -1, O, 1, 2, 3, 1, -1, x, y, y=f(x).
+\begin{tikzpicture}[x=0.60cm, y=0.56cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (4.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.75) -- (0,2.45) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,1);
+  \draw[densely dotted, line width=0.4pt] (-1,1) -- (2,1);
+  \draw[densely dotted, line width=0.4pt] (1,1) -- (1,-1);
+  \draw[densely dotted, line width=0.4pt] (0,-1) -- (1,-1);
+  \draw[densely dotted, line width=0.4pt] (2,1) -- (2,0);
+  \draw[densely dotted, line width=0.4pt] (3,1) -- (3,0);
+  \draw[line width=0.6pt] (-2.05,2.05) -- (1,-1);
+  \draw[line width=0.6pt] (1,-1) -- (2,0);
+  \draw[line width=0.6pt] (2,1) -- (3.85,1);
+  \fill (1,1) circle (2.2pt);
+  \fill (2,0) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,-1) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (2,1) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,1.22) {$1$};
+  \node[left=1pt, font=\small] at (0,-1) {$-1$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[font=\small] at (1.95,1.6) {$y=f(x)$};
+\end{tikzpicture}

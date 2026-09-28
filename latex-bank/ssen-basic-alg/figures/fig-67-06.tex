@@ -1,0 +1,16 @@
+% 67-06(67쪽) — $y=\log_{\frac{1}{4}} x$ 의 그래프 · $y$축 위의 두 점 A, B 와 $x$축의 $a$·$b$ 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문도 눈금 없는 개형이라 배치 비율만 그대로 따랐다.
+% 라벨은 원문에 있는 것($y=\log_{\frac{1}{4}} x$ · A · B · $a$ · $b$ · O · $x$ · $y$)만 둔다 — $\frac{b}{a}$ 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.5cm, y=0.55cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (6.6,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.5) -- (0,2.25) node[left=1pt, font=\small] {$y$};
+  \draw[domain=0.26:6.35, samples=160, smooth] plot (\x, {-1.5*ln(\x)});
+  \draw[densely dashed, line width=0.4pt] (0,-1.1828) -- (2.2,-1.1828) -- (2.2,0);
+  \draw[densely dashed, line width=0.4pt] (0,-2.5571) -- (5.5,-2.5571) -- (5.5,0);
+  \node[left=1pt, font=\small] at (0,-1.1828) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (0,-2.5571) {$\mathrm{B}$};
+  \node[below left=-2.5pt and -1.5pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[above=1pt, font=\small] at (2.2,0) {$a$};
+  \node[above=1pt, font=\small] at (5.5,0) {$b$};
+  \node[anchor=west, font=\small] at (2.9,-3.2) {$y=\log_{\frac{1}{4}} x$};
+\end{tikzpicture}

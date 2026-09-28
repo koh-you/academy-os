@@ -1,0 +1,16 @@
+% 42-11(42쪽) — x=1 에서 끊어진 y=f(x) 의 그래프(왼쪽은 직선, 오른쪽은 위로 휘는 곡선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 채운 점 (1,2) · 빈 점 (1,0) · 안내 점선 두 줄 · 라벨 2, O, 1, x, y, y=f(x). 눈금은 만들지 않는다.
+\begin{tikzpicture}[x=0.50cm, y=0.50cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.95,0) -- (3.0,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.05) -- (0,3.45) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (1,2);
+  \draw[densely dotted, line width=0.4pt] (1,2) -- (1,0);
+  \draw[line width=0.6pt] (-1.82,-0.82) -- (1,2);
+  \draw[line width=0.6pt, domain=1:2.62, samples=60, smooth] plot (\x, {(\x-1)*(\x-1)});
+  \fill (1,2) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,0) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[font=\small, anchor=west] at (0.55,3.05) {$y=f(x)$};
+\end{tikzpicture}

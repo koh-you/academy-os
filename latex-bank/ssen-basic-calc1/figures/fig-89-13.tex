@@ -1,0 +1,10 @@
+% 89-13(89쪽) — 삼차함수 f(x) 의 도함수 y=f'(x) 의 그래프(아래로 볼록한 포물선 · x축과 0, 3 에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 포물선 · 라벨 O, 3, x, y, y=f'(x). 눈금·f(x) 의 값은 원문에 없어 적지 않는다.
+\begin{tikzpicture}[x=0.40cm, y=0.26cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.3,0) -- (5.4,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,6.8) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-1.35:4.25, samples=90, smooth] plot (\x, {0.9*(\x)*((\x)-3)});
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (3.25,0) {$3$};
+  \node[anchor=south, font=\small] at (2.5,5.5) {$y=f'(x)$};
+\end{tikzpicture}

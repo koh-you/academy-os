@@ -1,0 +1,12 @@
+% 개념 25 85-33(인쇄 85쪽) — 확률밀도함수가 될 수 있는지 묻는 그래프: 0≤x≤2 에서 y=2 인 가로 선분과 x=2 의 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 축 0.7pt · 그래프 0.6pt · 라벨은 원문에 있는 것만(O · x · y · 2 · y=f(x)).
+\begin{tikzpicture}[scale=0.75, line width=0.6pt]
+  \draw[->, line width=0.7pt] (-0.45,0) -- (2.95,0) node[below, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-0.5) -- (0,2.75) node[right, font=\small] {$y$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[dotted, line width=0.6pt] (2,0) -- (2,2);
+  \draw (0,2) -- (2,2);
+  \node[left, font=\small] at (0,2) {$2$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[above, font=\small] at (1.15,2) {$y=f(x)$};
+\end{tikzpicture}

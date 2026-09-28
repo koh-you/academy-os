@@ -1,0 +1,18 @@
+% 141-04(141쪽) — 삼각형 ABC · $\seg{BC}=4$, $\seg{AC}=6$, $A=30^\circ$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 B 를 왼쪽 아래, C 를 오른쪽 아래, A 를 C 위쪽에 두었다.
+% 라벨은 원문에 있는 A·B·C·$30^\circ$·$6$·$4$ 만 둔다 — $\cos^2 B$ 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.45, >=stealth]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (4,0);
+  \coordinate (A) at (5.19,5.88);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ([shift=(228.6:0.95)]A) arc (228.6:258.6:0.95);
+  \node[font=\footnotesize] at ([shift=(243.6:1.62)]A) {$30^\circ$};
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-75:0.30)]A) to[bend left=26]
+    node[midway, right=-1pt, font=\footnotesize] {$6$} ([shift=(80:0.30)]C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-80:0.30)]B) to[bend right=22]
+    node[midway, below=-2.5pt, font=\footnotesize] {$4$} ([shift=(-100:0.30)]C);
+  \node[above=0pt, font=\small] at (A) {$\pt{A}$};
+  \node[left=1pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-2pt and -1pt, font=\small] at (C) {$\pt{C}$};
+\end{tikzpicture}

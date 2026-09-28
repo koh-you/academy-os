@@ -1,0 +1,18 @@
+% 50-38(50쪽) — $y=3^{x}$ 의 그래프 · $x=2$ 에서의 높이 $a$(양쪽 화살표)와 $y=81$ 일 때의 $x=b$ 안내 점선.
+% 원문 그림이 비례가 아닌 개념도(실제 $81$ 에 견주면 $x=2$ 의 높이는 훨씬 낮다)라 원문 배치의 비율을 그대로 옮겼다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 $81$·$2$·$b$·$a$·$y=3^{x}$ 만 · 눈금은 만들지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.25cm, y=0.72cm]
+  \draw[->, >=stealth, line width=0.7pt] (-3.4,0) -- (7.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,3.9) node[left=1pt] {$y$};
+  \draw[domain=-3.4:4.2, samples=90, smooth] plot (\x, {3*exp(0.8755*(\x-4))});
+  \draw[densely dotted, line width=0.4pt] (0,3) -- (4,3) -- (4,0);
+  \draw[densely dotted, line width=0.4pt] (0,0.52) -- (2,0.52) -- (2,0);
+  \draw[<->, >=stealth, line width=0.35pt] (-0.42,0.02) -- (-0.42,0.51);
+  \draw[->, >=stealth, line width=0.35pt] (-1.35,0.85) -- (-0.58,0.34);
+  \node[font=\small] at (-1.95,0.98) {$a$};
+  \node[left=1pt, font=\small] at (0,3) {$81$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (4,0) {$b$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (4.4,3.6) {$y=3^{x}$};
+\end{tikzpicture}

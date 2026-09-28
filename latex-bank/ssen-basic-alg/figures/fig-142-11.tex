@@ -1,0 +1,21 @@
+% 142-11(142쪽) — 원에 내접하는 사각형 ABCD 와 대각선 AC · $\seg{AD}=2$, $\seg{CD}=4$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 A 왼쪽 아래·B 오른쪽 아래·C 오른쪽 위·D 왼쪽에 두었다.
+% 라벨은 원문에 있는 A·B·C·D·$4$·$2$ 만 둔다 — $\seg{AC}$ 의 길이(답)와 $\cos B$ 는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=1.3, >=stealth]
+  \coordinate (O) at (0,0);
+  \coordinate (A) at (230:1);
+  \coordinate (B) at (310:1);
+  \coordinate (C) at (62:1);
+  \coordinate (D) at (181:1);
+  \draw[line width=0.6pt] (O) circle (1);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(50:0.10)]D) to[bend left=18]
+    node[midway, above left=-3.5pt and -3pt, font=\footnotesize] {$4$} ([shift=(215:0.10)]C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-50:0.12)]D) to[bend left=36]
+    node[midway, right=-2pt, font=\footnotesize] {$2$} ([shift=(110:0.12)]A);
+  \node[below left=-3.5pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[below right=-3.5pt and -3pt, font=\small] at (B) {$\pt{B}$};
+  \node[above right=-3.5pt and -3pt, font=\small] at (C) {$\pt{C}$};
+  \node[left=1pt, font=\small] at (D) {$\pt{D}$};
+\end{tikzpicture}

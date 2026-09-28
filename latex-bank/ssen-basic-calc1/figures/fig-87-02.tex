@@ -1,0 +1,11 @@
+% 87-02(87쪽) — 문항에 주어진 도함수 $y=f'(x)$ 의 그래프(삼차 · $x=-1$ 에서 $x$축에 접하고 $x=3$ 에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 -1, O, 3, x, y, y=f'(x). 눈금·다른 좌표값은 원문에 없으므로 넣지 않는다.
+\begin{tikzpicture}[x=0.42cm, y=0.30cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (4.35,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.0) -- (0,3.9) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth] plot coordinates {(-2.3,-2.24) (-2,-1.25) (-1.7,-0.58) (-1.4,-0.18) (-1,0) (-0.6,-0.14) (-0.2,-0.51) (0.2,-1.01) (0.6,-1.54) (1,-2.0) (1.4,-2.3) (1.67,-2.37) (2,-2.25) (2.4,-1.73) (2.7,-1.03) (3,0) (3.25,1.05) (3.45,2.05) (3.6,3.0)};
+  \node[above=1pt, font=\small] at (-1.15,0) {$-1$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[anchor=west, font=\small] at (0.3,3.5) {$y=f'(x)$};
+\end{tikzpicture}

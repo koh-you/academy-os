@@ -1,0 +1,21 @@
+% 147-09(147쪽) — 반지름의 길이가 4인 원에 내접하는 이등변삼각형 ABC · ∠B=∠C=30°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 반지름 4 와 두 30° 만 적는다(삼각형의 넓이는 답이므로 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.32cm, y=0.32cm]
+  \coordinate (O) at (0,0);
+  \coordinate (A) at (2,3.464);
+  \coordinate (B) at (-2,3.464);
+  \coordinate (C) at (4,0);
+  \draw[line width=0.55pt] (O) circle (4);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.5pt] (O) -- (C);
+  \fill (O) circle (2.2pt);
+  \draw[densely dotted, line width=0.35pt] (0.15,-0.32) to[bend right=12] node[midway, below=-2.5pt, font=\footnotesize] {$4$} (3.85,-0.32);
+  \draw[line width=0.4pt] ([shift=(-30:1.0)]B) arc (-30:0:1.0);
+  \node[font=\footnotesize] at ([shift=(-16:1.75)]B) {$30^\circ$};
+  \draw[line width=0.4pt] ([shift=(120:1.0)]C) arc (120:150:1.0);
+  \draw[line width=0.3pt] ([shift=(137:1.1)]C) -- (5.15,1.28);
+  \node[right=-1pt, font=\footnotesize] at (5.1,1.28) {$30^\circ$};
+  \node[above right=-3pt and -3.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[above left=-3pt and -3.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-3pt and -3pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

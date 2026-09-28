@@ -1,0 +1,10 @@
+% 116-17(116쪽) — 도함수 $y=f'(x)$ 의 그래프(아래로 볼록한 포물선 · $x=0,\ 3$ 에서 $x$축과 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 눈금 3 · 라벨 O, x, y, y=f'(x). 꼭짓점 좌표 등 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[x=0.50cm, y=0.53cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (4.35,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.75) -- (0,1.55) node[left=1pt, font=\small] {$y$};
+  \draw plot[smooth, tension=0.7] coordinates {(-0.55,1.95) (-0.4,1.36) (-0.2,0.64) (0,0) (0.3,-0.81) (0.6,-1.44) (0.9,-1.89) (1.2,-2.16) (1.5,-2.25) (1.8,-2.16) (2.1,-1.89) (2.4,-1.44) (2.7,-0.81) (3,0) (3.3,0.99) (3.55,1.95)};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=-2pt and -3pt, font=\small] at (3,0) {$3$};
+  \node[anchor=south west, font=\small] at (2.6,1.55) {$y=f'(x)$};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 146-05(146쪽) — 삼각형 ABC · AB=8, AC=6 · ∠A 의 이등분선이 BC 와 만나는 점 D. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문처럼 8 · 6 과 ∠A 가 이등분됨을 나타내는 표시만 두고, AD 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.40cm, y=0.40cm]
+  \coordinate (A) at (5.547,5.765);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (7.211,0);
+  \coordinate (D) at (4.121,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \draw[densely dotted, line width=0.35pt] (5.42,5.9) to[bend right=14] node[midway, above left=-4pt and -4pt, font=\footnotesize] {$8$} (-0.18,0.12);
+  \draw[densely dotted, line width=0.35pt] (5.72,5.88) to[bend left=14] node[midway, right=-2.5pt, font=\footnotesize] {$6$} (7.4,0.1);
+  \draw[line width=0.35pt] ([shift=(226.1:1.05)]A) arc (226.1:256.1:1.05);
+  \draw[line width=0.35pt] ([shift=(256.1:1.05)]A) arc (256.1:286.1:1.05);
+  \draw[line width=0.35pt] ([shift=(241.1:0.88)]A) -- ([shift=(241.1:1.22)]A);
+  \draw[line width=0.35pt] ([shift=(271.1:0.88)]A) -- ([shift=(271.1:1.22)]A);
+  \node[above=-2.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+  \node[below=-2.5pt, font=\footnotesize] at (D) {$\pt{D}$};
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 59-07(인쇄 59쪽) — 고객 서비스 만족도 원그래프. 원문 부채꼴 5개: 매우 만족 52명 · 만족 140명 · 보통 105명 · 불만족 72명 · 매우 불만족 31명.
+% 12시 방향에서 시계 방향으로 원문과 같은 차례·같은 중심각으로 그렸다. 스캔 그래프가 흐려 TikZ 로 다시 그림.
+% 라벨과 인원수는 원문 그림에 적힌 것 그대로이고(이 수치가 없으면 문제가 풀리지 않는다), 합계나 구하는 확률은 적지 않는다.
+\begin{tikzpicture}[line width=0.4pt]
+  \def\R{1.25}
+  \filldraw[fill=red!18]    (0,0) -- (43.2:\R)   arc[start angle=43.2,   end angle=90,     radius=\R] -- cycle;
+  \filldraw[fill=blue!25]   (0,0) -- (-82.8:\R)  arc[start angle=-82.8,  end angle=43.2,   radius=\R] -- cycle;
+  \filldraw[fill=yellow!75] (0,0) -- (-177.3:\R) arc[start angle=-177.3, end angle=-82.8,  radius=\R] -- cycle;
+  \filldraw[fill=yellow!25] (0,0) -- (117.9:\R)  arc[start angle=117.9,  end angle=182.7,  radius=\R] -- cycle;
+  \filldraw[fill=purple!12] (0,0) -- (90:\R)     arc[start angle=90,     end angle=117.9,  radius=\R] -- cycle;
+  \node[align=center, font=\tiny, inner sep=0pt] at (-19.8:0.62) {만족\\$140$명};
+  \node[align=center, font=\tiny, inner sep=0pt] at (-129:0.60) {보통\\$105$명};
+  \node[align=center, font=\tiny, inner sep=0pt] at (152:0.56) {불만족\\$72$명};
+  \draw[line width=0.3pt] (66.6:0.80) -- (0.98,1.42);
+  \node[align=center, font=\tiny, anchor=south west, inner sep=1pt] at (0.94,1.40) {매우 만족\\$52$명};
+  \draw[line width=0.3pt] (104:0.86) -- (-0.98,1.42);
+  \node[align=center, font=\tiny, anchor=south east, inner sep=1pt] at (-0.94,1.40) {매우 불만족\\$31$명};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 146-01(146쪽) — 삼각형 ABC · AB=8, AC=7, ∠B=60°, ∠C=75°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 8 · 7 · 60° · 75° 만 적는다(넓이는 답이므로 그림에 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.38cm, y=0.38cm]
+  \coordinate (A) at (3.962,6.862);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (5.8,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[densely dotted, line width=0.35pt] (3.78,6.94) to[bend right=16] node[midway, left=-2.5pt, font=\footnotesize] {$8$} (-0.3,0.06);
+  \draw[densely dotted, line width=0.35pt] (4.15,6.94) to[bend left=16] node[midway, right=-2.5pt, font=\footnotesize] {$7$} (6.1,0.06);
+  \draw[line width=0.4pt] ([shift=(0:0.95)]B) arc (0:60:0.95);
+  \node[font=\footnotesize] at ([shift=(32:1.75)]B) {$60^\circ$};
+  \draw[line width=0.4pt] ([shift=(105:0.95)]C) arc (105:180:0.95);
+  \node[font=\footnotesize] at ([shift=(144:1.8)]C) {$75^\circ$};
+  \node[above=-2.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

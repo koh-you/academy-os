@@ -1,0 +1,17 @@
+% 64-38(64쪽) — 「다음 로그함수의 그래프에서 a, b의 값을 구하시오.」 둘째 그림: y=log_{1/2} x 의 그래프와 x축 위의 1/2·b, y축 위의 a·-2.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 것(y=log_{1/2} x · a · -2 · 1/2 · b · O · x · y)만 두고 a, b 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.52cm, y=0.42cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.55,0) -- (5.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.65) -- (0,2.9) node[left=1pt, font=\small] {$y$};
+  \draw[domain=0.16:5.7, samples=160, smooth] plot (\x, {-ln(\x)/ln(2)});
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (0.5,1);
+  \draw[densely dotted, line width=0.4pt] (0.5,1) -- (0.5,0);
+  \draw[densely dashed, line width=0.4pt] (0,-2) -- (4,-2);
+  \draw[densely dotted, line width=0.4pt] (4,0) -- (4,-2);
+  \node[left=1pt, font=\small] at (0,1) {$a$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+  \node[below left=-1.5pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=-1pt, font=\small] at (0.58,0) {$\dfrac{1}{2}$};
+  \node[above=1pt, font=\small] at (4,0) {$b$};
+  \node[anchor=west, font=\small] at (2.2,-3.0) {$y=\log_{\frac{1}{2}} x$};
+\end{tikzpicture}

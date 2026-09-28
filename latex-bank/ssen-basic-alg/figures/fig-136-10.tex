@@ -1,0 +1,15 @@
+% 136-10(136쪽) — 함수 $y=a\sin bx$ 의 그래프(최댓값 4 · 최솟값 $-4$ · 축을 $\frac{\pi}{4}$, $\frac{\pi}{2}$ 에서 지남).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 4 · -4 · π/4 · π/2 · O · y=a sin bx 만 둔다.
+\begin{tikzpicture}[line width=0.6pt, x=2.2cm, y=0.36cm, >=stealth]
+  \draw[densely dashed, line width=0.35pt] (-0.42,4) -- (2.46,4);
+  \draw[densely dashed, line width=0.35pt] (-0.42,-4) -- (2.46,-4);
+  \draw[->, line width=0.7pt] (-0.42,0) -- (2.62,0) node[below=1pt, font=\footnotesize] {$x$};
+  \draw[->, line width=0.7pt] (0,-5.6) -- (0,5.9) node[left=1pt, font=\footnotesize] {$y$};
+  \draw[domain=-0.361:2.262, samples=220, smooth] plot (\x, {4*sin(4*\x r)});
+  \node[anchor=north east, font=\footnotesize] at (-0.045,3.55) {$4$};
+  \node[anchor=north east, font=\footnotesize] at (-0.045,-4.45) {$-4$};
+  \node[below right=-2pt and -1pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[above=-1pt, font=\footnotesize] at (0.7854,0.1) {$\dfrac{\pi}{4}$};
+  \node[below=-1pt, font=\footnotesize] at (1.5708,-0.1) {$\dfrac{\pi}{2}$};
+  \node[anchor=west, font=\footnotesize] at (0.86,5.5) {$y=a\sin bx$};
+\end{tikzpicture}

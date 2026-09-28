@@ -1,0 +1,28 @@
+% 48-43(48쪽) — $-1\le x\le 5$ 언저리에서 그린 $y=f(x)$ 의 그래프(뾰족한 점 · 빈 점 · 채운 점이 섞여 있다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 눈금 -1, 1, 2, 3, 4 와 라벨 O, x, y, y=f(x), 안내 점선, 빈 점(○)과 채운 점(●).
+% 연속·미분가능 여부는 이 그래프에서 읽는 것이 문제이므로 ○·× 같은 답 표시는 그림에 넣지 않는다.
+\begin{tikzpicture}[scale=0.72, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.55,0) -- (5.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,3.55) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (-1,2.55) -- (-1,0);
+  \draw[densely dotted, line width=0.4pt] (1,2.73) -- (1,0);
+  \draw[densely dotted, line width=0.4pt] (2,2.31) -- (2,0);
+  \draw[densely dotted, line width=0.4pt] (3,1.0) -- (3,0);
+  \draw[densely dotted, line width=0.4pt] (4,2.73) -- (4,0);
+  \draw[line width=0.6pt, smooth] plot coordinates {(-1.15,3.35) (-1,2.55) (-0.8,1.95) (-0.6,1.5) (-0.4,1.15) (-0.2,0.93) (0,0.85)};
+  \draw[line width=0.6pt, smooth] plot coordinates {(0,0.85) (0.22,1.05) (0.45,1.42) (0.65,1.88) (0.82,2.28) (1,2.73)};
+  \draw[line width=0.6pt, smooth] plot coordinates {(1,2.73) (1.15,2.74) (1.4,2.68) (1.7,2.51) (2,2.31) (2.4,1.94) (2.7,1.5) (2.9,1.2) (3,1.0)};
+  \draw[line width=0.6pt, smooth] plot coordinates {(3,1.0) (3.15,1.65) (3.35,2.12) (3.6,2.44) (3.8,2.62) (4,2.73)};
+  \draw[line width=0.6pt] (4,1.77) -- (5.1,1.15);
+  \draw[fill=white, line width=0.5pt] (0,0.85) circle (2.2pt);
+  \fill (0,1.78) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (4,2.73) circle (2.2pt);
+  \fill (4,1.77) circle (2.2pt);
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[font=\small] at (3.6,3.25) {$y=f(x)$};
+\end{tikzpicture}
