@@ -9706,7 +9706,7 @@
     "124-51": {
       "page": 124,
       "body": "$\\displaystyle\\int_{-1}^{1} (x^4+x^3+x^2+x+1)\\,dx$",
-      "hint": "정적분의 성질을 이용해서 우함수와 기함수로 나누어 적분해.\\\\ $\\displaystyle =\\int_{-1}^{1} (x^4+\\blank[1.1em]+1)\\,dx+\\underbrace{\\int_{-1}^{1} (\\blank[1.1em]+x)\\,dx}_{0}$\\\\ $\\displaystyle =2\\int_{\\blank[1.1em]}^{1} (x^4+\\blank[1.1em]+1)\\,dx$\\\\ $\\displaystyle =2\\Big[\\dfrac{1}{5}x^5+\\blank[1.1em]x^3+x\\Big]_{\\blank[1.1em]}^{1}$\\\\ $=\\blank$",
+      "hint": "정적분의 성질을 이용해서 우함수와 기함수로 나누어 적분해.\\\\ $\\displaystyle =\\int_{-1}^{1} (x^4+\\blank[1.1em]+1)\\,dx+\\underbrace{\\int_{-1}^{1} (\\blank[1.1em]+x)\\,dx}_{0}$\\\\ $\\displaystyle =2\\int_{\\blank[1.1em]}^{1} (x^4+\\blank[1.1em]+1)\\,dx$\\\\ $\\displaystyle =2\\Big[\\dfrac{1}{5}x^5+\\blank[1.1em]\\,x^3+x\\Big]_{\\blank[1.1em]}^{1}$\\\\ $=\\blank$",
       "answer": "",
       "answer_source": ""
     },
@@ -10028,7 +10028,7 @@
     "129-06": {
       "page": 129,
       "body": "$\\displaystyle\\int_{1}^{x} f(t)\\,dt=x^2+4x-5$",
-      "hint": "주어진 등식의 양변을 $x$에 대하여 미분하면\\\\ \\hspace*{1.5em}$\\dfrac{d}{dx}\\displaystyle\\int_{1}^{x} f(t)\\,dt=\\dfrac{d}{dx}(x^2+4x-5)$\\\\ \\hspace*{1.5em}$\\therefore f(x)=\\blank x+\\blank$",
+      "hint": "주어진 등식의 양변을 $x$에 대하여 미분하면\\\\ \\hspace*{1.5em}$\\dfrac{d}{dx}\\displaystyle\\int_{1}^{x} f(t)\\,dt=\\dfrac{d}{dx}(x^2+4x-5)$\\\\ \\hspace*{1.5em}$\\therefore f(x)=\\blank\\,x+\\blank$",
       "answer": "",
       "answer_source": ""
     },
