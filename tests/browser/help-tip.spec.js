@@ -1,5 +1,11 @@
 import { expect, test } from "./fixtures.js";
-import { collectPageErrors, loginAsTeacher, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
+import {
+  collectPageErrors,
+  loginAsTeacher,
+  navigateCalendarToMonth,
+  resetSafeFixture,
+  safeApiBaseUrl
+} from "./safeSmokeSupport.js";
 
 test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
@@ -313,5 +319,139 @@ test("exam analysis phrase picker tip is fully painted outside its overflow:clip
     await page.keyboard.press("Escape");
   }
 
+  expect(pageErrors).toEqual([]);
+});
+
+// 2026-09-28 · 출결 체크 모달의 남은 상시 설명 3건(등원 시각 · 하원 시각 · 저장 방식)을 물음표로 옮겼다.
+// 1·2 는 원래 <label> 이 입력을 감싸고 있었다. 그 안에 물음표 <button> 을 넣으면 label 의 연결 대상이
+// 버튼으로 바뀌어 입력칸이 접근 가능한 이름을 잃는다 — 그래서 제목 줄을 <label> 밖으로 빼고
+// htmlFor/id 로 명시 연결했다. 여기서 (1) 세 물음표가 열리고 (2) 두 입력의 접근 가능한 이름이
+// "등원 시각"·"하원 시각" 으로 남아 있고 (3) 확인 패널의 제목·요약·3버튼이 그대로 보이는지 잠근다.
+async function measureAttendanceFieldNames(page) {
+  return page.evaluate(() => {
+    const dialog = document.querySelector(".attendanceModal");
+    const inputs = [...dialog.querySelectorAll('.fieldGrid input[type="time"]')];
+    return inputs.map((input) => ({
+      ariaLabel: input.getAttribute("aria-label"),
+      // 접근 가능한 이름의 원천: <label for> 이 이 입력을 가리키는지.
+      labelTargetsInput: [...(input.labels ?? [])].every((label) => label.control === input),
+      labels: [...(input.labels ?? [])].map((label) => label.textContent.trim())
+    }));
+  });
+}
+
+async function openAttendanceModal(page) {
+  await navigateCalendarToMonth(page, 2026, 8);
+  await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.locator(".attendanceBadge").first().click();
+  const modal = page.getByRole("dialog", { name: "월경계 학생 출결 체크" });
+  await expect(modal).toBeVisible();
+  return modal;
+}
+
+test("attendance modal help tips open and the time inputs keep their accessible names", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.addStyleTag({ content: ".appFrame { transition: none !important; }" });
+  const modal = await openAttendanceModal(page);
+
+  // 상시 노출했던 <small> 안내는 사라졌다. 문구는 닫힌 말풍선 안에만 남는다
+  // (HelpTip 은 설명을 늘 DOM 에 두고 visibility 로만 감춘다 — aria-describedby 가 항상 유효해야 한다).
+  await expect(modal.locator(".fieldGrid small")).toHaveCount(0);
+  const fieldTips = modal.locator('.fieldGrid [role="tooltip"]');
+  await expect(fieldTips).toHaveCount(2);
+  await expect(fieldTips.first()).toBeHidden();
+  await expect(fieldTips.nth(1)).toBeHidden();
+
+  // 제목 + 등원 시각 + 하원 시각 = 이 단계에 물음표 3개. .fieldGrid 안에는 2개까지만 둔다.
+  await expect(modal.locator(".helpTip > .helpTipTrigger")).toHaveCount(3);
+  await expect(modal.locator(".fieldGrid .helpTip > .helpTipTrigger")).toHaveCount(2);
+
+  for (const [label, text] of [
+    ["출결 체크 설명", "지각/결석이면 시간과 사유를 남깁니다."],
+    ["등원 시각 설명", "출결을 못 찍은 학생은 실제 등원 시각을 입력하세요. 지각 분은 수업 시작 기준으로 자동 계산됩니다."],
+    ["하원 시각 설명", "하원 처리를 못 찍은 학생은 실제 하원 시각을 입력하세요."]
+  ]) {
+    const trigger = modal.getByRole("button", { name: label });
+    await trigger.click();
+    const bubble = page.locator(".helpTipBubble-open");
+    await expect(bubble).toBeVisible();
+    await expect(bubble).toHaveText(text);
+    expectTipFullyVisible(await measureOpenTip(page, label), `출결 체크 · ${label}`);
+    await page.keyboard.press("Escape");
+    await expect(bubble).toHaveCount(0);
+  }
+
+  // 입력칸의 접근 가능한 이름은 그대로다 — 이름으로 찾은 입력이 곧 time 입력이어야 한다.
+  // exact 를 켜야 물음표 트리거("등원 시각 설명")까지 같이 잡히지 않는다.
+  await expect(modal.getByRole("textbox", { exact: true, name: "등원 시각" })).toHaveAttribute("type", "time");
+  await expect(modal.getByRole("textbox", { exact: true, name: "하원 시각" })).toHaveAttribute("type", "time");
+  expect(await measureAttendanceFieldNames(page)).toEqual([
+    { ariaLabel: null, labelTargetsInput: true, labels: ["등원 시각"] },
+    { ariaLabel: null, labelTargetsInput: true, labels: ["하원 시각"] }
+  ]);
+
+  // 저장 방식 확인 패널: 제목·저장될 값 요약·3버튼은 그대로 보이고 설명만 물음표 뒤에 있다.
+  await modal.getByRole("button", { name: "결석", exact: true }).click();
+  await modal.getByRole("button", { name: "출결 저장" }).click();
+  const confirmPanel = modal.locator(".attendanceConfirmPanel");
+  await expect(confirmPanel).toContainText("출결을 어떻게 저장할까요?");
+  await expect(confirmPanel.locator(".attendanceConfirmSummary")).toContainText("저장될 값 · 상태 결석");
+  await expect(confirmPanel.getByRole("button", { name: "취소" })).toBeVisible();
+  await expect(confirmPanel.getByRole("button", { name: "저장만" })).toBeVisible();
+  await expect(confirmPanel.getByRole("button", { name: "저장 후 다음 정각 알림톡 예약" })).toBeVisible();
+  // 설명은 상시 노출되지 않는다 — 문구는 닫힌 말풍선 안에만 있다.
+  await expect(confirmPanel.locator('[role="tooltip"]')).toBeHidden();
+  await expect(confirmPanel.locator("p:visible")).toHaveCount(1);
+  // 물음표는 제목 옆에 하나만. 이 단계의 모달 전체로는 4개가 된다.
+  await expect(confirmPanel.locator(".helpTip > .helpTipTrigger")).toHaveCount(1);
+  await expect(modal.locator(".helpTip > .helpTipTrigger")).toHaveCount(4);
+  const saveModeTrigger = confirmPanel.getByRole("button", { name: "저장 방식 설명" });
+  await saveModeTrigger.click();
+  await expect(page.locator(".helpTipBubble-open")).toHaveText(
+    "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
+  );
+  expectTipFullyVisible(await measureOpenTip(page, "저장 방식 설명"), "출결 저장 방식");
+  await page.keyboard.press("Escape");
+
+  // 결석이 아닐 때는 같은 물음표가 즉시 발송 문구를 보여준다(분기는 그대로 살아 있다).
+  await confirmPanel.getByRole("button", { name: "취소" }).click();
+  await modal.getByRole("button", { name: "지각", exact: true }).click();
+  await modal.getByRole("button", { name: "출결 저장" }).click();
+  await modal.locator(".attendanceConfirmPanel").getByRole("button", { name: "저장 방식 설명" }).click();
+  await expect(page.locator(".helpTipBubble-open")).toHaveText(
+    "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."
+  );
+  await page.keyboard.press("Escape");
+
+  // 저장하지 않고 나간다 — 이 검사는 문구와 구조만 본다.
+  await modal.locator(".attendanceConfirmPanel").getByRole("button", { name: "취소" }).click();
+  expect(pageErrors).toEqual([]);
+});
+
+// 390px(모바일 폭)에서도 세 물음표 말풍선이 잘리지 않고, 입력 연결도 그대로다.
+test("attendance modal help tips stay painted at 390px", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.addStyleTag({ content: ".appFrame { transition: none !important; }" });
+  await page.setViewportSize({ height: 844, width: 390 });
+  const modal = await openAttendanceModal(page);
+
+  for (const label of ["출결 체크 설명", "등원 시각 설명", "하원 시각 설명"]) {
+    const trigger = modal.getByRole("button", { name: label });
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.click();
+    await expect(page.locator(".helpTipBubble-open")).toBeVisible();
+    const measured = await measureTipHitTest(page, label);
+    expect(measured.hitMisses, `390 · ${label}: 말풍선이 잘려 안 보이는 지점이 있다`).toEqual([]);
+    expect(measured.position, `390 · ${label}`).toBe("fixed");
+    await page.keyboard.press("Escape");
+  }
+
+  expect(await measureAttendanceFieldNames(page)).toEqual([
+    { ariaLabel: null, labelTargetsInput: true, labels: ["등원 시각"] },
+    { ariaLabel: null, labelTargetsInput: true, labels: ["하원 시각"] }
+  ]);
   expect(pageErrors).toEqual([]);
 });
