@@ -1,0 +1,12 @@
+{ "range": "89-07~92-31", "checked": 25, "ok": 25,
+  "findings": [
+    { "id": "89-07", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — p089 쪽 이미지 배지 007·쎈 0790 으로 대조해 일치" },
+    { "id": "89-10", "severity": "ok", "where": "body", "note": "원본 부등호 판독 확인 — 확대 크롭에서 q: |x-a| <= 1 확인, 조판본과 일치" },
+    { "id": "89-11", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — p089 쪽 이미지 배지 011·쎈 0794 로 대조해 일치" },
+    { "id": "90-14", "severity": "ok", "where": "figure", "note": "벤 다이어그램 U-Q-P 포함 관계와 원소 a,b(P 안)·c,d(Q 안 P 밖)·e(U 안 Q 밖) 배치가 원본과 일치" },
+    { "id": "90-18", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — p090 쪽 이미지 배지 018·쎈 0801 로 대조해 일치" },
+    { "id": "91-19", "severity": "ok", "where": "figure", "note": "U 사각형 안 P(내부에 Q)와 분리된 R 배치가 원본과 일치" },
+    { "id": "91-22", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — p091 쪽 이미지 배지 022·쎈 0805 로 대조해 일치" },
+    { "id": "92-26", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — p092 쪽 이미지 배지 026·쎈 0809 로 대조해 일치. 보기 3 지수는 확대 크롭에서 x^2 확인" },
+    { "id": "92-31", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — p092 쪽 이미지 배지 031·쎈 0814 로 대조해 일치" }
+  ] }

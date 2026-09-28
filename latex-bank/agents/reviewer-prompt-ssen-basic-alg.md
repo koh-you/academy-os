@@ -27,6 +27,18 @@ node latex-bank/tools/crop-page.mjs ssen-basic-alg <쪽> <x0> <y0> <x1> <y1> <ou
 
 **「원본과 조판본이 다른 문항이다」는 것 자체가 red 지적이 아니다.** 쪽 이미지에서 배지 번호로 확인해 조판본 내용이 그 번호 문항과 같으면 정상이고, `note` 에 「크롭 어긋남 — 쪽 이미지로 대조해 일치」라고만 적는다. 조판본이 **엉뚱한 번호의 문항**을 담고 있으면 red 다.
 
+### review 그림이 items.json 보다 한 판 낡았다 (공통 지시문)
+
+review png 는 21:06 조판본이고, 21:11 에 **공통 지시문이 빠졌던 그룹 8곳을 앞 그룹에서 물려받도록 고쳤다**(예 79-11~79-23 · 81-34~81-46). 그래서 **조판본 쪽에만 공통 지시문이 안 보이는 경우, 그림이 낡은 것이지 결함이 아닐 수 있다.**
+
+지시문이 빠진 것처럼 보이면 지적하기 전에 현재 `items.json` 을 확인한다:
+
+```bash
+node -e 'const j=require("./latex-bank/ssen-basic-alg/items.json");for(const u of j.units)for(const g of u.groups)if((g.items??[]).includes("79-11"))console.log(g.id,"|",g.section,"|",g.passage)'
+```
+
+거기에 `passage` 가 들어 있으면 **ok** 로 적고 `note` 에 「review 그림이 낡음 — items.json 에는 지시문 있음」이라고만 남긴다. 비어 있으면 진짜 누락이므로 red 다.
+
 ### 전사 단계에서 이미 확인된 검출기 오검출 (누락으로 착각하지 말 것)
 
 `latex-bank/ssen-basic-alg/work/배지-점검.md` 끝의 「실측 정정」 절에 7건이 적혀 있다(67~69쪽 18문항 · 92쪽 중복 21 · 134쪽 빠진번호 25~40 · 143쪽 8~12 중복 · 155쪽 중복 27 · 159쪽 20~25 · 169쪽 12~23 · 148쪽 8 중복 · 174쪽 20~23). 담당 쪽이 거기 걸려 있으면 먼저 읽는다.
