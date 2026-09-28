@@ -68,6 +68,33 @@ const INGEST_VERSION = "scan-answers-1.0";
 const LAYOUTS = {
   olympos: { template: "olympos-answer-icon.png", iconDark: 130, bodyTop: 0.07, columns: null, skipCodePages: true, waitForHeader: true, excludeTags: ["수행평가"], local: "type_label", badgeMinH: 9.5 },
   ssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.11, columns: [[0.03, 0.44], [0.56, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5 },
+  // ssena4: 베이직쎈 별책 답지 가운데 스캔이 아니라 A4(595.3×841.9pt) 디지털 원본인 판 — 22개정 베이직쎈 미적분1.
+  // 판형은 `ssen` 과 같다(두 컬럼 + 가운데 「베이직쎈 BOX」 띠 · 회색 「답」 상자 · 구역마다 01 부터 다시 시작하는
+  // 두 자리 주황 배지 · 개념 쪽의 반 컬럼 격자). 다른 점은 쪽이 6% 작다는 것뿐인데, 그 때문에 배지 글자 높이가
+  // 6.9~7.2pt 라 `ssen` 의 badgeMinH 7.5 로는 배지를 **하나도** 못 고른다(쪽마다 풀이 0~1개). 또 본문 첫 줄이
+  // 0.096 부터 시작해 bodyTop 0.11 로는 컬럼 첫 배지가 잘린다. cropBottom 은 0.920 — 본문 잉크는 0.918 위에서
+  // 끝나고 쪽 번호가 0.925~0.935(짝수 쪽 왼쪽 아래 · 홀수 쪽 오른쪽 아래)에 있어 기본 0.935 면 크롭에 딸려 온다.
+  // bodyBottom 자체는 0.935 그대로 둔다(줄이면 왼쪽 띠 OCR 이미지가 바뀌어 배지 3개가 사라졌다).
+  // iconSearchFrom·iconSkipBand·iconAchromatic: 이 책은 「06 답 f(x)=3」처럼 답만 한 줄인 문항이 많아 회색 「답」
+  // 상자가 배지 바로 뒤(컬럼 폭의 7%)에 있다. 기본 30% 부터 훑으면 그 88문항의 빠른답이 통째로 빠진다.
+  // 왼쪽까지 당기면 같은 크기의 색 라벨(「전략」 빨강 · 「풀이」 주황)이 답 상자로 잡히므로 색 비율로 거른다.
+  // 판이 홀짝으로 0.036 밀리고 홀수 쪽 바깥에만 세로 단원 탭(0.951~0.962)이 붙어 컬럼을 홀·짝으로 나눠 준다.
+  // badgeColored: 배지가 색 글자(개념 주황 · 유형 초록 · 실전 감각 UP 남색)라 `ssenb` 처럼 잉크의 색 비율로 고른다.
+  // 실측한 색 비율은 진짜 배지 0.91~1.00, 풀이 글 속의 검정 숫자 오독 0.00 으로 완전히 갈린다. 이 걸름이 없으면
+  // 풀이 한가운데의 검정 숫자가 가짜 배지가 되어 **90군데에서 크롭이 잘렸다**(8-08 은 마지막 세 줄과 「답」이 빠졌다).
+  // halfColumnGrid 도 끈다. 이 책에서 반 컬럼 격자(「01 답 ○ │ 02 답 ○」)는 p50 한 줄뿐인데(overrides 로 지정),
+  // 자동 감지는 109쪽 통틀어 p70 오른쪽 컬럼에서 한 번만 걸렸고 그마저 오검출이었다 — 풀이 글의 「1초」·「2초」를
+  // 격자 열로 읽어 99-10 · 99-12 · 99-16 의 크롭이 줄 왼쪽 20%(124px)만 남았다.
+  // 색 배지 보완은 `ssenb` 와 같은 까닭으로 끈다: 「학교 시험 기출로 실전 감각 UP!」 서술형 풀이의 채점 기준표
+  // 첫 칸에 ❶❷❸(색 동그라미)가 배지와 같은 x(3pt 차)로 줄줄이 서 있어 가짜 배지가 된다. 켜고 돌리면 해설은
+  // 1002 → 1047 로 늘지만 **142문항의 크롭이 표 앞에서 잘린다**(118-12 는 1484px → 89px). 실측 비교로 껐다.
+  ssena4: {
+    template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.093, bodyBottom: 0.935, cropBottom: 0.920,
+    columns: [[0.090, 0.437], [0.568, 0.935]], columnsEven: [[0.050, 0.428], [0.555, 0.910]],
+    badgeColored: true, badgeColorRatio: 0.45, colorBadgeFallback: false, minBandH: 4, halfColumnGrid: false,
+    iconSearchFrom: 0.06, iconSkipBand: [0.12, 0.30], iconAchromatic: true,
+    skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 6.5
+  },
   // lssen: 라이트쎈·쎈(중등) 별책 답지 — 두 컬럼(가운데 BOX 띠 없음) · 초록 4자리 책 전체 번호 배지 · 회색 「답」 상자.
   lssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.08, columns: [[0.03, 0.49], [0.51, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "book_number", badgeMinH: 7.5, badgeDigits: 4 },
   // ssenb: 쎈B(고등) 별책 답지 — 두 컬럼 + 가운데 세로 구분선 · 중단원마다 01 부터 다시 시작하는 색 배지 · 남회색 「답」 상자 ·
@@ -269,7 +296,7 @@ function findAnswerIcons(imageData, width, scale, box, template = null, darkThre
  * 회색 「답」 상자(쎈 답지) — 회색(90~215) 세로 테두리 두 줄이 5~10pt 떨어져 같은 높이(5~10pt)로 서 있고, 그 사이 위·아래
  * 행도 회색이며 바깥 고리는 희다. 속의 흰 「답」 글자 때문에 가로 런으로는 안 잡히므로 세로 테두리로 찾는다.
  */
-function findGrayIcons(imageData, width, scale, box) {
+function findGrayIcons(imageData, width, scale, box, searchFrom = 0.3, skipBand = null, achromatic = false) {
   const x0 = Math.max(0, Math.floor(box.x0 * scale));
   const x1 = Math.ceil(box.x1 * scale);
   const y0 = Math.max(0, Math.floor(box.y0 * scale));
@@ -278,7 +305,9 @@ function findGrayIcons(imageData, width, scale, box) {
   const maxSize = Math.round(10 * scale);
   const value = (x, y) => (x < 0 || y < 0 || x >= x1 || y >= y1 ? 255 : gray(imageData, (y * width + x) * 4));
   const grayish = (x, y) => { const v = value(x, y); return v >= 90 && v <= 215; };
-  const searchX0 = x0 + Math.round((x1 - x0) * 0.3);
+  // 기본 0.3 — 「답」 상자는 줄 오른쪽에 있다. 풀이 없이 답만 한 줄인 문항(「06 답 f(x)=3」)은 배지 바로 뒤라
+  // 왼쪽 30% 안에 있어 안 잡힌다. 그런 쪽이 많은 판은 layout.iconSearchFrom 으로 이 자리를 배지 폭 바로 뒤까지 당긴다.
+  const searchX0 = x0 + Math.round((x1 - x0) * searchFrom);
   // 세로 회색 런(2px 폭 허용)의 시작 y·길이
   const verticalRuns = [];
   for (let x = searchX0; x < x1; x += 1) {
@@ -322,9 +351,30 @@ function findGrayIcons(imageData, width, scale, box) {
       if (value(xx, left.y1 + 2) > 225) ringWhite += 1;
     }
     if (ringWhite < ringTotal * 0.75) continue;
+    // achromatic: 「답」 상자는 회색이고, 같은 크기·모양인 「전략」(빨강)·「풀이」(주황) 라벨은 색이다. 배지 바로 뒤까지
+    // 훑는 판에서는 그 라벨이 줄 맨 앞에 있어 그대로 답 줄이 된다 — 색 픽셀 비율로 가른다(답 0.0 · 라벨 0.7 이상).
+    if (achromatic) {
+      let colored = 0;
+      let total = 0;
+      for (let yy = left.y0; yy < left.y1; yy += 1) {
+        for (let xx = left.x; xx <= right.x; xx += 1) {
+          total += 1;
+          if (isColored(imageData, (yy * width + xx) * 4)) colored += 1;
+        }
+      }
+      if (total && colored / total > 0.25) continue;
+    }
     icons.push({ x: left.x / scale, y: (left.y0 + h / 2) / scale, w: w / scale, h: h / scale, px0: left.x, py0: left.y0 });
   }
-  return icons.map(({ px0, py0, ...icon }) => icon);
+  // skipBand: searchFrom 을 왼쪽으로 당긴 판에서 「답만 한 줄」의 상자(배지 바로 뒤)만 더 받고, 줄 한가운데의
+  // 오검출은 도로 버린다. 상자 왼쪽 x 의 컬럼 안 상대 위치 기준 [a, b) 구간을 버린다.
+  const kept = skipBand
+    ? icons.filter((icon) => {
+      const rel = (icon.x * scale - x0) / (x1 - x0);
+      return rel < skipBand[0] || rel >= skipBand[1];
+    })
+    : icons;
+  return kept.map(({ px0, py0, ...icon }) => icon);
 }
 
 /** 사람이 먼저 볼 것만 추린 검수 목록(마크다운). 패키지 폴더에 「검수-필요.md」로 남긴다. */
@@ -498,7 +548,7 @@ function localNumberOf(item, source = "type_label", digits = 2) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.pdf || !args.out) {
-    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen|lssen|ssenb|ssenbc|ssenbg] [--pages a-b] [--dpi 220] [--overrides <json>] [--item-list <items.json>]");
+    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen|ssena4|lssen|ssenb|ssenbc|ssenbg] [--pages a-b] [--dpi 220] [--overrides <json>] [--item-list <items.json>]");
     process.exit(2);
   }
   const outDir = path.resolve(args.out);
@@ -573,7 +623,7 @@ async function main() {
     const crops = [];
     // iconGray 를 안 쓰면 「회색 테두리」 규칙, 쓰면 「어두운 틀 + 견본」 규칙. 기본은 지금까지의 iconDark > 150 판정 그대로다.
     const icons = (layout.iconGray ?? layout.iconDark > 150)
-      ? findGrayIcons(imageData, canvas.width, renderScale, box)
+      ? findGrayIcons(imageData, canvas.width, renderScale, box, layout.iconSearchFrom, layout.iconSkipBand, layout.iconAchromatic)
       : findAnswerIcons(imageData, canvas.width, renderScale, box, answerTemplate, layout.iconDark, layout.iconNcc ?? 0.5, layout.iconColored ?? false);
     for (const icon of icons) {
       // 답 줄 띠: 아이콘 중심에서 위아래 9pt 안(분수 한 층)만. 윗줄(빈 틈 1.2pt 이상)로 번지지 않는다.
@@ -675,7 +725,12 @@ async function main() {
       }
       // 상자 왼쪽은 배지 x 로 정한다(아래에서 후보를 찾은 뒤 갱신). 잉크 여백 추정이 어긋나는 컬럼(답지 BOX 띠 옆)에 대비.
       const columnBox = { x0: left - 3, x1: column.x1 };
-      const { bands, boxes } = findColorBands(imageData, canvas.width, renderScale, { x0: left, x1: column.x1 }, pageHeight);
+      const { bands: rawBands, boxes: rawBoxes } = findColorBands(imageData, canvas.width, renderScale, { x0: left, x1: column.x1 }, pageHeight);
+      // minBandH: 얇은 가로 색 점선(풀이 줄에서 가운데 「베이직쎈 BOX」 로 가는 연결선)이 한 행짜리 색 띠로 잡히는
+      // 판에서 그 띠를 버린다. 띠는 「다음 색 띠 앞까지」라는 크롭 한계라서, 안 버리면 풀이가 첫 줄에서 잘린다.
+      // 실측(베이직쎈 미적분1 답지 109쪽): 진짜 머리 띠는 5pt·14pt 9개씩, 나머지 75개는 전부 0~3pt 연결선이었다.
+      const bands = layout.minBandH ? rawBands.filter((band) => band.y1 - band.y0 >= layout.minBandH) : rawBands;
+      const boxes = layout.minBandH ? [] : rawBoxes;
       const insideBox = (y) => boxes.some((box) => y >= box.y0 - 1 && y <= box.y1 + 1);
       const insideBand = (y) => bands.some((band) => y >= band.y0 - 1 && y <= band.y1 + 1);
       const numberTokens = tokens.filter((token) => badgeRe.test(token.text) && token.conf >= 40 && token.h >= 6.5 && token.h <= 12.5 && token.x >= column.x0 && token.x < column.x1);
@@ -745,7 +800,7 @@ async function main() {
 
       // 컬럼 맨 위 이어지는 풀이: 첫 배지 위(색 띠 밖)에 검정 잉크가 6pt 이상 있으면 직전 풀이에 붙인다.
       const firstBadge = badges[0];
-      const continuationLimit = firstBadge ? firstBadge.y - 3 : bodyBottom;
+      const continuationLimit = firstBadge ? firstBadge.y - 3 : (layout.cropBottom ? pageHeight * layout.cropBottom : bodyBottom);
       const aboveBands = [...bands, ...boxes];
       if (pending) {
         const above = inkRange(imageData, canvas.width, renderScale, { ...columnBox, y0: bodyTop, y1: continuationLimit }, aboveBands);
@@ -802,8 +857,11 @@ async function main() {
         const next = placed.slice(index + 1).find((entry) => entry.token.y > badge.y + 5 && entry.x0 < badgeX1 && entry.x1 > badgeX0)?.token;
         const nextBand = Math.min(bodyBottom, ...aboveBands.filter((band) => band.y0 > badge.y + badge.h).map((band) => band.y0 - 2));
         const limit = Math.min(next ? next.y - 3 : bodyBottom, nextBand);
-        const ink = inkRange(imageData, canvas.width, renderScale, { x0: badgeX0, x1: badgeX1, y0: badge.y - 2, y1: limit }, []);
-        const box = { x0: badgeX0, x1: badgeX1, y0: Math.max(bodyTop, badge.y - 3), y1: ink ? Math.min(limit, ink.bottom + 4) : limit };
+        // cropBottom: 크롭만 더 위에서 끊는 한계(쪽 번호가 컬럼 안쪽 아래 구석에 있는 판). 배지 후보 범위·왼쪽 띠
+        // OCR 은 bodyBottom 그대로 둔다 — 그 둘을 함께 줄이면 strip 이미지가 바뀌어 OCR 결과가 흔들린다(실측: 배지 3개 유실).
+        const cropLimit = layout.cropBottom ? Math.min(limit, pageHeight * layout.cropBottom) : limit;
+        const ink = inkRange(imageData, canvas.width, renderScale, { x0: badgeX0, x1: badgeX1, y0: badge.y - 2, y1: cropLimit }, []);
+        const box = { x0: badgeX0, x1: badgeX1, y0: Math.max(bodyTop, badge.y - 3), y1: ink ? Math.min(cropLimit, ink.bottom + 4) : cropLimit };
         const ocrNumber = Number(badge.text.replace(/^O/, "0"));
         pending = {
           ocrNumber: Number.isFinite(ocrNumber) ? ocrNumber : null,
