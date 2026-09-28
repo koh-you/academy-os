@@ -90,6 +90,17 @@ const LAYOUTS = {
     badgeInset: 2, badgeDigits: 3, badgeSpread: 18, badgeColored: true, badgeColorRatio: 0.45, colorBadgeFallback: false,
     halfColumnGrid: false,
     skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5
+  },
+  // ssenbg: ssenbc 와 판형(컬럼·탭·배지)은 같은데 스캔이 연한 판 — 쎈B 공통수학2. 「답」 상자 테두리가 gray 160~210 이라
+  // 어두운 틀 규칙(iconDark 185)으로는 절반만 잡힌다(실측 p2 9개 중 5개 · p50 8개 중 1개). 회색 테두리 규칙
+  // (findGrayIcons · iconGray: true)으로 바꾸면 같은 쪽에서 9/9 · 8/8 로 맞는다. 나머지는 ssenbc 와 같다.
+  ssenbg: {
+    template: "ssen-answer-icon.png", iconDark: 185, iconGray: true, iconNcc: 0.3, iconColored: true,
+    bodyTop: 0.068, bodyBottom: 0.952, tabMargin: 50,
+    columns: [[0.091, 0.498], [0.515, 0.917]], columnsEven: [[0.080, 0.487], [0.502, 0.902]], columnsAuto: true,
+    badgeInset: 2, badgeDigits: 3, badgeSpread: 18, badgeColored: true, badgeColorRatio: 0.45, colorBadgeFallback: false,
+    halfColumnGrid: false,
+    skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5
   }
 };
 
@@ -487,7 +498,7 @@ function localNumberOf(item, source = "type_label", digits = 2) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.pdf || !args.out) {
-    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen|lssen|ssenb|ssenbc] [--pages a-b] [--dpi 220] [--overrides <json>] [--item-list <items.json>]");
+    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen|lssen|ssenb|ssenbc|ssenbg] [--pages a-b] [--dpi 220] [--overrides <json>] [--item-list <items.json>]");
     process.exit(2);
   }
   const outDir = path.resolve(args.out);
