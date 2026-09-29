@@ -1,0 +1,10 @@
+{
+  "range": "127-49~132-09",
+  "checked": 25,
+  "ok": 25,
+  "findings": [
+    { "id": "128-54", "severity": "ok", "where": "layout", "note": "문항 크롭 없음(대표 문제 검은 배지) — 쪽 이미지 p128 로 대조해 본문·보기 5개 모두 일치" },
+    { "id": "128-57", "severity": "ok", "where": "figure", "note": "TikZ 재작도 — y=√x 곡선, x=k·x=k+1 두 직선, P_k·Q_k·R_k·S_k 라벨, 축 라벨과 하단 x=k·x=k+1 표기까지 원문과 구조 일치. 원문에 없는 값 추가 없음" },
+    { "id": "129-63", "severity": "ok", "where": "figure", "note": "8×8 표를 tabular 로 재조판 — 1~5행 수치, 6행 ⋮·⋱ 위치, a·b·c·225 칸 배치 모두 원문과 일치" }
+  ]
+}

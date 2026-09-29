@@ -95,6 +95,26 @@ const LAYOUTS = {
     iconSearchFrom: 0.06, iconSkipBand: [0.12, 0.30], iconAchromatic: true,
     skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 6.5
   },
+  // ssena4s: 베이직쎈 별책 답지가 A4(595.08×841.68pt) **스캔**인 판 — 2022개정 베이직쎈 확률과 통계 「정답 및 풀이」.
+  // 판형 구성은 `ssen`·`ssena4` 와 같다(두 컬럼 + 가운데 「베이직쎈 BOX」 띠 · 회색 「답」 상자 · 구역마다 01 부터
+  // 다시 시작하는 두 자리 색 배지 · 개념 쪽의 반 컬럼 격자 · 홀수 쪽 바깥의 세로 단원 탭). 다른 것은 판이 앉은 자리다.
+  // 실측(200dpi · 17쪽 표본): 본문 잉크가 짝수 쪽 0.090~0.961, 홀수 쪽 0.075~0.950 으로 쪽 너비를 거의 꽉 채운다.
+  // `ssen`(0.03~0.44 | 0.56~0.97 고정 1벌)은 홀수 쪽 오른쪽 컬럼이 세로 단원 탭(0.964~0.991)을 물어 크롭 오른쪽 끝에
+  // 탭 잉크가 들어오고, `ssena4`(미적분1)는 컬럼이 0.05~0.44 | 0.555~0.935 라 홀수 쪽 배지(x≈48pt)가 badgeInset
+  // 6pt 조건에서 통째로 빠진다. 그래서 홀·짝 2벌을 따로 둔다.
+  // badgeMinH 는 `ssen` 과 같은 7.5 다 — 이 판은 쪽만 A4 이고 인쇄 배율이 커서 배지 글자 높이가 7.5~8.2pt 다
+  // (`ssena4`(미적분1)는 6.9~7.2pt 라 6.5 로 내렸었다. 여기서 6.5 로 내리면 풀이 글 속 숫자 오독이 늘어난다).
+  // bodyTop 0.078: 컬럼 첫 배지가 0.083~0.096 에 있다. `ssen` 의 0.11 이면 쪽·컬럼 머리 문항이 늘 앞 문항에 붙는다
+  // (옛 판 ingest 에서 사람 지정 168개의 대부분이 이 원인이었다). 0.078 은 「정답&풀이」 리본(0.054~0.072)보다 아래다.
+  // bodyBottom/cropBottom 0.963: 본문 마지막 줄이 0.951~0.956 까지 내려오고(`ssen` 기본 0.935 면 잘린다) 쪽 번호가
+  // 0.968~0.983 에 있다(짝수 쪽 왼쪽 컬럼 안 · 홀수 쪽 오른쪽 컬럼 안).
+  ssena4s: {
+    template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.078, bodyBottom: 0.963, cropBottom: 0.963,
+    columns: [[0.040, 0.442], [0.560, 0.958]], columnsEven: [[0.052, 0.454], [0.572, 0.970]],
+    badgeColored: true, badgeColorRatio: 0.25, badgeLabelSize: { w: 13, h: 9 }, colorBadgeFallback: false, badgeSpread: 18, badgeLeftCluster: true,
+    iconSearchFrom: 0.06, iconSkipBand: [0.12, 0.30], iconAchromatic: true,
+    skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5
+  },
   // lssen: 라이트쎈·쎈(중등) 별책 답지 — 두 컬럼(가운데 BOX 띠 없음) · 초록 4자리 책 전체 번호 배지 · 회색 「답」 상자.
   lssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.08, columns: [[0.03, 0.49], [0.51, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "book_number", badgeMinH: 7.5, badgeDigits: 4 },
   // ssenb: 쎈B(고등) 별책 답지 — 두 컬럼 + 가운데 세로 구분선 · 중단원마다 01 부터 다시 시작하는 색 배지 · 남회색 「답」 상자 ·
@@ -548,7 +568,7 @@ function localNumberOf(item, source = "type_label", digits = 2) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.pdf || !args.out) {
-    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen|ssena4|lssen|ssenb|ssenbc|ssenbg] [--pages a-b] [--dpi 220] [--overrides <json>] [--item-list <items.json>]");
+    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen|ssena4|ssena4s|lssen|ssenb|ssenbc|ssenbg] [--pages a-b] [--dpi 220] [--overrides <json>] [--item-list <items.json>]");
     process.exit(2);
   }
   const outDir = path.resolve(args.out);
@@ -765,13 +785,32 @@ async function main() {
         .filter((token) => token.h >= layout.badgeMinH && token.x >= column.x0 + (layout.badgeInset ?? (layout.badgeDigits === 4 ? 1 : 6)) && token.x <= column.x0 + 60 && token.y > bodyTop - 4 && token.y + token.h < bodyBottom)
         .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && !sharesLine(token) && hasTextRight(token))
         // badgeColored: 배지가 색 글자인 판(쎈B)에서는 잉크의 색 비율로 검정 풀이 글 속 숫자 오독을 먼저 버린다.
-        .filter((token) => !layout.badgeColored || coloredInkRatio(imageData, canvas.width, renderScale, token) >= (layout.badgeColorRatio ?? 0.35));
-      const badgeLeft = candidates.length ? Math.min(...candidates.map((token) => token.x)) : left;
-      if (process.env.DEBUG_BADGES === String(pageNumber)) console.log(`  [${column.index}] numberTokens=${numberTokens.map((t) => `${t.text}@${t.x.toFixed(0)},${t.y.toFixed(0)}h${t.h.toFixed(1)}c${Math.round(t.conf)}k${coloredInkRatio(imageData, canvas.width, renderScale, t).toFixed(2)}`).join(" ")} candidates=${candidates.map((t) => `${t.text}@${t.x.toFixed(0)}`).join(",")} bodyTop=${bodyTop.toFixed(0)} colx0=${column.x0.toFixed(0)}`);
+        .filter((token) => !layout.badgeColored || coloredInkRatio(imageData, canvas.width, renderScale, token) >= (layout.badgeColorRatio ?? 0.35))
+        // badgeLabelSize: 「풀이」·「전략」처럼 **색 상자에 흰 글자**를 넣은 라벨이 배지와 같은 x 에 줄줄이 서 있는 판에서
+        // 그 라벨을 버린다. 실측(베이직쎈 확통 답지): 라벨은 폭 15~23pt · 높이 9.5~10pt, 구역 머리 숫자(「개념 08」)는
+        // 폭 15~16pt · 높이 11.5~11.8pt. 진짜 배지는 높이가 7.5~8.8pt 로 늘 9 아래다(폭은 「17 답 75」처럼 답 줄까지
+        // 한 토큰으로 읽혀 22~24pt 가 되기도 해서 폭만으로는 못 가른다). 색 비율(coloredInkRatio)은 라벨 0.6~0.7,
+        // 배지 0.6~0.95 로 겹쳐 쓸 수 없다. 이 걸름이 없으면 「전략」 다음 줄의 「풀이」 라벨이 가짜 배지가 되어
+        // 실전 감각 UP 22문항의 크롭이 첫 줄에서 끊긴다.
+        .filter((token) => !layout.badgeLabelSize || !(token.w > layout.badgeLabelSize.w && token.h >= layout.badgeLabelSize.h));
+      // badgeLeftCluster: 배지 x 가 잔여 기울기·스캔 휨으로 한 컬럼 안에서도 10~15pt 흐르고(실측: 베이직쎈 확통 답지
+      // p61 왼쪽 54→42pt · p56 왼쪽 62→47pt), 왼쪽 띠 OCR 이 같은 배지를 엉뚱한 x 로 한 번 더 주기도 한다.
+      // min 으로 badgeLeft 를 잡으면 badgeSpread 창이 그 한 개에 끌려가 나머지 배지가 통째로 빠진다
+      // (실측 p61 왼쪽 배지 7개 중 1개만 남았다). 켜면 후보 x 를 badgeSpread 폭 창으로 훑어 가장 많이 담기는
+      // 창의 시작을 badgeLeft 로 쓴다(동률이면 왼쪽). 끄면 지금까지의 min 그대로다.
+      const badgeSpread = layout.badgeSpread ?? 8;
+      const badgeLeft = !candidates.length
+        ? left
+        : layout.badgeLeftCluster
+          ? [...candidates].map((token) => token.x).sort((a, b) => a - b)
+            .map((x) => ({ x, count: candidates.filter((token) => token.x >= x && token.x <= x + badgeSpread).length }))
+            .reduce((best, entry) => (entry.count > best.count ? entry : best)).x
+          : Math.min(...candidates.map((token) => token.x));
+      if (process.env.DEBUG_BADGES === String(pageNumber)) console.log(`  [${column.index}] numberTokens=${numberTokens.map((t) => `${t.text}@${t.x.toFixed(0)},${t.y.toFixed(0)}h${t.h.toFixed(1)}c${Math.round(t.conf)}k${coloredInkRatio(imageData, canvas.width, renderScale, t).toFixed(2)}w${t.w.toFixed(0)}`).join(" ")} candidates=${candidates.map((t) => `${t.text}@${t.x.toFixed(0)}`).join(",")} bodyTop=${bodyTop.toFixed(0)} colx0=${column.x0.toFixed(0)}`);
       if (candidates.length) columnBox.x0 = badgeLeft - 3;
       // 배지 x 허용 폭: 잔여 기울기로 쪽 위아래 배지 x 가 밀리므로 판마다 넓힐 수 있게 둔다(기본 8pt).
       const ocrBadges = candidates
-        .filter((token) => token.x <= badgeLeft + (layout.badgeSpread ?? 8))
+        .filter((token) => token.x <= badgeLeft + badgeSpread)
         .sort((a, b) => a.y - b.y)
         .filter((token, index, list) => index === 0 || token.y - list[index - 1].y > 6);
       // OCR 이 놓친 배지 보완(쎈 답지): 배지 번호는 색 글자(주황·초록·빨강)라 배지 x 띠 안의 색 잉크 덩어리(높이 5~13pt)가
