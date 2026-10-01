@@ -2461,7 +2461,10 @@ check(
       "getExamPrepGeneratedKeyForDate(date)",
       'row.schoolName || "학교 미입력"',
       "entry.blocks.some(",
-      "item.schoolName ===",
+      // 2026-10-01 · 중복 제거 기준이 학교명 -> 학교·학년(+고사)으로 바뀌었다. 학교명만 보면
+      // 같은 학교의 다른 학년 학생이 그 일요일 시험대비에서 통째로 빠졌다.
+      "item.schoolGradeKey ||",
+      "blockIdentity",
       "item.examCycle ===",
       // 2026-10-01 · 모든 학교가 배제된 날짜는 수업을 만들지 않아 .map 앞에 .filter 가 붙는다.
       "return [...dateMap.values()]",

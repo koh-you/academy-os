@@ -79,11 +79,14 @@ function buildExistingExamPrepLessonCandidates(
       ) {
         return;
       }
+      // 2026-10-01 · 중복 제거는 학교·학년(+고사) 단위다. 학교명만 보면 같은 학교의 다른
+      // 학년 학생이 그 일요일에서 통째로 빠졌다.
+      const blockIdentity = block.schoolGradeKey || block.schoolName;
       if (
         !entry.blocks.some(
           (item) =>
-            item.schoolName ===
-              block.schoolName &&
+            (item.schoolGradeKey || item.schoolName) ===
+              blockIdentity &&
             item.examCycle === block.examCycle
         )
       ) {
@@ -95,9 +98,9 @@ function buildExistingExamPrepLessonCandidates(
     .filter((entry) => entry.blocks.length > 0)
     .map(
     (entry) => {
-      const schoolNames = entry.blocks
-        .map((block) => block.schoolName)
-        .join(", ");
+      const schoolNames = [
+        ...new Set(entry.blocks.map((block) => block.schoolName))
+      ].join(", ");
       return {
         generatedKey: entry.key,
         label: `${entry.date} 시험대비`,
@@ -268,8 +271,9 @@ const helperBoundaries = [
   "isExamPrepSchoolExcluded(",
   "schoolExclusions,",
   "entry.blocks.some(",
-  "item.schoolName ===",
-  "block.schoolName",
+  // 2026-10-01 · 중복 제거 기준이 학교명 -> 학교·학년(+고사)으로 바뀌었다.
+  "item.schoolGradeKey ||",
+  "blockIdentity",
   "item.examCycle ===",
   "block.examCycle",
   "entry.blocks.push(block)",
