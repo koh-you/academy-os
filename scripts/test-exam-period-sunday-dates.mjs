@@ -16,6 +16,9 @@ const getSundayDatesForExamPeriod =
     }
   });
 
+// 2026-10-01 · 기준이 시험 종료일에서 **시험 첫날** 로 바뀌었다. 첫날(08-01 토) 직전 일요일
+// 07-26 이 마지막 회차가 되고 거기서 3주를 거슬러 올라간다. 시험기간 안의 일요일은 이미
+// 시험이 시작된 뒤라 더 이상 만들지 않는다(창동고 10/11 사례).
 const period = {
   startDate: "2026-08-01",
   endDate: "2026-08-31"
@@ -24,14 +27,27 @@ const periodSnapshot = structuredClone(period);
 assert.deepEqual(
   getSundayDatesForExamPeriod(period),
   [
-    "2026-08-02",
-    "2026-08-09",
-    "2026-08-16",
-    "2026-08-23",
-    "2026-08-30"
+    "2026-07-05",
+    "2026-07-12",
+    "2026-07-19",
+    "2026-07-26"
   ]
 );
-assert.ok(formattedDates.length > 4);
+assert.equal(formattedDates.length, 4);
+
+// 종료일이 주말을 넘겨도 회차는 그대로다 — 창동고 보고의 핵심 회귀.
+assert.deepEqual(
+  getSundayDatesForExamPeriod({
+    startDate: "2026-10-07",
+    endDate: "2026-10-13"
+  }),
+  [
+    "2026-09-13",
+    "2026-09-20",
+    "2026-09-27",
+    "2026-10-04"
+  ]
+);
 assert.deepEqual(
   getSundayDatesForExamPeriod({
     date: "2026-08-12"

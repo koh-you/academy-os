@@ -19,13 +19,13 @@ const period = {
 };
 const periodSnapshot = structuredClone(period);
 assert.deepEqual(
+  // 2026-10-01 · 기준이 시험 첫날(08-01 토)로 바뀌어 직전 일요일 07-26 이 마지막 회차다.
   getSundayDatesForExamPeriod(period),
   [
-    "2026-08-02",
-    "2026-08-09",
-    "2026-08-16",
-    "2026-08-23",
-    "2026-08-30"
+    "2026-07-05",
+    "2026-07-12",
+    "2026-07-19",
+    "2026-07-26"
   ]
 );
 assert.deepEqual(
@@ -146,14 +146,11 @@ assert.ok(
 for (const selectorBoundary of [
   "return function getSundayDatesForExamPeriod(",
   "if (!period.endDate && !period.date) return []",
-  "const prepSundays = [3, 2, 1, 0].map(",
-  "toKoreaDateString(date)",
-  "const inPeriodSundays = []",
-  "while (cursor <= end) {",
-  "toKoreaDateString(cursor)",
-  "...prepSundays,",
-  "...inPeriodSundays",
-  "].sort()"
+  // 2026-10-01 · 기준이 시험 첫날로 바뀌면서 시험기간 안의 일요일 수집이 사라졌다.
+  "const day = start.getDay()",
+  "const lastPrepSunday = new Date(start)",
+  "return [3, 2, 1, 0].map((offset) => {",
+  "toKoreaDateString(date)"
 ]) {
   assert.ok(
     selectorSource.includes(selectorBoundary),

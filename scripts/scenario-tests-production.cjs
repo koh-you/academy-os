@@ -1708,7 +1708,9 @@ check("63 exam prep lesson detail removes block edit controls", hasAll(app, ["fu
 check("64 exam prep UI labels replace Sunday makeup wording", hasAll(`${lessonFrontendSource}\n${examPrepLessonCandidateBuilderSource}`, ['{ id: "examPrep", label: "시험대비"', '["examPrep", "🗓 시험대비"]', 'className: "시험대비"', 'lessonTopic: "시험대비"']) && !lessonFrontendSource.includes("일요보강") && !lessonFrontendSource.includes("일요시험보강"));
 check("64b generated special lessons avoid class template FK ids", !hasAll(`${app}\n${examPrepLessonCandidateBuilderSource}`, ['classTemplateId: "pre_exam"', 'classTemplateId: "exam_sunday_makeup"']) && generatedPreExamLessonBuilderSource.includes('lessonType: "preExam"') && examPrepLessonCandidateBuilderSource.includes('lessonType: "examPrep"') && hasAll(app, ['function isExamPrepLesson(lesson = {})', 'return lesson?.lessonType === "examPrep"']));
 check("64c generated lesson preview lists all candidates in scroll area", !app.includes("generatedLessonPlan.slice(0, 8)") && hasAll(css, [".generatedLessonList", "max-height: 420px", "overflow: auto"]));
-check("64d exam prep includes Sundays inside exam period", hasAll(examPeriodSundayDateSelectorSource, ["inPeriodSundays", "cursor <= end", "cursor.getDay() === 0", "...new Set([", "...prepSundays,", "...inPeriodSundays", "].sort()"]));
+// 2026-10-01 · 기준이 시험 종료일 → **시험 첫날** 로 바뀌었다. 시험이 시작된 뒤의 일요일은
+// 대비가 아니므로 더 이상 만들지 않는다(창동고: 수학 10/08인데 10/11 이 생기던 문제).
+check("64d exam prep anchors four Sundays on the exam start date", hasAll(examPeriodSundayDateSelectorSource, ["const day = start.getDay()", "const lastPrepSunday = new Date(start)", "lastPrepSunday.setDate(start.getDate() - day)", "return [3, 2, 1, 0].map((offset) => {", "lastPrepSunday.getDate() - offset * 7"]) && !examPeriodSundayDateSelectorSource.includes("inPeriodSundays") && !examPeriodSundayDateSelectorSource.includes("end.getDay()"));
 check("64e generated lessons use current exam cycle rows only", hasAll(app, ["generatedLessonPlanRows", "selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)", "buildGeneratedLessonPlan({"]) && hasAll(generatedLessonPlanSelectorsSource, ["(row.examCycle || currentExamCycle) === currentExamCycle"]));
 check("64f generated lesson save failures are visible without blocking alert", hasAll(`${app}\n${generatedLessonSaveStatusSource}`, ["generatedLessonSaveStatus", "자동 수업 저장 실패", "generatedLessonSaveNotice", "onRetryGeneratedLessonSave", "다시 저장", "postJsonWithTimeout(", "\"/api/lessons/bulk\""]) && hasAll(css, [".generatedLessonSaveNotice", ".generatedLessonSaveNotice.failed"]) && !app.includes("window.alert(`자동 수업 저장 실패"));
 check("65 final exam prep does not inherit midterm seed data", hasAll(app, ["normalizeExamPrepRows", "inferExamCycleFromPrepId", "getDefaultExamCycleForDate"]) && hasAll(coreDataRoute, ["inferExamCycleFromPrepId", "getDefaultExamCycleForDate", "exam_cycle: examCycle"]) && hasAll(sampleDataSource, ['examPrepId: "exam_prep_sanggye_2026_mid_1"', 'examCycle: "2026-1-mid"']));
@@ -2365,15 +2367,11 @@ check(
       '`${endDate}T00:00:00+09:00`',
       "Number.isNaN(start.getTime()) ||",
       "Number.isNaN(end.getTime())",
-      "const day = end.getDay()",
-      "const lastSunday = new Date(end)",
-      "lastSunday.setDate(end.getDate() - day)",
-      "const prepSundays = [3, 2, 1, 0].map(",
-      "const inPeriodSundays = []",
-      "while (cursor <= end) {",
-      "...prepSundays,",
-      "...inPeriodSundays",
-      "].sort()"
+      "const day = start.getDay()",
+      "const lastPrepSunday = new Date(start)",
+      "lastPrepSunday.setDate(start.getDate() - day)",
+      "return [3, 2, 1, 0].map((offset) => {",
+      "lastPrepSunday.getDate() - offset * 7"
     ]) &&
     appEntrySource.includes("getSundayDatesForExamPeriod,") &&
     examPrepLessonCandidateBuilderSource.includes("getSundayDatesForExamPeriod(")
@@ -2424,14 +2422,8 @@ check(
     hasAll(examPeriodSundayDateSelectorSource, [
       "return function getSundayDatesForExamPeriod(",
       "if (!period.endDate && !period.date) return []",
-      "const prepSundays = [3, 2, 1, 0].map(",
-      "toKoreaDateString(date)",
-      "const inPeriodSundays = []",
-      "while (cursor <= end) {",
-      "toKoreaDateString(cursor)",
-      "...prepSundays,",
-      "...inPeriodSundays",
-      "].sort()"
+      "return [3, 2, 1, 0].map((offset) => {",
+      "lastPrepSunday.getDate() - offset * 7"
     ]) &&
     ![
       "useState",

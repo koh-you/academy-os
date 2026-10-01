@@ -31,34 +31,17 @@ function getExistingSundayDatesForExamPeriod(
   ) {
     return [];
   }
-  const day = end.getDay();
-  const lastSunday = new Date(end);
-  lastSunday.setDate(end.getDate() - day);
-  const prepSundays = [3, 2, 1, 0].map(
-    (offset) => {
-      const date = new Date(lastSunday);
-      date.setDate(
-        lastSunday.getDate() - offset * 7
-      );
-      return toExistingKoreaDateString(date);
-    }
-  );
-  const inPeriodSundays = [];
-  const cursor = new Date(start);
-  while (cursor <= end) {
-    if (cursor.getDay() === 0) {
-      inPeriodSundays.push(
-        toExistingKoreaDateString(cursor)
-      );
-    }
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return [
-    ...new Set([
-      ...prepSundays,
-      ...inPeriodSundays
-    ])
-  ].sort();
+  // 2026-10-01 · 기준이 시험 종료일에서 시험 첫날로 바뀌었다(창동고 10/11 사례).
+  const day = start.getDay();
+  const lastPrepSunday = new Date(start);
+  lastPrepSunday.setDate(start.getDate() - day);
+  return [3, 2, 1, 0].map((offset) => {
+    const date = new Date(lastPrepSunday);
+    date.setDate(
+      lastPrepSunday.getDate() - offset * 7
+    );
+    return toExistingKoreaDateString(date);
+  });
 }
 
 const extractedSelector =
@@ -76,11 +59,10 @@ const fullPeriodSnapshot =
 assert.deepEqual(
   getExistingSundayDatesForExamPeriod(fullPeriod),
   [
-    "2026-08-02",
-    "2026-08-09",
-    "2026-08-16",
-    "2026-08-23",
-    "2026-08-30"
+    "2026-07-05",
+    "2026-07-12",
+    "2026-07-19",
+    "2026-07-26"
   ]
 );
 assert.deepEqual(
@@ -118,15 +100,16 @@ assert.deepEqual(
   ]
 );
 assert.deepEqual(
+  // 시작 > 종료인 역전 입력. 기준이 시작일이므로 08-20(목) 직전 일요일 08-16 이 마지막 회차다.
   getExistingSundayDatesForExamPeriod({
     startDate: "2026-08-20",
     endDate: "2026-08-10"
   }),
   [
-    "2026-07-19",
     "2026-07-26",
     "2026-08-02",
-    "2026-08-09"
+    "2026-08-09",
+    "2026-08-16"
   ]
 );
 assert.deepEqual(
@@ -181,20 +164,12 @@ const helperBoundaries = [
   '`${endDate}T00:00:00+09:00`',
   "Number.isNaN(start.getTime()) ||",
   "Number.isNaN(end.getTime())",
-  "const day = end.getDay()",
-  "const lastSunday = new Date(end)",
-  "lastSunday.setDate(end.getDate() - day)",
-  "const prepSundays = [3, 2, 1, 0].map(",
-  "return toKoreaDateString(date)",
-  "const inPeriodSundays = []",
-  "const cursor = new Date(start)",
-  "while (cursor <= end) {",
-  "if (cursor.getDay() === 0)",
-  "toKoreaDateString(cursor)",
-  "cursor.setDate(cursor.getDate() + 1)",
-  "...prepSundays,",
-  "...inPeriodSundays",
-  "].sort()"
+  "const day = start.getDay()",
+  "const lastPrepSunday = new Date(start)",
+  "lastPrepSunday.setDate(start.getDate() - day)",
+  "return [3, 2, 1, 0].map((offset) => {",
+  "lastPrepSunday.getDate() - offset * 7",
+  "return toKoreaDateString(date)"
 ];
 let previousIndex = -1;
 for (const boundary of helperBoundaries) {
