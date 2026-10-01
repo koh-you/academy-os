@@ -66,9 +66,7 @@ export function TeacherLessonHubV2({
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
-  onExcludeExamPrepSchool,
-  onIncludeExamPrepSchool,
-  onSaveExamPrepSchoolTime,
+  onSaveExamPrepSchoolPlan,
   getExamPrepLessonExcludedSchools,
   onToggleExamPrepDailyJournal,
   onSaveRecord,
@@ -208,6 +206,7 @@ export function TeacherLessonHubV2({
       <Modal
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal examPrepModal"
+        scrollable
         title="시험대비"
         titleAdornment={(
           <HelpTip
@@ -224,10 +223,8 @@ export function TeacherLessonHubV2({
           examPrepScheduleLessons={examPrepScheduleLessons}
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
-          onExcludeExamPrepSchool={onExcludeExamPrepSchool}
-          onIncludeExamPrepSchool={onIncludeExamPrepSchool}
           onSaveExamPrepSchedule={onSaveExamPrepSchedule}
-          onSaveExamPrepSchoolTime={onSaveExamPrepSchoolTime}
+          onSaveExamPrepSchoolPlan={onSaveExamPrepSchoolPlan}
           onToggleDailyJournal={onToggleExamPrepDailyJournal}
           onSaveRecord={onSaveRecord}
           persistedLessons={persistedLessons}

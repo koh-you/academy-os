@@ -69,63 +69,87 @@ export function removeExamPrepSchoolExclusion(exclusions = [], generatedKey = ""
 }
 
 /**
- * 제외를 이미 저장된 수업에도 바로 반영하는 저장 계획.
+ * 학교별 참여·시간 변경을 **한 요청**으로 보내는 저장 계획.
  *
- * 생성 제어만 바꾸면 저장된 수업은 다음 "생성 수업 적용" 까지 예전 명단을 들고 있어 화면과
- * 서버가 어긋난다. 그래서 같은 순간에 기존 시험대비 일정 저장 경로(CAS + 서버 재조회)로
- * 명단에서 그 학교 학생을 뺀다. 수업기록이나 알림 작업이 걸린 학생이 있으면 서버가 막아
- * 주므로(preflightExamPrepRosterRemovals) 여기서 따로 검사하지 않는다.
+ * 학교마다 따로 보내면 같은 수업에 CAS 쓰기가 연달아 나가 두 번째부터 충돌이 난다. 그리고
+ * 저장 상태가 행마다 갈려 "다 저장됐나?" 를 한눈에 볼 수 없었다. 그래서 바뀐 것을 모아
+ * 수업 하나의 `after` 를 만들고 한 번만 보낸다(examPrepSchoolPlanDraft 주석 참고).
  *
  * 저장되지 않은 자동 생성 수업은 계획이 비어 있다 — 화면 수업은 생성 계획에서 다시 만들어
- * 지므로 생성 제어만 바꾸면 충분하다.
+ * 지므로 제외는 생성 제어만으로 충분하고, 시간은 저장할 원본이 없다.
  */
-export function createExamPrepSchoolRosterSavePlan({
+export function createExamPrepSchoolPlanSavePlan({
   persistedLessons = [],
-  schoolName = "",
+  schoolTimes = [],
   sourceLesson = {},
-  students = []
+  students = [],
+  studentTimes = [],
+  toExclude = []
 } = {}) {
-  const schoolKey = createExamPrepSchoolKey(schoolName);
-  if (!schoolKey) throw new Error("제외할 학교를 선택해 주세요.");
+  const excludedKeys = new Set(
+    toExclude.map((entry) => createExamPrepSchoolKey(entry?.schoolKey || entry?.schoolName)).filter(Boolean)
+  );
   const roster = new Set(sourceLesson.studentIds ?? []);
   const removedStudentIds = students
     .filter((student) => roster.has(student.studentId))
-    .filter((student) => createExamPrepSchoolKey(student.schoolName) === schoolKey)
+    .filter((student) => excludedKeys.has(createExamPrepSchoolKey(student.schoolName)))
     .map((student) => student.studentId)
     .filter(Boolean);
+  const scheduleByStudentId = new Map();
+  schoolTimes.forEach((entry) => {
+    (entry.studentIds ?? []).forEach((studentId) => scheduleByStudentId.set(studentId, {
+      endTime: entry.endTime,
+      startTime: entry.startTime
+    }));
+  });
+  studentTimes.forEach((entry) => scheduleByStudentId.set(entry.studentId, {
+    endTime: entry.endTime,
+    startTime: entry.startTime
+  }));
+  const intent = { removedStudentIds, scheduleByStudentId };
   const persistedLesson = persistedLessons
     .find((lesson) => lesson?.lessonId === sourceLesson.lessonId) ?? null;
-  if (!persistedLesson) return { changes: [], removedStudentIds, schoolKey, schoolName };
-  const after = applyExamPrepSchoolRemovalToLesson(persistedLesson, removedStudentIds);
+  if (!persistedLesson) return { changes: [], ...intent };
+  const after = applyExamPrepSchoolPlanToLesson(persistedLesson, intent);
   return {
     changes: after ? [{ after, before: persistedLesson }] : [],
-    removedStudentIds,
-    schoolKey,
-    schoolName
+    ...intent
   };
 }
 
-function applyExamPrepSchoolRemovalToLesson(lesson, removedStudentIds = []) {
+function applyExamPrepSchoolPlanToLesson(lesson, { removedStudentIds = [], scheduleByStudentId = new Map() }) {
   const removed = new Set(removedStudentIds);
   const studentIds = (lesson.studentIds ?? []).filter((studentId) => !removed.has(studentId));
-  if (studentIds.length === (lesson.studentIds ?? []).length) return null;
-  return {
-    ...lesson,
-    specialLectureStudentSchedules: (lesson.specialLectureStudentSchedules ?? [])
-      .filter((schedule) => !removed.has(schedule?.studentId)),
-    studentIds
-  };
+  const roster = new Set(studentIds);
+  const schedules = (lesson.specialLectureStudentSchedules ?? [])
+    .filter((schedule) => roster.has(schedule?.studentId) && !scheduleByStudentId.has(schedule?.studentId));
+  scheduleByStudentId.forEach((time, studentId) => {
+    // 명단에 없는 학생의 개별 시간은 서버가 거부한다. 같은 저장에서 빠진 학생은 건너뛴다.
+    if (!roster.has(studentId)) return;
+    schedules.push({
+      endTime: time.endTime,
+      overrideReason: "시험대비 학교별 시간",
+      scheduleType: "adjusted",
+      startTime: time.startTime,
+      studentId
+    });
+  });
+  const sameRoster = studentIds.length === (lesson.studentIds ?? []).length;
+  const sameSchedules = JSON.stringify(schedules) === JSON.stringify(lesson.specialLectureStudentSchedules ?? []);
+  if (sameRoster && sameSchedules) return null;
+  return { ...lesson, specialLectureStudentSchedules: schedules, studentIds };
 }
 
 /**
- * 버전 충돌이면 서버 최신본 위에 같은 의도("이 학교 학생을 명단에서 뺀다")를 다시 얹는다.
- * 시간 수정 쪽 rebaseExamPrepScheduleChange 와 같은 이유 — 원본이 바뀌어도 원장님이 저장을
- * 한 번 더 누른 것과 같은 결과여야 한다. 최신 명단에 그 학교 학생이 없으면 null(할 일 없음).
+ * 충돌이면 서버 최신본 위에 같은 의도를 다시 얹는다. 최신 명단에 할 일이 남아 있지 않으면 null.
  */
-export function rebaseExamPrepSchoolRosterChange(change, currentLesson, plan = {}) {
+export function rebaseExamPrepSchoolPlanChange(change, currentLesson, plan = {}) {
   const lessonId = change?.after?.lessonId;
   if (!lessonId || !currentLesson?.lessonId || currentLesson.lessonId !== lessonId) return change;
-  const after = applyExamPrepSchoolRemovalToLesson(currentLesson, plan.removedStudentIds ?? []);
+  const after = applyExamPrepSchoolPlanToLesson(currentLesson, {
+    removedStudentIds: plan.removedStudentIds ?? [],
+    scheduleByStudentId: plan.scheduleByStudentId ?? new Map()
+  });
   if (!after) return null;
   return { after, before: currentLesson };
 }

@@ -79,7 +79,6 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
                 setDrafts((current) => ({ ...current, [student.studentId]: event.target.value }));
                 setSaveState({ state: "dirty", message: "저장 전 변경" });
               }}
-              placeholder="예: 함수 단원 오답 정리, 경우의 수 추가 보충"
               rows={3}
               value={drafts[student.studentId] ?? ""}
             />

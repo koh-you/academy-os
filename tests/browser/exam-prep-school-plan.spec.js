@@ -88,7 +88,7 @@ test.beforeEach(async ({ request }) => {
   await request.post(`${safeApiBaseUrl}/api/safe-fixture/reset`);
 });
 
-test("per-school panel saves one school's time for that date only and keeps an excluded school out after reload", async ({ page, request }) => {
+test("one save applies per-school time and exclusion, and the exclusion survives a reload", async ({ page, request }) => {
   await postExamPrepRows(request, [highSchoolRow]);
   await postExamPrepRows(request, [middleSchoolRow], { allowRestore: true });
   await postExamPrepLesson(
@@ -98,72 +98,113 @@ test("per-school panel saves one school's time for that date only and keeps an e
   );
   await loginAsTeacher(page);
   const detail = await openExamPrepModal(page);
-
-  // 두 학교가 각자의 행으로 보인다.
   const panel = detail.locator(".examPrepSchoolPlanPanel");
-  await expect(panel).toContainText("학교별 참여 · 시간");
-  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(2);
-  await expect(panel.locator(".examPrepSchoolPlanRow").first()).toContainText("안전고");
-  await expect(panel.locator(".examPrepSchoolPlanRow").nth(1)).toContainText("안전중");
 
-  // 모달이 넓어졌는지 — 세로로 이어지던 진행 내용 칸을 가로로 깔기 위한 전제다.
-  const modalWidth = await detail.evaluate((node) => node.getBoundingClientRect().width);
-  expect(modalWidth).toBeGreaterThan(1120);
-  const contentColumns = await detail.locator(".examPrepStudentContentList").evaluate(
+  // 평소에는 읽기 전용이다 — 행마다 버튼을 달지 않는다(수업일지와 같은 체계).
+  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(2);
+  await expect(panel.locator("input[type=\"time\"]")).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "수정" })).toBeVisible();
+
+  // 가로 2열 — 학생별 진행 내용은 오른쪽 열에서 따로 스크롤한다.
+  const columns = await detail.locator(".examPrepLessonLayout").evaluate(
     (node) => window.getComputedStyle(node).gridTemplateColumns.split(" ").length
   );
-  expect(contentColumns).toBeGreaterThan(1);
+  expect(columns).toBe(2);
+  await expect(detail.locator(".examPrepLessonContentColumn .examPrepLessonContentEditor")).toBeVisible();
+  // 학생마다 반복되던 예시글은 지웠다.
+  expect(
+    await detail.getByLabel("정산 미리보기 학생 오늘 진행한 내용").getAttribute("placeholder")
+  ).toBeNull();
 
-  // 입력만으로는 저장되지 않는다(화면 초안). 저장은 명시적인 버튼이다.
+  await panel.getByRole("button", { name: "수정" }).click();
+  // 입력만으로는 저장되지 않는다(화면 초안).
   await panel.getByLabel("안전중 시작 시간").fill("14:00");
   await panel.getByLabel("안전중 종료 시간").fill("17:00");
-  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).specialLectureStudentSchedules).toEqual([]);
+  await panel.getByLabel("안전고 이 날짜 참여").uncheck();
+  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(
+    expect.arrayContaining(["safe-settlement-student", "safe-active-student"])
+  );
 
-  const timeSave = page.waitForResponse((response) => response.url().includes("/api/exam-prep-schedule/save"));
-  await panel.locator(".examPrepSchoolPlanRow").nth(1).getByRole("button", { name: "시간 저장" }).click();
-  expect((await timeSave).status()).toBe(200);
-  await expect(panel.getByRole("status", { name: "안전중 저장 상태" })).toContainText("서버 재조회 일치");
+  // 저장 하나가 시간과 제외를 함께 보낸다 — 요청도 한 번이다.
+  const saveResponses = [];
+  page.on("response", (response) => {
+    if (response.url().includes("/api/exam-prep-schedule/save")) saveResponses.push(response);
+  });
+  await panel.getByRole("button", { name: "저장" }).click();
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" })).toContainText("저장 완료 · 서버 재조회 일치");
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" })).toContainText("제외 안전고");
+  expect(saveResponses).toHaveLength(1);
 
-  // 그 학교 학생만, 그 날짜만 바뀐다.
-  const afterTime = await readLesson(request, "lesson_exam_prep_2026-08-09");
-  expect(afterTime.specialLectureStudentSchedules).toEqual([
+  const afterSave = await readLesson(request, "lesson_exam_prep_2026-08-09");
+  expect(afterSave.studentIds).toEqual(["safe-active-student"]);
+  expect(afterSave.specialLectureStudentSchedules).toEqual([
     expect.objectContaining({ endTime: "17:00", startTime: "14:00", studentId: "safe-active-student" })
   ]);
-  expect(afterTime.startTime).toBe("13:00");
-  expect(afterTime.studentIds).toEqual(expect.arrayContaining(["safe-settlement-student", "safe-active-student"]));
+  expect(afterSave.startTime).toBe("13:00");
 
-  // 제외는 명단과 표시 라벨에서 그 학교를 뺀다.
-  const excludeSave = page.waitForResponse((response) => response.url().includes("/api/exam-prep-schedule/save"));
-  await panel.locator(".examPrepSchoolPlanRow").nth(1).getByRole("button", { name: "이 날짜 제외" }).click();
-  expect((await excludeSave).status()).toBe(200);
-  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(1);
-  await expect(panel.locator(".examPrepSchoolPlanExcluded")).toContainText("안전중");
-  await expect(detail).not.toContainText("월경계 학생");
-
-  const afterExclude = await readLesson(request, "lesson_exam_prep_2026-08-09");
-  expect(afterExclude.studentIds).toEqual(["safe-settlement-student"]);
-  expect(afterExclude.specialLectureStudentSchedules).toEqual([]);
+  // 제외한 학교는 같은 목록에 "이 날짜 제외" 로 남아 되돌릴 수 있다.
+  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(2);
+  await expect(panel.locator(".examPrepSchoolPlanRow.excluded")).toContainText("안전고");
+  await expect(panel.locator(".examPrepSchoolPlanRow.excluded")).toContainText("이 날짜 제외");
 
   // 새로고침해도 유지된다 — 제외가 app_state 서버 원천에 남기 때문이다.
   await page.reload();
   const reopened = await openExamPrepModal(page);
-  await expect(reopened.locator(".examPrepSchoolPlanRow")).toHaveCount(1);
-  await expect(reopened.locator(".examPrepSchoolPlanRow").first()).toContainText("안전고");
-  await expect(reopened.locator(".examPrepSchoolPlanExcluded")).toContainText("안전중");
-  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(["safe-settlement-student"]);
+  const reopenedPanel = reopened.locator(".examPrepSchoolPlanPanel");
+  await expect(reopenedPanel.locator(".examPrepSchoolPlanRow.excluded")).toContainText("안전고");
+  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(["safe-active-student"]);
 
   // 다시 포함하면 명단이 원천(시험정보 행) 기준으로 돌아온다.
-  await reopened.locator(".examPrepSchoolPlanExcluded").getByRole("button", { name: "다시 포함" }).click();
-  await expect(reopened.locator(".examPrepSchoolPlanRow")).toHaveCount(2);
-  await expect(reopened.locator(".examPrepSchoolPlanExcluded")).toHaveCount(0);
+  await reopenedPanel.getByRole("button", { name: "수정" }).click();
+  await reopenedPanel.getByLabel("안전고 이 날짜 참여").check();
+  await reopenedPanel.getByRole("button", { name: "저장" }).click();
+  await expect(reopenedPanel.locator(".examPrepSchoolPlanRow.excluded")).toHaveCount(0);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
 
-test("the last remaining school offers lesson deletion instead of exclusion", async ({ page, request }) => {
+test("a school whose students differ can be fixed per student", async ({ page, request }) => {
+  // 학생별로 시간이 다른 학교는 학교 한 줄로는 못 고친다 — 그 학교만 펼쳐 학생 칸을 연다.
+  // 같은 학교에 학생이 둘 이상이어야 의미가 있으므로 안전중 학생을 하나 더 만든다.
+  const studentResponse = await request.post(`${safeApiBaseUrl}/api/students`, {
+    data: {
+      createOnly: true,
+      student: {
+        grade: "중3",
+        loginId: "safe_second_middle",
+        name: "안전중 둘째",
+        pin: "1234",
+        schoolName: "안전중",
+        status: "active",
+        studentId: "safe-second-middle-student"
+      }
+    }
+  });
+  expect(studentResponse.ok(), await studentResponse.text()).toBe(true);
+  await postExamPrepRows(request, [middleSchoolRow], { allowRestore: true });
+  await postExamPrepLesson(request, ["safe-active-student", "safe-second-middle-student"], "안전중 2학기 중간고사");
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const panel = detail.locator(".examPrepSchoolPlanPanel");
+
+  await panel.getByRole("button", { name: "수정" }).click();
+  await panel.getByRole("button", { name: "학생별 시간" }).first().click();
+  await panel.getByLabel("월경계 학생 시작 시간").fill("15:00");
+  await panel.getByLabel("월경계 학생 종료 시간").fill("18:00");
+  await panel.getByRole("button", { name: "저장" }).click();
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" })).toContainText("학생 시간 1명");
+
+  const saved = await readLesson(request, "lesson_exam_prep_2026-08-09");
+  expect(saved.specialLectureStudentSchedules).toEqual([
+    expect.objectContaining({ endTime: "18:00", startTime: "15:00", studentId: "safe-active-student" })
+  ]);
+  // 읽기 모드로 돌아오면 그 학교는 "학생별 시간 다름" 으로 보인다.
+  await expect(panel.locator(".examPrepSchoolPlanRow").first()).toContainText("학생별 시간 다름");
+});
+
+test("the last remaining school cannot be excluded", async ({ page, request }) => {
   // 한 학교만 남으면 제외는 "그날을 아예 안 한다" 와 같아진다 — 그건 일정 삭제의 일이다.
-  // 안전중 행을 아예 만들지 않아 그 상태를 그대로 만든다.
   await postExamPrepRows(request, [highSchoolRow]);
   await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
 
@@ -171,7 +212,11 @@ test("the last remaining school offers lesson deletion instead of exclusion", as
   const detail = await openExamPrepModal(page);
   const panel = detail.locator(".examPrepSchoolPlanPanel");
   await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(1);
-  await expect(panel.getByRole("button", { name: "이 날짜 제외" })).toHaveCount(0);
-  await expect(panel).toContainText("남은 학교가 하나뿐입니다");
+  await panel.getByRole("button", { name: "수정" }).click();
+  await panel.getByLabel("안전고 이 날짜 참여").uncheck();
+  await panel.getByRole("button", { name: "저장" }).click();
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" }))
+    .toContainText("모든 학교를 빼려면 이 수업 자체를 삭제하세요");
+  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(["safe-settlement-student"]);
   await expect(detail.getByRole("button", { name: "일정 삭제" })).toBeVisible();
 });

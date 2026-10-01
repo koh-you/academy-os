@@ -1,110 +1,108 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { normalizeTimeInput } from "./attendance.js";
+import {
+  createExamPrepSchoolPlanDraft,
+  getExamPrepSchoolPlanChanges,
+  getExamPrepSchoolPlanValidationError,
+  hasExamPrepSchoolPlanChanges,
+  setExamPrepSchoolPlanDraftField,
+  setExamPrepSchoolPlanDraftStudentTime
+} from "./examPrepSchoolPlanDraft.js";
 
 /**
  * 2026-10-01 · 날짜 하나에서 학교 단위로 "이번엔 안 한다" 와 "이 학교만 이 시간" 을 정하는 자리.
  *
- * 그전에는 수업을 지우면 그날 모든 학교가 사라졌고, 학교를 빼려면 시험정보에서 그 학교의
- * 일요대비 4회를 통째로 빼야 했다. 수업은 날짜당 한 개를 유지하면서 그날 누가 오고 몇 시에
- * 오는지만 학교 단위로 고른다.
+ * 버튼 체계는 수업일지를 따른다 — 평소에는 읽기 전용이고, `수정` 을 누르면 칸이 열리며,
+ * `저장` 하나가 시간·참여를 한 번에 서버로 보낸다. 처음에는 행마다 [시간 저장][이 날짜 제외]
+ * 를 달았는데 학교가 다섯이면 버튼이 열 개라 화면이 버튼으로 덮였고, 제외하면 그 행이 사라져
+ * 저장 표시도 같이 사라져서 저장이 됐는지 알 수 없었다(2026-10-01 보고).
  *
- * 저장 경계: 시간은 화면 초안 -> "시간 저장" -> 기존 시험대비 일정 저장(CAS·서버 재조회),
- * 제외는 누르는 즉시 생성 제어에 남고 저장된 수업이면 같은 저장 경로로 명단까지 맞춘다.
- * 그래서 시간 칸은 입력만으로 저장되지 않고, 제외는 되돌릴 수 있는 토글이다.
+ * 제외한 학교도 같은 목록에 "이 날짜 제외" 로 남는다. 따로 칩으로 빼 두면 어디서 되돌리는지
+ * 찾기 어렵고 줄이 하나 더 생긴다.
  */
 export function ExamPrepSchoolPlanPanel({
   excludedSchools = [],
   lesson = {},
-  onExcludeSchool,
-  onIncludeSchool,
-  onSaveSchoolTime,
-  schoolRows = []
+  onSavePlan,
+  schoolRows = [],
+  studentRows = []
 }) {
-  const [timeDrafts, setTimeDrafts] = useState({});
-  const [rowStates, setRowStates] = useState({});
-  const [includeState, setIncludeState] = useState({ message: "", state: "idle" });
+  const initialDraft = useMemo(
+    () => createExamPrepSchoolPlanDraft({ excludedSchools, schoolRows, studentRows }),
+    [excludedSchools, schoolRows, studentRows]
+  );
+  const [draft, setDraft] = useState(initialDraft);
+  const [isEditing, setIsEditing] = useState(false);
+  const [expandedSchoolKey, setExpandedSchoolKey] = useState("");
+  const [saveState, setSaveState] = useState({ message: "", state: "idle" });
 
-  // 다른 수업으로 넘어갈 때만 비운다.
-  //
-  // 처음에는 명단·시간이 달라지면(rosterKey) 같이 비웠는데, 저장이 성공하면 바로 그 시간이
-  // 달라지므로 "서버 재조회 일치" 가 뜨자마자 지워졌다 — 원장님이 저장됐는지 볼 수 없었다.
-  // 저장 성공 뒤에는 그 학교의 초안만 지워 서버 값을 따라가게 한다(아래 runRowAction).
+  // 저장 성공으로 서버 값이 바뀌면 초안이 그 값을 따라간다. 편집 중에는 사람이 입력하던 값을
+  // 지키려고 건드리지 않는다 — 저장은 명시적인 `저장` 버튼에서만 일어난다.
   useEffect(() => {
-    setTimeDrafts({});
-    setRowStates({});
-    setIncludeState({ message: "", state: "idle" });
+    if (isEditing) return;
+    setDraft(initialDraft);
+  }, [initialDraft, isEditing]);
+
+  useEffect(() => {
+    setIsEditing(false);
+    setExpandedSchoolKey("");
+    setSaveState({ message: "", state: "idle" });
   }, [lesson.lessonId]);
 
-  function getDraft(row, field) {
-    return timeDrafts[row.schoolName]?.[field] ?? row[field] ?? "";
+  const changes = getExamPrepSchoolPlanChanges(draft, initialDraft);
+  const isDirty = hasExamPrepSchoolPlanChanges(changes);
+  const validationError = isDirty ? getExamPrepSchoolPlanValidationError(draft, changes) : "";
+  const isSaving = saveState.state === "saving";
+  const studentRowsBySchoolKey = useMemo(() => {
+    const map = new Map();
+    draft.schools.forEach((school) => {
+      map.set(
+        school.schoolKey,
+        studentRows.filter((row) => school.studentIds.includes(row.studentId))
+      );
+    });
+    return map;
+  }, [draft.schools, studentRows]);
+
+  function updateSchool(schoolKey, field, value) {
+    setDraft((current) => setExamPrepSchoolPlanDraftField(current, schoolKey, field, value));
+    setSaveState({ message: "", state: "dirty" });
   }
 
-  function updateDraft(row, field, value) {
-    setTimeDrafts((current) => ({
-      ...current,
-      [row.schoolName]: { ...current[row.schoolName], [field]: value }
-    }));
-    setRowStates((current) => ({ ...current, [row.schoolName]: { message: "", state: "dirty" } }));
+  function updateStudentTime(studentId, field, value) {
+    setDraft((current) => setExamPrepSchoolPlanDraftStudentTime(current, studentId, field, value));
+    setSaveState({ message: "", state: "dirty" });
   }
 
-  function isRowDirty(row) {
-    const startTime = normalizeTimeInput(getDraft(row, "startTime"));
-    const endTime = normalizeTimeInput(getDraft(row, "endTime"));
-    return startTime !== normalizeTimeInput(row.startTime) || endTime !== normalizeTimeInput(row.endTime);
+  function startEditing() {
+    setDraft(initialDraft);
+    setIsEditing(true);
+    setSaveState({ message: "", state: "idle" });
   }
 
-  async function runRowAction(schoolName, action, savingMessage) {
-    setRowStates((current) => ({ ...current, [schoolName]: { message: savingMessage, state: "saving" } }));
+  function cancelEditing() {
+    setDraft(initialDraft);
+    setIsEditing(false);
+    setExpandedSchoolKey("");
+    setSaveState({ message: "", state: "idle" });
+  }
+
+  async function save() {
+    if (validationError) {
+      setSaveState({ message: validationError, state: "failed" });
+      return;
+    }
+    setSaveState({ message: "Supabase 저장·재조회 확인 중", state: "saving" });
     try {
-      await action();
-      // 초안을 비워 이 행이 서버가 돌려준 값을 그대로 보여주게 한다(저장 표시는 남는다).
-      setTimeDrafts((current) => {
-        const next = { ...current };
-        delete next[schoolName];
-        return next;
-      });
-      setRowStates((current) => ({ ...current, [schoolName]: { message: "서버 재조회 일치", state: "saved" } }));
+      await onSavePlan(changes);
+      setIsEditing(false);
+      setExpandedSchoolKey("");
+      setSaveState({ message: describeSavedChanges(changes), state: "saved" });
     } catch (error) {
-      setRowStates((current) => ({
-        ...current,
-        [schoolName]: { message: error.message || "저장에 실패했습니다.", state: "failed" }
-      }));
+      setSaveState({ message: error.message || "저장에 실패했습니다. 입력은 유지됩니다.", state: "failed" });
     }
   }
-
-  function saveTime(row) {
-    return runRowAction(
-      row.schoolName,
-      () => onSaveSchoolTime({
-        endTime: normalizeTimeInput(getDraft(row, "endTime")),
-        schoolName: row.schoolName,
-        startTime: normalizeTimeInput(getDraft(row, "startTime"))
-      }),
-      "Supabase 저장·재조회 확인 중"
-    );
-  }
-
-  function excludeSchool(row) {
-    return runRowAction(
-      row.schoolName,
-      () => onExcludeSchool({ schoolName: row.schoolName }),
-      "명단에서 제외하는 중"
-    );
-  }
-
-  async function includeSchool(schoolName) {
-    setIncludeState({ message: "", state: "saving" });
-    try {
-      await onIncludeSchool({ schoolName });
-      setIncludeState({ message: "", state: "idle" });
-    } catch (error) {
-      setIncludeState({ message: error.message || "다시 포함에 실패했습니다.", state: "failed" });
-    }
-  }
-
-  const canExclude = schoolRows.length > 1;
 
   return (
     <section className="panel examPrepSchoolPlanPanel">
@@ -115,110 +113,147 @@ export function ExamPrepSchoolPlanPanel({
             <h3>학교별 참여 · 시간</h3>
             <HelpTip
               label="학교별 참여 · 시간"
-              text="이 날짜만 학교 단위로 조정합니다. 제외는 재생성해도 유지되고, 시간은 이 날짜의 그 학교 학생에게만 적용됩니다. 다른 회차는 그대로입니다."
+              text="이 날짜만 학교 단위로 조정합니다. 체크를 풀면 그 학교는 이 날짜에서 빠지고 재생성해도 유지됩니다. 시간은 이 날짜의 그 학교 학생에게만 적용되고 다른 회차는 그대로입니다."
             />
           </div>
         </div>
+        <div className="examPrepSchoolPlanHeaderActions">
+          {isEditing ? (
+            <>
+              <button className="softButton compact" disabled={isSaving} onClick={cancelEditing} type="button">취소</button>
+              <button className="primaryButton compact" disabled={isSaving || !isDirty} onClick={save} type="button">
+                {isSaving ? "저장 중" : "저장"}
+              </button>
+            </>
+          ) : (
+            <button className="softButton compact" onClick={startEditing} type="button">수정</button>
+          )}
+        </div>
       </div>
 
-      {schoolRows.length ? (
-        <ul className="examPrepSchoolPlanList">
-          {schoolRows.map((row) => {
-            const rowState = rowStates[row.schoolName] ?? { message: "", state: "idle" };
-            const isSaving = rowState.state === "saving";
-            return (
-              <li className="examPrepSchoolPlanRow" key={row.schoolName}>
-                <div className="examPrepSchoolPlanIdentity">
-                  <strong>{row.schoolName}</strong>
-                  <small>{row.studentIds.length}명{row.isMixedTime ? " · 학생별 시간 다름" : ""}</small>
-                </div>
-                <div className="examPrepSchoolPlanTimes">
-                  <label>
-                    <span>시작</span>
+      <ul className="examPrepSchoolPlanList">
+        {draft.schools.map((school) => {
+          const schoolStudentRows = studentRowsBySchoolKey.get(school.schoolKey) ?? [];
+          const isExpanded = expandedSchoolKey === school.schoolKey;
+          return (
+            <li
+              className={`examPrepSchoolPlanRow${school.isIncluded ? "" : " excluded"}`}
+              key={school.schoolKey}
+            >
+              <div className="examPrepSchoolPlanRowMain">
+                {isEditing ? (
+                  <label className="examPrepSchoolPlanInclude">
                     <input
-                      aria-label={`${row.schoolName} 시작 시간`}
+                      aria-label={`${school.schoolName} 이 날짜 참여`}
+                      checked={school.isIncluded}
                       disabled={isSaving}
-                      onChange={(event) => updateDraft(row, "startTime", event.target.value)}
-                      type="time"
-                      value={getDraft(row, "startTime")}
+                      onChange={(event) => updateSchool(school.schoolKey, "isIncluded", event.target.checked)}
+                      type="checkbox"
                     />
+                    <strong>{school.schoolName}</strong>
                   </label>
-                  <label>
-                    <span>종료</span>
-                    <input
-                      aria-label={`${row.schoolName} 종료 시간`}
-                      disabled={isSaving}
-                      onChange={(event) => updateDraft(row, "endTime", event.target.value)}
-                      type="time"
-                      value={getDraft(row, "endTime")}
-                    />
-                  </label>
-                </div>
-                <div className="examPrepSchoolPlanRowActions">
+                ) : (
+                  <strong className="examPrepSchoolPlanName">{school.schoolName}</strong>
+                )}
+                <span className="examPrepSchoolPlanMeta">
+                  {school.isIncluded ? `${school.studentIds.length}명` : "이 날짜 제외"}
+                </span>
+                {school.isIncluded ? (
+                  isEditing ? (
+                    <span className="examPrepSchoolPlanTimes">
+                      <input
+                        aria-label={`${school.schoolName} 시작 시간`}
+                        disabled={isSaving}
+                        onChange={(event) => updateSchool(school.schoolKey, "startTime", event.target.value)}
+                        type="time"
+                        value={school.startTime}
+                      />
+                      <span aria-hidden="true">~</span>
+                      <input
+                        aria-label={`${school.schoolName} 종료 시간`}
+                        disabled={isSaving}
+                        onChange={(event) => updateSchool(school.schoolKey, "endTime", event.target.value)}
+                        type="time"
+                        value={school.endTime}
+                      />
+                    </span>
+                  ) : (
+                    <span className="examPrepSchoolPlanTimeLabel">
+                      {school.isMixedTime
+                        ? "학생별 시간 다름"
+                        : school.startTime && school.endTime
+                          ? `${school.startTime}-${school.endTime}`
+                          : "시간 미정"}
+                    </span>
+                  )
+                ) : null}
+                {/* 학생별로 시간이 다른 학교는 학교 한 줄로는 못 고친다. 그 학교만 펼쳐
+                    학생 칸을 연다(2026-10-01 요청). 저장은 같은 `저장` 하나가 맡는다. */}
+                {isEditing && school.isIncluded && schoolStudentRows.length > 1 ? (
                   <button
-                    className="softButton compact"
-                    disabled={isSaving || !isRowDirty(row)}
-                    onClick={() => saveTime(row)}
+                    aria-expanded={isExpanded}
+                    className="softButton compact examPrepSchoolPlanExpandButton"
+                    disabled={isSaving}
+                    onClick={() => setExpandedSchoolKey(isExpanded ? "" : school.schoolKey)}
                     type="button"
                   >
-                    시간 저장
+                    학생별 시간
                   </button>
-                  {canExclude ? (
-                    <button
-                      className="dangerSoftButton compact"
-                      disabled={isSaving}
-                      onClick={() => excludeSchool(row)}
-                      type="button"
-                    >
-                      이 날짜 제외
-                    </button>
-                  ) : null}
-                </div>
-                {rowState.state === "idle" ? null : (
-                  <div aria-label={`${row.schoolName} 저장 상태`} className="examPrepSchoolPlanRowStatus" role="status">
-                    <InlineSaveStatus label={row.schoolName} saveState={rowState.state} />
-                    {rowState.message ? <span>{rowState.message}</span> : null}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="inlineNotice">이 날짜에 참여하는 학교가 없습니다.</p>
-      )}
+                ) : null}
+              </div>
 
-      {/* 제외한 학교는 명단에서 사라져 위 목록에 나오지 않는다. 다시 포함할 자리가 없으면
-          되돌릴 수 없으므로 따로 남겨 둔다. */}
-      {excludedSchools.length ? (
-        <div className="examPrepSchoolPlanExcluded">
-          <span>이 날짜에서 제외한 학교</span>
-          <ul>
-            {excludedSchools.map((entry) => (
-              <li key={entry.schoolKey}>
-                <strong>{entry.schoolName}</strong>
-                <button
-                  className="softButton compact"
-                  disabled={includeState.state === "saving"}
-                  onClick={() => includeSchool(entry.schoolName)}
-                  type="button"
-                >
-                  다시 포함
-                </button>
-              </li>
-            ))}
-          </ul>
-          {includeState.state === "failed" ? (
-            <p className="inlineNotice danger" role="status">{includeState.message}</p>
-          ) : null}
-        </div>
+              {isEditing && isExpanded ? (
+                <ul className="examPrepSchoolPlanStudentList">
+                  {schoolStudentRows.map((studentRow) => (
+                    <li key={studentRow.studentId}>
+                      <span>{studentRow.name}</span>
+                      <input
+                        aria-label={`${studentRow.name} 시작 시간`}
+                        disabled={isSaving}
+                        onChange={(event) => updateStudentTime(studentRow.studentId, "startTime", event.target.value)}
+                        type="time"
+                        value={draft.studentTimes[studentRow.studentId]?.startTime ?? ""}
+                      />
+                      <span aria-hidden="true">~</span>
+                      <input
+                        aria-label={`${studentRow.name} 종료 시간`}
+                        disabled={isSaving}
+                        onChange={(event) => updateStudentTime(studentRow.studentId, "endTime", event.target.value)}
+                        type="time"
+                        value={draft.studentTimes[studentRow.studentId]?.endTime ?? ""}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+
+      {isEditing && expandedSchoolKey ? (
+        <small className="muted" role="note">
+          학생별 시간을 고치면 그 학교의 시작·종료 입력은 무시됩니다.
+        </small>
       ) : null}
 
-      {canExclude ? null : (
-        <small className="muted" role="note">
-          남은 학교가 하나뿐입니다. 이 날짜를 아예 하지 않으려면 아래 일정 삭제를 쓰세요.
-        </small>
+      {saveState.state === "idle" ? null : (
+        <div aria-label="학교별 참여 저장 상태" className="examPrepSchoolPlanStatus" role="status">
+          <InlineSaveStatus label="학교별 참여" saveState={saveState.state} />
+          {saveState.message ? <span>{saveState.message}</span> : null}
+        </div>
       )}
     </section>
   );
+}
+
+// 저장 뒤에 무엇이 반영됐는지 한 줄로 남긴다 — 제외한 행은 목록에서 "이 날짜 제외" 로만
+// 바뀌어 저장이 됐는지 알기 어려웠다(2026-10-01 보고).
+function describeSavedChanges(changes = {}) {
+  const parts = [];
+  if (changes.toExclude?.length) parts.push(`제외 ${changes.toExclude.map((entry) => entry.schoolName).join(", ")}`);
+  if (changes.toInclude?.length) parts.push(`다시 포함 ${changes.toInclude.map((entry) => entry.schoolName).join(", ")}`);
+  if (changes.schoolTimes?.length) parts.push(`학교 시간 ${changes.schoolTimes.length}곳`);
+  if (changes.studentTimes?.length) parts.push(`학생 시간 ${changes.studentTimes.length}명`);
+  return `${parts.join(" · ")} 저장 완료 · 서버 재조회 일치`;
 }

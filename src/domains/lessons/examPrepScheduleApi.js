@@ -20,7 +20,7 @@ export async function saveExamPrepSchedulePlanRequest({ auditId, changes, reques
  *
  * rebaseChange 는 "최신본 위에 같은 편집을 다시 얹는" 방법이다. 기본값은 시간 수정이고,
  * 학교별 제외는 명단에서 그 학교 학생을 빼는 다른 의도이므로 자기 rebase 를 넘긴다
- * (examPrepSchoolPlan.rebaseExamPrepSchoolRosterChange · 2026-10-01).
+ * (examPrepSchoolPlan.rebaseExamPrepSchoolPlanChange · 2026-10-01).
  */
 export async function saveExamPrepScheduleWithConflictRecovery({
   createAuditId = () => `exam-prep-schedule-${Date.now()}`,

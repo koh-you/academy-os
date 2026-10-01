@@ -14,12 +14,13 @@ import {
   groupExamPrepStudentsBySchool,
   groupExamPrepStudentsByTime
 } from "./examPrepLessonPresentation.js";
-import { ExamPrepSchoolPlanPanel } from "./ExamPrepSchoolPlanPanel.jsx";
 import { getLessonStudentIds } from "../students/lessonRosterSelectors.js";
 
 const ExamPrepContentEditor = lazy(() => import("./ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
+// 2026-10-01 · 모달을 열 때만 쓰는 패널이라 초기 번들에서 뺀다(진행 내용 편집기와 같은 이유).
+const ExamPrepSchoolPlanPanel = lazy(() => import("./ExamPrepSchoolPlanPanel.jsx").then((module) => ({ default: module.ExamPrepSchoolPlanPanel })));
 
-export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepExcludedSchools = [], examPrepScheduleLessons = [], lesson, onDeleteLesson, onExcludeExamPrepSchool, onIncludeExamPrepSchool, onSaveExamPrepSchedule, onSaveExamPrepSchoolTime, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
+export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepExcludedSchools = [], examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveExamPrepSchoolPlan, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
@@ -48,16 +49,22 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
         />
       </div>
 
-      {onExcludeExamPrepSchool && onSaveExamPrepSchoolTime ? (
+      {/* 2026-10-01 · 가로 2열. 학생별 진행 내용이 학생 수만큼 아래로 이어져 모달을 넓혀도
+          하단 스크롤이 길었다. 왼쪽은 이 수업을 정하는 것(학교별 참여·명단·일정), 오른쪽은
+          오늘 적는 것(학생별 진행 내용)으로 나누고 오른쪽만 따로 스크롤한다. 수업 등록
+          모달(2026-09-26)과 같은 패턴이다. */}
+      <div className="examPrepLessonLayout">
+        <div className="examPrepLessonMainColumn">
+      {onSaveExamPrepSchoolPlan ? (
+        <Suspense fallback={<p className="inlineNotice">학교별 참여를 불러오는 중입니다.</p>}>
         <ExamPrepSchoolPlanPanel
           excludedSchools={examPrepExcludedSchools}
           lesson={lesson}
-          onExcludeSchool={({ schoolName }) => onExcludeExamPrepSchool({ lesson, schoolName })}
-          onIncludeSchool={({ schoolName }) => onIncludeExamPrepSchool({ lesson, schoolName })}
-          onSaveSchoolTime={({ endTime, schoolName, startTime }) =>
-            onSaveExamPrepSchoolTime({ endTime, lesson, schoolName, startTime })}
+          onSavePlan={(changes) => onSaveExamPrepSchoolPlan({ changes, lesson })}
           schoolRows={schoolPlanRows}
+          studentRows={studentRows}
         />
+        </Suspense>
       ) : null}
 
       <section className="panel examPrepRosterPanel">
@@ -166,16 +173,21 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
           <EmptyState description="필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요." title="연결된 시험정보가 없습니다." />
         )}
 
-        <Suspense fallback={<p className="inlineNotice">진행 내용 입력을 준비하는 중입니다.</p>}>
-          <ExamPrepContentEditor
-            createRecord={(student) => createEmptyRecord(lesson, student)}
-            lesson={lesson}
-            onSaveRecord={onSaveRecord}
-            records={records}
-            studentRows={studentRows}
-          />
-        </Suspense>
       </section>
+        </div>
+
+        <div className="examPrepLessonContentColumn">
+          <Suspense fallback={<p className="inlineNotice">진행 내용 입력을 준비하는 중입니다.</p>}>
+            <ExamPrepContentEditor
+              createRecord={(student) => createEmptyRecord(lesson, student)}
+              lesson={lesson}
+              onSaveRecord={onSaveRecord}
+              records={records}
+              studentRows={studentRows}
+            />
+          </Suspense>
+        </div>
+      </div>
 
       {isScheduleEditorOpen ? (
         <ScheduleModalComponent

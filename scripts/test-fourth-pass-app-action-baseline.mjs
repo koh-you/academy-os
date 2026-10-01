@@ -68,11 +68,12 @@ const expectedDirectCallHandlers = [];
 // 후보도, direct request call 도 늘리지 않는다.
 // 119: 2026-09-16 handleSaveClassTemplate(반관리 반 개설·수정). 요청은
 // domains/teacher/classTemplateApi.js 의 얇은 래퍼가 보내므로 direct request call 은 그대로.
-// 122: 2026-10-01 날짜별 학교 단위 참여·시간 3개 — handleSaveExamPrepSchoolTime,
-// handleExcludeExamPrepSchool, handleIncludeExamPrepSchool. 저장은 기존
-// handleSaveExamPrepSchedule(= examPrepScheduleApi 래퍼)을 거치므로 direct request call 은 그대로.
+// 120: 2026-10-01 날짜별 학교 단위 참여·시간. 처음에는 시간·제외·다시 포함 3개였는데,
+// 화면을 "수정 -> 저장 하나" 로 묶으면서 handleSaveExamPrepSchoolPlan 한 개가 됐다. 저장은
+// 기존 handleSaveExamPrepSchedule(= examPrepScheduleApi 래퍼)을 거치므로 direct request
+// call 은 그대로.
 assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
-assert.equal(handlers.length, 122, `handle* count drifted from the baseline (122), now ${handlers.length}`);
+assert.equal(handlers.length, 120, `handle* count drifted from the baseline (120), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
 assert.equal(directRequestCallCount, 19, `direct fetch/postJson call count drifted from the 4-4 closeout (19), now ${directRequestCallCount}`);

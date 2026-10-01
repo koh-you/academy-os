@@ -59,15 +59,14 @@ assert.deepEqual(
     "attendanceSettings",
     "createEmptyRecord",
     // 2026-10-01 · 날짜별 학교 단위 참여·시간 패널. 제외 목록은 생성 제어에서 읽고(명단에서
-    // 사라진 학교를 다시 포함할 자리가 필요하다), 제외·재포함·시간 저장은 App 핸들러를 쓴다.
+    // 사라진 학교도 같은 목록에 남아야 되돌릴 수 있다), 시간·참여 변경은 저장 하나로 묶여
+    // onSaveExamPrepSchoolPlan 한 개를 쓴다.
     "examPrepExcludedSchools",
     "examPrepScheduleLessons",
     "lesson",
     "onDeleteLesson",
-    "onExcludeExamPrepSchool",
-    "onIncludeExamPrepSchool",
     "onSaveExamPrepSchedule",
-    "onSaveExamPrepSchoolTime",
+    "onSaveExamPrepSchoolPlan",
     "onSaveRecord",
     "onToggleDailyJournal",
     "persistedLessons",
