@@ -5,6 +5,7 @@ export function createExamPrepLessonCandidateBuilder({
   examCycleLabel,
   getExamPrepGeneratedKeyForDate,
   getExamPrepSchoolGradeKey = () => "",
+  getMathExamDates = () => [],
   getStandardLessonColor,
   getStudentSchoolGradeKey = () => "",
   getSundayDatesForExamPeriod,
@@ -23,8 +24,10 @@ export function createExamPrepLessonCandidateBuilder({
       );
       if (!period) return;
       if (!period.date) return;
+      // 수학시험일은 주말 대비 여부를 가른다(examPeriodSundayDateSelector 주석 참고).
       getSundayDatesForExamPeriod(
-        period
+        period,
+        getMathExamDates(row)
       ).forEach((date) => {
         const key =
           getExamPrepGeneratedKeyForDate(date);

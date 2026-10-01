@@ -1710,7 +1710,10 @@ check("64b generated special lessons avoid class template FK ids", !hasAll(`${ap
 check("64c generated lesson preview lists all candidates in scroll area", !app.includes("generatedLessonPlan.slice(0, 8)") && hasAll(css, [".generatedLessonList", "max-height: 420px", "overflow: auto"]));
 // 2026-10-01 · 기준이 시험 종료일 → **시험 첫날** 로 바뀌었다. 시험이 시작된 뒤의 일요일은
 // 대비가 아니므로 더 이상 만들지 않는다(창동고: 수학 10/08인데 10/11 이 생기던 문제).
-check("64d exam prep anchors four Sundays on the exam start date", hasAll(examPeriodSundayDateSelectorSource, ["const day = start.getDay()", "const lastPrepSunday = new Date(start)", "lastPrepSunday.setDate(start.getDate() - day)", "return [3, 2, 1, 0].map((offset) => {", "lastPrepSunday.getDate() - offset * 7"]) && !examPeriodSundayDateSelectorSource.includes("inPeriodSundays") && !examPeriodSundayDateSelectorSource.includes("end.getDay()"));
+// 2026-10-01 · 기본 4회는 시험 첫날 기준 그대로 두고, 나중에 적는 수학시험일로 주말 수업
+// 여부가 정해지도록 mathExamSundays 를 더했다. 그래서 `return [3, 2, 1, 0]` 이 아니라
+// `const prepSundays = [3, 2, 1, 0]` 을 잠근다.
+check("64d exam prep anchors four Sundays on the exam start date and adds the Sunday before each math exam", hasAll(examPeriodSundayDateSelectorSource, ["const day = start.getDay()", "const lastPrepSunday = new Date(start)", "lastPrepSunday.setDate(start.getDate() - day)", "const prepSundays = [3, 2, 1, 0].map((offset) => {", "lastPrepSunday.getDate() - offset * 7", "mathExamDates = []", "const mathExamSundays = (Array.isArray(mathExamDates) ? mathExamDates : [])", "sunday.setDate(date.getDate() - date.getDay())", "...new Set([...prepSundays, ...mathExamSundays])"]) && !examPeriodSundayDateSelectorSource.includes("inPeriodSundays") && !examPeriodSundayDateSelectorSource.includes("end.getDay()"));
 check("64e generated lessons use current exam cycle rows only", hasAll(app, ["generatedLessonPlanRows", "selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)", "buildGeneratedLessonPlan({"]) && hasAll(generatedLessonPlanSelectorsSource, ["(row.examCycle || currentExamCycle) === currentExamCycle"]));
 check("64f generated lesson save failures are visible without blocking alert", hasAll(`${app}\n${generatedLessonSaveStatusSource}`, ["generatedLessonSaveStatus", "자동 수업 저장 실패", "generatedLessonSaveNotice", "onRetryGeneratedLessonSave", "다시 저장", "postJsonWithTimeout(", "\"/api/lessons/bulk\""]) && hasAll(css, [".generatedLessonSaveNotice", ".generatedLessonSaveNotice.failed"]) && !app.includes("window.alert(`자동 수업 저장 실패"));
 check("65 final exam prep does not inherit midterm seed data", hasAll(app, ["normalizeExamPrepRows", "inferExamCycleFromPrepId", "getDefaultExamCycleForDate"]) && hasAll(coreDataRoute, ["inferExamCycleFromPrepId", "getDefaultExamCycleForDate", "exam_cycle: examCycle"]) && hasAll(sampleDataSource, ['examPrepId: "exam_prep_sanggye_2026_mid_1"', 'examCycle: "2026-1-mid"']));
@@ -2370,8 +2373,11 @@ check(
       "const day = start.getDay()",
       "const lastPrepSunday = new Date(start)",
       "lastPrepSunday.setDate(start.getDate() - day)",
-      "return [3, 2, 1, 0].map((offset) => {",
-      "lastPrepSunday.getDate() - offset * 7"
+      "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+      "lastPrepSunday.getDate() - offset * 7",
+      // 2026-10-01 · 수학시험일 기반 추가 일요일(총 5회 가능)도 같은 모듈 안에 있어야 한다.
+      "const mathExamSundays = (Array.isArray(mathExamDates) ? mathExamDates : [])",
+      "...new Set([...prepSundays, ...mathExamSundays])"
     ]) &&
     appEntrySource.includes("getSundayDatesForExamPeriod,") &&
     examPrepLessonCandidateBuilderSource.includes("getSundayDatesForExamPeriod(")
@@ -2422,8 +2428,10 @@ check(
     hasAll(examPeriodSundayDateSelectorSource, [
       "return function getSundayDatesForExamPeriod(",
       "if (!period.endDate && !period.date) return []",
-      "return [3, 2, 1, 0].map((offset) => {",
-      "lastPrepSunday.getDate() - offset * 7"
+      "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+      "lastPrepSunday.getDate() - offset * 7",
+      // 2026-10-01 · 추가 일요일 계산도 이 경계 안에 머문다.
+      "...new Set([...prepSundays, ...mathExamSundays])"
     ]) &&
     ![
       "useState",
