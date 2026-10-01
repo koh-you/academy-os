@@ -66,6 +66,10 @@ export function TeacherLessonHubV2({
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
+  onExcludeExamPrepSchool,
+  onIncludeExamPrepSchool,
+  onSaveExamPrepSchoolTime,
+  getExamPrepLessonExcludedSchools,
   onToggleExamPrepDailyJournal,
   onSaveRecord,
   onRestoreCanceledLesson,
@@ -216,10 +220,14 @@ export function TeacherLessonHubV2({
         <ExamPrepLessonDetail
           attendanceSettings={attendanceSettings}
           createEmptyRecord={nestedPanels.createEmptyRecord}
+          examPrepExcludedSchools={getExamPrepLessonExcludedSchools?.(selectedLesson) ?? []}
           examPrepScheduleLessons={examPrepScheduleLessons}
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
+          onExcludeExamPrepSchool={onExcludeExamPrepSchool}
+          onIncludeExamPrepSchool={onIncludeExamPrepSchool}
           onSaveExamPrepSchedule={onSaveExamPrepSchedule}
+          onSaveExamPrepSchoolTime={onSaveExamPrepSchoolTime}
           onToggleDailyJournal={onToggleExamPrepDailyJournal}
           onSaveRecord={onSaveRecord}
           persistedLessons={persistedLessons}

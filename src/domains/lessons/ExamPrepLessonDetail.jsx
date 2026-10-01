@@ -8,16 +8,18 @@ import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import {
   createExamPrepAttendanceSummary,
+  createExamPrepSchoolPlanRows,
   createExamPrepStudentRows,
   getExamPrepSourceItems,
   groupExamPrepStudentsBySchool,
   groupExamPrepStudentsByTime
 } from "./examPrepLessonPresentation.js";
+import { ExamPrepSchoolPlanPanel } from "./ExamPrepSchoolPlanPanel.jsx";
 import { getLessonStudentIds } from "../students/lessonRosterSelectors.js";
 
 const ExamPrepContentEditor = lazy(() => import("./ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
 
-export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
+export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepExcludedSchools = [], examPrepScheduleLessons = [], lesson, onDeleteLesson, onExcludeExamPrepSchool, onIncludeExamPrepSchool, onSaveExamPrepSchedule, onSaveExamPrepSchoolTime, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
@@ -27,6 +29,7 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
   const studentGroups = rosterView === "school"
     ? groupExamPrepStudentsBySchool(studentRows)
     : groupExamPrepStudentsByTime(studentRows);
+  const schoolPlanRows = createExamPrepSchoolPlanRows(studentRows);
   const schoolCount = new Set(studentRows.map((row) => row.schoolName).filter((name) => name !== "학교 미입력")).size;
   const displaySchoolCount = Math.max(schoolCount, sourceItems.length);
   return (
@@ -44,6 +47,18 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
           value={`${attendanceSummary.arrived}/${attendanceSummary.total}명 등원`}
         />
       </div>
+
+      {onExcludeExamPrepSchool && onSaveExamPrepSchoolTime ? (
+        <ExamPrepSchoolPlanPanel
+          excludedSchools={examPrepExcludedSchools}
+          lesson={lesson}
+          onExcludeSchool={({ schoolName }) => onExcludeExamPrepSchool({ lesson, schoolName })}
+          onIncludeSchool={({ schoolName }) => onIncludeExamPrepSchool({ lesson, schoolName })}
+          onSaveSchoolTime={({ endTime, schoolName, startTime }) =>
+            onSaveExamPrepSchoolTime({ endTime, lesson, schoolName, startTime })}
+          schoolRows={schoolPlanRows}
+        />
+      ) : null}
 
       <section className="panel examPrepRosterPanel">
         <div className="examPrepRosterHeader">

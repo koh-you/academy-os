@@ -17,11 +17,16 @@ export async function saveExamPrepSchedulePlanRequest({ auditId, changes, reques
  *
  * onLessonRefreshed 는 서버 최신본을 화면 상태에 반영하는 콜백. 재시도가 또 실패해도
  * 최신본은 반영해 두므로, 그 다음 저장은 맞는 원본으로 나간다.
+ *
+ * rebaseChange 는 "최신본 위에 같은 편집을 다시 얹는" 방법이다. 기본값은 시간 수정이고,
+ * 학교별 제외는 명단에서 그 학교 학생을 빼는 다른 의도이므로 자기 rebase 를 넘긴다
+ * (examPrepSchoolPlan.rebaseExamPrepSchoolRosterChange · 2026-10-01).
  */
 export async function saveExamPrepScheduleWithConflictRecovery({
   createAuditId = () => `exam-prep-schedule-${Date.now()}`,
   onLessonRefreshed,
   plan,
+  rebaseChange = rebaseExamPrepScheduleChange,
   request
 }) {
   const send = (changes) => saveExamPrepSchedulePlanRequest({ auditId: createAuditId(), changes, request });
@@ -32,7 +37,7 @@ export async function saveExamPrepScheduleWithConflictRecovery({
     if (!currentLesson?.lessonId) throw error;
     onLessonRefreshed?.(currentLesson);
     const rebasedChanges = plan.changes
-      .map((change) => rebaseExamPrepScheduleChange(change, currentLesson, plan))
+      .map((change) => rebaseChange(change, currentLesson, plan))
       .filter(Boolean);
     if (!rebasedChanges.length) {
       throw new Error("최신 수업 명단에는 선택한 학생이 없습니다. 최신 원본을 불러왔으니 대상을 다시 확인해 주세요.");

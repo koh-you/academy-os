@@ -1594,6 +1594,16 @@
 - 오래된 완료 항목은 월별 archive로 이동한다.
 - 미룬 작업은 여기 복제하지 않고 `docs/deferred-work-queue.md`만 갱신한다.
 
+## 2026-10-01 일요시험대비 — 날짜별 학교 단위 참여·시간
+
+- 요청: 10/4 에서 중학교만 빼고 싶은데 자리가 없다. 수업을 지우면 그날 모든 학교가 사라지고, 시험정보의 "내신 준비 제외" 는 그 학교의 4회 전부를 뺀다.
+- 원인: 후보 생성이 날짜당 수업 한 개에 그날 걸린 모든 학교를 합친다(`examPrepLessonCandidateBuilder`). 학교 단위 제어가 어디에도 없었다.
+- 추가: `examPrepSchoolPlan.js`(제외 키·명단 저장 계획·충돌 rebase), `ExamPrepSchoolPlanPanel.jsx`(학교별 행 — 시작/종료 시간 + 이 날짜 제외 + 다시 포함), `createExamPrepSchoolPlanRows`(시간이 섞이면 한 시간으로 보여주지 않는다), 일정 저장 계획의 `scope: "date"`.
+- 제외는 `generatedLessonControls.examPrepSchoolExclusions` 에 남고 후보 단계에서 적용돼 재생성해도 유지된다. 저장된 수업이면 기존 시험대비 일정 저장 경로(CAS·재조회)로 명단까지 맞추고, 순서는 제어 -> 명단이라 명단 저장이 막히면 제어를 되돌린다.
+- safe browser 로 두 결함을 찾아 고쳤다: (1) 제외가 자동저장 debounce 전 새로고침에서 서버 예전 값에 덮여 사라짐 -> 직접 저장·재조회, (2) 저장 성공 직후 초안 리셋 effect 가 "서버 재조회 일치" 를 바로 지움 -> 그 학교 초안만 비우고 표시는 남김.
+- 모달 1120 -> 1600px, 진행 내용 칸 다열 grid.
+- 검증: 전용 fixture, `test:production` 472/472 · scenario 829/829, `lint:runtime`, `build` + chunk budget, safe browser 시험대비 17/17(신규 2건 포함).
+
 ## 2026-08-04 Solapi 4-7반 예약 명단 오판 긴급 수정
 
 - 운영 원천에서 4-7반 8건이 모두 `학생이 현재 수업 명단에서 제외`로 취소된 것을 확인했다. 학생·수업 명단과 화목/토 개별 스케줄은 정상이다.

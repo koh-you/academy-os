@@ -120,17 +120,25 @@ import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPerio
 import { createExamPrepLessonCandidateBuilder } from "../domains/lessons/examPrepLessonCandidateBuilder.js";
 import { filterStaleGeneratedExamPrepLessons } from "../domains/lessons/examPrepGeneratedLessonSourceFilter.js";
 import { saveExamPrepScheduleWithConflictRecovery } from "../domains/lessons/examPrepScheduleApi.js";
+import { createExamPrepScheduleSavePlan } from "../domains/lessons/examPrepSchedulePlan.js";
 import { ExamPrepLessonDetail } from "../domains/lessons/ExamPrepLessonDetail.jsx";
 import { LessonJournalFallback } from "../domains/lessons/LessonJournalFallback.jsx";
 import { MonthlyRegularLessonOpenModal } from "../domains/lessons/MonthlyRegularLessonOpenModal.jsx";
 import { mergeGeneratedCalendarLessons } from "../domains/lessons/generatedLessonCalendarMerge.js";
 import {
+  addGeneratedLessonExamPrepSchoolExclusion,
   addGeneratedLessonManualOverrideKey,
   addGeneratedLessonSuppressedKey,
   normalizeGeneratedLessonControls,
+  removeGeneratedLessonExamPrepSchoolExclusion,
   removeGeneratedLessonManualOverrideKey,
   removeGeneratedLessonSuppressedKey
 } from "../domains/lessons/generatedLessonControlsModel.js";
+import {
+  createExamPrepSchoolRosterSavePlan,
+  getExamPrepExcludedSchools,
+  rebaseExamPrepSchoolRosterChange
+} from "../domains/lessons/examPrepSchoolPlan.js";
 import { getExamPrepGeneratedKeyForDate } from "../domains/lessons/generatedExamPrepKeyBuilder.js";
 import { createGeneratedLessonIdentityModel } from "../domains/lessons/generatedLessonIdentityModel.js";
 import { createGeneratedPreExamLessonBuilder } from "../domains/lessons/generatedPreExamLessonBuilder.js";
@@ -1921,6 +1929,7 @@ function normalizeAiSettings(settings = {}) {
 }
 
 const defaultGeneratedLessonControls = {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: [],
   suppressedKeys: []
 };
@@ -3276,12 +3285,13 @@ export function App() {
     saveGeneratedLessonsFromPlan(generatedLessonPlan);
   }
 
-  async function handleSaveExamPrepSchedule(plan) {
+  async function handleSaveExamPrepSchedule(plan, { rebaseChange } = {}) {
     // 버전 충돌이면 서버 최신본으로 원본을 갈아끼우고 같은 편집을 다시 얹어 한 번 재시도한다
     // (examPrepScheduleApi 참고). 최신본은 재시도 성공 여부와 무관하게 화면에 반영해 둔다.
     const result = await saveExamPrepScheduleWithConflictRecovery({
       onLessonRefreshed: (lesson) => setLessons((current) => upsertById(current, lesson, "lessonId")),
       plan,
+      ...(rebaseChange ? { rebaseChange } : {}),
       request: postJsonWithTimeout
     });
     if (result?.source !== "supabase" || result?.verified !== true || !Array.isArray(result.lessons)) {
@@ -3290,6 +3300,89 @@ export function App() {
     mergeGeneratedLessonsIntoState(result.lessons);
     result.lessons.forEach((lesson) => clearGeneratedLessonManualOverride(getGeneratedLessonKey(lesson)));
     return result;
+  }
+
+  // 2026-10-01 · 날짜 하나에서 학교 단위로 참여·시간을 정한다. 수업은 날짜당 한 개라
+  // 수업을 지우면 그날 모든 학교가 사라졌고, 학교를 빼려면 그 학교의 일요대비 4회를 통째로
+  // 빼야 했다(examPrepSchoolPlan 주석 참고).
+  //
+  // 시간은 이 날짜만 바꾼다. 이후 회차까지 미는 건 기존 '일정 수정' 모달의 일이다.
+  function handleSaveExamPrepSchoolTime({ endTime, lesson, schoolName, startTime }) {
+    return handleSaveExamPrepSchedule(createExamPrepScheduleSavePlan({
+      endTime,
+      lessons: examPrepScheduleLessons,
+      mode: "school",
+      persistedLessons: lessons,
+      scope: "date",
+      selectedKeys: [schoolName],
+      sourceLesson: lesson,
+      startTime,
+      students
+    }));
+  }
+
+  // 학교별 제외는 app_state 자동저장(500ms debounce)에 얹지 않고 직접 저장·재조회한다.
+  //
+  // 자동저장만 믿으면 제외 직후 새로고침·재로그인에서 서버의 예전 값이 부트스트랩으로
+  // 다시 덮어써 제외가 사라졌다(2026-10-01 safe browser 재현). 제외는 "이번 주 그 학교는
+  // 안 온다" 는 운영 결정이므로 저장이 확인돼야 완료다.
+  async function persistGeneratedLessonControls(nextControls) {
+    setGeneratedLessonControls(nextControls);
+    if (session?.role !== "teacher") return;
+    const result = await getAppStatePersistenceController().save({
+      generatedLessonControls: nextControls
+    });
+    if (result?.ok === false) {
+      throw result.error ?? new Error("생성 수업 설정의 Supabase 저장·재조회를 확인하지 못했습니다.");
+    }
+  }
+
+  // 제외는 두 곳을 같이 맞춘다: 생성 제어(재생성해도 유지)와, 이미 저장된 수업이면 그 명단.
+  // 저장된 수업을 건드리지 않으면 다음 '생성 수업 적용' 까지 서버 명단이 그대로 남아
+  // 화면과 알림톡 대상이 어긋난다.
+  //
+  // 순서는 제어 -> 명단이다. 명단 저장이 막히면(수업기록·알림 작업이 걸린 학생) 제어를
+  // 되돌려 반만 적용된 상태로 두지 않는다.
+  async function handleExcludeExamPrepSchool({ lesson, schoolName }) {
+    const generatedKey = getGeneratedLessonKey(lesson) || lesson?.generatedKey;
+    if (!generatedKey) throw new Error("자동 생성된 시험대비 수업에서만 학교를 제외할 수 있습니다.");
+    const plan = createExamPrepSchoolRosterSavePlan({
+      persistedLessons: lessons,
+      schoolName,
+      sourceLesson: lesson,
+      students
+    });
+    if (!plan.removedStudentIds.length) throw new Error("이 학교의 학생이 명단에 없습니다.");
+    const beforeControls = normalizeGeneratedLessonControls(generatedLessonControls);
+    await persistGeneratedLessonControls(
+      addGeneratedLessonExamPrepSchoolExclusion(beforeControls, generatedKey, schoolName)
+    );
+    if (!plan.changes.length) return;
+    try {
+      await handleSaveExamPrepSchedule(plan, { rebaseChange: rebaseExamPrepSchoolRosterChange });
+    } catch (error) {
+      await persistGeneratedLessonControls(beforeControls);
+      throw error;
+    }
+  }
+
+  function handleIncludeExamPrepSchool({ lesson, schoolName }) {
+    const generatedKey = getGeneratedLessonKey(lesson) || lesson?.generatedKey;
+    if (!generatedKey) return Promise.resolve();
+    return persistGeneratedLessonControls(
+      removeGeneratedLessonExamPrepSchoolExclusion(
+        normalizeGeneratedLessonControls(generatedLessonControls),
+        generatedKey,
+        schoolName
+      )
+    );
+  }
+
+  function getExamPrepLessonExcludedSchools(lesson) {
+    return getExamPrepExcludedSchools(
+      generatedLessonControls.examPrepSchoolExclusions,
+      getGeneratedLessonKey(lesson) || lesson?.generatedKey
+    );
   }
 
   useEffect(() => {
@@ -6442,6 +6535,10 @@ export function App() {
       handleSendLessonComment,
       handleSaveDerivedSchoolCalendar,
       handleSaveExamPrepSchedule,
+      handleExcludeExamPrepSchool,
+      handleIncludeExamPrepSchool,
+      handleSaveExamPrepSchoolTime,
+      getExamPrepLessonExcludedSchools,
       handleSyncSpecialLectureStudentSchedules,
       handleTeacherVerifyHomework,
       handleToggleExamPrepDailyJournal,

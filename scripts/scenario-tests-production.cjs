@@ -2453,7 +2453,7 @@ check(
   "84d-165 examPrep lesson candidate inventory preserves date grouping block dedupe and fixed lesson fields",
   (appEntrySource.match(/function buildExamPrepLessonCandidates\(rows = \[\]\)/g) || []).length === 0 &&
     (appEntrySource.match(/createExamPrepLessonCandidateBuilder\(\{/g) || []).length === 1 &&
-    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows, students\)/g) || []).length === 1 &&
+    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows, students, safeControls\.examPrepSchoolExclusions\)/g) || []).length === 1 &&
     hasAll(examPrepLessonCandidateBuilderSource, [
       "const dateMap = new Map()",
       "parseDateRangeText(",
@@ -2463,7 +2463,8 @@ check(
       "entry.blocks.some(",
       "item.schoolName ===",
       "item.examCycle ===",
-      "return [...dateMap.values()].map(",
+      // 2026-10-01 · 모든 학교가 배제된 날짜는 수업을 만들지 않아 .map 앞에 .filter 가 붙는다.
+      "return [...dateMap.values()]",
       "generatedKey: entry.key",
       "label: `${entry.date} 시험대비`",
       "`${schoolNames} 시험기간 전 시험대비`",
@@ -2480,14 +2481,14 @@ check(
       'status: "scheduled"'
     ]) &&
     appEntrySource.includes(
-      "candidates.push(...buildExamPrepLessonCandidates(rows, students))"
+      "candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions))"
     )
 );
 check(
   "84d-166 examPrep lesson candidate extraction stays pure with App-injected format and date dependencies",
   (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPrepLessonCandidateBuilder\.js"/g) || []).length === 1 &&
     (appEntrySource.match(/createExamPrepLessonCandidateBuilder\(\{/g) || []).length === 1 &&
-    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows, students\)/g) || []).length === 1 &&
+    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows, students, safeControls\.examPrepSchoolExclusions\)/g) || []).length === 1 &&
     !appEntrySource.includes("function buildExamPrepLessonCandidates(") &&
     (examPrepLessonCandidateBuilderSource.match(/export function createExamPrepLessonCandidateBuilder\(/g) || []).length === 1 &&
     hasAll(appEntrySource, [
@@ -2497,7 +2498,7 @@ check(
       "getStandardLessonColor,",
       "getSundayDatesForExamPeriod,",
       "parseDateRangeText",
-      "candidates.push(...buildExamPrepLessonCandidates(rows, students))"
+      "candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions))"
     ]) &&
     hasAll(examPrepLessonCandidateBuilderSource, [
       "return function buildExamPrepLessonCandidates(",
@@ -2530,7 +2531,7 @@ check(
   "84d-167 examPrep lesson candidate boundary closes out before App-owned plan status resolution",
   (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPrepLessonCandidateBuilder\.js"/g) || []).length === 1 &&
     (appEntrySource.match(/createExamPrepLessonCandidateBuilder\(\{/g) || []).length === 1 &&
-    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows, students\)/g) || []).length === 1 &&
+    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows, students, safeControls\.examPrepSchoolExclusions\)/g) || []).length === 1 &&
     !appEntrySource.includes("function buildExamPrepLessonCandidates(") &&
     (examPrepLessonCandidateBuilderSource.match(/export function createExamPrepLessonCandidateBuilder\(/g) || []).length === 1 &&
     (examPrepLessonCandidateBuilderSource.match(/return function buildExamPrepLessonCandidates\(/g) || []).length === 1 &&
@@ -2540,7 +2541,7 @@ check(
       "createExamPrepLessonCandidateBuilder({",
       "getSundayDatesForExamPeriod,",
       "function buildGeneratedLessonPlan(",
-      "candidates.push(...buildExamPrepLessonCandidates(rows, students))",
+      "candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions))",
       "return candidates.map((candidate) => {",
       "const existing = lessons.find(",
       "const status = suppressed ?"
@@ -2551,7 +2552,8 @@ check(
       "getSundayDatesForExamPeriod(",
       "getExamPrepGeneratedKeyForDate(date)",
       "entry.blocks.some(",
-      "return [...dateMap.values()].map(",
+      // 2026-10-01 · 모든 학교가 배제된 날짜는 수업을 만들지 않아 .map 앞에 .filter 가 붙는다.
+      "return [...dateMap.values()]",
       "examCycleLabel(",
       "getStandardLessonColor({",
       'lessonType: "examPrep"'
@@ -2587,7 +2589,7 @@ check(
       "createPreExamGeneratedKey(event)",
       "candidates.push({",
       "lesson: { ...lesson, generatedKey }",
-      "candidates.push(...buildExamPrepLessonCandidates(rows, students))",
+      "candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions))",
       "return candidates.map((candidate) => {",
       "const candidateKeys = new Set(",
       "getGeneratedLessonIdentityKeys(candidate.lesson)",

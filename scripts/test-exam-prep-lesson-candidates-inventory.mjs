@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { lessonCalendarColors } from "../src/app/appConfig.js";
 import { getExamPrepGeneratedKeyForDate } from "../src/domains/lessons/generatedExamPrepKeyBuilder.js";
 import { createExamPeriodSundayDateSelector } from "../src/domains/lessons/examPeriodSundayDateSelector.js";
+import { isExamPrepSchoolExcluded } from "../src/domains/lessons/examPrepSchoolPlan.js";
 import { parseDateRangeText } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
 
 function toExistingKoreaDateString(date) {
@@ -38,8 +39,10 @@ const getExistingSundayDatesForExamPeriod =
       toExistingKoreaDateString
   });
 
+// 2026-10-01 · 학교별 제외가 더해져 복제 구현도 같은 인자·같은 필터를 갖는다.
 function buildExistingExamPrepLessonCandidates(
-  rows = []
+  rows = [],
+  schoolExclusions = []
 ) {
   const dateMap = new Map();
   rows.forEach((row) => {
@@ -68,6 +71,15 @@ function buildExistingExamPrepLessonCandidates(
       }
       const entry = dateMap.get(key);
       if (
+        isExamPrepSchoolExcluded(
+          schoolExclusions,
+          key,
+          block.schoolName
+        )
+      ) {
+        return;
+      }
+      if (
         !entry.blocks.some(
           (item) =>
             item.schoolName ===
@@ -79,7 +91,9 @@ function buildExistingExamPrepLessonCandidates(
       }
     });
   });
-  return [...dateMap.values()].map(
+  return [...dateMap.values()]
+    .filter((entry) => entry.blocks.length > 0)
+    .map(
     (entry) => {
       const schoolNames = entry.blocks
         .map((block) => block.schoolName)
@@ -248,13 +262,22 @@ const helperBoundaries = [
   'row.schoolName || "학교 미입력"',
   "examCycle: row.examCycle || \"\"",
   "if (!dateMap.has(key))",
+  // 2026-10-01 · 학교별 제외를 후보 단계에서 적용한다. 제외 판정은 block 을 담기 전에 오고,
+  // 모든 학교가 빠진 날짜는 수업을 만들지 않으므로 .map 앞에 .filter 가 끼어든다
+  // (examPrepSchoolPlan 주석 참고).
+  "isExamPrepSchoolExcluded(",
+  "schoolExclusions,",
   "entry.blocks.some(",
   "item.schoolName ===",
   "block.schoolName",
   "item.examCycle ===",
   "block.examCycle",
   "entry.blocks.push(block)",
-  "return [...dateMap.values()].map(",
+  // 2026-10-01 · 학교별 제외를 후보 단계에서 적용한다. 제외 판정은 block 을 담기 전에 오고,
+  // 모든 학교가 빠진 날짜는 수업을 만들지 않으므로 .map 앞에 .filter 가 끼어든다
+  // (examPrepSchoolPlan 주석 참고).
+  "return [...dateMap.values()]",
+  ".filter((entry) => entry.blocks.length > 0)",
   "generatedKey: entry.key",
   "label: `${entry.date} 시험대비`",
   "`${schoolNames} 시험기간 전 시험대비`",
@@ -298,7 +321,7 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
-    "buildExamPrepLessonCandidates(rows, students)"
+    "buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions)"
   ).length - 1,
   1
 );

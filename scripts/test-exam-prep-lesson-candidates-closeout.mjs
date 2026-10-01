@@ -139,7 +139,7 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
-    "buildExamPrepLessonCandidates(rows, students)"
+    "buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions)"
   ).length - 1,
   1
 );
@@ -169,7 +169,7 @@ const appBoundaries = [
   "getSundayDatesForExamPeriod,",
   "function toKoreaDateString(date)",
   "function buildGeneratedLessonPlan(",
-  "candidates.push(...buildExamPrepLessonCandidates(rows, students))",
+  "candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions))",
   "return candidates.map((candidate) => {"
 ];
 let previousIndex = -1;
@@ -190,7 +190,9 @@ for (const moduleBoundary of [
   "getSundayDatesForExamPeriod(",
   "getExamPrepGeneratedKeyForDate(date)",
   "entry.blocks.some(",
-  "return [...dateMap.values()].map(",
+  // 2026-10-01 · 모든 학교가 빠진 날짜는 수업을 만들지 않아 .map 앞에 .filter 가 붙는다.
+  "isExamPrepSchoolExcluded(",
+  "return [...dateMap.values()]",
   "examCycleLabel(",
   "getStandardLessonColor({",
   'lessonType: "examPrep"'

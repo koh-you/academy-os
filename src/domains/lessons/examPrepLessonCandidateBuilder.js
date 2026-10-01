@@ -1,5 +1,6 @@
 import { scopeDeterministicId } from "../../shared/utils/tenantIdScope.js";
 import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
+import { isExamPrepSchoolExcluded } from "./examPrepSchoolPlan.js";
 
 export function createExamPrepLessonCandidateBuilder({
   examCycleLabel,
@@ -14,7 +15,8 @@ export function createExamPrepLessonCandidateBuilder({
 }) {
   return function buildExamPrepLessonCandidates(
     rows = [],
-    students = []
+    students = [],
+    schoolExclusions = []
   ) {
     const dateMap = new Map();
     rows.forEach((row) => {
@@ -48,6 +50,17 @@ export function createExamPrepLessonCandidateBuilder({
           });
         }
         const entry = dateMap.get(key);
+        // 그 날짜에서 사람이 뺀 학교는 명단·표시 모두에서 빠진다. 수업 자체는 남는다 —
+        // 같은 날짜의 다른 학교 대비는 그대로 해야 하기 때문이다(2026-10-01 요청).
+        if (
+          isExamPrepSchoolExcluded(
+            schoolExclusions,
+            key,
+            block.schoolName
+          )
+        ) {
+          return;
+        }
         if (
           !entry.blocks.some(
             (item) =>
@@ -61,7 +74,9 @@ export function createExamPrepLessonCandidateBuilder({
         }
       });
     });
-    return [...dateMap.values()].map(
+    return [...dateMap.values()]
+      .filter((entry) => entry.blocks.length > 0)
+      .map(
       (entry) => {
         const schoolNames = entry.blocks
           .map(

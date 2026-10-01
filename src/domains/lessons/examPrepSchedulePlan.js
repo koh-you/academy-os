@@ -38,10 +38,18 @@ export function createExamPrepScheduleGroups({ lesson = {}, mode = "school", stu
   return [...groups.values()].sort((left, right) => left.label.localeCompare(right.label, "ko", { numeric: true }));
 }
 
+/**
+ * scope 는 이 편집이 닿는 날짜 범위다.
+ * - "forward"(기본): 이 날짜부터 그 학생의 마지막 시험대비까지. 기존 일정 수정 모달의 계약.
+ * - "date": 이 날짜만. 학교별 시간을 그날만 다르게 두는 자리에서 쓴다 — 주말 수학시험
+ *   일정에 맞춰 한 학교만 시간을 당기는 일이 있는데, 그걸 이후 회차까지 밀면 안 된다
+ *   (2026-10-01 요청).
+ */
 export function createExamPrepScheduleSavePlan({
   lessons = [],
   mode = "school",
   persistedLessons = [],
+  scope = "forward",
   selectedKeys = [],
   sourceLesson = {},
   startTime = "",
@@ -58,7 +66,9 @@ export function createExamPrepScheduleSavePlan({
   const targets = new Set(targetStudentIds);
   const persistedById = new Map(persistedLessons.map((lesson) => [lesson.lessonId, lesson]));
   const changes = lessons
-    .filter((lesson) => lesson.lessonType === "examPrep" && lesson.date >= sourceLesson.date)
+    .filter((lesson) => lesson.lessonType === "examPrep" && (
+      scope === "date" ? lesson.date === sourceLesson.date : lesson.date >= sourceLesson.date
+    ))
     .sort((left, right) => left.date.localeCompare(right.date))
     .flatMap((lesson) => {
       const after = applyExamPrepScheduleToLesson(lesson, { endTime: normalizedEnd, startTime: normalizedStart, targets });
@@ -69,6 +79,7 @@ export function createExamPrepScheduleSavePlan({
   return {
     changes,
     endTime: normalizedEnd,
+    scope,
     sourceDate: sourceLesson.date,
     startTime: normalizedStart,
     targetStudentIds

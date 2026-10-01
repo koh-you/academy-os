@@ -8,8 +8,14 @@ import {
   removeGeneratedLessonSuppressedKey
 } from "../src/domains/lessons/generatedLessonControlsModel.js";
 
+// 2026-10-01 · 날짜별 학교 제외(examPrepSchoolExclusions)가 제어에 더해졌다. 복제 구현은
+// 정규화 형태만 맞추고, 제외 항목의 정규화·정렬 규칙은 전용 테스트
+// (test-exam-prep-school-plan.mjs)가 본다.
 function normalizeExistingGeneratedLessonControls(value = {}) {
   return {
+    examPrepSchoolExclusions: Array.isArray(value.examPrepSchoolExclusions)
+      ? value.examPrepSchoolExclusions
+      : [],
     manualOverrideKeys: Array.isArray(value.manualOverrideKeys)
       ? [...new Set(value.manualOverrideKeys)]
       : [],
@@ -92,6 +98,7 @@ const extractedNormalized =
   normalizeGeneratedLessonControls(source);
 
 assert.deepEqual(normalized, {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: ["generated:manual:keep"],
   suppressedKeys: [
     "generated:suppressed:remove",
@@ -106,6 +113,7 @@ assert.deepEqual(
     suppressedKeys: null
   }),
   {
+    examPrepSchoolExclusions: [],
     manualOverrideKeys: [],
     suppressedKeys: []
   }
@@ -113,6 +121,7 @@ assert.deepEqual(
 assert.deepEqual(
   normalizeExistingGeneratedLessonControls(),
   {
+    examPrepSchoolExclusions: [],
     manualOverrideKeys: [],
     suppressedKeys: []
   }
@@ -135,6 +144,7 @@ const extractedManualAdded =
     )
   );
 assert.deepEqual(manualAdded, {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: [
     "generated:manual:keep",
     "generated:manual:add"

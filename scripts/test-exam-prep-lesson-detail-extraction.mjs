@@ -58,10 +58,16 @@ assert.deepEqual(
   [
     "attendanceSettings",
     "createEmptyRecord",
+    // 2026-10-01 · 날짜별 학교 단위 참여·시간 패널. 제외 목록은 생성 제어에서 읽고(명단에서
+    // 사라진 학교를 다시 포함할 자리가 필요하다), 제외·재포함·시간 저장은 App 핸들러를 쓴다.
+    "examPrepExcludedSchools",
     "examPrepScheduleLessons",
     "lesson",
     "onDeleteLesson",
+    "onExcludeExamPrepSchool",
+    "onIncludeExamPrepSchool",
     "onSaveExamPrepSchedule",
+    "onSaveExamPrepSchoolTime",
     "onSaveRecord",
     "onToggleDailyJournal",
     "persistedLessons",
@@ -70,7 +76,7 @@ assert.deepEqual(
     "students",
     "templates"
   ].sort(),
-  "TeacherLessonHubV2's full-featured call site must pass exactly the same prop set as before plus the disclosed additions (createEmptyRecord, attendanceSettings, onToggleDailyJournal)"
+  "TeacherLessonHubV2's full-featured call site must pass exactly the same prop set as before plus the disclosed additions (createEmptyRecord, attendanceSettings, onToggleDailyJournal, and the 2026-10-01 per-school participation props)"
 );
 
 console.log("exam prep lesson detail extraction: no App back-reference, preserved contract snippets, and exact call-site prop sets verified");

@@ -147,7 +147,8 @@ const candidateBoundaries = [
   "getSundayDatesForExamPeriod(",
   "getExamPrepGeneratedKeyForDate(date)",
   "if (!dateMap.has(key))",
-  "return [...dateMap.values()].map("
+  // 2026-10-01 · 모든 학교가 모든 빠진 날짜는 수업을 만들지 않아 .map 앞에 .filter 가 붙는다.
+  "return [...dateMap.values()]"
 ];
 let previousCandidateIndex = -1;
 for (const boundary of candidateBoundaries) {
