@@ -8302,6 +8302,10 @@ const buildExamPrepLessonCandidates =
     examCycleLabel,
     getExamPrepGeneratedKeyForDate,
     getExamPrepSchoolGradeKey,
+    getMathExamDates: (row) =>
+      normalizeMathExamEntries(row)
+        .map((entry) => entry.date)
+        .filter(Boolean),
     getStandardLessonColor,
     getStudentSchoolGradeKey,
     getSundayDatesForExamPeriod,

@@ -149,8 +149,10 @@ for (const selectorBoundary of [
   // 2026-10-01 · 기준이 시험 첫날로 바뀌면서 시험기간 안의 일요일 수집이 사라졌다.
   "const day = start.getDay()",
   "const lastPrepSunday = new Date(start)",
-  "return [3, 2, 1, 0].map((offset) => {",
-  "toKoreaDateString(date)"
+  "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+  "toKoreaDateString(date)",
+  "const mathExamSundays = (Array.isArray(mathExamDates) ? mathExamDates : [])",
+  "...new Set([...prepSundays, ...mathExamSundays])"
 ]) {
   assert.ok(
     selectorSource.includes(selectorBoundary),

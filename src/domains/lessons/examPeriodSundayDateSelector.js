@@ -2,7 +2,8 @@ export function createExamPeriodSundayDateSelector({
   toKoreaDateString
 }) {
   return function getSundayDatesForExamPeriod(
-    period = {}
+    period = {},
+    mathExamDates = []
   ) {
     if (!period.endDate && !period.date) return [];
     const startDate =
@@ -32,12 +33,29 @@ export function createExamPeriodSundayDateSelector({
     const day = start.getDay();
     const lastPrepSunday = new Date(start);
     lastPrepSunday.setDate(start.getDate() - day);
-    return [3, 2, 1, 0].map((offset) => {
+    const prepSundays = [3, 2, 1, 0].map((offset) => {
       const date = new Date(lastPrepSunday);
       date.setDate(
         lastPrepSunday.getDate() - offset * 7
       );
       return toKoreaDateString(date);
     });
+    // 수학시험일을 나중에 적으면 그걸로 주말 수업 여부가 정해진다. 시험기간이 주말을 끼고
+    // 수학시험이 그 주말 **뒤** 평일이면, 직전 일요일에도 대비를 해야 한다 — 기본 4회를
+    // 넘겨 5회가 되더라도 만든다(2026-10-01 요청).
+    //
+    // 수학시험이 주말 **앞**이면(창동고 10/08) 그 직전 일요일은 이미 기본 4회 안에 있으므로
+    // 아무것도 늘지 않는다. 그래서 "주말을 끼면 무조건 추가"가 아니라 수학시험일이 판단한다.
+    const mathExamSundays = (Array.isArray(mathExamDates) ? mathExamDates : [])
+      .map((value) => new Date(`${String(value ?? "").trim()}T00:00:00+09:00`))
+      .filter((date) => !Number.isNaN(date.getTime()))
+      .map((date) => {
+        const sunday = new Date(date);
+        sunday.setDate(date.getDate() - date.getDay());
+        return toKoreaDateString(sunday);
+      });
+    return [
+      ...new Set([...prepSundays, ...mathExamSundays])
+    ].sort();
   };
 }
