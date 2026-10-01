@@ -138,6 +138,63 @@ const everySchoolExcluded = addExamPrepSchoolExclusion(
 );
 assert.equal(candidateFor(everySchoolExcluded), undefined);
 
+// --- 같은 학교의 두 학년이 같은 일요일에 걸리면 둘 다 명단에 든다 ---
+// 2026-10-01 · 중복 제거가 `학교명 + 고사` 기준이던 동안은 먼저 온 학년의 block 하나만
+// 남아서, 나머지 학년 학생이 그 일요일 시험대비에서 통째로 빠졌다.
+const twoGradeRows = [
+  { examPrepId: "m2", schoolName: "노원중", grade: "중2", examCycle: "2026-2-mid", examPeriod: "2026-10-07~2026-10-13" },
+  { examPrepId: "m3", schoolName: "노원중", grade: "중3", examCycle: "2026-2-mid", examPeriod: "2026-10-07~2026-10-13" },
+  { examPrepId: "h2", schoolName: "창동고", grade: "고2", examCycle: "2026-2-mid", examPeriod: "2026-10-07~2026-10-13" }
+];
+const twoGradeStudents = [
+  { studentId: "m2a", schoolName: "노원중", grade: "중2" },
+  { studentId: "m3a", schoolName: "노원중", grade: "중3" },
+  { studentId: "h2a", schoolName: "창동고", grade: "고2" }
+];
+const twoGradeCandidate = buildCandidates(twoGradeRows, twoGradeStudents, [])
+  .find((item) => item.lesson.date === "2026-10-04");
+assert.deepEqual(
+  [...twoGradeCandidate.lesson.studentIds].sort(),
+  ["h2a", "m2a", "m3a"],
+  "같은 학교의 두 학년 학생이 모두 명단에 든다"
+);
+// 표시 문구는 학교·고사 단위로 묶여 학년 수만큼 늘어나지 않는다.
+assert.equal(
+  twoGradeCandidate.lesson.sourceLabel,
+  "노원중 2학기 중간 · 창동고 2학기 중간"
+);
+assert.equal(
+  twoGradeCandidate.reason,
+  "노원중, 창동고 시험기간 전 시험대비"
+);
+// 학교 단위 제외는 그 학교의 모든 학년을 함께 뺀다.
+const twoGradeExcluded = buildCandidates(
+  twoGradeRows,
+  twoGradeStudents,
+  addExamPrepSchoolExclusion([], generatedKey, "노원중학교")
+).find((item) => item.lesson.date === "2026-10-04");
+assert.deepEqual(twoGradeExcluded.lesson.studentIds, ["h2a"]);
+assert.equal(twoGradeExcluded.lesson.sourceLabel, "창동고 2학기 중간");
+// 같은 학교·학년 행이 두 벌 있어도(중복 등록) 명단과 문구는 한 번만 센다.
+const duplicatedRowCandidate = buildCandidates(
+  [...twoGradeRows, { ...twoGradeRows[1], examPrepId: "m3-dup" }],
+  twoGradeStudents,
+  []
+).find((item) => item.lesson.date === "2026-10-04");
+assert.deepEqual([...duplicatedRowCandidate.lesson.studentIds].sort(), ["h2a", "m2a", "m3a"]);
+assert.equal(duplicatedRowCandidate.lesson.sourceLabel, "노원중 2학기 중간 · 창동고 2학기 중간");
+// 학년이 비어 학교·학년 키를 만들 수 없는 행은 학교명으로 한 벌만 센다.
+const gradelessCandidate = buildCandidates(
+  [
+    { examPrepId: "g1", schoolName: "미정중", grade: "", examCycle: "2026-2-mid", examPeriod: "2026-10-07~2026-10-13" },
+    { examPrepId: "g2", schoolName: "미정중", grade: "", examCycle: "2026-2-mid", examPeriod: "2026-10-07~2026-10-13" }
+  ],
+  [],
+  []
+).find((item) => item.lesson.date === "2026-10-04");
+assert.equal(gradelessCandidate.lesson.sourceLabel, "미정중 2학기 중간");
+assert.deepEqual(gradelessCandidate.lesson.studentIds, []);
+
 // --- 학교별 행: 시간이 섞여 있으면 한 시간으로 보여주지 않는다 ---
 const studentRows = [
   { studentId: "s1", schoolName: "창동고", startTime: "13:00", endTime: "18:00" },

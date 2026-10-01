@@ -61,11 +61,20 @@ export function createExamPrepLessonCandidateBuilder({
         ) {
           return;
         }
+        // 중복 제거는 **학교·학년**(+고사) 단위다.
+        //
+        // 예전에는 `학교명 + 고사` 로 묶어서, 같은 학교의 두 학년 시험정보가 같은 일요일에
+        // 걸리면 먼저 온 학년의 block 하나만 남았다. 명단은 block 의 schoolGradeKey 에서
+        // 뽑으므로 나머지 학년 학생이 그 일요일 시험대비에서 통째로 빠졌다(2026-10-01 발견).
+        // 표시 문구는 아래에서 학교·고사 단위로 다시 묶어 "안전중 · 안전중" 이 되지 않게 한다.
+        const blockIdentity =
+          block.schoolGradeKey || block.schoolName;
         if (
           !entry.blocks.some(
             (item) =>
-              item.schoolName ===
-                block.schoolName &&
+              (item.schoolGradeKey ||
+                item.schoolName) ===
+                blockIdentity &&
               item.examCycle ===
                 block.examCycle
           )
@@ -78,11 +87,14 @@ export function createExamPrepLessonCandidateBuilder({
       .filter((entry) => entry.blocks.length > 0)
       .map(
       (entry) => {
-        const schoolNames = entry.blocks
-          .map(
-            (block) => block.schoolName
+        // 학년이 여럿이어도 학교는 한 번만 적는다(명단은 학년별 block 전부를 본다).
+        const schoolNames = [
+          ...new Set(
+            entry.blocks.map(
+              (block) => block.schoolName
+            )
           )
-          .join(", ");
+        ].join(", ");
         const schoolGradeKeys = new Set(
           entry.blocks
             .map((block) => block.schoolGradeKey)
@@ -110,16 +122,20 @@ export function createExamPrepLessonCandidateBuilder({
             lessonType: "examPrep",
             lessonTopic: "시험대비",
             sourceSchoolEventId: entry.key,
-            sourceLabel: entry.blocks
-              .map(
-                (block) =>
-                  `${block.schoolName} ${
-                    examCycleLabel(
-                      block.examCycle
-                    )
-                  }`
+            // 표시명도 학교·고사 단위로 묶는다 — 학년별 block 을 그대로 적으면
+            // "안전중 2학기 중간 · 안전중 2학기 중간" 이 된다(2026-10-01).
+            sourceLabel: [
+              ...new Set(
+                entry.blocks.map(
+                  (block) =>
+                    `${block.schoolName} ${
+                      examCycleLabel(
+                        block.examCycle
+                      )
+                    }`
+                )
               )
-              .join(" · "),
+            ].join(" · "),
             date: entry.date,
             dayOfWeek: "sun",
             startTime: "13:00",
