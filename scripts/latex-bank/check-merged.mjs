@@ -103,6 +103,23 @@ for (const unit of bank.units ?? []) {
   if (!hasRef || !last.length) continue;
   const max = Math.max(...last);
   if (ids.length !== max) add("단원수", `${unit.code} ${unit.title}`, `문항 ${ids.length}개인데 마지막 배지는 ${max} — ${max - ids.length}개가 비었을 수 있다`);
+
+  // 쎈 통번호는 한 중단원 안에서 정확히 1씩 는다. 배지 번호보다 강한 기준이다 — 배지를 통째로 못 읽는 책
+  // (쎈B 미적분1 새 쇄는 「대표 문제」 배지가 색 알약 안 흰 글자라 OCR 이 하나도 못 읽었다)에서는
+  // 빠진 문항이 번호 끊김으로 드러나지 않고 뒤 번호가 당겨져 조용히 메워진다. 통번호는 그걸 잡는다.
+  const refs = ids.map((id) => ({ id, n: Number(items[id]?.ssen_ref) })).filter((r) => Number.isFinite(r.n) && r.n > 0);
+  if (refs.length !== ids.length) add("통번호없음", `${unit.code} ${unit.title}`, `${ids.length - refs.length}문항에 ssen_ref 가 없다 — 크롭 오른쪽 위에서 읽어 채운다`);
+  if (refs.length < 2) continue;
+  const jumps = [];
+  for (let i = 1; i < refs.length; i += 1) {
+    if (refs[i].n - refs[i - 1].n !== 1) jumps.push(`${refs[i - 1].id}(${refs[i - 1].n})→${refs[i].id}(${refs[i].n})`);
+  }
+  if (jumps.length) add("통번호끊김", `${unit.code} ${unit.title}`, `쎈 통번호가 1씩 늘지 않는다: ${jumps.slice(0, 8).join(" ")}${jumps.length > 8 ? ` 외 ${jumps.length - 8}건` : ""}`);
+  // 배지 − 1 = 통번호 − (단원 첫 통번호). 둘 중 하나만 어긋나도 여기서 갈린다.
+  const badge = (id) => Number(/-(\d+)$/.exec(id)?.[1]);
+  const base = refs[0].n - badge(refs[0].id);
+  const off = refs.filter((r) => r.n - base !== badge(r.id));
+  if (off.length) add("배지통번호불일치", `${unit.code} ${unit.title}`, `배지와 통번호가 어긋난다: ${off.slice(0, 8).map((r) => `${r.id}(쎈 ${r.n})`).join(" ")}${off.length > 8 ? ` 외 ${off.length - 8}건` : ""}`);
 }
 
 // ── 출력 ───────────────────────────────────────────────────────────────────────

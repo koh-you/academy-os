@@ -4,7 +4,7 @@
 // 사용:
 //   node scripts/problem-bank/ingest-scan-badges.mjs --pdf "C:/…/베이직쎈-공통수학2.pdf" --out output/problem-bank/ssen-basic-cm2 \
 //     --title "베이직쎈 공통수학2" --folder "고1 / 쎈" --grade 고1 --subject 수학 [--pages 2-15] [--units "01 평면좌표,02 직선의 방정식"]
-//     [--unit-pages "2-15,16-32,33-54"]   ← 단원 경계를 PDF 쪽 범위로 못 박는다(--units 와 같은 순서). 없으면 「실전 → 개념」 전환으로 나눈다.
+//     [--badge-x-tol 14] [--unit-pages "2-15,16-32,33-54"]   ← 단원 경계를 PDF 쪽 범위로 못 박는다(--units 와 같은 순서). 없으면 「실전 → 개념」 전환으로 나눈다.
 //
 // 올림포스와 달리 문항 코드가 없고 번호(01·02…)가 구역(개념 쪽·기본&핵심 유형·실전 감각 UP)마다 다시 시작한다.
 // 그래서 문항 번호는 「인쇄 쪽-번호」(12-13)로 두고 쪽 안의 굵은 번호 배지를 앵커로 자른다. 개념 쪽의 공통 지시문
@@ -207,6 +207,15 @@ async function main() {
   //   그 판의 진짜 유형 라벨은 색 알약 안 흰 글자라 OCR 에 안 잡히므로 hasTagLeft 만으로 충분하다.
   //   배지가 주황·파랑인 단원에서는 켜고 끈 결과가 같았다(쎈B 공통수학2 p31–35·p108–112 실측).
   const noGreenType = args["no-green-type"] === true || String(args["no-green-type"] ?? "") === "true";
+  // --badge-x-tol N(pt · 기본 8): 한 컬럼 안에서 배지 x 가 흔들리는 폭. 평판 스캔이 아니라 책을 펼쳐 찍은 판은
+  //   쪽 안에서 휘어(원근) 위·아래 배지의 x 가 10pt 넘게 벌어진다 — 한 번의 회전 보정으로는 못 편다.
+  //   기본 8 이면 컬럼 맨 위 배지가 창 밖으로 밀려 통째로 빠진다(쎈B 미적분1 새 쇄 p15: 6문항 중 2개만 검출).
+  //   값을 키우면 컬럼 왼쪽의 본문 숫자를 배지로 주울 위험이 커지므로 책마다 실측해서 정한다.
+  const badgeXTol = Math.max(4, Number(args["badge-x-tol"] ?? 8));
+  // --max-badge N(기본 60): 이 값을 넘는 번호는 OCR 오독으로 보고 순번으로 덮어쓴다. 쪽마다 번호가 다시 시작하는
+  //   베이직쎈은 60 이면 맞지만, 중단원마다 번호가 이어지는 쎈B 는 한 단원이 88·108 까지 간다 — 기본값이면
+  //   61번부터 전부 「순번」으로 덮여 쓰여 뒤 번호가 통째로 어긋난다(쎈B 미적분1 새 쇄 p17 실측).
+  const maxBadge = Number(args["max-badge"] ?? 60);
   const badgePattern = bookNumbering ? /^\d{4}$/ : (wideBadge ? /^\d{2,3}$/ : /^\d{2}$/);
   const badgeMinH = bookNumbering ? 8 : 9.5;
   const renderScale = dpi / 72;
@@ -435,23 +444,23 @@ async function main() {
         .filter((token) => badgePattern.test(token.text) && token.conf >= 40 && token.h >= badgeMinH && token.h <= 13)
         .filter((token) => token.x >= column.x0 + 2 && token.x <= column.x0 + 80 && token.y > bodyTop && token.y + token.h < bodyBottom)
         .filter((token) => !ringColored(token))
-      // 배지 x: 후보마다 [x, x+8pt] 창에 드는 후보 수를 세어 가장 많은 창의 왼쪽 끝(두 OCR 모드가 같은 배지를 조금 다른 x 로
+      // 배지 x: 후보마다 [x, x+badgeXTol] 창에 드는 후보 수를 세어 가장 많은 창의 왼쪽 끝(두 OCR 모드가 같은 배지를 조금 다른 x 로
       // 읽어도, 기울어진 쪽에서 한 배지만 왼쪽으로 튀어도 흔들리지 않게 — 4pt 칸 묶기는 동률일 때 튄 값을 고르기도 했다).
       let badgeLeft = left;
       if (candidates.length) {
-        const windows = candidates.map((token) => ({ x: token.x, count: candidates.filter((other) => other.x >= token.x && other.x <= token.x + 8).length }));
+        const windows = candidates.map((token) => ({ x: token.x, count: candidates.filter((other) => other.x >= token.x && other.x <= token.x + badgeXTol).length }));
         badgeLeft = windows.sort((a, b) => b.count - a.count || a.x - b.x)[0].x;
       }
       // 배지 띠 재판독: 쪽 전체 OCR 이 굵은 두 자리 배지를 놓치면(「11」 신뢰도 0 등) 그 문항이 앞 문항 크롭에 붙는다.
       // 배지 x 좌우 좁은 띠만 2배로 키워 숫자만 다시 읽어 빠진 배지를 보탠다(같은 y 의 배지는 한 번만).
       const stripTokens = candidates.length
-        ? await ocrBadgeStrip(tesseract, canvas, renderScale, { x0: Math.max(column.x0, badgeLeft - 5), x1: badgeLeft + (bookNumbering ? 34 : 22), y0: bodyTop, y1: bodyBottom }, path.join(tmpDir, `p${pageNumber}-badges-${column.index}.png`), badgePattern, badgeMinH - 0.5)
+        ? await ocrBadgeStrip(tesseract, canvas, renderScale, { x0: Math.max(column.x0, badgeLeft - 5), x1: badgeLeft + (bookNumbering ? 34 : 22) + (badgeXTol - 8), y0: bodyTop, y1: bodyBottom }, path.join(tmpDir, `p${pageNumber}-badges-${column.index}.png`), badgePattern, badgeMinH - 0.5)
         : [];
       // 띠에서 읽은 두 자리가 유형 라벨(「032」)의 앞 두 글자일 수 있다 — 라벨 왼쪽에는 「유형」 꼬리표 상자가 붙어 있고
       // 배지 왼쪽은 빈 여백이므로 꼬리표로 가른다(색은 회색 쪽에서 못 쓴다). 선택지 「④ 1」이 「41」로 읽히는 것은 신뢰도(≥75)로 거른다.
       // 신뢰도 낮은(30~75) 띠 토큰은 위·아래 배지와 번호가 이어질 때만(43 ↔ 44 ↔ 45) 받는다 — 주황 배지 「44」는 48 로 읽힌다.
-      const stripFit = stripTokens.filter((token) => Math.abs(token.x - badgeLeft) <= 4 && !ringColored(token) && !hasTagLeft(token));
-      const sure = [...candidates.filter((token) => token.x <= badgeLeft + 8), ...stripFit.filter((token) => token.conf >= 75)];
+      const stripFit = stripTokens.filter((token) => Math.abs(token.x - badgeLeft) <= Math.max(4, badgeXTol - 4) && !ringColored(token) && !hasTagLeft(token));
+      const sure = [...candidates.filter((token) => token.x <= badgeLeft + badgeXTol), ...stripFit.filter((token) => token.conf >= 75)];
       const sequential = stripFit.filter((token) => token.conf < 75).filter((token) => {
         const value = Number(token.text);
         const above = sure.filter((other) => other.y < token.y - 6).sort((a, b) => b.y - a.y)[0];
@@ -542,7 +551,7 @@ async function main() {
         const oneDigitOff = String(entry.number).padStart(4, "0").split("").filter((ch, k) => ch !== String(expected).padStart(4, "0")[k]).length === 1;
         const bookMisread = bookNumbering && !runsOn && (seen.has(entry.number) || entry.number === 0 || oneDigitOff || diff >= 300);
         // 쪽 번호 판: 오독으로 볼 만한 것만 고친다: 중복·0·큰 수, 앞자리 오독(±10·±20), 한두 개 차이. 그 밖은 읽은 값을 믿고 표시만 한다.
-        const pageMisread = !bookNumbering && (seen.has(entry.number) || entry.number === 0 || entry.number > 60 || [10, 20].includes(diff));
+        const pageMisread = !bookNumbering && (seen.has(entry.number) || entry.number === 0 || entry.number > maxBadge || [10, 20].includes(diff));
         if (bookMisread || pageMisread) {
           entry.flags.push(`number_corrected(${entry.number})`);
           entry.number = expected;
