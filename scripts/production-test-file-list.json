@@ -320,6 +320,7 @@
   "scripts/test-exam-period-sunday-dates-inventory.mjs",
   "scripts/test-exam-period-sunday-dates.mjs",
   "scripts/test-exam-period-sunday-dates-closeout.mjs",
+  "scripts/test-exam-prep-school-plan.mjs",
   "scripts/test-exam-prep-lesson-candidates-inventory.mjs",
   "scripts/test-exam-prep-lesson-candidates.mjs",
   "scripts/test-exam-prep-lesson-candidates-closeout.mjs",

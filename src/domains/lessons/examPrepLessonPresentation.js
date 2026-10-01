@@ -72,6 +72,37 @@ export function groupExamPrepStudentsBySchool(rows = []) {
     .map(([label, students]) => ({ label, students }));
 }
 
+/**
+ * 2026-10-01 · 학교별 참여·시간 패널의 행. 학생 행을 학교로 묶고, 그 학교 학생이 모두 같은
+ * 시간이면 그 시간을, 섞여 있으면 빈 값과 isMixedTime 을 준다 — 섞인 걸 한 시간으로 보여
+ * 주면 "시간 저장" 이 모르는 사이에 나머지 학생 시간을 덮어쓴다.
+ */
+export function createExamPrepSchoolPlanRows(rows = []) {
+  const groups = new Map();
+  rows.forEach((row) => {
+    const schoolName = row.schoolName || "학교 미입력";
+    if (!groups.has(schoolName)) {
+      groups.set(schoolName, { schoolName, startTimes: new Set(), endTimes: new Set(), studentIds: [] });
+    }
+    const group = groups.get(schoolName);
+    group.studentIds.push(row.studentId);
+    group.startTimes.add(row.startTime || "");
+    group.endTimes.add(row.endTime || "");
+  });
+  return [...groups.values()]
+    .sort((left, right) => compareKoreanText(left.schoolName, right.schoolName))
+    .map((group) => {
+      const isMixedTime = group.startTimes.size > 1 || group.endTimes.size > 1;
+      return {
+        endTime: isMixedTime ? "" : [...group.endTimes][0] ?? "",
+        isMixedTime,
+        schoolName: group.schoolName,
+        startTime: isMixedTime ? "" : [...group.startTimes][0] ?? "",
+        studentIds: group.studentIds
+      };
+    });
+}
+
 export function createExamPrepAttendanceSummary(rows = []) {
   const counts = rows.reduce((totals, row) => {
     const record = row?.record ?? null;

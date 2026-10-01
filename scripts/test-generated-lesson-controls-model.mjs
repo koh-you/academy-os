@@ -23,7 +23,9 @@ const source = {
 const sourceSnapshot = structuredClone(source);
 const normalized = normalizeGeneratedLessonControls(source);
 
+// 2026-10-01 · 날짜별 학교 제외가 제어에 더해졌다(examPrepSchoolPlan 참고).
 assert.deepEqual(normalized, {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: ["generated:manual:keep"],
   suppressedKeys: [
     "generated:suppressed:remove",
@@ -37,11 +39,13 @@ assert.deepEqual(
     suppressedKeys: null
   }),
   {
+    examPrepSchoolExclusions: [],
     manualOverrideKeys: [],
     suppressedKeys: []
   }
 );
 assert.deepEqual(normalizeGeneratedLessonControls(), {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: [],
   suppressedKeys: []
 });
