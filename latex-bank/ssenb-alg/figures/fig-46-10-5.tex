@@ -1,11 +1,10 @@
-% 46-10 ⑤(46쪽) — 보기 그래프: 증가하고 $x$절편이 1보다 작은 로그함수의 개형(점선은 $x=1$ 에서 곡선까지 위로).
-% 그림 자체가 보기라 TikZ 로 다시 그림. 라벨은 원문 그대로 O·1·x·y 만.
-\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
-  \path (-0.9,-2.5) rectangle (3.6,2.5); % 보기 행 사이 여백
-  \draw[->, >=stealth, line width=0.7pt] (-0.6,0) -- (3.45,0) node[below=1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,2.25) node[left=1pt, font=\small] {$y$};
-  \draw[line width=0.6pt, domain=0.136:2.87, samples=120, smooth] plot (\x, {ln(1.6*\x)/ln(2)});
-  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,0.678);
-  \node[below=1pt, font=\small] at (1,0) {$1$};
-  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+% 46-10 ⑤(46쪽) — 보기 그림: 증가하는 로그함수 곡선 · $x$절편이 $1$ 보다 왼쪽($x=1$ 에서 양수).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 $\pt{O}$ · $1$ · $x$ · $y$ 만.
+\begin{tikzpicture}[line width=0.5pt, x=0.50cm, y=0.30cm, >=stealth, baseline=(current bounding box.center)]
+  \draw[->, line width=0.6pt] (-0.9,0) -- (5.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.6pt] (0,-3.2) -- (0,3.3) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.3pt] (1,0) -- (1,1);
+  \draw[domain=0.14:4.4, samples=110, smooth] plot (\x, {ln(\x)/0.693147+1});
+  \node[below=0pt, font=\small] at (1,-0.06) {$1$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
 \end{tikzpicture}

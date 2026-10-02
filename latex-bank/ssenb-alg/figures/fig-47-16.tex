@@ -1,27 +1,20 @@
-% 47-16(47쪽) — y=log_2 2x 와 y=log_2 (x/2) 의 그래프, 직선 y=k 와의 교점 A·B, 두 점을 지나는 x축에 수직인 직선이
-% 다른 곡선과 만나는 점 C·D, 그리고 두 곡선과 선분 AC·BD 로 둘러싸인 부분(연한 채색). 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로(y=k · A · B · C · D · 두 곡선의 식 · O · x · y)와 A, B 의 직각 표시만. 넓이(답)는 적지 않는다.
-\begin{tikzpicture}[line width=0.6pt, x=0.85cm, y=0.45cm]
-  % f(x)=log_2 2x, g(x)=log_2 (x/2), k=0.5 → A(0.7071,0.5) B(2.8284,0.5) C(0.7071,-1.5) D(2.8284,2.5)
-  \fill[yellow!25]
-    plot[domain=0.7071:2.8284, samples=60, smooth] (\x, {1+ln(\x)/ln(2)}) -- (2.8284,0.5)
-    -- plot[domain=2.8284:0.7071, samples=60, smooth] (\x, {ln(\x)/ln(2)-1}) -- cycle;
-  \draw[->, >=stealth, line width=0.7pt] (-0.45,0) -- (3.95,0) node[below=1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-2.9) -- (0,3.65) node[left=1pt, font=\small] {$y$};
-  \draw[line width=0.55pt] (-0.35,0.5) -- (3.35,0.5);
-  \draw[domain=0.0625:3.8, samples=140, smooth] plot (\x, {1+ln(\x)/ln(2)});
-  \draw[domain=0.25:3.8, samples=140, smooth] plot (\x, {ln(\x)/ln(2)-1});
-  \draw[line width=0.55pt] (0.7071,0.5) -- (0.7071,-1.5);
-  \draw[line width=0.55pt] (2.8284,0.5) -- (2.8284,2.5);
-  % 직각 표시
-  \draw[line width=0.4pt] (0.7071,0.24) -- (0.93,0.24) -- (0.93,0.5);
-  \draw[line width=0.4pt] (2.8284,0.76) -- (2.60,0.76) -- (2.60,0.5);
-  \node[above left=-2pt and -2pt, font=\small] at (0.7071,0.5) {$\mathrm{A}$};
-  \node[above right=-2pt and 0pt, font=\small] at (2.8284,0.5) {$\mathrm{B}$};
-  \node[below right=-1pt and 0pt, font=\small] at (0.7071,-1.5) {$\mathrm{C}$};
-  \node[above left=-2pt and -2pt, font=\small] at (2.8284,2.5) {$\mathrm{D}$};
-  \node[anchor=east, font=\small] at (-0.4,0.5) {$y=k$};
-  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
-  \node[anchor=west, font=\small] at (0.15,3.4) {$y=\log_2 2x$};
-  \node[anchor=west, font=\small] at (1.55,-2.35) {$y=\log_2 \dfrac{x}{2}$};
+% 47-16(47쪽) — $y=\log_2 x$ 의 그래프와 직선 $y=x$, $x$축 위의 $1$·$a$·$b$·$c$·$d$ 와 점선(원문 「오른쪽 그림」).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 점선은 원문대로 $a\to b$, $c\to d$ 두 벌 — 직선 $y=x$ 위의 점에서 가로로 가 곡선에 닿고 거기서 세로로 $x$축에 내려온다.
+% 라벨은 원문에 있는 것만 — $y=x$ · $y=\log_2 x$ · $\pt{O}$ · $1$ · $a$ · $b$ · $c$ · $d$ · $x$ · $y$. 값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.42cm, y=0.52cm, >=stealth]
+  \draw[->, line width=0.7pt] (-1.0,0) -- (7.8,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-1.9) -- (0,4.0) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.5pt] (-0.8,-0.8) -- (3.4,3.4);
+  \draw[domain=0.33:7.3, samples=160, smooth] plot (\x, {ln(\x)/0.693147});
+  \draw[densely dashed, line width=0.3pt] (1.1,0) -- (1.1,1.1) -- (2.1435,1.1) -- (2.1435,0);
+  \draw[densely dashed, line width=0.3pt] (2.75,0) -- (2.75,2.75) -- (6.7272,2.75) -- (6.7272,0);
+  \node[font=\small, fill=white, inner sep=0.6pt, anchor=north east] at (-0.06,-0.06) {$\pt{O}$};
+  \node[below=0pt, font=\small] at (1,-0.03) {$1$};
+  \node[below=0pt, font=\small] at (2.1435,-0.03) {$b$};
+  \node[below=0pt, font=\small] at (2.75,-0.03) {$c$};
+  \node[below=0pt, font=\small] at (6.7272,-0.03) {$d$};
+  \node[font=\small] at (1.62,-1.15) {$a$};
+  \draw[line width=0.3pt] (1.52,-0.98) to[bend left=25] (1.13,-0.10);
+  \node[anchor=south west, font=\small] at (3.40,3.40) {$y=x$};
+  \node[anchor=south west, font=\small] at (3.50,2.83) {$y=\log_2 x$};
 \end{tikzpicture}

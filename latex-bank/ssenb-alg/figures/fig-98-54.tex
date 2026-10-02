@@ -1,25 +1,27 @@
-% 98-54(98쪽) — 원에 내접하는 사각형 ABCD(AB=4, BC=2, CD=4, AD=6, ∠A=60°).
-% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·4·2·4·6·60°)만 두고 넓이(답)는 적지 않는다.
-\begin{tikzpicture}[line width=0.5pt]
-  \coordinate (A) at (-1.477,0.260);
-  \coordinate (B) at (0.312,-1.467);
-  \coordinate (C) at (1.410,-0.513);
-  \coordinate (D) at (1.272,0.795);
-  \fill[red!8] (A) -- (B) -- (C) -- (D) -- cycle;
-  \draw[line width=0.6pt] (0,0) circle (1.5);
-  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
-  \draw[dashed, line width=0.3pt] (A) to[bend left=14] (D);
-  \draw[dashed, line width=0.3pt] (A) to[bend right=14] (B);
-  \draw[dashed, line width=0.3pt] (B) to[bend right=16] (C);
-  \draw[dashed, line width=0.3pt] (C) to[bend right=18] (D);
-  \draw[line width=0.35pt] ($(A)+(-44:0.42)$) arc (-44:11:0.42);
-  \node[font=\small] at (-0.60,0.02) {$60^\circ$};
-  \node[font=\small] at (-0.26,0.92) {$6$};
-  \node[font=\small] at (-0.87,-0.90) {$4$};
-  \node[font=\small] at (0.72,-0.80) {$2$};
-  \node[font=\small] at (1.72,0.16) {$4$};
-  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
-  \node[font=\small, below=2pt] at (B) {$\mathrm{B}$};
-  \node[font=\small, below right=-2pt and -1pt] at (C) {$\mathrm{C}$};
-  \node[font=\small, above right=-2pt and -1pt] at (D) {$\mathrm{D}$};
+% 98-54(98쪽) — 원에 내접하는 사각형 ABCD($\seg{AB}=4$ · $\seg{BC}=2$ · $\seg{CD}=4$ · $\seg{AD}=6$ · $A=60^\circ$). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 A·B·C·D, 길이 6·4·2·4, 각 $60^\circ$. 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=1cm, y=1cm]
+  \coordinate (A) at (-1.504,-0.375);
+  \coordinate (B) at (0.108,-1.546);
+  \coordinate (C) at (0.954,-1.221);
+  \coordinate (D) at (1.300,0.844);
+  \fill[black!6] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (0,0) circle (1.55);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  % 길이 표시의 점선 호
+  \draw[densely dashed, line width=0.35pt] (A) to[bend left=14] (D);
+  \draw[densely dashed, line width=0.35pt] (D) to[bend left=14] (C);
+  \draw[densely dashed, line width=0.35pt] (B) to[bend right=16] (C);
+  \draw[densely dashed, line width=0.35pt] (A) to[bend right=16] (B);
+  % 각 표시
+  \draw[line width=0.45pt] ($(A)+(-36:0.42)$) arc (-36:23.5:0.42);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.22,0.46) {$6$};
+  \node[font=\small, fill=white, inner sep=1pt] at (1.40,-0.22) {$4$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.56,-1.14) {$2$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.84,-1.17) {$4$};
+  \node[font=\small] at (-0.70,-0.30) {$60^\circ$};
+  \node[font=\small, anchor=east] at (-1.60,-0.37) {$\pt{A}$};
+  \node[font=\small, anchor=north] at (0.11,-1.63) {$\pt{B}$};
+  \node[font=\small, anchor=north west] at (1.00,-1.26) {$\pt{C}$};
+  \node[font=\small, anchor=west] at (1.37,0.86) {$\pt{D}$};
 \end{tikzpicture}

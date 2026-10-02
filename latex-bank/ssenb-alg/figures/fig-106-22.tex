@@ -1,10 +1,12 @@
-% 106-22(106쪽) — 가로줄·세로줄에 있는 세 수가 각각 등차수열을 이루는 3×3 표(a, 0, b / c, d, −2 / 8, e, f).
-% 스캔 화질이 낮아 TikZ 로 다시 그림. 칸의 값은 원문 그대로만 두고, 구하는 값(답)은 넣지 않는다.
-\begin{tikzpicture}[line width=0.5pt]
-  \draw[black!80, step=0.72] (0,0) grid (2.16,2.16);
-  \foreach \yc/\aa/\bb/\cc in {1.80/a/0/b, 1.08/c/d/{-2}, 0.36/8/e/f}{
-    \node[font=\small] at (0.36,\yc) {$\aa$};
-    \node[font=\small] at (1.08,\yc) {$\bb$};
-    \node[font=\small] at (1.80,\yc) {$\cc$};
-  }
-\end{tikzpicture}
+% 106-22(106쪽) — 발문의 「오른쪽 그림」 3×3 수 배열 표. 스캔 표라 tabular 로 다시 조판.
+% 칸 값은 원문 그대로(a, 0, b / c, d, -2 / 8, e, f). 원문에 없는 값은 더하지 않고, 답 $a+c-e-f$ 가 표에서 읽히지 않게 둔다.
+{\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.5}%
+\begin{tabular}{|c|c|c|}
+\hline
+\makebox[7mm]{$a$} & \makebox[7mm]{$0$} & \makebox[7mm]{$b$} \\
+\hline
+$c$ & $d$ & $-2$ \\
+\hline
+$8$ & $e$ & $f$ \\
+\hline
+\end{tabular}}

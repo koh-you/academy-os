@@ -1,19 +1,25 @@
-% 89-04(89쪽) — AB=2√6, AC=4, B=45°, C=60° 인 삼각형 ABC. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로 A·B·C 와 2√6·4(점선 안내)·45°·60° 만. sin 75° 의 값은 적지 않는다.
-\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+% 89-04(89쪽) — $\seg{AB}=3\sqrt{2}$, $A=105^\circ$, $B=45^\circ$ 인 삼각형 ABC 와 변 BC 위의 점 P(원문 「오른쪽 그림」).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 것만 — 네 점 이름, $3\sqrt{2}$, $105^\circ$, $45^\circ$.
+% $\seg{CP}/\sin(\angle\pt{CAP})$ 의 최솟값(답)이 읽히지 않게 눈금은 넣지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (1.26,1.26);
   \coordinate (B) at (0,0);
-  \coordinate (C) at (5.2,0);
-  \coordinate (A) at (2.4,2.1);
-  \draw (B) -- (A) -- (C) -- (B);
-  \draw[dashed, line width=0.4pt] (B) to[bend right=16] (A);
-  \draw[dashed, line width=0.4pt] (A) to[bend right=16] (C);
-  \draw (B) ++(0:0.72) arc (0:41.2:0.72);
-  \draw (C) ++(180:0.72) arc (180:143.1:0.72);
-  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
-  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
-  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
-  \node[font=\small] at (0.72,1.34) {$2\sqrt{6}$};
-  \node[font=\small] at (4.28,1.34) {$4$};
-  \node[font=\small] at (1.18,0.28) {$45^\circ$};
-  \node[font=\small] at (4.04,0.28) {$60^\circ$};
+  \coordinate (C) at (3.442,0);
+  \coordinate (P) at (2.604,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.5pt] (A) -- (P);
+  \fill (P) circle (1.8pt);
+  % $105^\circ$ = $\angle\pt{BAC}$
+  \draw[line width=0.4pt] (0.977,0.977) arc (225:330:0.40);
+  \node[font=\scriptsize] at (1.42,0.66) {$105^\circ$};
+  % $45^\circ$ = $\angle\pt{ABC}$
+  \draw[line width=0.4pt] (0.38,0) arc (0:45:0.38);
+  \node[font=\scriptsize] at (0.56,0.23) {$45^\circ$};
+  % 길이 표시의 점선 호
+  \draw[densely dashed, line width=0.35pt] (B) to[bend left=16] (A);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.42,0.86) {$3\sqrt{2}$};
+  \node[font=\small, anchor=south] at (1.26,1.32) {$\pt{A}$};
+  \node[font=\small, anchor=east] at (-0.06,0.02) {$\pt{B}$};
+  \node[font=\small, anchor=west] at (3.50,0.02) {$\pt{C}$};
+  \node[font=\small, anchor=north] at (2.604,-0.08) {$\pt{P}$};
 \end{tikzpicture}

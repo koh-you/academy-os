@@ -1,22 +1,21 @@
-% 99-63(99쪽) — 두 대각선의 길이가 a, b 이고 두 대각선이 이루는 각의 크기가 45° 인 사각형 ABCD.
-% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·a·b·45°)만 두고 a^3+b^3 의 값(답)은 적지 않는다.
-\begin{tikzpicture}[line width=0.5pt]
-  \coordinate (A) at (0,0.31);
-  \coordinate (B) at (2.27,0);
-  \coordinate (C) at (3.00,0.48);
-  \coordinate (D) at (0.91,1.22);
-  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
-  \draw[line width=0.5pt] (A) -- (C);
-  \draw[line width=0.5pt] (B) -- (D);
-  \draw[dashed, line width=0.3pt] (A) to[bend right=6] (C);
-  \draw[dashed, line width=0.3pt] (B) to[bend right=8] (D);
-  \coordinate (X) at (1.810,0.413);
-  \draw[line width=0.35pt] ($(X)+(138.1:0.35)$) arc (138.1:183.3:0.35);
-  \node[font=\small] at (1.26,0.61) {$45^\circ$};
-  \node[font=\small] at (1.74,0.74) {$a$};
-  \node[font=\small] at (1.58,0.22) {$b$};
-  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
-  \node[font=\small, below=2pt] at (B) {$\mathrm{B}$};
-  \node[font=\small, right=2pt] at (C) {$\mathrm{C}$};
-  \node[font=\small, above=2pt] at (D) {$\mathrm{D}$};
+% 99-63(99쪽) — 두 대각선의 길이가 $a$, $b$ 이고 두 대각선이 이루는 각이 $45^\circ$ 인 사각형 ABCD. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 A·B·C·D, 대각선 $a$·$b$, 각 $45^\circ$. $a$·$b$ 의 값(답)은 그림에서 읽히지 않게 길이를 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=1cm, y=1cm]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (2.46,-0.30);
+  \coordinate (C) at (3.36,0.18);
+  \coordinate (D) at (1.18,0.96);
+  \coordinate (P) at (2.044,0.110);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  % 각 표시
+  \draw[line width=0.45pt] ($(P)+(135.4:0.42)$) arc (135.4:183.1:0.42);
+  \node[font=\small] at (1.44,0.36) {$45^\circ$};
+  \node[font=\small, fill=white, inner sep=1pt] at (2.60,0.33) {$a$};
+  \node[font=\small, fill=white, inner sep=1pt] at (2.11,-0.12) {$b$};
+  \node[font=\small, anchor=east] at (-0.09,0.00) {$\pt{A}$};
+  \node[font=\small, anchor=north] at (2.46,-0.38) {$\pt{B}$};
+  \node[font=\small, anchor=west] at (3.44,0.20) {$\pt{C}$};
+  \node[font=\small, anchor=south] at (1.17,1.04) {$\pt{D}$};
 \end{tikzpicture}

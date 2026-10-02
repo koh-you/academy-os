@@ -1,28 +1,24 @@
-% 79-47(79쪽) — 원 x^2+y^2=1 위의 점 P 와 x축에 내린 수선의 발 A · ∠POA=α, ∠OPA=β · 삼각형 POA. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로(x · y · 1 · -1 · O · A · P · α · β · x^2+y^2=1)만 두고, 삼각형의 넓이(답)는 적지 않는다.
-\begin{tikzpicture}[scale=1.5, line width=0.5pt]
-  \coordinate (O) at (0,0);
-  \coordinate (P) at (0.6157,0.7880);
-  \coordinate (A) at (0.6157,0);
-  \fill[black!8] (O) -- (A) -- (P) -- cycle;
-  \draw[->, >=stealth, line width=0.7pt] (-1.45,0) -- (1.55,0) node[below right=0pt and -1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-1.45) -- (0,1.55) node[above left=-2pt and 0pt, font=\small] {$y$};
-  \draw[line width=0.6pt] (0,0) circle (1);
-  \draw[line width=0.6pt] (O) -- (P) -- (A);
-  \fill (P) circle (1.8pt);
-  % A 의 직각 표시
-  \draw[line width=0.35pt] (0.52,0) -- (0.52,0.096) -- (0.6157,0.096);
-  \draw[line width=0.35pt] (0.30,0) arc (0:52:0.30);
-  \draw[line width=0.35pt] ($(P)+(232:0.24)$) arc (232:270:0.24);
-  \node[font=\small, anchor=south east, inner sep=0.5pt] at (0.42,0.07) {$\alpha$};
-  \node[font=\small, inner sep=0pt] at (0.537,0.468) {$\beta$};
-  \node[font=\small, above right=-2pt and 0pt] at (P) {$\mathrm{P}$};
-  \node[font=\small, below=2pt] at (A) {$\mathrm{A}$};
-  \node[font=\small, below left=0pt and -2pt] at (O) {$\mathrm{O}$};
-  % 눈금 라벨 네 개는 원문처럼 원 둘레 바깥에 둔다(원 위에 걸치면 글자와 원이 겹친다).
-  \node[font=\small, anchor=south east, inner sep=1.5pt] at (0,1) {$1$};
-  \node[font=\small, anchor=north east, inner sep=1.5pt] at (0,-1) {$-1$};
-  \node[font=\small, below=2pt] at (1.15,0) {$1$};
-  \node[font=\small, below=2pt] at (-1.23,0) {$-1$};
-  \node[font=\small, anchor=west] at (0.34,-1.22) {$x^2+y^2=1$};
+% 79-47(79쪽) — 원 $x^{2}+y^{2}=1$ 위의 점 $\pt{P}$ 와 $x$축에 내린 수선의 발 $\pt{A}$(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: $x$·$y$·$\pt{O}$·$\pt{A}$·$\pt{P}$·$1$·$-1$·$x^{2}+y^{2}=1$, 각 $\alpha$·$\beta$, 원문처럼 삼각형 $\pt{POA}$ 를 연한 주황으로 칠한다.
+% 삼각형 $\pt{POA}$ 의 넓이(답)가 그림에서 읽히지 않게 $\pt{P}$ 의 좌표·각도 눈금은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=1.45cm, y=1.45cm, >=stealth]
+  \fill[orange!22] (0,0) -- (0.7071,0) -- (0.7071,0.7071) -- cycle;
+  \draw (0,0) circle (1);
+  \draw[->, line width=0.7pt] (-1.6,0) -- (1.45,0) node[below=1pt] {$x$};
+  \draw[->, line width=0.7pt] (0,-1.5) -- (0,1.33) node[left=1pt] {$y$};
+  \draw[line width=0.5pt] (0,0) -- (0.7071,0.7071) -- (0.7071,0);
+  \draw[line width=0.45pt] (0.6071,0) -- (0.6071,0.1) -- (0.7071,0.1);
+  \draw[line width=0.45pt] (0.30,0) arc (0:45:0.30);
+  \draw[line width=0.45pt] (0.7071,0.7071) ++(225:0.22) arc (225:270:0.22);
+  \fill (0.7071,0.7071) circle (2.2pt);
+  \node[font=\small] at (0.38,0.15) {$\alpha$};
+  \node[font=\small] at (0.58,0.40) {$\beta$};
+  \node[font=\small, anchor=south west] at (0.73,0.74) {$\pt{P}$};
+  \node[font=\small, anchor=north] at (0.7071,-0.06) {$\pt{A}$};
+  \node[font=\small, anchor=north east] at (-0.03,-0.04) {$\pt{O}$};
+  \node[font=\small, anchor=east] at (-0.06,1) {$1$};
+  \node[font=\small, anchor=east] at (-0.06,-1) {$-1$};
+  \node[font=\small, anchor=north] at (-1,-0.06) {$-1$};
+  \node[font=\small, anchor=north] at (1.04,-0.06) {$1$};
+  \node[font=\small, anchor=west] at (0.26,-1.18) {$x^{2}+y^{2}=1$};
 \end{tikzpicture}

@@ -1,16 +1,19 @@
-% 110-52(110쪽) — 숫자판(홀수 시작 가로·세로 규칙표)과 왼쪽 위 2×2 칸(⊞ 모양)이 색칠된 그림. 스캔 표라 TikZ 로 다시 그림.
-% 칸 값은 원문 그대로(1~13 · 오른쪽·아래로 ⋯ ⋮ ⋱)만 두고, 구하는 합은 적지 않는다.
-\begin{tikzpicture}[line width=0.4pt, x=6.1mm, y=5.3mm]
-  \fill[orange!32] (0,0) rectangle (2,-2);
-  \foreach \i in {0,...,6} \draw[black!65] (\i,0) -- (\i,-6);
-  \foreach \j in {0,...,6} \draw[black!65] (0,-\j) -- (6,-\j);
-  \draw[orange!70!black, line width=0.7pt] (0,0) rectangle (2,-2);
-  \foreach \c/\v in {1/1,2/2,3/3,4/4,5/5} \node[font=\scriptsize] at (\c-0.5,-0.5) {$\v$};
-  \foreach \c/\v in {1/3,2/4,3/5,4/6,5/7} \node[font=\scriptsize] at (\c-0.5,-1.5) {$\v$};
-  \foreach \c/\v in {1/5,2/6,3/7,4/8,5/9} \node[font=\scriptsize] at (\c-0.5,-2.5) {$\v$};
-  \foreach \c/\v in {1/7,2/8,3/9,4/10,5/11} \node[font=\scriptsize] at (\c-0.5,-3.5) {$\v$};
-  \foreach \c/\v in {1/9,2/10,3/11,4/12,5/13} \node[font=\scriptsize] at (\c-0.5,-4.5) {$\v$};
-  \foreach \r in {1,...,5} \node[font=\scriptsize] at (5.5,-\r+0.5) {$\cdots$};
-  \foreach \c in {1,...,5} \node[font=\scriptsize] at (\c-0.5,-5.5) {$\vdots$};
-  \node[font=\scriptsize] at (5.5,-5.5) {$\ddots$};
+% 110-52(110쪽) — 숫자판. 가로 5칸 + 「$\cdots$」 칸, 세로 5줄 + 「$\vdots$」 줄.
+% 왼쪽 위 2×2 칸(1·2·3·4)이 원문처럼 노랗게 칠해진 田 모양이다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 칸의 수는 원문 그대로만 적고, 구하는 합(답)은 그림에서 읽히지 않게 넣지 않는다.
+\begin{tikzpicture}[line width=0.5pt, x=1cm, y=1cm]
+  \fill[yellow!35] (0,2.4) rectangle (1.32,3.6);
+  \draw[black!80, xstep=0.66, ystep=0.6] (0,0) grid (3.96,3.6);
+  \foreach \yc/\ca/\cb/\cc/\cd/\ce in {3.3/1/2/3/4/5, 2.7/3/4/5/6/7, 2.1/5/6/7/8/9, 1.5/7/8/9/10/11, 0.9/9/10/11/12/13}{
+    \node[font=\small] at (0.33,\yc) {$\ca$};
+    \node[font=\small] at (0.99,\yc) {$\cb$};
+    \node[font=\small] at (1.65,\yc) {$\cc$};
+    \node[font=\small] at (2.31,\yc) {$\cd$};
+    \node[font=\small] at (2.97,\yc) {$\ce$};
+    \node[font=\small] at (3.63,\yc) {$\cdots$};
+  }
+  \foreach \xc in {0.33, 0.99, 1.65, 2.31, 2.97}{
+    \node[font=\small] at (\xc,0.3) {$\vdots$};
+  }
+  \node[font=\small] at (3.63,0.3) {$\ddots$};
 \end{tikzpicture}

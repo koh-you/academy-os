@@ -1,26 +1,24 @@
-% 93-27(93쪽) — 정육각형 ABCDEF 와 변 AB 의 중점 M, 선분 MF. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로 A·B·C·D·E·F·M 과 θ(∠AMF)·중점 표시만. cos θ 의 값과 한 변의 길이는 적지 않는다.
-\begin{tikzpicture}[scale=0.82, line width=0.6pt]
-  \coordinate (A) at (-0.875,1.515);
-  \coordinate (F) at (0.875,1.515);
-  \coordinate (E) at (1.75,0);
-  \coordinate (D) at (0.875,-1.515);
-  \coordinate (C) at (-0.875,-1.515);
-  \coordinate (B) at (-1.75,0);
-  \coordinate (M) at (-1.3125,0.7575);
-  \draw (A) -- (F) -- (E) -- (D) -- (C) -- (B) -- cycle;
-  \draw (M) -- (F);
-  \draw[line width=0.45pt] (-1.2252,1.1486) -- (-1.0174,1.0286);
-  \draw[line width=0.45pt] (-1.1701,1.2439) -- (-0.9623,1.1239);
-  \draw[line width=0.45pt] (-1.6627,0.3911) -- (-1.4549,0.2711);
-  \draw[line width=0.45pt] (-1.6076,0.4864) -- (-1.3998,0.3664);
-  \draw (M) ++(19.1:0.5) arc (19.1:60:0.5);
-  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
-  \node[above=1pt, font=\small] at (F) {$\mathrm{F}$};
-  \node[right=1pt, font=\small] at (E) {$\mathrm{E}$};
-  \node[below=2pt, font=\small] at (D) {$\mathrm{D}$};
-  \node[below=2pt, font=\small] at (C) {$\mathrm{C}$};
-  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
-  \node[left=3pt, font=\small] at (M) {$\mathrm{M}$};
-  \node[font=\small] at (-0.70,1.20) {$\theta$};
+% 93-27(93쪽) — ∠C 의 이등분선 CD 를 그은 삼각형 ABC(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 A·B·C·D, 길이 6·3·2, 이등분을 나타내는 두 점 표시. 선분 AB 의 길이(답)는 그림에 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.55cm, y=0.55cm]
+  \coordinate (A) at (6,5.196);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (3,0);
+  \coordinate (D) at (2,1.732);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (C) -- (D);
+  % 두 각이 같음을 나타내는 점 표시(원문)
+  \fill (2.463,0.310) circle (1.1pt);
+  \fill (3.000,0.620) circle (1.1pt);
+  % 길이 표시의 점선 호
+  \draw[densely dashed, line width=0.35pt] (C) .. controls (4.264,1.349) and (5.464,3.427) .. (A);
+  \draw[densely dashed, line width=0.35pt] (B) .. controls (0.90,-0.42) and (2.10,-0.42) .. (C);
+  \draw[densely dashed, line width=0.35pt] (C) .. controls (3.003,0.695) and (2.603,1.387) .. (D);
+  \node[font=\small, anchor=south] at (6.00,5.33) {$\pt{A}$};
+  \node[font=\small, anchor=east] at (-0.14,0.02) {$\pt{B}$};
+  \node[font=\small, anchor=north west] at (3.08,-0.10) {$\pt{C}$};
+  \node[font=\small, anchor=south east] at (1.90,1.80) {$\pt{D}$};
+  \node[font=\small] at (5.10,2.32) {$6$};
+  \node[font=\small, fill=white, inner sep=1pt] at (1.50,-0.55) {$3$};
+  \node[font=\small, fill=white, inner sep=1pt] at (2.98,1.14) {$2$};
 \end{tikzpicture}

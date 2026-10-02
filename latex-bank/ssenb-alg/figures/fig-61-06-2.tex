@@ -1,0 +1,11 @@
+% 61-06 ②(61쪽) — 보기 그림: 원점을 지나는 45° 반직선(제3사분면)과 $y$축의 음의 방향 사이 영역을 색칠. 스캔 화질이 낮아 TikZ 로 다시 그림(그림 자체가 보기라 원문 모양을 그대로 옮긴다).
+\begin{tikzpicture}[scale=0.75, line width=0.5pt, >=stealth, baseline=(current bounding box.center)]
+  \path (-1.62,-1.72) rectangle (1.78,1.78);
+  \fill[red!16] (0,0) -- (0,-1.45) -- (-1.45,-1.45) -- cycle;
+  \draw[->, line width=0.6pt] (-1.5,0) -- (1.70,0) node[below=1pt, font=\scriptsize] {$x$};
+  \draw[->, line width=0.6pt] (0,-1.5) -- (0,1.70) node[left=1pt, font=\scriptsize] {$y$};
+  \draw[line width=0.6pt] (0,0) -- (-1.55,-1.55);
+  \draw[line width=0.35pt] (225:0.42) arc (225:270:0.42);
+  \node[font=\scriptsize] at (-0.34,-0.80) {$45^\circ$};
+  \node[below right=-1pt and -1pt, font=\scriptsize] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

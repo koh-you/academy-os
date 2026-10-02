@@ -1,14 +1,11 @@
-% 94-34(94쪽) — 외접원 위의 삼각형 ABC 와 ∠A=60°. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로 A·B·C 와 60°(∠A) 만. AB:AC 의 비·외접원의 반지름·AB 의 길이는 적지 않는다.
-\begin{tikzpicture}[scale=0.82, line width=0.6pt]
-  \draw (0,0) circle (1.95);
-  \coordinate (A) at (-0.824,1.767);
-  \coordinate (B) at (-1.884,-0.505);
-  \coordinate (C) at (1.920,-0.339);
-  \draw (A) -- (B) -- (C) -- (A);
-  \draw (A) ++(245:0.55) arc (245:322.5:0.55);
-  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
-  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
-  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
-  \node[font=\small] at (-0.56,0.84) {$60^\circ$};
+% 94-34(94쪽) — 변 $\pt{BC}$ 위의 점 $\pt{D}$ 가 있는 삼각형 $\pt{ABC}$(원문 「아래 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 $\pt{A}$·$\pt{B}$·$\pt{C}$·$\pt{D}$ 뿐이다. 조건 (가)(나)의 길이는 본문에만 있으므로 그림에 적지 않는다.
+% $\sin C$ 의 값(답)이 읽히지 않게 각·눈금은 그리지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (-0.17,1.43) -- (0,0) -- (4.05,0) -- cycle;
+  \draw[line width=0.5pt] (-0.17,1.43) -- (1.41,0);
+  \node[anchor=south east, font=\small] at (-0.10,1.47) {$\pt{A}$};
+  \node[anchor=north east, font=\small] at (0.04,-0.03) {$\pt{B}$};
+  \node[anchor=north west, font=\small] at (4.10,0.03) {$\pt{C}$};
+  \node[anchor=north, font=\small] at (1.41,-0.06) {$\pt{D}$};
 \end{tikzpicture}

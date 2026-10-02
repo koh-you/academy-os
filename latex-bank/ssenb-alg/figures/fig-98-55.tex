@@ -1,23 +1,25 @@
-% 98-55(98쪽) — AB=7, BC=3, CD=4, DA=6, ∠C=90° 인 사각형 ABCD.
-% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·6·7·4·3·직각 표시)만 두고 넓이(답)는 적지 않는다.
-\begin{tikzpicture}[line width=0.5pt]
-  \coordinate (A) at (-0.44,2.44);
-  \coordinate (B) at (0.45,0);
-  \coordinate (C) at (1.55,0);
-  \coordinate (D) at (1.55,1.47);
-  \fill[yellow!35] (A) -- (B) -- (C) -- (D) -- cycle;
-  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
-  \draw[dashed, line width=0.3pt] (A) to[bend left=14] (D);
-  \draw[dashed, line width=0.3pt] (A) to[bend right=12] (B);
-  \draw[dashed, line width=0.3pt] (B) to[bend right=16] (C);
-  \draw[dashed, line width=0.3pt] (D) to[bend left=14] (C);
-  \draw[line width=0.4pt] (1.37,0) -- (1.37,0.18) -- (1.55,0.18);
-  \node[font=\small] at (0.78,2.18) {$6$};
-  \node[font=\small] at (-0.36,1.18) {$7$};
-  \node[font=\small] at (1.90,0.74) {$4$};
-  \node[font=\small] at (1.00,-0.36) {$3$};
-  \node[font=\small, above=2pt] at (A) {$\mathrm{A}$};
-  \node[font=\small, below left=-2pt and -2pt] at (B) {$\mathrm{B}$};
-  \node[font=\small, right=2pt] at (C) {$\mathrm{C}$};
-  \node[font=\small, right=2pt] at (D) {$\mathrm{D}$};
+% 98-55(98쪽) — 사각형 ABCD($\seg{AB}=7$ · $\seg{BC}=3$ · $\seg{CD}=4$ · $\seg{DA}=6$ · $C=90^\circ$). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 A·B·C·D, 길이 6·4·3·7 과 C 의 직각 표시. 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=1cm, y=1cm]
+  \coordinate (A) at (-0.97,2.95);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (1.52,0);
+  \coordinate (D) at (1.52,1.88);
+  \fill[black!6] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  % 직각 표시
+  \draw[line width=0.45pt] (1.36,0) -- (1.36,0.16) -- (1.52,0.16);
+  % 길이 표시의 점선 호
+  \draw[densely dashed, line width=0.35pt] (A) to[bend left=14] (D);
+  \draw[densely dashed, line width=0.35pt] (D) to[bend left=14] (C);
+  \draw[densely dashed, line width=0.35pt] (B) to[bend right=14] (C);
+  \draw[densely dashed, line width=0.35pt] (B) to[bend left=14] (A);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.40,2.72) {$6$};
+  \node[font=\small] at (1.90,0.94) {$4$};
+  \node[font=\small] at (0.76,-0.38) {$3$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.88,1.36) {$7$};
+  \node[font=\small, anchor=south east] at (-0.90,3.00) {$\pt{A}$};
+  \node[font=\small, anchor=north east] at (-0.02,-0.04) {$\pt{B}$};
+  \node[font=\small, anchor=north west] at (1.57,-0.04) {$\pt{C}$};
+  \node[font=\small, anchor=west] at (1.60,1.90) {$\pt{D}$};
 \end{tikzpicture}
