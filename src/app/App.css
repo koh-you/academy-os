@@ -3456,10 +3456,10 @@ summary:focus-visible {
 
 .examPrepStudentContentList {
   display: grid;
-  gap: 10px;
-  /* 넓은 모달에서는 열을 늘려 세로 길이를 줄인다. 한 칸이 320px 아래로 좁아지면 학생명과
-     입력칸이 같이 눌리므로 그때는 한 열로 돌아간다. */
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 8px;
+  /* 2026-10-01 · 오른쪽 열이 자체 스크롤을 가지므로 여기서는 열을 늘리지 않는다. 좁은 열에
+     다열을 깔면 학생명과 입력칸이 같이 눌린다. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .examPrepStudentContentRow {
@@ -3492,115 +3492,139 @@ summary:focus-visible {
 
 .examPrepSchoolPlanPanel {
   display: grid;
+  gap: 10px;
+}
+
+.examPrepSchoolPlanHeader {
+  align-items: flex-start;
+  display: flex;
   gap: 12px;
+  justify-content: space-between;
 }
 
 .examPrepSchoolPlanHeader h3 {
   margin: 0;
 }
 
+.examPrepSchoolPlanHeaderActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
 .examPrepSchoolPlanList {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .examPrepSchoolPlanRow {
-  align-items: center;
   background: var(--academy-surface, #fff);
   border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 10px;
   display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(140px, 0.9fr) auto auto;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 8px 12px;
 }
 
-.examPrepSchoolPlanIdentity {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
+/* 제외한 학교도 같은 목록에 남는다 — 체크 한 번으로 되돌릴 수 있어야 한다. */
+.examPrepSchoolPlanRow.excluded {
+  background: var(--academy-surface-muted, #f8fafc);
 }
 
-.examPrepSchoolPlanIdentity strong,
-.examPrepSchoolPlanIdentity small {
-  overflow-wrap: anywhere;
-}
-
-.examPrepSchoolPlanIdentity small {
+.examPrepSchoolPlanRow.excluded .examPrepSchoolPlanName,
+.examPrepSchoolPlanRow.excluded .examPrepSchoolPlanInclude strong {
   color: var(--academy-muted, #64748b);
-  font-weight: 700;
 }
 
-.examPrepSchoolPlanTimes {
+.examPrepSchoolPlanRowMain {
+  align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.examPrepSchoolPlanTimes label {
+.examPrepSchoolPlanInclude {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.examPrepSchoolPlanInclude input[type="checkbox"] {
+  height: 18px;
+  min-height: 0;
+  width: 18px;
+}
+
+.examPrepSchoolPlanName,
+.examPrepSchoolPlanInclude strong {
+  min-width: 90px;
+}
+
+.examPrepSchoolPlanMeta,
+.examPrepSchoolPlanTimeLabel {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.examPrepSchoolPlanTimeLabel {
+  margin-left: auto;
+}
+
+.examPrepSchoolPlanTimes {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.examPrepSchoolPlanTimes input {
+  width: 120px;
+}
+
+.examPrepSchoolPlanExpandButton {
+  flex: 0 0 auto;
+}
+
+.examPrepSchoolPlanStudentList {
+  border-top: 1px solid var(--academy-border, #d8e3f8);
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 0;
+}
+
+.examPrepSchoolPlanStudentList li {
   align-items: center;
   display: flex;
   gap: 6px;
 }
 
-.examPrepSchoolPlanTimes span {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 800;
+.examPrepSchoolPlanStudentList li > span:first-child {
+  flex: 1 1 auto;
+  font-weight: 700;
+  min-width: 0;
 }
 
-.examPrepSchoolPlanRowActions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+.examPrepSchoolPlanStudentList input {
+  flex: 0 0 auto;
+  width: 120px;
 }
 
-.examPrepSchoolPlanRowStatus {
+.examPrepSchoolPlanStatus {
   align-items: center;
-  display: flex;
-  gap: 8px;
-  grid-column: 1 / -1;
-}
-
-.examPrepSchoolPlanRowStatus span {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-}
-
-.examPrepSchoolPlanExcluded {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 10px;
-  display: grid;
-  gap: 8px;
-  padding: 10px 12px;
-}
-
-.examPrepSchoolPlanExcluded > span {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.examPrepSchoolPlanExcluded ul {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
 
-.examPrepSchoolPlanExcluded li {
-  align-items: center;
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 999px;
-  display: flex;
-  gap: 8px;
-  padding: 4px 6px 4px 12px;
+.examPrepSchoolPlanStatus span {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
 }
 
 .examPrepLessonContentFooter {
@@ -3639,12 +3663,31 @@ summary:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .examPrepSchoolPlanRow {
+  .examPrepSchoolPlanTimes,
+  .examPrepSchoolPlanTimeLabel {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .examPrepLessonLayout {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .examPrepSchoolPlanRowActions {
-    justify-content: flex-start;
+  .modalCard.examPrepModal .modalScrollBody {
+    overflow: auto;
+  }
+
+  .modalCard.examPrepModal .examPrepLessonBody,
+  .modalCard.examPrepModal .examPrepLessonLayout {
+    grid-template-rows: none;
+    height: auto;
+  }
+
+  .modalCard.examPrepModal .examPrepLessonMainColumn,
+  .modalCard.examPrepModal .examPrepLessonContentColumn {
+    max-height: none;
+    overflow-y: visible;
   }
 }
 
@@ -5219,7 +5262,61 @@ button:disabled {
 /* 2026-10-01 · 시험대비 모달은 학생 수만큼 진행 내용 칸이 아래로 이어져 한 화면에 안 들어
    왔다. 모달을 넓히고 아래 진행 내용을 여러 열로 깔아 한 눈에 보이게 한다(요청). */
 .modalCard.examPrepModal {
+  /* 배경 패딩(56px × 2)을 빼야 카드 아래가 화면 밖으로 8px 넘지 않는다(수업 등록 모달과 동일). */
+  max-height: calc(100dvh - 112px);
   max-width: 1600px;
+}
+
+/* 모달 자체 높이를 화면 안에 가두고(공용 scrollable) 두 열이 각자 스크롤한다. 가두지 않으면
+   카드가 학생 수만큼 길어져(1280×720 에서 1149px 실측) 페이지가 통째로 스크롤됐다 — 가로로
+   넓혀도 "하단 스크롤이 길다" 는 문제가 그대로였다(2026-10-01 보고).
+   본문은 스크롤하지 않고 요약 줄 + 2열로 나눠, 남은 높이를 두 열이 나눠 갖는다. */
+.modalCard.examPrepModal .modalScrollBody {
+  overflow: hidden;
+}
+
+.modalCard.examPrepModal .examPrepLessonBody {
+  display: grid;
+  gap: 14px;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.modalCard.examPrepModal .examPrepLessonLayout {
+  height: 100%;
+  min-height: 0;
+}
+
+.modalCard.examPrepModal .examPrepLessonMainColumn,
+.modalCard.examPrepModal .examPrepLessonContentColumn {
+  align-content: start;
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
+/* 2026-10-01 · 가로 2열. 왼쪽은 이 수업을 정하는 것, 오른쪽은 오늘 적는 것(학생별 진행
+   내용)이고 오른쪽만 따로 스크롤한다. 모달을 넓혀도 학생 수만큼 아래로 이어지던 하단
+   스크롤을 없애기 위해서다(요청). 1100px 이하에서는 1열로 돌아간다. */
+.examPrepLessonLayout {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+}
+
+.examPrepLessonMainColumn,
+.examPrepLessonContentColumn {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.examPrepLessonContentColumn {
+  align-content: start;
 }
 
 .modalCard.studentPortalPreviewModal {
