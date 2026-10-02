@@ -58,7 +58,7 @@ export function LessonJournalDetail({
   onEditLesson,
   onOpenAttendance,
   onOpenExamPrep,
-  onToggleExamPrepDailyJournal,
+  onToggleExamPrepJournalView,
   onOpenReport,
   notificationJobs = [],
   records,
@@ -284,8 +284,10 @@ export function LessonJournalDetail({
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(lesson, linkedMakeupTask);
   const isAbsenceMakeupLesson = isSupplementMakeupLesson && linkedMakeupTask?.taskType === "absence_makeup";
   const isHomeworkMakeupLesson = isSupplementMakeupLesson && linkedMakeupTask?.taskType === "homework_makeup";
-  const isExamPrepDailyJournalEnabled = lessonNotificationPlan?.dailyJournalEnabled === true;
-  const isExamPrepLessonCurrent = isExamPrepLesson(lesson) && !isExamPrepDailyJournalEnabled;
+  // 2026-10-02 · 알림톡 체크박스가 아니라 `수업일지로 열기` 버튼이 이 화면을 연다
+  // (TeacherLessonHubV2 주석 참고).
+  const isExamPrepJournalViewEnabled = lessonNotificationPlan?.journalViewEnabled === true;
+  const isExamPrepLessonCurrent = isExamPrepLesson(lesson) && !isExamPrepJournalViewEnabled;
 
   const {
     applyHomeworkFollowupMethod,
@@ -650,8 +652,8 @@ export function LessonJournalDetail({
         lesson={lesson}
         onBack={onBack}
         onOpenExamPrep={onOpenExamPrep}
-        onReturnToExamPrepRoster={isExamPrepDailyJournalEnabled && isExamPrepLesson(lesson) && onToggleExamPrepDailyJournal
-          ? () => onToggleExamPrepDailyJournal(lesson.lessonId, false)
+        onReturnToExamPrepRoster={isExamPrepJournalViewEnabled && isExamPrepLesson(lesson) && onToggleExamPrepJournalView
+          ? () => onToggleExamPrepJournalView(lesson.lessonId, false)
           : undefined}
         statusPills={(
           <LessonJournalNotificationBar

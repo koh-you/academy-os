@@ -71,7 +71,7 @@ test("current exam management roster removes stale school and saves forward sche
   const contentInput = detail.getByLabel("정산 미리보기 학생 오늘 강의 내용");
   await contentInput.fill("안전고 고1 함수 단원 오답 정리");
   const contentSaveResponse = page.waitForResponse((response) => response.url().includes("/api/lesson-records"));
-  await detail.getByRole("button", { name: /학생별 강의 내용 저장/ }).click();
+  await detail.getByRole("button", { name: /학생별 기록 저장/ }).click();
   expect((await contentSaveResponse).status()).toBe(200);
   await expect(detail.getByRole("status")).toContainText("학생별 1명 재조회 확인");
   await detail.getByRole("button", { name: "일정 수정" }).click();

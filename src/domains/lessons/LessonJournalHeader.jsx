@@ -21,10 +21,10 @@ export function LessonJournalHeader({
     <NavigationHeader
       actions={statusPills || onReturnToExamPrepRoster ? (
         <>
-          {statusPills}
           {onReturnToExamPrepRoster ? (
             <button className="softButton" onClick={onReturnToExamPrepRoster} type="button">시험대비 명단 화면</button>
           ) : null}
+          {statusPills}
         </>
       ) : null}
       className="lessonJournalHeader"

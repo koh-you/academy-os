@@ -17,9 +17,10 @@ import { getLessonStudentIds } from "../students/lessonRosterSelectors.js";
 
 const ExamPrepContentEditor = lazy(() => import("./ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
 // 2026-10-01 · 모달을 열 때만 쓰는 패널이라 초기 번들에서 뺀다(진행 내용 편집기와 같은 이유).
+const ExamPrepNotificationBar = lazy(() => import("./ExamPrepNotificationBar.jsx").then((module) => ({ default: module.ExamPrepNotificationBar })));
 const ExamPrepSchoolPlanPanel = lazy(() => import("./ExamPrepSchoolPlanPanel.jsx").then((module) => ({ default: module.ExamPrepSchoolPlanPanel })));
 
-export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepExcludedSchools = [], examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveExamPrepSchoolPlan, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
+export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepExcludedSchools = [], examPrepNotificationEnabled = false, examPrepNotificationScheduledLabel = "", examPrepScheduleLessons = [], lesson, onApplyExamPrepNotificationPlan, onDeleteLesson, onOpenJournalView, onSaveExamPrepSchedule, onSaveExamPrepSchoolPlan, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
@@ -46,15 +47,21 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
           />
         </div>
         <div aria-label="시험대비 수업 작업" className="examPrepActions" role="group">
-          {onToggleDailyJournal ? (
-            <label className="examPrepDailyJournalToggle">
-              <input
-                checked={false}
-                onChange={(event) => onToggleDailyJournal(lesson.lessonId, event.target.checked)}
-                type="checkbox"
-              />
-              데일리 알림톡 사용
-            </label>
+          {onToggleDailyJournal && onApplyExamPrepNotificationPlan ? (
+            <ExamPrepNotificationBar
+              isEnabled={examPrepNotificationEnabled}
+              lesson={lesson}
+              onApplyPlan={onApplyExamPrepNotificationPlan}
+              onToggleEnabled={onToggleDailyJournal}
+              scheduledLabel={examPrepNotificationScheduledLabel}
+            />
+          ) : null}
+          {/* 수업일지에는 숙제·과제 상태·코멘트 미리보기처럼 이 화면에 없는 것이 있다. 그리로
+              가는 길은 남기되, 알림톡 체크 뒤에 숨기지 않고 제 이름으로 부른다(2026-10-02). */}
+          {onOpenJournalView ? (
+            <button className="softButton" onClick={() => onOpenJournalView(lesson.lessonId, true)} type="button">
+              수업일지로 열기
+            </button>
           ) : null}
           <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
             일정 수정

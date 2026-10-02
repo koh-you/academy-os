@@ -1560,10 +1560,58 @@ summary:focus-visible {
 }
 
 .examPrepActions {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+}
+
+/* 2026-10-02 · 시험대비 알림톡 줄. 체크(설정)와 [Solapi 반영](실제 예약)을 나란히 두되
+   버튼이 체크 바로 옆에 붙지 않게 예약 시각을 사이에 둔다. */
+.examPrepNotificationBar {
+  align-items: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 999px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 6px 4px 12px;
+}
+
+.examPrepNotificationSchedule {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.examPrepNotificationStatus {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.examPrepNotificationStatus small {
+  color: var(--academy-muted, #64748b);
+}
+
+/* 학생별 칸이 강의 내용 + 코멘트 2종으로 늘었다. 오른쪽 열이 좁으므로 세로로 쌓는다. */
+.examPrepStudentContentFields {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.examPrepStudentContentFields label {
+  display: grid;
+  gap: 2px;
+}
+
+.examPrepStudentContentFields > label > span {
+  color: var(--academy-muted, #64748b);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .examPrepActions button {
