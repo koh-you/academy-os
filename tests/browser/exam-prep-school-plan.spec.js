@@ -118,7 +118,7 @@ test("one save applies per-school time and exclusion, and the exclusion survives
   await expect(detail.locator(".examPrepLessonContentColumn .examPrepLessonContentEditor")).toBeVisible();
   // 학생마다 반복되던 예시글은 지웠다.
   expect(
-    await detail.getByLabel("정산 미리보기 학생 오늘 진행한 내용").getAttribute("placeholder")
+    await detail.getByLabel("정산 미리보기 학생 오늘 강의 내용").getAttribute("placeholder")
   ).toBeNull();
 
   await panel.getByRole("button", { name: "수정" }).click();
@@ -167,6 +167,40 @@ test("one save applies per-school time and exclusion, and the exclusion survives
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("the schedule and delete actions stay above the scrolling columns", async ({ page, request }) => {
+  // 2026-10-02 · 일정 수정은 이 날짜에 오는 학생 전체의 일정을 조율하는 일인데, 스크롤하는
+  // 왼쪽 열 맨 아래에 있어 찾아 내려가야 보였다(요청). 요약 줄과 같은 스크롤 밖 영역으로 옮겼다.
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const scheduleButton = detail.getByRole("button", { name: "일정 수정" });
+  await expect(scheduleButton).toBeVisible();
+  await expect(detail.locator(".examPrepLessonActionBar")).toContainText("일정 수정");
+
+  // 스크롤하는 열 안에 들어 있으면 안 된다.
+  const insideScrollColumn = await scheduleButton.evaluate(
+    (node) => Boolean(node.closest(".examPrepLessonMainColumn") || node.closest(".examPrepLessonContentColumn"))
+  );
+  expect(insideScrollColumn).toBe(false);
+
+  // 두 열을 끝까지 내려도 버튼이 제자리에 있고 화면 안에 남는다.
+  const before = await scheduleButton.evaluate((node) => Math.round(node.getBoundingClientRect().top));
+  await detail.locator(".examPrepLessonMainColumn").evaluate((node) => { node.scrollTop = node.scrollHeight; });
+  await detail.locator(".examPrepLessonContentColumn").evaluate((node) => { node.scrollTop = node.scrollHeight; });
+  const after = await scheduleButton.evaluate((node) => Math.round(node.getBoundingClientRect().top));
+  expect(after).toBe(before);
+  const inViewport = await scheduleButton.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return rect.top >= 0 && rect.bottom <= window.innerHeight;
+  });
+  expect(inViewport).toBe(true);
+
+  // 학생별 칸은 수업일지와 같은 칸이라는 것을 라벨로 드러낸다(둘 다 record.lessonProgress).
+  await expect(detail.locator(".examPrepStudentContentHeading")).toContainText("학생별 오늘 강의 내용");
 });
 
 test("school rows and student rows line their time inputs up on the same columns", async ({ page, request }) => {

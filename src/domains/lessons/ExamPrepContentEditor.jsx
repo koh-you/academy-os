@@ -50,10 +50,10 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
     <div className="examPrepLessonContentEditor">
       <div className="examPrepStudentContentHeading">
         <div className="helpTipTitleRow">
-          <strong>학생별 오늘 진행한 내용</strong>
+          <strong>학생별 오늘 강의 내용</strong>
           <HelpTip
-            label="학생별 오늘 진행한 내용"
-            text="학생마다 별도의 칸에 적고 각각의 수업기록으로 저장합니다."
+            label="학생별 오늘 강의 내용"
+            text="수업일지의 '오늘 강의 내용'과 같은 칸입니다. 여기서 적어도 수업일지와 알림톡의 🧭 강의 내용에 그대로 들어갑니다. 학생마다 별도의 칸에 적고 각각의 수업기록으로 저장합니다."
           />
         </div>
         <span>{studentRows.length}명</span>
@@ -72,7 +72,7 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
               <small>{student.schoolName} · {student.timeLabel}</small>
             </span>
             <textarea
-              aria-label={`${student.name} 오늘 진행한 내용`}
+              aria-label={`${student.name} 오늘 강의 내용`}
               id={`exam-prep-content-${lesson.lessonId}-${student.studentId}`}
               maxLength={1000}
               onChange={(event) => {
@@ -88,7 +88,7 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
       <div className="examPrepLessonContentFooter">
         <span>변경한 학생의 내용만 저장합니다.</span>
         <button className="primaryButton" disabled={!saveItems.length || saveState.state === "saving"} onClick={save} type="button">
-          {saveState.state === "saving" ? "저장 확인 중" : `학생별 진행 내용 저장${saveItems.length ? ` (${saveItems.length}명)` : ""}`}
+          {saveState.state === "saving" ? "저장 확인 중" : `학생별 강의 내용 저장${saveItems.length ? ` (${saveItems.length}명)` : ""}`}
         </button>
       </div>
       {saveState.message ? <p className={`inlineNotice ${saveState.state === "failed" ? "danger" : ""}`} role="status">{saveState.message}</p> : null}

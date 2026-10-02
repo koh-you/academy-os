@@ -68,10 +68,10 @@ test("current exam management roster removes stale school and saves forward sche
   // 확인하려던 것(낡은 학교가 빠지고 현재 학교가 보인다)은 학교별 참여 패널과 명단으로 본다.
   await expect(detail).toContainText("안전고");
   await expect(detail).not.toContainText("상계고");
-  const contentInput = detail.getByLabel("정산 미리보기 학생 오늘 진행한 내용");
+  const contentInput = detail.getByLabel("정산 미리보기 학생 오늘 강의 내용");
   await contentInput.fill("안전고 고1 함수 단원 오답 정리");
   const contentSaveResponse = page.waitForResponse((response) => response.url().includes("/api/lesson-records"));
-  await detail.getByRole("button", { name: /학생별 진행 내용 저장/ }).click();
+  await detail.getByRole("button", { name: /학생별 강의 내용 저장/ }).click();
   expect((await contentSaveResponse).status()).toBe(200);
   await expect(detail.getByRole("status")).toContainText("학생별 1명 재조회 확인");
   await detail.getByRole("button", { name: "일정 수정" }).click();
@@ -111,7 +111,7 @@ test("current exam management roster removes stale school and saves forward sche
   await navigateCalendarToMonth(page, 2026, 8);
   const persistedDay = page.getByRole("gridcell", { name: /2026-08-09/ });
   await persistedDay.locator(".lessonPill").click();
-  await expect(page.getByRole("dialog", { name: "시험대비" }).getByLabel("정산 미리보기 학생 오늘 진행한 내용")).toHaveValue("안전고 고1 함수 단원 오답 정리");
+  await expect(page.getByRole("dialog", { name: "시험대비" }).getByLabel("정산 미리보기 학생 오늘 강의 내용")).toHaveValue("안전고 고1 함수 단원 오답 정리");
 });
 
 test("exam prep schedule conflict returns 409 without stopping the safe API", async ({ request }) => {
