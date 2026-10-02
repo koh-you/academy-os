@@ -1,27 +1,30 @@
-% 8-07(8쪽) — $y=f(x)$ 의 그래프(닫힌 점·빈 점·안내 점선 · $x=0$ 에서 꺾임). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점선만 · 눈금은 만들지 않음).
-\begin{tikzpicture}[scale=0.62, line width=0.6pt]
-  \draw[->, >=stealth, line width=0.7pt] (-2.3,0) -- (3.4,0) node[below=1pt] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-2.7) -- (0,3.9) node[left=1pt] {$y$};
-  \draw[densely dotted, line width=0.4pt] (0,2) -- (2,2) -- (2,1);
+% 8-07(8쪽) — y=f(x) 의 그래프(원문 오른쪽 그림 · x=-1 에서 좌우가 갈리고 x=1 에 빈 점). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 -1, 1, 2 · y축 눈금 2, 1, -1 · 안내 점선 · 빈 점 (-1,1), (1,0), (2,2) · 채운 점 (-1,-1), (1,2), (2,1) · 라벨 O, x, y, y=f(x).
+\begin{tikzpicture}[baseline=(current bounding box.center), x=0.55cm, y=0.55cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (2.95,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.1) -- (0,3.25) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (2,2);
   \draw[densely dotted, line width=0.4pt] (1,2) -- (1,0);
+  \draw[densely dotted, line width=0.4pt] (2,2) -- (2,0);
   \draw[densely dotted, line width=0.4pt] (-1,1) -- (2,1);
-  \draw[densely dotted, line width=0.4pt] (-1,1) -- (-1,-1) -- (0,-1);
-  \draw[smooth, tension=0.7] plot coordinates {(-1.8,-2.4) (-1.55,-1.8) (-1.28,-1.35) (-1,-1)};
-  \draw[smooth, tension=0.7] plot coordinates {(-1,1) (-0.75,0.85) (-0.5,0.55) (-0.3,0.15) (-0.15,-0.4) (0,-1)};
-  \draw (0,-1) -- (2,1);
-  \draw[smooth, tension=0.7] plot coordinates {(2,2) (2.25,2.3) (2.45,2.78) (2.58,3.25)};
-  \fill (-1,-1) circle (2.2pt);
-  \draw[fill=white] (-1,1) circle (2.2pt);
-  \draw[fill=white] (1,0) circle (2.2pt);
-  \fill (2,1) circle (2.2pt);
-  \fill (1,2) circle (2.2pt);
-  \draw[fill=white] (2,2) circle (2.2pt);
-  \node[left=2pt, font=\small] at (0,2) {$2$};
-  \node[left=2pt, font=\small] at (0,1) {$1$};
-  \node[right=2pt, font=\small] at (0,-1) {$-1$};
-  \node[below=1pt, font=\small] at (-1,0) {$-1$};
-  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \draw[densely dotted, line width=0.4pt] (-1,1) -- (-1,-1);
+  \draw[densely dotted, line width=0.4pt] (-1,-1) -- (0,-1);
+  \draw[line width=0.6pt, domain=-1.75:-1, samples=60, smooth] plot (\x, {-1-1.4*(\x+1)*(\x+1)});
+  \draw[line width=0.6pt, domain=-1:0, samples=60, smooth] plot (\x, {1-2*(\x+1)*(\x+1)});
+  \draw[line width=0.6pt] (0,-1) -- (2,1);
+  \draw[line width=0.6pt, domain=2:2.55, samples=60, smooth] plot (\x, {2+1.6*(\x-2)*(\x-2)});
+  \fill (-1,-1) circle (2pt);
+  \fill (1,2) circle (2pt);
+  \fill (2,1) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (-1,1) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (1,0) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (2,2) circle (2pt);
+  \node[below=1pt, xshift=-4pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt and -3pt, font=\small] at (1,0) {$1$};
   \node[below=1pt, font=\small] at (2,0) {$2$};
-  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
-  \node[anchor=west, font=\small] at (0.45,3.45) {$y=f(x)$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[right=1pt, font=\small] at (0,-1.25) {$-1$};
+  \node[anchor=west, font=\small] at (0.45,2.95) {$y=f(x)$};
 \end{tikzpicture}

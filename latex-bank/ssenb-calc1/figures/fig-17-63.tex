@@ -1,0 +1,21 @@
+% 17-63(17쪽) — y=√(x-1) 의 그래프 위의 두 점 A(2, 1)·P 와 수선의 발 H·Q. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 1 · 라벨 O, x, y, A(2, 1), P, Q, H, y=√(x-1) · 선분 AQ·PH · 직각 표시 2개(Q, H).
+\begin{tikzpicture}[x=0.60cm, y=0.60cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.55,0) -- (5.05,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,2.85) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt, domain=1:4.55, samples=120, smooth] plot (\x, {sqrt(\x-1)});
+  \draw[line width=0.5pt] (2,1) -- (3.6,1);
+  \draw[line width=0.5pt] (3.6,1.6125) -- (3.6,0);
+  \draw[line width=0.4pt] (3.42,1) -- (3.42,0.82) -- (3.6,0.82);
+  \draw[line width=0.4pt] (3.42,0) -- (3.42,0.18) -- (3.6,0.18);
+  \fill (2,1) circle (2.2pt);
+  \fill (3.6,1.6125) circle (2.2pt);
+  \node[above left=-1pt and -3pt, font=\small] at (2,1) {$\pt{A}(2,\,1)$};
+  \node[above=1pt, font=\small] at (3.6,1.6125) {$\pt{P}$};
+  \node[right=1pt, font=\small] at (3.6,1) {$\pt{Q}$};
+  \node[below=1pt, font=\small] at (3.6,0) {$\pt{H}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[font=\small] at (3.70,2.55) {$y=\sqrt{x-1}$};
+  \draw[line width=0.4pt] (4.26,2.30) -- (4.46,1.98);
+\end{tikzpicture}

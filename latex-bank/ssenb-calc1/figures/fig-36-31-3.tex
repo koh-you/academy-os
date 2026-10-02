@@ -1,0 +1,12 @@
+% 36-31 ③(36쪽) — 보기 그래프: x=a 에서 꺾인 V 모양(절댓값 꼴). 보기 자체가 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y=f(x), O, a, x, y 만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.3,-1.6) rectangle (3.1,2.7);
+  \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.85,0) node[below=1pt, font=\scriptsize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.15) -- (0,2.35) node[left=1pt, font=\scriptsize] {$y$};
+  \draw[line width=0.6pt] (-1.35,2.30) -- (0.55,0.60) -- (2.45,2.30);
+  \draw[densely dotted, line width=0.4pt] (0.55,0) -- (0.55,0.60);
+  \node[anchor=west, font=\scriptsize] at (1.15,0.45) {$y=f(x)$};
+  \node[below left=-2pt and -2pt, font=\scriptsize] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\scriptsize] at (0.55,0) {$a$};
+\end{tikzpicture}

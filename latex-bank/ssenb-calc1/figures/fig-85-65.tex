@@ -1,0 +1,20 @@
+% 85-65(85쪽) — 원점을 출발한 점 P의 위치 x(t) 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선 · x 눈금 4 와 -3 · a 와 c·e 의 세로 파선 · 4 와 -3 의 가로 파선 · 라벨 x(t), O, a, b, c, d, e, t.
+\begin{tikzpicture}[x=0.52cm, y=0.30cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (6.2,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.4) -- (0,5.6) node[left=1pt, font=\small] {$x(t)$};
+  \draw[densely dashed, line width=0.4pt] (0,4) -- (3.4,4) (3.4,0) -- (3.4,4);
+  \draw[densely dashed, line width=0.4pt] (0,-3) -- (5.05,-3) (1.0,0) -- (1.0,-3) (5.05,0) -- (5.05,-3);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (0,0) (0.25,-1.35) (0.55,-2.50) (1.00,-3.00) (1.35,-2.70) (1.70,-1.70) (2.15,0)
+    (2.55,1.85) (2.95,3.35) (3.40,4.00) (3.80,3.55) (4.15,2.25) (4.50,0)
+    (4.80,-1.75) (5.05,-3.00) (5.35,-4.55) };
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, inner sep=2.5pt, font=\small] at (-0.08,4) {$4$};
+  \node[anchor=east, inner sep=2.5pt, font=\small] at (-0.08,-3) {$-3$};
+  \node[above=1pt, font=\small] at (1.00,0) {$a$};
+  \node[below=1pt, font=\small] at (2.15,0) {$b$};
+  \node[below=1pt, font=\small] at (3.40,0) {$c$};
+  \node[below=1pt, font=\small] at (4.36,0) {$d$};
+  \node[above=1pt, font=\small] at (5.05,0) {$e$};
+\end{tikzpicture}

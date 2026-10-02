@@ -1,0 +1,28 @@
+% 124-49(124쪽) — 함수 y=f(x) 와 그 역함수 y=g(x) 의 그래프(두 점 (2,2),(6,6)에서 만남 · 사이 영역 색칠). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 2 · 6 (x축과 y축) · 두 교점으로 가는 안내 파선 · 라벨 O, x, y, y=f(x), y=g(x) · 색칠한 영역.
+% 두 곡선의 식은 원문에 없다. 원문 그림처럼 (2,2)·(6,6)에서만 만나고 y=x 에 대하여 서로 대칭인 곡선 한 쌍으로 모양만 옮겼다
+% (g 는 f 의 x·y 를 바꿔 그린 것이다). 넓이를 묻는 문항이라 2·6 말고는 눈금을 넣지 않는다.
+\begin{tikzpicture}[x=0.28cm, y=0.28cm, line width=0.5pt,
+  declare function={ff(\t)=2+0.35*(\t-2)+0.0825*(\t-2)*(\t-2)+0.02*(\t-2)*(\t-2)*(\t-2);}]
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (8.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,8.6) node[left=1pt] {$y$};
+  % 두 곡선 사이의 색칠한 영역
+  \fill[orange!25] plot[domain=2:6, samples=60, smooth] (\x, {ff(\x)})
+    -- plot[domain=6:2, samples=60, smooth, variable=\t] ({ff(\t)}, \t) -- cycle;
+  % 좌표 안내 파선(원문)
+  \draw[dashed, line width=0.35pt] (0,2) -- (2,2);
+  \draw[dashed, line width=0.35pt] (2,0) -- (2,2);
+  \draw[dashed, line width=0.35pt] (0,6) -- (6,6);
+  \draw[dashed, line width=0.35pt] (6,0) -- (6,6);
+  % y=f(x) 와 그 역함수 y=g(x)(f 의 x·y 를 바꿔 그린다)
+  \draw[line width=0.6pt, domain=0.55:6.5, samples=120, smooth] plot (\x, {ff(\x)});
+  \draw[line width=0.6pt, domain=-0.8:6.5, samples=120, smooth, variable=\t] plot ({ff(\t)}, \t);
+  % 눈금 라벨(원문 자리 그대로)
+  \node[below left=1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=2pt, font=\small] at (2,0) {$2$};
+  \node[below=2pt, font=\small] at (6,0) {$6$};
+  \node[left=2pt, font=\small] at (0,2) {$2$};
+  \node[left=2pt, font=\small] at (0,6) {$6$};
+  \node[anchor=west, font=\small] at (2.3,8.1) {$y=f(x)$};
+  \node[anchor=west, font=\small] at (6.6,5.4) {$y=g(x)$};
+\end{tikzpicture}

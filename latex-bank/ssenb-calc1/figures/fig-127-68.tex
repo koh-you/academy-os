@@ -1,22 +1,19 @@
-% 127-68(127쪽) — 0\le t\le 7 에서 점 P 의 속도 v(t) 의 그래프(꺾은선). 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 꼭짓점은 원문대로 (0,0)·(1,1)·(4,-2)·(5,1)·(6,1)·(7,0). 원문 라벨만: v(t) · t · O · 1 · -2 · 1, 2, 4, 5, 6, 7 과 점선.
-\begin{tikzpicture}[x=0.42cm, y=0.32cm, line width=0.5pt]
-  \draw[dotted, line width=0.4pt] (0,1) -- (6,1);
-  \draw[dotted, line width=0.4pt] (0,-2) -- (4,-2);
-  \draw[dotted, line width=0.4pt] (1,0) -- (1,1);
-  \draw[dotted, line width=0.4pt] (4,0) -- (4,-2);
-  \draw[dotted, line width=0.4pt] (5,0) -- (5,1);
-  \draw[dotted, line width=0.4pt] (6,0) -- (6,1);
-  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (8.0,0) node[below] {$t$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-3.1) -- (0,2.3) node[left] {$v(t)$};
-  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
-  \draw[line width=0.6pt] (0,0) -- (1,1) -- (4,-2) -- (5,1) -- (6,1) -- (7,0);
-  \node[left, font=\small, inner sep=1.5pt] at (0,1) {$1$};
-  \node[left, font=\small, inner sep=1.5pt] at (0,-2) {$-2$};
-  \node[below, font=\small, inner sep=1.5pt] at (1,0) {$1$};
-  \node[above, font=\small, inner sep=1.5pt] at (2,0) {$2$};
-  \node[above, font=\small, inner sep=1.5pt] at (4,0) {$4$};
-  \node[below, font=\small, inner sep=1.5pt, xshift=2pt] at (5,0) {$5$};
-  \node[below, font=\small, inner sep=1.5pt] at (6,0) {$6$};
-  \node[below, font=\small, inner sep=1.5pt] at (7,0) {$7$};
+% 127-68(127쪽) — 점 P 의 시각 t (0<=t<=d) 에서의 속도 v(t) 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선(t=0, a, b, c 에서 v=0 · t=d 에서 끝남) · t=d 의 안내 점선 ·
+% 라벨 O, a, b, c, d, t, v(t). 눈금·좌표값은 원문에 없으므로 넣지 않는다
+% (넓이 사이의 관계를 따지는 문항이라 수치를 더하면 답이 드러난다). 곡선은 원문이 지나는 점을 재서 smooth 로 이었다.
+\begin{tikzpicture}[x=0.40cm, y=0.40cm, line width=0.5pt]
+  \draw[densely dotted, line width=0.35pt] (6.66,0) -- (6.66,-1.28);
+  \draw[->, >=stealth, line width=0.7pt] (-1.25,0) -- (7.7,0) node[below=1pt, font=\footnotesize] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.0) -- (0,4.0) node[left=1pt, font=\footnotesize] {$v(t)$};
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (0,0) (0.10,0.32) (0.24,0.70) (0.64,1.46) (1.04,1.76) (1.24,1.76) (1.64,1.38)
+    (2.04,0.56) (2.44,-0.46) (2.84,-1.20) (3.04,-1.28) (3.44,-0.90) (3.84,0.26)
+    (4.24,1.74) (4.64,2.86) (4.94,3.16) (5.24,2.86) (5.64,1.96) (6.04,0.64)
+    (6.44,-0.82) (6.66,-1.28) };
+  \node[below left=-1pt and -2pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[below=2pt, font=\footnotesize] at (2.18,0) {$a$};
+  \node[below=2pt, font=\footnotesize] at (3.68,0) {$b$};
+  \node[below=2pt, font=\footnotesize] at (6.0,0) {$c$};
+  \node[above=2pt, font=\footnotesize] at (6.52,0) {$d$};
 \end{tikzpicture}

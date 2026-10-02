@@ -1,0 +1,11 @@
+% 112-76(112쪽) — 이차함수 y=f(x) 의 그래프(아래로 볼록 · x축과 x=3, x=6 에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 숫자 3 · 6 · 라벨 O, x, y, y=f(x). 꼭짓점·y절편 값은 원문에 없어 적지 않는다.
+\begin{tikzpicture}[x=0.24cm, y=0.10cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (9.8,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,20.0) node[left=1pt] {$y$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt, domain=0:8.6, samples=160, smooth] plot (\x, {(\x-3)*(\x-6)});
+  \node[below=2pt, font=\small] at (3,0) {$3$};
+  \node[below=2pt, font=\small] at (6,0) {$6$};
+  \node[right=1pt, font=\small] at (5.4,18.0) {$y=f(x)$};
+\end{tikzpicture}

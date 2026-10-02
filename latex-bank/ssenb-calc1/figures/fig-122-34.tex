@@ -1,15 +1,21 @@
-% 122-34(122쪽) — 곡선 y=x^3-6x+k (k>0) 와 x축·y축이 x>=0 에서 둘러싸는 S_1, 이 곡선과 x축이 둘러싸는 S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로 y·x·O·S_1·S_2·y=x^3-6x+k 와 원문의 지시선만. y절편의 높이는 원문처럼 개략 위치라 k 값을 그림에서 잴 수 없다.
-\begin{tikzpicture}[xscale=0.55, yscale=0.26, line width=0.5pt]
-  \fill[olive!22] (0,0) -- plot[domain=0:0.3399, samples=30] (\x, {\x*\x*\x-6*\x+2}) -- cycle;
-  \fill[olive!22] plot[domain=0.3399:2.2618, samples=50] (\x, {\x*\x*\x-6*\x+2}) -- cycle;
-  \draw[->, >=stealth, line width=0.7pt] (-3.35,0) -- (3.75,0) node[below left=-1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-4.8) -- (0,8.8) node[left=1pt, font=\small] {$y$};
-  \draw[line width=0.6pt, domain=-2.85:2.82, samples=130] plot (\x, {\x*\x*\x-6*\x+2});
-  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
-  \draw[line width=0.4pt] (-0.78,1.45) -- (0.1,0.85);
-  \node[left, font=\small, inner sep=1pt] at (-0.78,1.5) {$S_1$};
-  \draw[line width=0.4pt] (2.1,-4.15) -- (1.55,-2.75);
-  \node[below, font=\small, inner sep=1pt] at (2.2,-4.15) {$S_2$};
-  \node[right, font=\small, inner sep=2pt] at (0.35,8.1) {$y=x^3-6x+k$};
+% 122-34(122쪽) — 곡선 y=x^3-6x+k (k>0) 와 x축·y축이 만드는 두 도형 S_1, S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 색칠한 두 도형과 S_1, S_2 지시 화살표 · 라벨 O, x, y, y=x^3-6x+k.
+% 눈금 숫자는 원문에 하나도 없으므로 넣지 않는다(k 가 답이라 수치를 더하면 답이 드러난다).
+\begin{tikzpicture}[x=0.40cm, y=0.145cm, line width=0.5pt]
+  % 색칠한 두 도형(원문)
+  \path[fill=green!22] (0,0) -- (0.7320508,0)
+    -- plot[domain=0.7320508:0, samples=50] (\x, {\x*\x*\x-6*\x+4}) -- cycle;
+  \path[fill=black!18] (0.7320508,0) -- (2,0)
+    -- plot[domain=2:0.7320508, samples=50] (\x, {\x*\x*\x-6*\x+4}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-3.2,0) -- (3.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,11.5) node[left=1pt] {$y$};
+  % 곡선
+  \draw[line width=0.6pt, domain=-2.9:2.72, samples=160, smooth] plot (\x, {\x*\x*\x-6*\x+4});
+  % 영역 지시 화살표(원문)
+  \draw[->, >=stealth, line width=0.35pt] (-0.5,2.3) -- (0.25,1.1);
+  \draw[->, >=stealth, line width=0.35pt] (1.78,-2.6) -- (1.35,-1.1);
+  \node[below left=1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-0.55,2.5) {$S_1$};
+  \node[anchor=north west, font=\small] at (1.75,-2.7) {$S_2$};
+  \node[anchor=west, font=\small] at (0.2,10.2) {$y=x^3-6x+k$};
 \end{tikzpicture}

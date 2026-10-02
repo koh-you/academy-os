@@ -1,23 +1,38 @@
-% 120-20(120쪽) — 두 사차함수 y=f(x), y=g(x) 의 그래프가 x=-7, -4, 0, 5 에서 만나 생기는 세 도형 A, B, C. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로 y·x·O·-7·-4·5·A·B·C·y=f(x)·y=g(x) 와 원문의 점선 세 개만. 세 넓이(4, 6, 11)는 그림에서 잴 수 없게 개략 모양으로 그렸다.
-\begin{tikzpicture}[xscale=0.22, yscale=0.28, line width=0.5pt]
-  \fill[yellow!35] plot[domain=-7:-4, samples=40] (\x, {1.7+0.0034*(\x+7)*(\x+4)*\x*(\x-5)}) -- plot[domain=-4:-7, samples=40] (\x, {1.7-0.0034*(\x+7)*(\x+4)*\x*(\x-5)}) -- cycle;
-  \fill[purple!14] plot[domain=-4:0, samples=50] (\x, {1.7+0.0034*(\x+7)*(\x+4)*\x*(\x-5)}) -- plot[domain=0:-4, samples=50] (\x, {1.7-0.0034*(\x+7)*(\x+4)*\x*(\x-5)}) -- cycle;
-  \fill[yellow!60] plot[domain=0:5, samples=60] (\x, {1.7+0.0034*(\x+7)*(\x+4)*\x*(\x-5)}) -- plot[domain=5:0, samples=60] (\x, {1.7-0.0034*(\x+7)*(\x+4)*\x*(\x-5)}) -- cycle;
-  \draw[->, >=stealth, line width=0.7pt] (-9.6,0) -- (7.4,0) node[below left=-1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-3.0) -- (0,5.9) node[left=1pt, font=\small] {$y$};
-  \draw[line width=0.6pt, domain=-8.8:6.3, samples=140] plot (\x, {1.7+0.0034*(\x+7)*(\x+4)*\x*(\x-5)});
-  \draw[line width=0.6pt, domain=-8.8:6.3, samples=140] plot (\x, {1.7-0.0034*(\x+7)*(\x+4)*\x*(\x-5)});
-  \draw[dotted, line width=0.5pt] (-7,0) -- (-7,1.7);
-  \draw[dotted, line width=0.5pt] (-4,0) -- (-4,1.7);
-  \draw[dotted, line width=0.5pt] (5,0) -- (5,1.7);
-  \node[below right=-1pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
-  \node[below, font=\small, inner sep=2pt] at (-7,0) {$-7$};
-  \node[below, font=\small, inner sep=2pt] at (-4,0) {$-4$};
-  \node[below, font=\small, inner sep=2pt] at (5,0) {$5$};
-  \node[font=\small] at (-5.5,1.7) {$A$};
-  \node[font=\small] at (-2,1.7) {$B$};
-  \node[font=\small] at (2.5,1.7) {$C$};
-  \node[font=\small] at (5.2,6.7) {$y=f(x)$};
-  \node[font=\small] at (2.2,-3.7) {$y=g(x)$};
+% 120-20(120쪽) — 두 사차함수 y=f(x) 와 y=g(x) 의 그래프가 x=-7, -4, 0, 5 에서 만나 만드는 세 도형 A, B, C. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 -7 · -4 · 5 · 라벨 O, x, y, y=f(x), y=g(x), A, B, C · -7, -4, 5 의 안내 파선. 넓이 4, 6, 11 은 글로만 주어지고 그림에는 없다.
+% 두 사차함수의 식은 원문에 없다. 교점 네 개의 x좌표와 세 도형의 위아래 관계만 원문대로 맞춘 보조식이며(f-g 의 부호: x<-7 양 · -7~-4 음 · -4~0 양 · 0~5 음 · x>5 양) y축에 눈금이 없어 값을 잴 수 없다.
+\begin{tikzpicture}[x=0.215cm, y=0.068cm, line width=0.5pt]
+  % 세 도형(두 그래프 사이)
+  \fill[brown!22] plot[domain=-7:-4, samples=80, smooth] (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))}) -- plot[domain=-4:-7, samples=80, smooth] (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))}) -- cycle;
+  \fill[violet!20] plot[domain=-4:0, samples=80, smooth] (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))}) -- plot[domain=0:-4, samples=80, smooth] (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))}) -- cycle;
+  \fill[orange!35] plot[domain=0:5, samples=90, smooth] (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))}) -- plot[domain=5:0, samples=90, smooth] (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))}) -- cycle;
+  % 축
+  \draw[->, >=stealth, line width=0.7pt] (-9.3,0) -- (7.0,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5) -- (0,22) node[left=1pt] {$y$};
+  % 안내 파선(원문)
+  \draw[dashed, line width=0.35pt] (-7,0) -- (-7,11);
+  \draw[dashed, line width=0.35pt] (-4,0) -- (-4,11);
+  \draw[dashed, line width=0.35pt] (5,0) -- (5,11);
+  % y=f(x) — 교점 바깥에서 위, -7~-4 와 0~5 에서 아래
+  \draw[line width=0.6pt, domain=-8.6:-7, samples=60, smooth] plot (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=-7:-4, samples=70, smooth] plot (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=-4:0, samples=70, smooth] plot (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=0:5, samples=90, smooth] plot (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=5:6.1, samples=60, smooth] plot (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  % y=g(x) — f 와 위아래가 반대
+  \draw[line width=0.6pt, domain=-8.6:-7, samples=60, smooth] plot (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=-7:-4, samples=70, smooth] plot (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=-4:0, samples=70, smooth] plot (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=0:5, samples=90, smooth] plot (\x, {11+0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  \draw[line width=0.6pt, domain=5:6.1, samples=60, smooth] plot (\x, {11-0.5*sqrt(abs(((\x)+7)*((\x)+4)*(\x)*((\x)-5)))});
+  % 라벨(원문 자리 그대로)
+  \node[below=2pt, font=\small] at (-7,0) {$-7$};
+  \node[below=2pt, font=\small] at (-4,0) {$-4$};
+  \node[below=2pt, font=\small] at (-1.2,0) {$\pt{O}$};
+  \node[below=2pt, font=\small] at (5,0) {$5$};
+  \node[font=\small] at (-5.5,11) {$A$};
+  \node[font=\small] at (-2.1,11) {$B$};
+  \node[font=\small] at (2.7,11) {$C$};
+  \node[anchor=east, font=\small] at (5.8,26.5) {$y=f(x)$};
+  \node[anchor=east, font=\small] at (5.8,-9) {$y=g(x)$};
 \end{tikzpicture}

@@ -1,0 +1,15 @@
+% 17-64(17쪽) — y=(1/2)x^2 의 그래프 위의 점 P 와 직선 OP, 그리고 P 를 지나 OP 에 수직인 직선이 y축과 만나는 점 f(t). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 O, x, y, f(t), P(t, (1/2)t^2), y=(1/2)x^2 · 직각 표시(P). 눈금은 원문에 없다.
+\begin{tikzpicture}[x=0.46cm, y=0.46cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.5,0) -- (3.7,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,5.5) node[left=1pt] {$y$};
+  \node[below right=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt, domain=-3.15:3.15, samples=120, smooth] plot (\x, {0.5*\x*\x});
+  \draw[line width=0.5pt] (-1.6,-1.6) -- (3.25,3.25);
+  \draw[line width=0.5pt] (-1.25,5.25) -- (3.45,0.55);
+  \draw[line width=0.4pt] (1.802,1.802) -- (1.604,2.0) -- (1.802,2.198);
+  \fill (2,2) circle (2.2pt);
+  \node[right=2pt, font=\small] at (2,2) {$\pt{P}\Big(t,\,\dfrac{1}{2}t^2\Big)$};
+  \node[left=2pt, font=\small] at (0,3.85) {$f(t)$};
+  \node[font=\small] at (1.55,4.75) {$y=\dfrac{1}{2}x^2$};
+\end{tikzpicture}

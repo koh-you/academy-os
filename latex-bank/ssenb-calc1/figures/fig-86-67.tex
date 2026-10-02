@@ -1,0 +1,12 @@
+% 86-67(86쪽) — 점 P의 위치 x(t)(t에 대한 삼차식) 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선(t=0, 1, 4 에서 t축을 지남) · t 눈금 1 과 4 · 라벨 x(t), O, t.
+% x 축 눈금은 원문에 없으므로 넣지 않는다(가속도가 0 이 되는 시각이 그림에서 읽히지 않게).
+\begin{tikzpicture}[x=0.52cm, y=0.52cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.80,0) -- (5.15,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.40) -- (0,3.35) node[left=1pt, font=\small] {$x(t)$};
+  \draw[line width=0.6pt, domain=-0.12:4.32, samples=180, smooth]
+    plot (\x, {-0.462*\x*(\x-1)*(\x-4)});
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (3.88,0) {$4$};
+\end{tikzpicture}

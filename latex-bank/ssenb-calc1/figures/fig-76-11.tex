@@ -1,0 +1,12 @@
+% 76-11(76쪽) — 삼차함수 f(x)의 도함수 y=f'(x)(아래로 볼록한 이차함수)의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 위 눈금 숫자 -3 과 2(f'(x)=0 의 두 근) · 라벨 O, x, y, y=f'(x).
+% y축 눈금·꼭짓점 값은 원문에 없으므로 넣지 않는다(k 의 값의 범위가 답이라 수치를 더하면 답이 드러난다).
+\begin{tikzpicture}[x=0.28cm, y=0.28cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-6.0,0) -- (5.9,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.2) -- (0,7.6) node[left=1pt] {$y$};
+  \draw[line width=0.6pt, domain=-4.9:4.1, samples=140, smooth] plot (\x, {0.4*(\x+3)*(\x-2)});
+  \node[below=2pt, font=\small] at (-3.45,0) {$-3$};
+  \node[below=2pt, font=\small] at (2.45,0) {$2$};
+  \node[below left=1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (1.0,7.0) {$y=f'(x)$};
+\end{tikzpicture}

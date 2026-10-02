@@ -1,17 +1,15 @@
-% 35-29(35쪽) — 원점을 지나며 위로 볼록하게 증가하는 y=f(x)의 그래프와 직선 y=2x, x축 위의 두 점 a, b(그래프까지 세로 점선).
-% 스캔 화질이 낮아 TikZ 로 다시 그림. 눈금·좌표값은 원문에 없다.
-\begin{tikzpicture}[scale=0.8, line width=0.5pt]
-  \draw[->, >=stealth, line width=0.7pt] (-0.85,0) -- (3.15,0) node[below left=-1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-0.72) -- (0,2.45) node[right=-1pt, font=\small] {$y$};
-  \draw[line width=0.6pt] (-0.3,-0.6) -- (1.09,2.18);
-  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
-    (0,0) (0.2,0.259) (0.4,0.455) (0.7,0.673) (1.0,0.833)
-    (1.4,0.991) (1.86,1.121) (2.3,1.215) (2.72,1.285)};
-  \draw[densely dotted, line width=0.4pt] (1.0,0) -- (1.0,0.833);
-  \draw[densely dotted, line width=0.4pt] (1.86,0) -- (1.86,1.121);
-  \node[below=1pt, font=\small] at (1.0,0) {$a$};
-  \node[below=1pt, font=\small] at (1.86,0) {$b$};
-  \node[below right=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
-  \node[font=\small] at (1.25,2.3) {$y=2x$};
-  \node[font=\small] at (2.25,1.62) {$y=f(x)$};
+% 35-29(35쪽) — 원점을 지나 증가하며 위로 볼록한 함수 y=f(x) 의 그래프와 직선 y=2x. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 직선 · a·b 에서 곡선까지 올라가는 안내 점선 둘 · 라벨 y=2x, y=f(x), O, a, b, x, y.
+\begin{tikzpicture}[x=0.95cm, y=0.95cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.95,0) -- (4.45,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.25) -- (0,3.05) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (1.90,0) -- (1.90,1.68);
+  \draw[densely dotted, line width=0.4pt] (2.95,0) -- (2.95,2.11);
+  \draw[line width=0.6pt] (-0.55,-1.10) -- (1.35,2.70);
+  \draw[line width=0.6pt, domain=0:4.20, samples=120, smooth] plot (\x, {2.75*(1-exp(-0.50*\x))});
+  \node[anchor=south west, font=\small] at (1.05,2.55) {$y=2x$};
+  \node[anchor=south, font=\small] at (3.35,2.35) {$y=f(x)$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.90,0) {$a$};
+  \node[below=1pt, font=\small] at (2.95,0) {$b$};
 \end{tikzpicture}

@@ -1,17 +1,26 @@
-% 47-15(47쪽) — x=-3, x=-2, x=1 인 점에서 접선의 기울기가 0 인 함수 y=f(x) 의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨·점선은 원문 그대로(-3, -2, 1, -3, O, y=f(x))만 옮겼고, 원문에 없는 눈금·좌표는 넣지 않았다.
-\begin{tikzpicture}[x=0.62cm, y=0.3cm, line width=0.5pt]
-  \draw[->, >=stealth, line width=0.7pt] (-4.3,0) -- (2.85,0) node[below] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-4.8) -- (0,8.8) node[left] {$y$};
-  \node[below left=-3pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
-  \draw[line width=0.6pt, domain=-3.78:2.2, samples=150, smooth]
-    plot (\x,{0.766*(\x*\x*\x*\x/4+4*\x*\x*\x/3+\x*\x/2-6*\x)});
-  \draw[densely dotted, line width=0.4pt] (-3,0) -- (-3,5.17);
-  \draw[densely dotted, line width=0.4pt] (-2,0) -- (-2,5.62);
-  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,-3) -- (0,-3);
-  \node[below, font=\small, inner sep=1.5pt] at (-3,0) {$-3$};
-  \node[below, font=\small, inner sep=1.5pt] at (-2,0) {$-2$};
-  \node[above, font=\small, inner sep=1.5pt] at (1,0) {$1$};
-  \node[left, font=\small, inner sep=2pt] at (0,-3) {$-3$};
-  \node[anchor=south east, font=\small, inner sep=1pt] at (2.8,7.4) {$y=f(x)$};
+% 47-15(47쪽) — x=-3, x=-2, x=1 에서 접선의 기울기가 0 인 함수 y=f(x) 의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 숫자 -3 -2 (x) · 1 (x, 축 위) · -3 (y) · 라벨 O, x, y, y=f(x) · 좌표 안내 파선.
+% 원문 그림은 개형만 보여 주는 그림이라 수치 눈금을 더 만들지 않았다.
+\begin{tikzpicture}[x=0.34cm, y=0.33cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.8,0) -- (2.8,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.9) -- (0,3.0) node[left=1pt] {$y$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  % 좌표 안내 파선(원문)
+  \draw[dashed, line width=0.35pt] (-3,0) -- (-3,0.95);
+  \draw[dashed, line width=0.35pt] (-2,0) -- (-2,1.25);
+  \draw[dashed, line width=0.35pt] (1,0) -- (1,-3);
+  \draw[dashed, line width=0.35pt] (0,-3) -- (1,-3);
+  % 그래프
+  \draw[line width=0.6pt, smooth] plot coordinates {
+    (-4.35,2.05) (-4.00,1.55) (-3.65,1.16) (-3.32,0.99) (-3.00,0.95) (-2.68,1.05)
+    (-2.34,1.18) (-2.00,1.25) (-1.68,1.19) (-1.34,1.07) (-1.00,0.92) (-0.65,0.76)
+    (-0.30,0.56) (0.00,0.34) (0.28,0.00) (0.50,-0.70) (0.70,-1.70) (0.85,-2.48)
+    (0.92,-2.82) (1.00,-3.00) (1.08,-2.82) (1.15,-2.48) (1.30,-1.70) (1.50,-0.70)
+    (1.72,0.00) (1.90,0.80) (2.10,1.85) (2.30,3.00)};
+  % 눈금 라벨(원문 자리 그대로: 1 은 x축 위, -3 은 y축 왼쪽)
+  \node[below=2pt, font=\small] at (-3,0) {$-3$};
+  \node[below=2pt, font=\small] at (-2,0) {$-2$};
+  \node[above left=0pt and -2pt, font=\small] at (1,0) {$1$};
+  \node[left=2pt, font=\small] at (0,-3) {$-3$};
+  \node[anchor=south east, font=\small] at (2.5,3.4) {$y=f(x)$};
 \end{tikzpicture}

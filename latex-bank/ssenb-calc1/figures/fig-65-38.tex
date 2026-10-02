@@ -1,0 +1,16 @@
+% 65-38(65쪽) — 삼차함수 y=f(x) 의 그래프(최고차항 양수 · 극대의 x좌표 α · 극소의 x좌표 β · y절편 -3).
+% 원문에 있는 것만: 곡선 · α·β 로 가는 세로 점선 둘 · 라벨 y=f(x), α, β, -3, O, x, y. 다른 눈금은 만들지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.72cm, y=0.44cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.05,0) -- (2.60,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.25) -- (0,3.35) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-1.429,0) -- (-1.429,2.56);
+  \draw[densely dashed, line width=0.4pt] (0.996,0) -- (0.996,-2.78);
+  \draw[line width=0.6pt, domain=-2.62:2.25, samples=140, smooth]
+    plot (\x, {0.75*((\x)^3 + 0.65*(\x)^2 - 4.27*(\x) - 1.0925)});
+  \node[below=1pt, font=\small] at (-1.429,0) {$\alpha$};
+  \node[above=1pt, font=\small] at (0.996,0) {$\beta$};
+  \node[above left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[left=1pt, font=\small] at (0,-0.819) {$-3$};
+  \node[anchor=west, font=\small] at (1.15,2.75) {$y=f(x)$};
+\end{tikzpicture}

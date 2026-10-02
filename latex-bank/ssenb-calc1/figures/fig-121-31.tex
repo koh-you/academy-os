@@ -1,14 +1,22 @@
-% 121-31(121쪽) — 두 곡선 y=x^2(x-4) 와 y=ax(x-4) 가 둘러싸는 두 색칠 부분. 스캔 화질이 낮아 TikZ 로 다시 그림.
-% 라벨은 원문 그대로 y·x·O·4·y=ax(x-4)·y=x^2(x-4) 만. 포물선의 벌어진 정도는 원문처럼 개략적이라 두 넓이가 같아지는 a 값을 그림에서 잴 수 없다.
-\begin{tikzpicture}[xscale=0.5, yscale=0.17, line width=0.5pt]
-  \fill[olive!25] plot[domain=0:2.6, samples=50] (\x, {\x*\x*(\x-4)}) -- plot[domain=2.6:0, samples=50] (\x, {2.6*\x*(\x-4)}) -- cycle;
-  \fill[olive!25] plot[domain=2.6:4, samples=40] (\x, {\x*\x*(\x-4)}) -- plot[domain=4:2.6, samples=40] (\x, {2.6*\x*(\x-4)}) -- cycle;
-  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (5.6,0) node[below left=-1pt, font=\small] {$x$};
-  \draw[->, >=stealth, line width=0.7pt] (0,-11.8) -- (0,8.4) node[left=1pt, font=\small] {$y$};
-  \draw[line width=0.6pt, domain=-1.0:4.35, samples=110] plot (\x, {\x*\x*(\x-4)});
-  \draw[line width=0.6pt, domain=-0.6:4.6, samples=110] plot (\x, {2.6*\x*(\x-4)});
-  \node[above right=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
-  \node[below, font=\small, inner sep=2pt] at (4,0) {$4$};
-  \node[font=\small] at (2.85,7.6) {$y=ax(x-4)$};
-  \node[font=\small] at (2.55,-11.2) {$y=x^2(x-4)$};
+% 121-31(121쪽) — 두 곡선 y=x^2(x-4) 와 y=ax(x-4) 가 둘러싸는 두 도형. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 4 · 색칠한 두 도형 · 라벨 O, x, y, y=ax(x-4), y=x^2(x-4).
+% a 는 원문 그림의 모양(포물선이 삼차곡선보다 얕고 두 도형이 둘의 교점에서 허리로 만난다)만 따라 그렸고 눈금을 넣지 않는다
+% — a 가 답이므로 그림에서 값을 읽을 수 없어야 한다.
+\begin{tikzpicture}[x=0.45cm, y=0.175cm, line width=0.5pt]
+  % 색칠한 두 도형(원문)
+  \path[fill=green!18]
+    plot[domain=0:2, samples=60] (\x, {\x*\x*(\x-4)})
+    -- plot[domain=2:0, samples=60] (\x, {2*\x*(\x-4)}) -- cycle;
+  \path[fill=green!18]
+    plot[domain=2:4, samples=60] (\x, {\x*\x*(\x-4)})
+    -- plot[domain=4:2, samples=60] (\x, {2*\x*(\x-4)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.1,0) -- (5.0,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-10.2) -- (0,7.2) node[left=1pt] {$y$};
+  % 두 곡선
+  \draw[line width=0.6pt, domain=-0.75:4.3, samples=150, smooth] plot (\x, {\x*\x*(\x-4)});
+  \draw[line width=0.6pt, domain=-0.6:4.3, samples=120, smooth] plot (\x, {2*\x*(\x-4)});
+  \node[above right=0pt and 1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=1pt and 0pt, font=\small] at (4,0) {$4$};
+  \node[anchor=east, font=\small] at (4.6,8.3) {$y=ax(x-4)$};
+  \node[anchor=north, font=\small] at (2.1,-10.6) {$y=x^2(x-4)$};
 \end{tikzpicture}

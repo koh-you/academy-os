@@ -1,0 +1,11 @@
+% 65-39(65쪽) — 삼차함수 y=f(x) 의 그래프(최고차항 음수 · 극소·극대가 모두 y축 오른쪽 · y절편 음수).
+% 원문에 있는 것만: 곡선 · 라벨 y=f(x), O, x, y. 눈금은 원문에 없으므로 넣지 않는다(계수의 부호를 묻는 문항).
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.56cm, y=0.44cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.15,0) -- (4.75,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.05) -- (0,3.15) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-0.78:4.25, samples=140, smooth]
+    plot (\x, {-0.55*((\x)^3 - 5.1*(\x)^2 + 4.23*(\x) + 1.755)});
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (2.35,2.85) {$y=f(x)$};
+\end{tikzpicture}

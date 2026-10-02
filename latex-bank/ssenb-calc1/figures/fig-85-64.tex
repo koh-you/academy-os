@@ -1,0 +1,18 @@
+% 85-64(85쪽) — 원점을 출발한 점 P의 속도 v(t) 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선(원점에서 출발 · t=a 에서 극소 · t=b 에서 t축을 지남 · t=c 에서 극대 · t=d 에서 t축에 접함 · t=e 이후 증가)
+% · a·c·e 의 세로 파선 · 라벨 v(t), O, a, b, c, d, e, t. 눈금·수치는 원문에 없으므로 넣지 않는다.
+\begin{tikzpicture}[x=0.56cm, y=0.56cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (6.3,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.95) -- (0,3.3) node[left=1pt, font=\small] {$v(t)$};
+  \draw[densely dashed, line width=0.4pt] (1.05,0) -- (1.05,-1.08) (2.8,0) -- (2.8,1.25) (5.05,0) -- (5.05,1.4);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (0,0) (0.30,-0.52) (0.62,-0.90) (1.05,-1.08) (1.45,-0.92) (1.75,-0.60) (2.00,0)
+    (2.30,0.80) (2.55,1.12) (2.80,1.25) (3.10,1.15) (3.45,0.80) (3.80,0.32)
+    (4.08,0.03) (4.28,0.02) (4.50,0.20) (4.78,0.72) (5.05,1.40) (5.35,2.30) (5.55,3.05) };
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (1.05,0) {$a$};
+  \node[below=1pt, font=\small] at (2.00,0) {$b$};
+  \node[below=1pt, font=\small] at (2.80,0) {$c$};
+  \node[below=1pt, font=\small] at (4.18,0) {$d$};
+  \node[below=1pt, font=\small] at (5.05,0) {$e$};
+\end{tikzpicture}
