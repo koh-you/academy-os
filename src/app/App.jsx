@@ -5371,32 +5371,9 @@ export function App() {
     persistLessonNotificationPlans(nextPlans);
   }
 
-  // 2026-10-02 · 체크는 "이 수업도 알림톡을 보낸다" 는 설정만 바꾼다. Solapi 실제 예약·취소는
-  // handleApplyLessonNotificationPlan 을 누를 때만 일어난다 — 되돌리기 어려운 바깥 행동이
-  // 체크 한 번에 딸려 나가면 안 된다.
-  //
-  // 예전 dailyJournalEnabled 는 화면을 일반 수업일지로 바꿔치우는 플래그였다. 같은 자리에서
-  // 알림톡까지 쓸 수 있게 되어 화면 전환은 없앴고, 켜 두셨던 분의 의도(=보낸다)는
-  // getExamPrepNotificationEnabled 가 이어받는다.
-  function handleToggleExamPrepDailyJournal(lessonId, enabled) {
-    if (!lessonId) return;
-    const currentPlan = lessonNotificationPlans[lessonId];
-    const nextPlans = {
-      ...lessonNotificationPlans,
-      [lessonId]: {
-        ...(currentPlan ?? {}),
-        dailyJournalEnabled: enabled === true,
-        mode: enabled === true ? (currentPlan?.mode && currentPlan.mode !== "none" ? currentPlan.mode : "default") : "none",
-        updatedAt: new Date().toISOString()
-      }
-    };
-    setLessonNotificationPlans(nextPlans);
-    persistLessonNotificationPlans(nextPlans);
-  }
-
-  // 화면 전환은 알림톡 설정과 다른 일이다. 수업일지에는 숙제·과제 상태·코멘트 미리보기처럼
-  // 시험대비 화면에 없는 것이 있어 그리로 갈 길은 남긴다 — 다만 `데일리 알림톡 사용` 이라는
-  // 이름 뒤에 숨기지 않고 `수업일지로 열기` 라는 제 이름으로 부른다(2026-10-02).
+  // 2026-10-02 · 시험대비 수업을 일반 수업일지로 여는 토글. 학생별 강의 내용·코멘트와 알림톡
+  // 예약은 수업일지가 맡으므로, 시험대비 모달의 [수업일지 · 알림톡] 버튼이 이걸 켠다.
+  // 돌아오는 길은 수업일지 머리의 [시험대비 명단 화면] 이다.
   function handleToggleExamPrepJournalView(lessonId, enabled) {
     if (!lessonId) return;
     const currentPlan = lessonNotificationPlans[lessonId];
@@ -5412,37 +5389,8 @@ export function App() {
     persistLessonNotificationPlans(nextPlans);
   }
 
-  // 시험대비 수업은 이 화면에서 켜기 전까지 알림톡을 보내지 않는다. 저장된 설정이 없으면
-  // 일반 수업의 기본값("default")을 따라가지 않고 꺼진 것으로 본다 — 예전에는 이 화면에
-  // 예약 수단이 없어 실제로 아무것도 나가지 않았고, 그 상태를 그대로 유지한다.
-  function getExamPrepNotificationEnabled(lesson) {
-    const plan = lessonNotificationPlans[lesson?.lessonId];
-    if (!plan) return false;
-    if (plan.mode) return plan.mode !== "none";
-    return plan.dailyJournalEnabled === true;
-  }
-
-  // allowPastFallback: false 는 수업일지 라벨과 같은 설정이다. 켜 두면 지난 수업에도 "다음
-  // 가능한 시각" 이 미래 날짜로 찍혀, 보내지지도 않을 예약이 잡힌 것처럼 보인다.
-  function getExamPrepNotificationScheduledLabel(lesson) {
-    const plan = lessonNotificationPlans[lesson?.lessonId];
-    if (plan?.mode === "manual" && plan.scheduledAt) return `수동 예약 · ${formatKoreaTimeLabel(plan.scheduledAt)}`;
-    const delayMinutes = plan?.mode === "delay30" ? 30 : plan?.mode === "nextDay11am" ? "nextDay11am" : 0;
-    const scheduledDate = getLessonAlimtalkScheduledDate(lesson, delayMinutes, { allowPastFallback: false });
-    return scheduledDate ? `예약 ${formatKoreaTimeLabel(scheduledDate)}` : "예약 시간 지남";
-  }
-
   async function handleApplyLessonNotificationPlan(lessonId) {
     const mode = lessonNotificationPlans[lessonId]?.mode || "default";
-    return applyLessonNotificationPlan(lessonId, mode);
-  }
-
-  async function handleApplyExamPrepNotificationPlan(lessonId) {
-    const lesson = calendarLessons.find((item) => item.lessonId === lessonId);
-    // 자동 생성 수업은 예약 대상이 되려면 먼저 서버에 있어야 한다(알림 job 이 lessonId 를 건다).
-    if (lesson?.isVirtualGeneratedLesson || lesson?.isExamPrepAutoLesson) await ensurePersistedLesson(lesson);
-    const plan = lessonNotificationPlans[lessonId];
-    const mode = plan?.mode || (plan?.dailyJournalEnabled === true ? "default" : "none");
     return applyLessonNotificationPlan(lessonId, mode);
   }
 
@@ -6571,14 +6519,10 @@ export function App() {
       handleSaveDerivedSchoolCalendar,
       handleSaveExamPrepSchedule,
       handleSaveExamPrepSchoolPlan,
-      handleApplyExamPrepNotificationPlan,
       handleToggleExamPrepJournalView,
-      getExamPrepNotificationEnabled,
-      getExamPrepNotificationScheduledLabel,
       getExamPrepLessonExcludedSchools,
       handleSyncSpecialLectureStudentSchedules,
       handleTeacherVerifyHomework,
-      handleToggleExamPrepDailyJournal,
       handleToggleStudentNotificationMute,
       handleUndoLessonAction,
       handleUndoPassSupplementTask,

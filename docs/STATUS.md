@@ -1,5 +1,13 @@
 # Academy OS Current Status
 
+## 2026-10-02 시험대비 모달 — 기록·알림톡을 수업일지로 되돌림
+
+- **되돌린 것**: 같은 날 올린 #440 이 시험대비 모달 안에 학생별 강의 내용·코멘트와 알림톡 예약을 넣었는데, 같은 칸(`record.lessonProgress`·`teacherComment`·`studentComment`)을 두 화면에서 적게 되어 어디에 쓰는 게 맞는지 알 수 없었다. 액션도 한 줄에 일곱 개가 되어 넘쳤다(요청).
+- **지금 경계**: 시험대비 모달은 "그 날짜에 누가 몇 시에 오는가" 만 맡는다 — 학교별 참여·시간, 명단, 일정 수정·삭제. 학생별 기록과 알림톡은 수업일지가 맡고, `[수업일지 · 알림톡]` 버튼이 그리로 연다. 복귀는 수업일지 머리의 `[시험대비 명단 화면]`.
+- **지운 것**: `ExamPrepContentEditor`, `ExamPrepNotificationBar`, `examPrepStudentContent.js` 와 그 CSS·테스트. App 핸들러 2개(`handleApplyExamPrepNotificationPlan`, `handleToggleExamPrepDailyJournal`)도 함께 지웠다. `handleToggleExamPrepJournalView` 만 남는다.
+- **레이아웃**: 오른쪽 열이 사라져 2열을 접고 모달을 1600 → 1120px 로 좁혔다. 1512×950 실측 모달 1120×838(bottom 894 < 950), 액션 3개 한 줄, 요약 카드 한 줄, 가로 넘침 0.
+
+
 ## 2026-10-02 시험대비 알림톡 — 화면 전환 분리 · 코멘트 인라인
 
 - **체크박스가 화면을 바꿔치우던 동작을 끊었다**: `데일리 알림톡 사용` 은 화면을 일반 수업일지로 교체하는 플래그였다. 알림톡 하나 쓰자고 학교별 참여 관리 화면을 떠나야 했다. 이제 체크는 **알림톡 설정만** 바꾸고 화면은 그대로다.

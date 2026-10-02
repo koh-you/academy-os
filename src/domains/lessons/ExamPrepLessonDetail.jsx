@@ -15,12 +15,10 @@ import {
 } from "./examPrepLessonPresentation.js";
 import { getLessonStudentIds } from "../students/lessonRosterSelectors.js";
 
-const ExamPrepContentEditor = lazy(() => import("./ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
-// 2026-10-01 · 모달을 열 때만 쓰는 패널이라 초기 번들에서 뺀다(진행 내용 편집기와 같은 이유).
-const ExamPrepNotificationBar = lazy(() => import("./ExamPrepNotificationBar.jsx").then((module) => ({ default: module.ExamPrepNotificationBar })));
+// 2026-10-02 · 모달을 열 때만 쓰는 패널이라 초기 번들에서 뻐다.
 const ExamPrepSchoolPlanPanel = lazy(() => import("./ExamPrepSchoolPlanPanel.jsx").then((module) => ({ default: module.ExamPrepSchoolPlanPanel })));
 
-export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepExcludedSchools = [], examPrepNotificationEnabled = false, examPrepNotificationScheduledLabel = "", examPrepScheduleLessons = [], lesson, onApplyExamPrepNotificationPlan, onDeleteLesson, onOpenJournalView, onSaveExamPrepSchedule, onSaveExamPrepSchoolPlan, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
+export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, examPrepExcludedSchools = [], examPrepScheduleLessons = [], lesson, onDeleteLesson, onOpenJournalView, onSaveExamPrepSchedule, onSaveExamPrepSchoolPlan, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
@@ -43,24 +41,17 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
           <span className="eyebrow">시험대비 수업</span>
           <HelpTip
             label="시험대비 수업"
-            text="저장된 실제 수업 기준으로 수업일지와 알림톡을 연결합니다. 날짜나 시간이 다르면 일정 수정에서 이 수업 자체를 조정합니다."
+            text="이 화면은 그 날짜에 누가 몇 시에 오는지를 정합니다. 학생별 강의 내용·코멘트와 알림톡 예약은 [수업일지 · 알림톡]에서 합니다. 날짜나 시간이 다르면 일정 수정에서 이 수업 자체를 조정합니다."
           />
         </div>
         <div aria-label="시험대비 수업 작업" className="examPrepActions" role="group">
-          {onToggleDailyJournal && onApplyExamPrepNotificationPlan ? (
-            <ExamPrepNotificationBar
-              isEnabled={examPrepNotificationEnabled}
-              lesson={lesson}
-              onApplyPlan={onApplyExamPrepNotificationPlan}
-              onToggleEnabled={onToggleDailyJournal}
-              scheduledLabel={examPrepNotificationScheduledLabel}
-            />
-          ) : null}
-          {/* 수업일지에는 숙제·과제 상태·코멘트 미리보기처럼 이 화면에 없는 것이 있다. 그리로
-              가는 길은 남기되, 알림톡 체크 뒤에 숨기지 않고 제 이름으로 부른다(2026-10-02). */}
+          {/* 2026-10-02 · 학생별 기록과 알림톡은 수업일지가 맡는다. 같은 칸(record.lessonProgress
+              ·teacherComment·studentComment)을 두 화면에서 적게 하니 어디에 쓰는 게 맞는지
+              알 수 없었고, 액션이 한 줄에 일곱 개가 되어 넘쳤다(요청). 이 모달은 "이 날짜에
+              누가 몇 시에 오는가" 만 맡고, 기록·알림톡은 수업일지로 넘긴다. */}
           {onOpenJournalView ? (
-            <button className="softButton" onClick={() => onOpenJournalView(lesson.lessonId, true)} type="button">
-              수업일지로 열기
+            <button className="primaryButton" onClick={() => onOpenJournalView(lesson.lessonId, true)} type="button">
+              수업일지 · 알림톡
             </button>
           ) : null}
           <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
@@ -86,12 +77,9 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
         />
       </div>
 
-      {/* 2026-10-01 · 가로 2열. 학생별 진행 내용이 학생 수만큼 아래로 이어져 모달을 넓혀도
-          하단 스크롤이 길었다. 왼쪽은 이 수업을 정하는 것(학교별 참여·명단·일정), 오른쪽은
-          오늘 적는 것(학생별 진행 내용)으로 나누고 오른쪽만 따로 스크롤한다. 수업 등록
-          모달(2026-09-26)과 같은 패턴이다. */}
-      <div className="examPrepLessonLayout">
-        <div className="examPrepLessonMainColumn">
+      {/* 2026-10-02 · 오른쪽 열(학생별 기록)을 수업일지로 넘기면서 2열을 접었다. 남은 것은
+          학교별 참여·명단뿐이라 한 열로 충분하고, 모달도 그만큼 좁아진다. */}
+      <div className="examPrepLessonMainColumn">
       {onSaveExamPrepSchoolPlan ? (
         <Suspense fallback={<p className="inlineNotice">학교별 참여를 불러오는 중입니다.</p>}>
         <ExamPrepSchoolPlanPanel
@@ -165,20 +153,6 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
           <EmptyState description="일정 수정에서 학생 명단을 먼저 지정해 주세요." title="참여 학생이 없습니다." />
         )}
       </section>
-
-        </div>
-
-        <div className="examPrepLessonContentColumn">
-          <Suspense fallback={<p className="inlineNotice">진행 내용 입력을 준비하는 중입니다.</p>}>
-            <ExamPrepContentEditor
-              createRecord={(student) => createEmptyRecord(lesson, student)}
-              lesson={lesson}
-              onSaveRecord={onSaveRecord}
-              records={records}
-              studentRows={studentRows}
-            />
-          </Suspense>
-        </div>
       </div>
 
       {isScheduleEditorOpen ? (

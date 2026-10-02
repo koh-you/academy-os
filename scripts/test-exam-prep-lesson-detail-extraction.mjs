@@ -28,9 +28,11 @@ const preservedContractSnippets = [
   ["isScheduleEditorOpen", "schedule modal open/close local state"],
   ["onClick={() => onDeleteLesson(lesson.lessonId)}", "delete-lesson callback identity"],
   ["onSave={onSaveExamPrepSchedule}", "exam-prep schedule save callback"],
-  ["onSaveRecord={onSaveRecord}", "lesson record save callback"],
-  ["<Suspense fallback=", "Suspense boundary around ExamPrepContentEditor"],
-  ["<ExamPrepContentEditor", "ExamPrepContentEditor usage"],
+  // 2026-10-02 · 학생별 기록(강의 내용·코멘트)과 알림톡 예약을 수업일지로 넘기면서
+  // ExamPrepContentEditor 와 onSaveRecord 가 이 화면에서 빠졌다. 같은 칸을 두 화면에서 적게
+  // 하니 어디에 쓰는 게 맞는지 알 수 없었다(요청). 그 자리는 [수업일지 · 알림톡] 버튼이 잇는다.
+  ["onOpenJournalView(lesson.lessonId, true)", "journal entry point for records and alimtalk"],
+  ["<Suspense fallback=", "Suspense boundary around the lazy school plan panel"],
   ["rosterView === \"school\"", "time/school roster sort toggle"],
   // 2026-10-02 · 연결된 시험정보 칩은 지웠다. 바로 위 학교별 참여 패널이 같은 학교를
   // 인원·시간·참여 여부까지 보여줘 칩은 같은 말을 한 번 더 할 뿐이었다(요청).
@@ -43,15 +45,6 @@ for (const [snippet, label] of preservedContractSnippets) {
   assert.ok(detailSource.includes(snippet), `extracted component must preserve: ${label} (missing "${snippet}")`);
 }
 
-assert.ok(
-  teacherLessonHubSource.includes("createEmptyRecord={nestedPanels.createEmptyRecord}"),
-  "TeacherLessonHubV2 call site must pass createEmptyRecord (new prop, needed since the component left App.jsx's closure scope)"
-);
-assert.ok(
-  lessonJournalDetailSource.includes("createEmptyRecord={createEmptyRecord}"),
-  "LessonJournalDetail call site must pass createEmptyRecord (new prop, needed since the component left App.jsx's closure scope)"
-);
-
 const teacherHubPropNames = [...teacherLessonHubSource.matchAll(/<ExamPrepLessonDetail\b[\s\S]*?\/>/g)][0][0]
   .match(/\n\s+(\w+)=/g)
   .map((line) => line.trim().replace(/=$/, ""));
@@ -59,32 +52,27 @@ assert.deepEqual(
   [...teacherHubPropNames].sort(),
   [
     "attendanceSettings",
-    "createEmptyRecord",
     // 2026-10-01 · 날짜별 학교 단위 참여·시간 패널. 제외 목록은 생성 제어에서 읽고(명단에서
     // 사라진 학교도 같은 목록에 남아야 되돌릴 수 있다), 시간·참여 변경은 저장 하나로 묶여
     // onSaveExamPrepSchoolPlan 한 개를 쓴다.
     "examPrepExcludedSchools",
-    // 2026-10-02 · 알림톡을 이 화면 안에서 쓰고 예약한다. 체크박스가 화면을 일반 수업일지로
-    // 바꿔치우던 분기를 없앤 대신, 설정 상태·예약 시각·Solapi 반영 핸들러를 받는다.
-    "examPrepNotificationEnabled",
-    "examPrepNotificationScheduledLabel",
     "examPrepScheduleLessons",
     "lesson",
-    "onApplyExamPrepNotificationPlan",
     "onDeleteLesson",
-    // 2026-10-02 · 수업일지로 가는 길은 알림톡 체크가 아니라 제 이름의 버튼이 연다.
+    // 2026-10-02 · 학생별 기록(강의 내용·코멘트)과 알림톡 예약은 수업일지가 맡는다. 같은 칸을
+    // 두 화면에서 적게 하니 어디에 쓰는 게 맞는지 알 수 없었고, 액션도 한 줄에 일곱 개가 되어
+    // 넘쳤다(요청). 이 화면은 "그 날짜에 누가 몇 시에 오는가" 만 맡고, 그리로 가는 버튼 하나를
+    // 받는다 — createEmptyRecord·onSaveRecord·알림톡 props 는 모두 빠졌다.
     "onOpenJournalView",
     "onSaveExamPrepSchedule",
     "onSaveExamPrepSchoolPlan",
-    "onSaveRecord",
-    "onToggleDailyJournal",
     "persistedLessons",
     "records",
     "ScheduleModalComponent",
     "students",
     "templates"
   ].sort(),
-  "TeacherLessonHubV2's full-featured call site must pass exactly the same prop set as before plus the disclosed additions (createEmptyRecord, attendanceSettings, onToggleDailyJournal, and the 2026-10-01 per-school participation props)"
+  "TeacherLessonHubV2's full-featured call site must pass exactly the per-school participation props plus the journal entry point (2026-10-02)"
 );
 
 console.log("exam prep lesson detail extraction: no App back-reference, preserved contract snippets, and exact call-site prop sets verified");

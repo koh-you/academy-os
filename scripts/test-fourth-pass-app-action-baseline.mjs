@@ -73,12 +73,11 @@ const expectedDirectCallHandlers = [];
 // 기존 handleSaveExamPrepSchedule(= examPrepScheduleApi 래퍼)을 거치므로 direct request
 // call 은 그대로.
 assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
-// 122: 2026-10-02 handleApplyExamPrepNotificationPlan 과 handleToggleExamPrepJournalView.
-// 시험대비 화면에서 알림톡을 쓰고 예약까지 하도록 바뀌면서, 자동 생성 수업을 먼저 저장한 뒤
-// 기존 applyLessonNotificationPlan 에 넘기는 얇은 래퍼가 하나 늘었다. 그리고 수업일지로 가는
-// 화면 전환을 알림톡 설정과 분리하면서 전용 토글이 하나 더 생겼다(예전에는 `데일리 알림톡
-// 사용` 체크가 겸했다). 둘 다 postAppState·기존 경로만 쓰므로 direct request call 은 그대로.
-assert.equal(handlers.length, 122, `handle* count drifted from the baseline (122), now ${handlers.length}`);
+// 120: 2026-10-02 handleToggleExamPrepJournalView 하나만 남았다. 시험대비 화면 안에서
+// 알림톡을 쓰고 예약하려던 두 핸들러(handleApplyExamPrepNotificationPlan,
+// handleToggleExamPrepDailyJournal)는 학생별 기록·알림톡을 수업일지로 되돌리면서 지웠다 —
+// 같은 칸을 두 화면에서 적게 하니 어디에 쓰는 게 맞는지 알 수 없었다(요청).
+assert.equal(handlers.length, 120, `handle* count drifted from the baseline (120), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
 assert.equal(directRequestCallCount, 19, `direct fetch/postJson call count drifted from the 4-4 closeout (19), now ${directRequestCallCount}`);
