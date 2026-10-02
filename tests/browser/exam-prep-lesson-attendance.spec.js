@@ -125,7 +125,9 @@ test("exam prep lesson can opt into the daily Alimtalk and carries that day's te
   await expect(examPrepBody).toBeVisible();
   await expect(page.locator(".journalRow")).toHaveCount(0);
 
-  await page.getByText("데일리 알림톡 사용").click();
+  // 2026-10-02 · 알림톡 체크가 화면을 바꿔치우던 동작을 끊었다. 수업일지로 가는 길은
+  // `수업일지로 열기` 라는 제 이름의 버튼이 맡는다.
+  await page.getByRole("button", { name: "수업일지로 열기" }).click();
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
   await expect(lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first()).toBeVisible();

@@ -64,9 +64,16 @@ assert.deepEqual(
     // 사라진 학교도 같은 목록에 남아야 되돌릴 수 있다), 시간·참여 변경은 저장 하나로 묶여
     // onSaveExamPrepSchoolPlan 한 개를 쓴다.
     "examPrepExcludedSchools",
+    // 2026-10-02 · 알림톡을 이 화면 안에서 쓰고 예약한다. 체크박스가 화면을 일반 수업일지로
+    // 바꿔치우던 분기를 없앤 대신, 설정 상태·예약 시각·Solapi 반영 핸들러를 받는다.
+    "examPrepNotificationEnabled",
+    "examPrepNotificationScheduledLabel",
     "examPrepScheduleLessons",
     "lesson",
+    "onApplyExamPrepNotificationPlan",
     "onDeleteLesson",
+    // 2026-10-02 · 수업일지로 가는 길은 알림톡 체크가 아니라 제 이름의 버튼이 연다.
+    "onOpenJournalView",
     "onSaveExamPrepSchedule",
     "onSaveExamPrepSchoolPlan",
     "onSaveRecord",

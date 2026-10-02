@@ -3,6 +3,7 @@ import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import {
   createExamPrepStudentContentDrafts,
   createExamPrepStudentContentSaveItems,
+  examPrepStudentContentFields,
   getExamPrepLegacyCommonContent
 } from "./examPrepStudentContent.js";
 
@@ -31,10 +32,10 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
       const saved = await onSaveRecord(item.record.lessonStudentRecordId, lesson, item.student, item.record, {
         skipNotificationRefresh: true,
         skipRelatedHomeworks: true,
-        verifyFields: ["lessonProgress"]
+        verifyFields: item.changedFields
       });
       if (!saved) {
-        setSaveState({ state: "failed", message: `${item.student.name} 진행 내용 저장에 실패했습니다. 입력은 유지됩니다.` });
+        setSaveState({ state: "failed", message: `${item.student.name} 기록 저장에 실패했습니다. 입력은 유지됩니다.` });
         return;
       }
     }
@@ -50,10 +51,10 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
     <div className="examPrepLessonContentEditor">
       <div className="examPrepStudentContentHeading">
         <div className="helpTipTitleRow">
-          <strong>학생별 오늘 강의 내용</strong>
+          <strong>학생별 기록 · 알림톡</strong>
           <HelpTip
-            label="학생별 오늘 강의 내용"
-            text="수업일지의 '오늘 강의 내용'과 같은 칸입니다. 여기서 적어도 수업일지와 알림톡의 🧭 강의 내용에 그대로 들어갑니다. 학생마다 별도의 칸에 적고 각각의 수업기록으로 저장합니다."
+            label="학생별 기록 · 알림톡"
+            text="수업일지와 같은 칸입니다. 강의 내용은 알림톡의 🧭 강의 내용, 코멘트는 💬 코멘트로 그대로 나갑니다. 학부모 코멘트와 학생 코멘트는 받는 사람이 다릅니다. 여기서 저장해도 알림톡이 나가지는 않습니다 — 예약은 위 알림톡 줄에서 따로 누릅니다."
           />
         </div>
         <span>{studentRows.length}명</span>
@@ -66,29 +67,43 @@ export function ExamPrepContentEditor({ createRecord, lesson, onSaveRecord, reco
       ) : null}
       <div className="examPrepStudentContentList">
         {studentRows.map((student) => (
-          <label className="examPrepStudentContentRow" htmlFor={`exam-prep-content-${lesson.lessonId}-${student.studentId}`} key={student.studentId}>
+          <div className="examPrepStudentContentRow" key={student.studentId}>
             <span className="examPrepStudentContentIdentity">
               <strong>{student.name}</strong>
               <small>{student.schoolName} · {student.timeLabel}</small>
             </span>
-            <textarea
-              aria-label={`${student.name} 오늘 강의 내용`}
-              id={`exam-prep-content-${lesson.lessonId}-${student.studentId}`}
-              maxLength={1000}
-              onChange={(event) => {
-                setDrafts((current) => ({ ...current, [student.studentId]: event.target.value }));
-                setSaveState({ state: "dirty", message: "저장 전 변경" });
-              }}
-              rows={3}
-              value={drafts[student.studentId] ?? ""}
-            />
-          </label>
+            <div className="examPrepStudentContentFields">
+              {examPrepStudentContentFields.map((entry) => {
+                const fieldId = `exam-prep-${entry.field}-${lesson.lessonId}-${student.studentId}`;
+                return (
+                  <label htmlFor={fieldId} key={entry.field}>
+                    <span>{entry.ariaSuffix}</span>
+                    <textarea
+                      aria-label={`${student.name} ${entry.ariaSuffix}`}
+                      id={fieldId}
+                      maxLength={1000}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setDrafts((current) => ({
+                          ...current,
+                          [student.studentId]: { ...current[student.studentId], [entry.field]: value }
+                        }));
+                        setSaveState({ state: "dirty", message: "저장 전 변경" });
+                      }}
+                      rows={2}
+                      value={drafts[student.studentId]?.[entry.field] ?? ""}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </div>
         ))}
       </div>
       <div className="examPrepLessonContentFooter">
-        <span>변경한 학생의 내용만 저장합니다.</span>
+        <span>변경한 칸만 저장합니다. 저장은 알림톡을 보내지 않습니다.</span>
         <button className="primaryButton" disabled={!saveItems.length || saveState.state === "saving"} onClick={save} type="button">
-          {saveState.state === "saving" ? "저장 확인 중" : `학생별 강의 내용 저장${saveItems.length ? ` (${saveItems.length}명)` : ""}`}
+          {saveState.state === "saving" ? "저장 확인 중" : `학생별 기록 저장${saveItems.length ? ` (${saveItems.length}명)` : ""}`}
         </button>
       </div>
       {saveState.message ? <p className={`inlineNotice ${saveState.state === "failed" ? "danger" : ""}`} role="status">{saveState.message}</p> : null}

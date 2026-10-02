@@ -200,7 +200,54 @@ test("the schedule and delete actions stay above the scrolling columns", async (
   expect(inViewport).toBe(true);
 
   // 학생별 칸은 수업일지와 같은 칸이라는 것을 라벨로 드러낸다(둘 다 record.lessonProgress).
-  await expect(detail.locator(".examPrepStudentContentHeading")).toContainText("학생별 오늘 강의 내용");
+  await expect(detail.locator(".examPrepStudentContentHeading")).toContainText("학생별 기록 · 알림톡");
+});
+
+test("the alimtalk comment is written in place, and the checkbox only changes the plan", async ({ page, request }) => {
+  // 2026-10-02 · 전에는 알림톡 코멘트를 쓰려면 체크박스가 화면을 일반 수업일지로 바꿔치웠다.
+  // 이제 시험대비 화면 안에서 강의 내용·코멘트를 적고, Solapi 실제 예약은 따로 누른다.
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+
+  // 강의 내용과 두 코멘트를 같은 화면에서 적는다.
+  await detail.getByLabel("정산 미리보기 학생 오늘 강의 내용").fill("미적분 오답 정리");
+  await detail.getByLabel("정산 미리보기 학생 학부모 코멘트").fill("학부모께 전하는 말");
+  await detail.getByLabel("정산 미리보기 학생 학생 코멘트").fill("학생에게 전하는 말");
+  await detail.getByRole("button", { name: /학생별 기록 저장/ }).click();
+  await expect(detail.locator(".examPrepLessonContentEditor").getByRole("status")).toContainText("재조회 확인");
+
+  const records = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
+  expect(records.records).toContainEqual(expect.objectContaining({
+    lessonId: "lesson_exam_prep_2026-08-09",
+    lessonProgress: "미적분 오답 정리",
+    studentComment: "학생에게 전하는 말",
+    studentId: "safe-settlement-student",
+    teacherComment: "학부모께 전하는 말"
+  }));
+
+  // 화면은 그대로다 — 체크해도 수업일지로 바뀌지 않는다.
+  const notificationBar = detail.locator(".examPrepNotificationBar");
+  await expect(notificationBar).toContainText("보내지 않음");
+  await notificationBar.getByLabel("알림톡 사용").check();
+  await expect(detail.locator(".examPrepSchoolPlanPanel")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "수업일지" })).toHaveCount(0);
+  await expect(notificationBar).toContainText("예약");
+
+  // 체크만으로는 Solapi 요청이 나가지 않는다 — 예약은 별도 행동이다.
+  const reservationRequests = [];
+  page.on("request", (req) => {
+    if (req.url().includes("/api/notification-jobs")) reservationRequests.push(req.url());
+  });
+  await notificationBar.getByLabel("알림톡 사용").uncheck();
+  await notificationBar.getByLabel("알림톡 사용").check();
+  expect(reservationRequests).toEqual([]);
+
+  // 반영 버튼을 눌러야 예약이 일어난다.
+  await notificationBar.getByRole("button", { name: "Solapi 반영" }).click();
+  await expect(notificationBar.getByRole("status", { name: "시험대비 알림톡 반영 상태" })).toContainText("Solapi");
 });
 
 test("school rows and student rows line their time inputs up on the same columns", async ({ page, request }) => {
