@@ -163,16 +163,10 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
           titleAs="h3"
         />
 
-        {sourceItems.length ? (
-          <div className="examPrepSourceChipList" aria-label="연결된 시험정보">
-            {sourceItems.map((label) => (
-              <span className="examPrepSourceChip" key={label}>{label}</span>
-            ))}
-          </div>
-        ) : (
-          <EmptyState description="필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요." title="연결된 시험정보가 없습니다." />
-        )}
-
+        {/* 2026-10-02 · 연결된 시험정보 칩을 지웠다. 바로 위 학교별 참여 패널이 같은 학교를
+            인원·시간·참여 여부까지 보여주므로 칩은 같은 말을 한 번 더 할 뿐이었다(요청).
+            이로써 "2학기 중간고사" 라는 고사 이름은 이 모달에 더 이상 나오지 않는다 — 날짜와
+            학교로 어느 고사인지 알 수 있고, 고사 자체는 시험관리에서 본다. */}
       </section>
         </div>
 

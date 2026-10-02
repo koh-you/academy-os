@@ -32,7 +32,9 @@ const preservedContractSnippets = [
   ["<Suspense fallback=", "Suspense boundary around ExamPrepContentEditor"],
   ["<ExamPrepContentEditor", "ExamPrepContentEditor usage"],
   ["rosterView === \"school\"", "time/school roster sort toggle"],
-  ["examPrepSourceChip", "connected exam-source info rendering"],
+  // 2026-10-02 · 연결된 시험정보 칩은 지웠다. 바로 위 학교별 참여 패널이 같은 학교를
+  // 인원·시간·참여 여부까지 보여줘 칩은 같은 말을 한 번 더 할 뿐이었다(요청).
+  // 고사 이름은 패널 설명에 한 번만 남는다.
   ["className=\"ghostButton\"", "schedule-edit button class"],
   // 2026-09-19 · 일정 삭제는 확인 모달 진입 버튼이라 dangerButton → dangerSoftButton 으로 통일(docs/ui-button-hierarchy.md).
   ["className=\"dangerSoftButton\"", "delete-schedule button class"]

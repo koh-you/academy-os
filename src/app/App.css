@@ -1568,22 +1568,6 @@ summary:focus-visible {
   padding: 0 14px;
 }
 
-.examPrepSourceChipList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.examPrepSourceChip {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 999px;
-  color: var(--academy-text, #0f172a);
-  font-size: 13px;
-  font-weight: 800;
-  padding: 6px 12px;
-}
-
 .lessonNotificationStatusRow {
   align-items: center;
   display: flex;
