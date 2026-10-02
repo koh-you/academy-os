@@ -1,0 +1,10 @@
+138-43	qa/p138.jpg
+138-44	qa/p138.jpg
+138-45	qa/p138.jpg
+138-46	qa/p138.jpg
+139-47	qa/p139.jpg
+139-48	qa/p139.jpg
+140-49	qa/p140.jpg
+140-50	qa/p140.jpg
+141-51	qa/p141.jpg
+141-52	qa/p141.jpg

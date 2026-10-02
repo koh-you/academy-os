@@ -4,8 +4,9 @@
 \begin{tikzpicture}[x=0.80cm, y=0.52cm, line width=0.5pt]
   \draw[->, >=stealth, line width=0.7pt] (-3.00,0) -- (1.30,0) node[below=1pt, font=\small] {$x$};
   \draw[->, >=stealth, line width=0.7pt] (0,-1.75) -- (0,2.70) node[left=1pt, font=\small] {$y$};
-  \draw[line width=0.6pt, domain=-2.60:0.88, samples=120, smooth]
-    plot (\x, {-0.8*((\x)^3 + 2.35*(\x)^2 + 0.06*(\x) - 0.594)});
+  % 2026-10-02 검수: 원본 x절편 비 -3.61 : -1.39 : 1 에 맞춰 근을 -1.63, -0.63, 0.45 로 다시 잡았다.
+  \draw[line width=0.6pt, domain=-2.05:0.95, samples=120, smooth]
+    plot (\x, {-0.8*(((\x)+1.63)*((\x)+0.63)*((\x)-0.45))});
   \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\pt{O}$};
   \node[anchor=east, font=\small] at (-1.55,2.25) {$y=f(x)$};
 \end{tikzpicture}

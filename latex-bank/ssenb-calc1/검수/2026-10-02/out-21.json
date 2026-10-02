@@ -1,0 +1,14 @@
+{ "range": "101-03~105-27", "checked": 25, "ok": 22,
+  "findings": [
+    { "id": "102-07", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 색 알약 배지) — 쪽 이미지 qa/p108.jpg 로 대조해 일치(쎈 0873)" },
+    { "id": "102-08", "severity": "yellow", "where": "body", "note": "본문 첫 줄의 인라인 displaystyle 적분이 높아 둘째 줄 「수는?」이 적분 아래끝 -2 와 겹침(내용은 원문과 일치)", "fix": "items['102-08'].body 의 적분식을 par smallskip centerline{...} par smallskip noindent 로 별도 줄에 빼기" },
+    { "id": "102-11", "severity": "ok", "where": "layout", "note": "크롭이 아래 유형 03 상자와 12번까지 물고 내려왔으나 조판본은 11번 발문·조건 상자만 담고 있어 일치. 끝의 「(단, a, b는 상수이다.)」가 줄 오른쪽 끝으로 가는 것은 book.tex 의 dmcondfill 이 의도한 동작" },
+    { "id": "102-12", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 qa/p108.jpg 로 대조해 일치(쎈 0878)" },
+    { "id": "103-16", "severity": "ok", "where": "layout", "note": "크롭이 유형 04 상자와 17번 대표 문제를 물고 내려왔으나 조판본은 16번만 담고 있어 일치" },
+    { "id": "103-17", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 qa/p109.jpg 로 대조해 일치(쎈 0883)" },
+    { "id": "104-22", "severity": "ok", "where": "layout", "note": "크롭이 유형 05 상자를 물고 내려왔으나 조판본은 22번만 담고 있어 일치. 조건 (나) 의 「(단, n=0, 1, 2, …)」만 원문에서는 같은 줄, 조판본에서는 다음 줄로 내려감(가독성 문제 없음)" },
+    { "id": "104-23", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 qa/p110.jpg 를 4배 확대해 대조, 구간조건 x>=2 / x<=2 까지 일치(쎈 0889)" },
+    { "id": "105-25", "severity": "yellow", "where": "figure", "note": "그림이 오른쪽으로 떠서 본문 두 줄만 옆에 붙고, 별도 줄 식 (정적분 -3 에서 1 까지)과 「의 값을 구하시오.」가 그림 아래로 한참 밀려 가운데 빈 공간이 크다. 그림 내용(두 선분 · x축 -3, -2 · y축 2, 1 · (-3, 2) 안내 파선)은 원문과 일치" },
+    { "id": "105-26", "severity": "yellow", "where": "body", "note": "인라인 cases 때문에 첫 줄 한글 자간이 크게 늘어지고(「함 수 … 에  대 하 여」), 둘째 줄 적분 아래끝 -1 이 셋째 줄 「시오.」와 겹침(내용은 원문과 일치)", "fix": "items['105-26'].body 의 cases 식과 적분식을 par smallskip centerline{...} par smallskip noindent 로 별도 줄에 빼기" },
+    { "id": "105-27", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 qa/p111.jpg 와 105-26 크롭 꼬리로 대조해 일치(쎈 0893)" }
+  ] }

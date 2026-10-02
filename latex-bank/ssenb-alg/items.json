@@ -2969,7 +2969,7 @@
    "page": 23,
    "level": "하",
    "ssen_ref": "0186",
-   "body": "다음은 1이 아닌 세 양수 $a$, $b$, $c$에 대하여 \\par\\smallskip\\centerline{$a^{\\log_b c}=c^{\\log_b a}$}\\par\\smallskip\\noindent 이 성립함을 증명한 것이다. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] $a^{\\log_b c}=x$로 놓으면 로그의 정의에 의하여\\\\[1mm] \\hspace*{1.5em}$\\framebox[2em]{\\scriptsize ㈎}=\\log_b c$\\\\[1mm] 이때 $\\framebox[2em]{\\scriptsize ㈎}=\\dfrac{\\log_c x}{\\framebox[2em]{\\scriptsize ㈏}}$, $\\log_b c=\\dfrac{1}{\\framebox[2em]{\\scriptsize ㈐}}$이므로\\\\[1mm] \\hspace*{1.5em}$\\dfrac{\\log_c x}{\\framebox[2em]{\\scriptsize ㈏}}=\\dfrac{1}{\\framebox[2em]{\\scriptsize ㈐}}$\\\\[1mm] \\hspace*{1.5em}$\\therefore \\log_c x=\\dfrac{\\framebox[2em]{\\scriptsize ㈏}}{\\framebox[2em]{\\scriptsize ㈐}}=\\log_b a$\\\\[1mm] 따라서 $x=c^{\\log_b a}$이므로\\\\[1mm] \\hspace*{1.5em}$a^{\\log_b c}=c^{\\log_b a}$\\end{minipage}} 위의 과정에서 ㈎, ㈏, ㈐에 알맞은 것을 써넣으시오.",
+   "body": "다음은 1이 아닌 세 양수 $a$, $b$, $c$에 대하여 \\par\\smallskip\\centerline{$a^{\\log_b c}=c^{\\log_b a}$}\\par\\smallskip\\noindent 이 성립함을 증명한 것이다. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] $a^{\\log_b c}=x$로 놓으면 로그의 정의에 의하여\\\\[1mm] \\hspace*{1.5em}$\\fbox{\\footnotesize ㈎}=\\log_b c$\\\\[1mm] 이때 $\\fbox{\\footnotesize ㈎}=\\dfrac{\\log_c x}{\\fbox{\\footnotesize ㈏}}$, $\\log_b c=\\dfrac{1}{\\fbox{\\footnotesize ㈐}}$이므로\\\\[1mm] \\hspace*{1.5em}$\\dfrac{\\log_c x}{\\fbox{\\footnotesize ㈏}}=\\dfrac{1}{\\fbox{\\footnotesize ㈐}}$\\\\[1mm] \\hspace*{1.5em}$\\therefore \\log_c x=\\dfrac{\\fbox{\\footnotesize ㈏}}{\\fbox{\\footnotesize ㈐}}=\\log_b a$\\\\[1mm] 따라서 $x=c^{\\log_b a}$이므로\\\\[1mm] \\hspace*{1.5em}$a^{\\log_b c}=c^{\\log_b a}$\\end{minipage}} 위의 과정에서 ㈎, ㈏, ㈐에 알맞은 것을 써넣으시오.",
    "answer": "",
    "answer_source": ""
   },
@@ -2977,7 +2977,7 @@
    "page": 23,
    "level": "중",
    "ssen_ref": "0187",
-   "body": "다음은 $\\log_{12} 4$가 무리수임을 증명한 것이다. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] $\\log_{12} 4$가 $\\framebox[2em]{\\scriptsize ㈎}$라 가정하면 서로소인 두 자연수 $m$, $n$ $(m<n)$에 대하여 $\\log_{12} 4=\\dfrac{m}{n}$으로 나타낼 수 있다.\\\\[1mm] 로그의 정의에 의하여\\\\[1mm] \\hspace*{1.5em}$12^{\\frac{m}{n}}=4$,\\qquad $12^{m}=4^{n}$\\qquad $\\therefore \\framebox[2em]{\\scriptsize ㈏}=4^{n-m}$\\\\[1mm] 이때 $\\framebox[2em]{\\scriptsize ㈏}$은 $\\framebox[2em]{\\scriptsize ㈐}$이고 $4^{n-m}$은 짝수이므로 $\\framebox[2em]{\\scriptsize ㈏}$과 $4^{n-m}$은 항상 같지 않다.\\\\[1mm] 따라서 $\\log_{12} 4$는 무리수이다.\\end{minipage}} 위의 과정에서 ㈎, ㈏, ㈐에 알맞은 것을 써넣으시오.",
+   "body": "다음은 $\\log_{12} 4$가 무리수임을 증명한 것이다. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] $\\log_{12} 4$가 $\\fbox{\\footnotesize ㈎}$라 가정하면 서로소인 두 자연수 $m$, $n$ $(m<n)$에 대하여 $\\log_{12} 4=\\dfrac{m}{n}$으로 나타낼 수 있다.\\\\[1mm] 로그의 정의에 의하여\\\\[1mm] \\hspace*{1.5em}$12^{\\frac{m}{n}}=4$,\\qquad $12^{m}=4^{n}$\\qquad $\\therefore \\fbox{\\footnotesize ㈏}=4^{n-m}$\\\\[1mm] 이때 $\\fbox{\\footnotesize ㈏}$은 $\\fbox{\\footnotesize ㈐}$이고 $4^{n-m}$은 짝수이므로 $\\fbox{\\footnotesize ㈏}$과 $4^{n-m}$은 항상 같지 않다.\\\\[1mm] 따라서 $\\log_{12} 4$는 무리수이다.\\end{minipage}} 위의 과정에서 ㈎, ㈏, ㈐에 알맞은 것을 써넣으시오.",
    "answer": "",
    "answer_source": ""
   },
@@ -5833,7 +5833,7 @@
    "page": 69,
    "level": "중",
    "ssen_ref": "0618",
-   "body": "두 행렬 $A=\\begin{pmatrix} \\cos\\theta & 1 \\\\ 0 & a+\\sin^{3}\\theta \\end{pmatrix}$, $B=\\begin{pmatrix} \\dfrac{1}{3}+\\sin\\theta & 1 \\\\[2mm] 0 & \\cos^{3}\\theta \\end{pmatrix}$에 대하여 $A=B$이다. 이때 상수 $a$의 값을 구하시오.",
+   "body": "두 행렬 \\par\\smallskip\\centerline{$A=\\begin{pmatrix} \\cos\\theta & 1 \\\\ 0 & a+\\sin^{3}\\theta \\end{pmatrix}$, $B=\\begin{pmatrix} \\dfrac{1}{3}+\\sin\\theta & 1 \\\\[2mm] 0 & \\cos^{3}\\theta \\end{pmatrix}$}\\par\\smallskip\\noindent 에 대하여 $A=B$이다. 이때 상수 $a$의 값을 구하시오.",
    "answer": "",
    "answer_source": ""
   },
@@ -6435,7 +6435,7 @@
    "tag": "서술형",
    "level": "상",
    "ssen_ref": "0720",
-   "body": "오른쪽 그림과 같이 원에 내접하는 사각형~$\\pt{ABCD}$에서 $\\angle\\pt{DAB}=\\alpha$, $\\angle\\pt{DCB}=\\beta$라 할 때, $\\cos\\alpha=-\\dfrac{4}{5}$이다. $\\tan\\alpha+\\sin\\beta$의 값을 구하시오.",
+   "body": "오른쪽 그림과 같이 원에 내접하는 사각형~$\\pt{ABCD}$에서 $\\angle\\pt{DAB}=\\alpha$, $\\angle\\pt{DCB}=\\beta$라 할 때, $\\cos\\alpha=\\dfrac{4}{5}$이다. $\\tan\\alpha+\\sin\\beta$의 값을 구하시오.",
    "figure": "tikz:fig-79-48",
    "answer": "",
    "answer_source": ""
@@ -9377,7 +9377,7 @@
    "page": 126,
    "tag": "대표 문제",
    "ssen_ref": "1104",
-   "body": "다음을 계산하시오.\\exprbox{$1\\cdot(n-1)+2\\cdot(n-2)+3\\cdot(n-3)+\\cdots+(n-1)\\cdot 1$}",
+   "body": "다음을 계산하시오.\\exprbox{$1\\cdot(n-1)+2\\cdot(n-2)+3\\cdot(n-3)+\\cdots+{(n-1)\\cdot 1}$}",
    "answer": "",
    "answer_source": ""
   },
@@ -9977,7 +9977,7 @@
    "page": 136,
    "level": "중",
    "ssen_ref": "1191",
-   "body": "성냥개비를 이용하여 다음 그림과 같이 도형을 만들 때, [$n$단계]의 도형을 만드는 데 필요한 성냥개비의 개수를 $a_n$이라 하자. 이때 $a_n$과 $a_{n+1}$ 사이의 관계식을 구하시오.",
+   "body": "성냥개비를 이용하여 다음 그림과 같이 도형을 만들 때, \\mbox{[$n$단계]}의 도형을 만드는 데 필요한 성냥개비의 개수를 $a_n$이라 하자. 이때 $a_n$과 $a_{n+1}$ 사이의 관계식을 구하시오.",
    "figure": "crop:fig-136-33.jpg",
    "figure_layout": "below",
    "answer": "",
@@ -10089,7 +10089,7 @@
    "page": 138,
    "tag": "대표 문제",
    "ssen_ref": "1202",
-   "body": "다음은 모든 자연수 $n$에 대하여\\par\\smallskip\\centerline{$1+3+5+\\cdots+(2n-1)=n^2$\\quad $\\cdots\\cdots$ ㉠}\\par\\smallskip\\noindent 이 성립함을 수학적 귀납법으로 증명한 것이다.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright\\lineskip=4pt {\\small\\bfseries 증명}\\par\\smallskip (i) $n=1$일 때,\\quad (좌변)$=1$, (우변)$=1^2=1$\\\\ \\hspace*{1.5em}따라서 ㉠이 성립한다.\\\\ (ii) $n=k$일 때 ㉠이 성립한다고 가정하면\\\\ \\hspace*{3em}$1+3+5+\\cdots+(2k-1)=k^2$\\\\ \\hspace*{1.5em}위의 식의 양변에 $\\fbox{㈎}$을 더하면\\\\ \\hspace*{3em}$1+3+5+\\cdots+(2k-1)+\\fbox{㈎}=k^2+2k+1$\\\\ \\hspace*{8em}$=(\\fbox{㈏})^2$\\\\ \\hspace*{1.5em}따라서 $n=k+1$일 때도 ㉠이 성립한다.\\\\ (i), (ii)에서 모든 자연수 $n$에 대하여 ㉠이 성립한다.\\end{minipage}}\\noindent 위의 과정에서 ㈎, ㈏에 알맞은 식을 각각 $f(k)$, $g(k)$라 할 때, $f(2)g(1)$의 값을 구하시오.",
+   "body": "다음은 모든 자연수 $n$에 대하여\\par\\smallskip\\centerline{$1+3+5+\\cdots+(2n-1)=n^2$\\quad $\\cdots\\cdots$ ㉠}\\par\\smallskip\\noindent 이 성립함을 수학적 귀납법으로 증명한 것이다.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright\\lineskip=4pt {\\small\\bfseries 증명}\\par\\smallskip (i) $n=1$일 때,\\quad (좌변)$=1$, (우변)$=1^2=1$\\\\ \\hspace*{1.5em}따라서 ㉠이 성립한다.\\\\ (ii) $n=k$일 때 ㉠이 성립한다고 가정하면\\\\ \\hspace*{3em}$1+3+5+\\cdots+(2k-1)=k^2$\\\\ \\hspace*{1.5em}위의 식의 양변에 $\\fbox{㈎}$을 더하면\\\\ \\hspace*{1.5em}$1+3+5+\\cdots+(2k-1)+\\fbox{㈎}=k^2+2k+1$\\\\ \\hspace*{8em}$=(\\fbox{㈏})^2$\\\\ \\hspace*{1.5em}따라서 $n=k+1$일 때도 ㉠이 성립한다.\\\\ (i), (ii)에서 모든 자연수 $n$에 대하여 ㉠이 성립한다.\\end{minipage}}\\noindent 위의 과정에서 ㈎, ㈏에 알맞은 식을 각각 $f(k)$, $g(k)$라 할 때, $f(2)g(1)$의 값을 구하시오.",
    "answer": "",
    "answer_source": ""
   },
@@ -10167,13 +10167,13 @@
    "page": 141,
    "level": "중",
    "ssen_ref": "1209",
-   "body": "다음은 $h>0$일 때, $n\\ge 2$인 모든 자연수 $n$에 대하여 부등식\\par\\smallskip\\centerline{$(1+h)^{n}>1+nh$\\qquad $\\cdots\\cdots$ ㉠}\\par\\smallskip\\noindent 가 성립함을 수학적 귀납법으로 증명한 것이다.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] (i) $n=2$일 때,\\\\[1mm] \\hspace*{1.5em}(좌변)$=(1+h)^{2}=1+2h+h^{2}$,\\\\[1mm] \\hspace*{1.5em}(우변)$=\\fbox{(가)}$\\\\[1mm] \\hspace*{1em}이때 $h^{2}>0$이므로\\quad $1+2h+h^{2}>\\fbox{(가)}$\\\\[1mm] \\hspace*{1em}따라서 ㉠이 성립한다.\\\\[1mm] (ii) $n=k$ $(k\\ge 2)$일 때 ㉠이 성립한다고 가정하면\\\\[1mm] \\hspace*{1.5em}$(1+h)^{k}>1+kh$\\\\[1mm] \\hspace*{1em}위의 식의 양변에 $1+h$를 곱하면 $1+h>0$이므로\\\\[1mm] \\hspace*{1.5em}$(1+h)^{k+1}>(1+kh)(1+h)$\\\\[1mm] \\hspace*{4em}$=1+(k+1)h+\\fbox{(나)}$\\\\[1mm] \\hspace*{1em}이때 $kh^{2}>0$이므로\\\\[1mm] \\hspace*{1.5em}$1+(k+1)h+kh^{2}>1+(k+1)h$\\\\[1mm] \\hspace*{1.5em}$\\therefore (1+h)^{k+1}>1+\\fbox{(다)}$\\\\[1mm] \\hspace*{1em}따라서 $n=k+1$일 때도 ㉠이 성립한다.\\\\[1mm] (i), (ii)에서 $n\\ge 2$인 모든 자연수 $n$에 대하여 ㉠이 성립한다.\\end{minipage}}\\noindent 위의 과정에서 (가), (나), (다)에 알맞은 것은?",
+   "body": "다음은 $h>0$일 때, $n\\ge 2$인 모든 자연수 $n$에 대하여 부등식\\par\\smallskip\\centerline{$(1+h)^{n}>1+nh$\\qquad $\\cdots\\cdots$ ㉠}\\par\\smallskip\\noindent 가 성립함을 수학적 귀납법으로 증명한 것이다.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] (i) $n=2$일 때,\\\\[1mm] \\hspace*{1.5em}(좌변)$=(1+h)^{2}=1+2h+h^{2}$,\\\\[1mm] \\hspace*{1.5em}(우변)$=\\fbox{㈎}$\\\\[1mm] \\hspace*{1em}이때 $h^{2}>0$이므로\\quad $1+2h+h^{2}>\\fbox{㈎}$\\\\[1mm] \\hspace*{1em}따라서 ㉠이 성립한다.\\\\[1mm] (ii) $n=k$ $(k\\ge 2)$일 때 ㉠이 성립한다고 가정하면\\\\[1mm] \\hspace*{1.5em}$(1+h)^{k}>1+kh$\\\\[1mm] \\hspace*{1em}위의 식의 양변에 $1+h$를 곱하면 $1+h>0$이므로\\\\[1mm] \\hspace*{1.5em}$(1+h)^{k+1}>(1+kh)(1+h)$\\\\[1mm] \\hspace*{4em}$=1+(k+1)h+\\fbox{㈏}$\\\\[1mm] \\hspace*{1em}이때 $kh^{2}>0$이므로\\\\[1mm] \\hspace*{1.5em}$1+(k+1)h+kh^{2}>1+(k+1)h$\\\\[1mm] \\hspace*{1.5em}$\\therefore (1+h)^{k+1}>1+\\fbox{㈐}$\\\\[1mm] \\hspace*{1em}따라서 $n=k+1$일 때도 ㉠이 성립한다.\\\\[1mm] (i), (ii)에서 $n\\ge 2$인 모든 자연수 $n$에 대하여 ㉠이 성립한다.\\end{minipage}}\\noindent 위의 과정에서 ㈎, ㈏, ㈐에 알맞은 것은?",
    "choices": [
-    "$1-2h$, $kh$, $kh$",
-    "$1-2h$, $kh^{2}$, $(k+1)h$",
-    "$1+2h$, $kh$, $kh$",
-    "$1+2h$, $kh^{2}$, $(k+1)h$",
-    "$1+2h$, $kh^{2}$, $kh$"
+    "㈎ $1-2h$ \\quad ㈏ $kh$ \\quad ㈐ $kh$",
+    "㈎ $1-2h$ \\quad ㈏ $kh^{2}$ \\quad ㈐ $(k+1)h$",
+    "㈎ $1+2h$ \\quad ㈏ $kh$ \\quad ㈐ $kh$",
+    "㈎ $1+2h$ \\quad ㈏ $kh^{2}$ \\quad ㈐ $(k+1)h$",
+    "㈎ $1+2h$ \\quad ㈏ $kh^{2}$ \\quad ㈐ $kh$"
    ],
    "choices_layout": "v",
    "answer": "",
@@ -10183,7 +10183,7 @@
    "page": 141,
    "level": "상",
    "ssen_ref": "1210",
-   "body": "다음은 모든 자연수 $n$에 대하여 부등식\\par\\smallskip\\centerline{$\\dfrac{1!+2!+3!+\\cdots+n!}{(n+1)!}<\\dfrac{2}{n+1}$\\qquad $\\cdots\\cdots$ ㉠}\\par\\smallskip\\noindent 가 성립함을 수학적 귀납법으로 증명한 것이다.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] (i) $n=1$일 때,\\\\[1mm] \\hspace*{1.5em}(좌변)$=\\dfrac{1!}{2!}=\\dfrac{1}{2}$, (우변)$=\\dfrac{2}{1+1}=1$\\\\[1mm] \\hspace*{1em}따라서 ㉠이 성립한다.\\\\[1mm] (ii) $n=k$일 때 ㉠이 성립한다고 가정하면\\\\[1mm] \\hspace*{1.5em}$\\dfrac{1!+2!+3!+\\cdots+k!}{(k+1)!}<\\dfrac{2}{k+1}$\\\\[1mm] \\hspace*{1em}$n=k+1$일 때\\\\[1mm] \\hspace*{1.5em}$\\dfrac{1!+2!+3!+\\cdots+(k+1)!}{(k+2)!}$\\\\[1mm] \\hspace*{2.5em}$=\\fbox{(가)}\\left\\{\\dfrac{1!+2!+3!+\\cdots+k!}{(k+1)!}+\\dfrac{(k+1)!}{(k+1)!}\\right\\}$\\\\[1mm] \\hspace*{2.5em}$<\\fbox{(가)}\\left(1+\\dfrac{2}{k+1}\\right)$\\\\[1mm] \\hspace*{2.5em}$=\\dfrac{1}{k+2}+\\fbox{(나)}$\\\\[1mm] \\hspace*{1em}이때 자연수 $k$에 대하여 $\\dfrac{2}{k+1}\\le 1$이므로\\\\[1mm] \\hspace*{1.5em}$\\fbox{(나)}\\le\\dfrac{1}{k+2}$이고\\\\[1mm] \\hspace*{1.5em}$\\dfrac{1!+2!+3!+\\cdots+(k+1)!}{(k+2)!}<\\dfrac{2}{k+2}$이다.\\\\[1mm] \\hspace*{1em}따라서 $n=k+1$일 때도 ㉠이 성립한다.\\\\[1mm] (i), (ii)에서 모든 자연수 $n$에 대하여 ㉠이 성립한다.\\end{minipage}}\\noindent 위의 과정에서 (가), (나)에 알맞은 식을 각각 $f(k)$, $g(k)$라 할 때, $f(8)+g(3)$의 값은?",
+   "body": "다음은 모든 자연수 $n$에 대하여 부등식\\par\\smallskip\\centerline{$\\dfrac{1!+2!+3!+\\cdots+n!}{(n+1)!}<\\dfrac{2}{n+1}$\\qquad $\\cdots\\cdots$ ㉠}\\par\\smallskip\\noindent 가 성립함을 수학적 귀납법으로 증명한 것이다.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright {\\small\\bfseries 증명}\\\\[1mm] (i) $n=1$일 때,\\\\[1mm] \\hspace*{1.5em}(좌변)$=\\dfrac{1!}{2!}=\\dfrac{1}{2}$, (우변)$=\\dfrac{2}{1+1}=1$\\\\[1mm] \\hspace*{1em}따라서 ㉠이 성립한다.\\\\[1mm] (ii) $n=k$일 때 ㉠이 성립한다고 가정하면\\\\[1mm] \\hspace*{1.5em}$\\dfrac{1!+2!+3!+\\cdots+k!}{(k+1)!}<\\dfrac{2}{k+1}$\\\\[1mm] \\hspace*{1em}$n=k+1$일 때\\\\[1mm] \\hspace*{1.5em}$\\dfrac{1!+2!+3!+\\cdots+(k+1)!}{(k+2)!}$\\\\[1mm] \\hspace*{2.5em}$=\\fbox{㈎}\\left\\{\\dfrac{1!+2!+3!+\\cdots+k!}{(k+1)!}+\\dfrac{(k+1)!}{(k+1)!}\\right\\}$\\\\[1mm] \\hspace*{2.5em}$<\\fbox{㈎}\\left(1+\\dfrac{2}{k+1}\\right)$\\\\[1mm] \\hspace*{2.5em}$=\\dfrac{1}{k+2}+\\fbox{㈏}$\\\\[1mm] \\hspace*{1em}이때 자연수 $k$에 대하여 $\\dfrac{2}{k+1}\\le 1$이므로\\\\[1mm] \\hspace*{1.5em}$\\fbox{㈏}\\le\\dfrac{1}{k+2}$이고\\\\[1mm] \\hspace*{1.5em}$\\dfrac{1!+2!+3!+\\cdots+(k+1)!}{(k+2)!}<\\dfrac{2}{k+2}$이다.\\\\[1mm] \\hspace*{1em}따라서 $n=k+1$일 때도 ㉠이 성립한다.\\\\[1mm] (i), (ii)에서 모든 자연수 $n$에 대하여 ㉠이 성립한다.\\end{minipage}}\\noindent 위의 과정에서 ㈎, ㈏에 알맞은 식을 각각 $f(k)$, $g(k)$라 할 때, $f(8)+g(3)$의 값은?",
    "choices": [
     "$\\dfrac{1}{10}$",
     "$\\dfrac{1}{5}$",

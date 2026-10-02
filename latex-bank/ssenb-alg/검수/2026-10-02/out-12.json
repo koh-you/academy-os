@@ -1,0 +1,13 @@
+{ "range": "54-62~61-02", "checked": 25, "ok": 23,
+  "findings": [
+    { "id": "54-64", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 색 알약 배지) — 54-63 크롭 아래쪽과 쪽 이미지 p054 로 대조해 내용·쎈 0485 일치" },
+    { "id": "54-64", "severity": "yellow", "where": "layout", "note": "줄 늘림이 심해 한글 낱말이 벌어짐(「부 등 식 … 의  해 가」). 내용은 원문과 같고 items.json 수정은 필요 없다 — 조판 단계 justification 문제" },
+    { "id": "55-69", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 p055 로 대조해 발문·선택지 5개·쎈 0490 일치" },
+    { "id": "55-70", "severity": "yellow", "where": "layout", "note": "첫 줄 늘림이 심해 「두  집 합」 이 벌어짐. 내용은 원문과 같고 items.json 수정 불필요 — 조판 단계 justification 문제" },
+    { "id": "56-72", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 p056 을 재크롭해 대조, 밑 1/3·log_3(x/3)·쎈 0493 일치" },
+    { "id": "56-75", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — 쪽 이미지 p056 재크롭으로 대조, 지수 log_{1/2}x·8x^4·쎈 0496 일치" },
+    { "id": "56-78", "severity": "ok", "where": "layout", "note": "크롭 없음 — 56-77 크롭 아래쪽과 쪽 이미지 p056 으로 대조해 일치. 배지 78 은 인쇄 56쪽에 있고 배치 Y 가 57-78 로 중복 전사하지 않았다(items.json 에 57-78 없음)" },
+    { "id": "57-81", "severity": "ok", "where": "layout", "note": "크롭 없음 — 57-80 크롭 아래쪽과 쪽 이미지 p057 로 대조, 「2026년에 60만 원」·log 9=0.9542·선택지 2045~2049년 일치" },
+    { "id": "57-80", "severity": "ok", "where": "body", "note": "우변 지수 확인 — p057 을 6배로 재크롭해 −(log k)^2 로 읽었다(선택지 ④ 3 이 떨어지는 형태와도 맞음). 조판본과 일치" },
+    { "id": "61-01", "severity": "ok", "where": "layout", "note": "05 삼각함수 첫 문항 · 쎈 0567 로 새 쇄 기준과 일치(배지−1=0=567−567)" }
+  ] }

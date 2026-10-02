@@ -7,12 +7,17 @@
 \newcommand{\seg}[1]{\overline{\mathrm{#1}}}
 \newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
 \newcommand{\vecAB}[1]{\overrightarrow{\mathrm{#1}}}
-\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\centering\vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 조건 상자. 본문에서는 수식을 안 끊지만(\binoppenalty) 이 상자는 폭이 고정이라 긴 식이 테두리 밖으로 삐져나간다
+% (검수 지적 쎈B 대수 126-41·126-43·21-17 — 「(2n-1)·1」 끝이 상자 밖에 찍힌다). 상자 안에서만 연산자·관계 뒤 줄바꿈을 허용한다.
+% 들어가는 식은 그대로 한 줄로 두고, 넘칠 때만 TeX 가 끊는다(원문도 그 자리에서 두 줄로 간다).
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.96\linewidth}\centering\binoppenalty=700 \relpenalty=500 \vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
 % 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
 \newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
 % 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
 \newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
-\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
+% 보기 상자도 같다. ㄱ·ㄴ·ㄷ 줄은 \\ 로 나누므로 \parskip 이 먹지 않아, 분수가 든 줄이 다음 줄과 맞닿는다
+% (검수 지적 쎈B 대수 62-08·78-40·79-46 · 미적분1 11-24·27-46). 줄 겹침 여유를 본문보다 넉넉히 주고, 긴 줄은 상자 안에서 끊는다.
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.96\linewidth}\binoppenalty=700 \relpenalty=500 \lineskiplimit=3pt \lineskip=4pt \vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
 \newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
 \newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
@@ -29,6 +34,16 @@
 % 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
 % 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
 \emergencystretch=2em
+% 한글 음절 사이 늘임을 끈다. 좁은 낱장 폭(110mm)에 끊을 수 없는 긴 수식이 들어가면 kotex 가 남은 늘임을 음절 사이로
+% 보내 「함 수 … 에 대 하 여」처럼 낱말이 무너진다(검수 지적 쎈B 미적분1 8-06·10-20·40-56·55-68 · 대수 51-36·54-64·90-11 등).
+% 늘임은 낱말 사이로만 가게 하고, 그래도 모자라 줄이 넘치는 자리는 위 \emergencystretch 가 받는다.
+% xetexko 는 음절마다 줄바꿈 자리를 두고 그 glue 에 plus.08em 을 주는데(xetexko.sty \XeKo@stretchshrink),
+% 한 줄에 음절이 20개면 1.6em 까지 벌어진다. 늘임만 0 으로 두고 줄임(minus.04em)은 남겨 과밀 줄은 여전히 붙일 수 있게 한다.
+\xetexkostretchshrink{plus0em minus.04em}
+% 본문 속 \dfrac 처럼 키 큰 수식이 든 줄은 기본 \lineskip(1pt)으로는 위아래 줄과 맞닿는다
+% (검수 지적 쎈B 미적분1 76-11·77-14·79-26·55-70·41-64 · 대수 62-08·36-34 등 — 분모가 아랫줄 글자 위에 올라탄다).
+% 줄 사이가 2pt 보다 좁아지는 자리에서만 3pt 를 확보한다. 보통 줄은 \baselineskip 그대로라 쪽 배치가 바뀌지 않는다.
+\lineskiplimit=2pt \lineskip=3pt
 \newcommand{\nob}[1]{\mbox{#1}}
 % 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
 % 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
@@ -291,7 +306,7 @@
 \vspace{3mm}\setcounter{dmproblemcount}{56}\dmpnum{40-57}{\input{items/40-57}}\vspace{8mm}
 \vspace{3mm}\setcounter{dmproblemcount}{57}\dmpnum{40-58}{\input{items/40-58}}\vspace{8mm}
 \vspace{3mm}\setcounter{dmproblemcount}{58}\dmpnum{40-59}{\input{items/40-59}}\vspace{8mm}
-\vspace{3mm}\setcounter{dmproblemcount}{59}\dmpnum{40-60}{\input{items/40-60}}\vspace{8mm}
+\setcounter{dmproblemcount}{59}\dmpnum{40-60}{\input{items/40-60}}\vspace{8mm}
 \dmsection{유형 17 치환을 이용한 극한값의 계산}
 \vspace{3mm}\setcounter{dmproblemcount}{60}\dmpnum{41-61}{\input{items/41-61}}\vspace{8mm}
 \vspace{3mm}\setcounter{dmproblemcount}{61}\dmpnum{41-62}{\input{items/41-62}}\vspace{8mm}

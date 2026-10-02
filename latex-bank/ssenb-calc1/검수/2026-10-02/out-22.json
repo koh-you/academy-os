@@ -1,0 +1,12 @@
+{ "range": "105-28~109-52", "checked": 25, "ok": 23,
+  "findings": [
+    { "id": "106-32", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 색 알약 배지 미검출) — pdf 112쪽 이미지로 대조해 일치(쎈 0898 · 선택지 3/4/5/6/7)" },
+    { "id": "107-38", "severity": "yellow", "where": "layout", "note": "크롭 없음 — pdf 113쪽 이미지로 대조해 내용 일치(쎈 0904). 다만 둘째 줄 한글 자간이 과하게 늘어남(「만 족 시 키 고 … 정 적 분」). 본문 중간에 inline displaystyle 적분이 끼어 양쪽 정렬이 늘인 결과", "fix": "107-38 body 의 $\\displaystyle\\int_{0}^{1} f(x)\\,dx=-3$ 을 \\par\\smallskip\\centerline{...}\\par\\smallskip\\noindent 별도 줄로 빼면 자간 늘임이 사라짐" },
+    { "id": "107-40", "severity": "yellow", "where": "layout", "note": "내용은 원본과 일치하나 둘째 줄 한글 자간이 과하게 늘어남(「만 족 시 키 고 … 정 적 분」) — 107-38 과 같은 원인", "fix": "107-40 body 의 $\\displaystyle\\int_{0}^{2} xf(x)\\,dx=4$ 를 \\par\\smallskip\\centerline{...}\\par\\smallskip\\noindent 별도 줄로 분리" },
+    { "id": "107-42", "severity": "ok", "where": "layout", "note": "크롭이 아래 유형 09 상자와 43번 대표 문제까지 물고 내려왔으나 42번 본문만 전사됨 — 일치" },
+    { "id": "107-43", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지 미검출) — pdf 113쪽 이미지로 대조해 일치(쎈 0909 · 선택지 6/9/12/15/18)" },
+    { "id": "108-44", "severity": "ok", "where": "layout", "note": "크롭 오른쪽이 잘려 발문 끝 「정적분」이 안 보임 — pdf 114쪽 이미지로 대조해 일치(조건 ㈎㈏ 포함)" },
+    { "id": "108-45", "severity": "ok", "where": "layout", "note": "크롭 오른쪽 일부 잘림 — pdf 114쪽 이미지로 보기 ㄱㄴㄷㄹ(2026~2030)·선택지까지 대조해 일치" },
+    { "id": "108-47", "severity": "ok", "where": "layout", "note": "크롭이 아래 유형 10 상자까지 물고 내려왔으나 47번 본문만 전사됨 — 일치" },
+    { "id": "108-48", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지 미검출) — pdf 114쪽 이미지로 대조해 일치(쎈 0914). 전사 메모대로 p108-passage-1 은 공통 지시문이 아니라 48번 본문이고, 49번에 지시문이 잘못 붙지 않았음을 확인" }
+  ] }
