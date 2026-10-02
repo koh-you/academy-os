@@ -140,88 +140,101 @@ export function ExamPrepSchoolPlanPanel({
               className={`examPrepSchoolPlanRow${school.isIncluded ? "" : " excluded"}`}
               key={school.schoolKey}
             >
+              {/* 2026-10-02 · 학교 줄과 학생 줄이 같은 3열 격자를 쓴다(이름 / 시간 / 작업).
+                  전에는 학교 줄만 끝에 버튼이 있어 학생 줄의 시간 칸이 더 오른쪽으로 밀렸다. */}
               <div className="examPrepSchoolPlanRowMain">
-                {isEditing ? (
-                  <label className="examPrepSchoolPlanInclude">
-                    <input
-                      aria-label={`${school.schoolName} 이 날짜 참여`}
-                      checked={school.isIncluded}
-                      disabled={isSaving}
-                      onChange={(event) => updateSchool(school.schoolKey, "isIncluded", event.target.checked)}
-                      type="checkbox"
-                    />
-                    <strong>{school.schoolName}</strong>
-                  </label>
-                ) : (
-                  <strong className="examPrepSchoolPlanName">{school.schoolName}</strong>
-                )}
-                <span className="examPrepSchoolPlanMeta">
-                  {school.isIncluded ? `${school.studentIds.length}명` : "이 날짜 제외"}
-                </span>
-                {school.isIncluded ? (
-                  isEditing ? (
-                    <span className="examPrepSchoolPlanTimes">
+                <div className="examPrepSchoolPlanIdentity">
+                  {isEditing ? (
+                    <label className="examPrepSchoolPlanInclude">
                       <input
-                        aria-label={`${school.schoolName} 시작 시간`}
+                        aria-label={`${school.schoolName} 이 날짜 참여`}
+                        checked={school.isIncluded}
                         disabled={isSaving}
-                        onChange={(event) => updateSchool(school.schoolKey, "startTime", event.target.value)}
-                        type="time"
-                        value={school.startTime}
+                        onChange={(event) => updateSchool(school.schoolKey, "isIncluded", event.target.checked)}
+                        type="checkbox"
                       />
-                      <span aria-hidden="true">~</span>
-                      <input
-                        aria-label={`${school.schoolName} 종료 시간`}
-                        disabled={isSaving}
-                        onChange={(event) => updateSchool(school.schoolKey, "endTime", event.target.value)}
-                        type="time"
-                        value={school.endTime}
-                      />
-                    </span>
+                      <strong>{school.schoolName}</strong>
+                    </label>
                   ) : (
-                    <span className="examPrepSchoolPlanTimeLabel">
-                      {school.isMixedTime
-                        ? "학생별 시간 다름"
-                        : school.startTime && school.endTime
-                          ? `${school.startTime}-${school.endTime}`
-                          : "시간 미정"}
-                    </span>
-                  )
-                ) : null}
-                {/* 학생별로 시간이 다른 학교는 학교 한 줄로는 못 고친다. 그 학교만 펼쳐
-                    학생 칸을 연다(2026-10-01 요청). 저장은 같은 `저장` 하나가 맡는다. */}
-                {isEditing && school.isIncluded && schoolStudentRows.length > 1 ? (
-                  <button
-                    aria-expanded={isExpanded}
-                    className="softButton compact examPrepSchoolPlanExpandButton"
-                    disabled={isSaving}
-                    onClick={() => setExpandedSchoolKey(isExpanded ? "" : school.schoolKey)}
-                    type="button"
-                  >
-                    학생별 시간
-                  </button>
-                ) : null}
+                    <strong className="examPrepSchoolPlanName">{school.schoolName}</strong>
+                  )}
+                  <span className="examPrepSchoolPlanMeta">
+                    {school.isIncluded ? `${school.studentIds.length}명` : "이 날짜 제외"}
+                  </span>
+                </div>
+                <div className="examPrepSchoolPlanTimes">
+                  {school.isIncluded ? (
+                    isEditing ? (
+                      <>
+                        <input
+                          aria-label={`${school.schoolName} 시작 시간`}
+                          disabled={isSaving}
+                          onChange={(event) => updateSchool(school.schoolKey, "startTime", event.target.value)}
+                          type="time"
+                          value={school.startTime}
+                        />
+                        <span aria-hidden="true">~</span>
+                        <input
+                          aria-label={`${school.schoolName} 종료 시간`}
+                          disabled={isSaving}
+                          onChange={(event) => updateSchool(school.schoolKey, "endTime", event.target.value)}
+                          type="time"
+                          value={school.endTime}
+                        />
+                      </>
+                    ) : (
+                      <span className="examPrepSchoolPlanTimeLabel">
+                        {school.isMixedTime
+                          ? "학생별 시간 다름"
+                          : school.startTime && school.endTime
+                            ? `${school.startTime}-${school.endTime}`
+                            : "시간 미정"}
+                      </span>
+                    )
+                  ) : null}
+                </div>
+                <div className="examPrepSchoolPlanRowAction">
+                  {/* 학생별로 시간이 다른 학교는 학교 한 줄로는 못 고친다. 그 학교만 펼쳐
+                      학생 칸을 열다(2026-10-01 요청). 저장은 같은 저장 버튼 하나가 맡는다. */}
+                  {isEditing && school.isIncluded && schoolStudentRows.length > 1 ? (
+                    <button
+                      aria-expanded={isExpanded}
+                      className="softButton compact examPrepSchoolPlanExpandButton"
+                      disabled={isSaving}
+                      onClick={() => setExpandedSchoolKey(isExpanded ? "" : school.schoolKey)}
+                      type="button"
+                    >
+                      학생별 시간
+                    </button>
+                  ) : null}
+                </div>
               </div>
 
               {isEditing && isExpanded ? (
                 <ul className="examPrepSchoolPlanStudentList">
                   {schoolStudentRows.map((studentRow) => (
                     <li key={studentRow.studentId}>
-                      <span>{studentRow.name}</span>
-                      <input
-                        aria-label={`${studentRow.name} 시작 시간`}
-                        disabled={isSaving}
-                        onChange={(event) => updateStudentTime(studentRow.studentId, "startTime", event.target.value)}
-                        type="time"
-                        value={draft.studentTimes[studentRow.studentId]?.startTime ?? ""}
-                      />
-                      <span aria-hidden="true">~</span>
-                      <input
-                        aria-label={`${studentRow.name} 종료 시간`}
-                        disabled={isSaving}
-                        onChange={(event) => updateStudentTime(studentRow.studentId, "endTime", event.target.value)}
-                        type="time"
-                        value={draft.studentTimes[studentRow.studentId]?.endTime ?? ""}
-                      />
+                      <div className="examPrepSchoolPlanIdentity">
+                        <span className="examPrepSchoolPlanStudentName">{studentRow.name}</span>
+                      </div>
+                      <div className="examPrepSchoolPlanTimes">
+                        <input
+                          aria-label={`${studentRow.name} 시작 시간`}
+                          disabled={isSaving}
+                          onChange={(event) => updateStudentTime(studentRow.studentId, "startTime", event.target.value)}
+                          type="time"
+                          value={draft.studentTimes[studentRow.studentId]?.startTime ?? ""}
+                        />
+                        <span aria-hidden="true">~</span>
+                        <input
+                          aria-label={`${studentRow.name} 종료 시간`}
+                          disabled={isSaving}
+                          onChange={(event) => updateStudentTime(studentRow.studentId, "endTime", event.target.value)}
+                          type="time"
+                          value={draft.studentTimes[studentRow.studentId]?.endTime ?? ""}
+                        />
+                      </div>
+                      <div className="examPrepSchoolPlanRowAction" />
                     </li>
                   ))}
                 </ul>
