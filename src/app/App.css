@@ -1544,13 +1544,19 @@ summary:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.examPrepPanel {
-  background: var(--status-info-bg, #eff6ff);
+/* 2026-10-02 · 일정 수정·삭제를 모달 상단으로 올리면서 아래쪽 `examPrepPanel`
+   섹션을 통째로 들어냈다. 연결된 시험정보 칩을 지운 뒤로는 머리글과 액션만 남아
+   있었다. */
+.examPrepLessonActionBar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
 }
 
-.examPrepPanel h3 {
-  font-size: 22px;
-  margin: 4px 0 8px;
+.examPrepLessonActionBar .eyebrow {
+  margin: 0;
 }
 
 .examPrepActions {
@@ -5292,23 +5298,6 @@ button:disabled {
 
 .modalCard.examPrepModal .examPrepSummaryGrid .metricCard strong {
   font-size: 15px;
-}
-
-/* 2026-10-02 · 2열이 되면서 이 패널이 좁아졌다. 공용 sectionHeader 는 설명과 작업 버튼을
-   한 줄에 두는데, 705px 패널에서 버튼이 378px 를 가져가 설명이 281px 로 눌려 다섯 줄로
-   쪼개졌다(한국어는 어디서든 줄바꿈된다). 좁은 열에서는 설명과 버튼을 위아래로 나눈다. */
-.modalCard.examPrepModal .examPrepPanel .sharedSectionHeader {
-  flex-wrap: wrap;
-}
-
-.modalCard.examPrepModal .examPrepPanel .sectionHeaderCopy {
-  flex: 1 1 100%;
-  min-width: 0;
-}
-
-.modalCard.examPrepModal .examPrepPanel .examPrepActions {
-  flex: 1 1 100%;
-  justify-content: flex-start;
 }
 
 .modalCard.examPrepModal .modalScrollBody {

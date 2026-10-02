@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
-import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
@@ -35,6 +34,37 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
   const displaySchoolCount = Math.max(schoolCount, sourceItems.length);
   return (
     <div className="examPrepLessonBody">
+      {/* 2026-10-02 · 일정 수정·삭제는 이 날짜에 오는 학생 전체의 일정을 조율하는 일인데,
+          스크롤하는 왼쪽 열 맨 아래에 있어 찾아 내려가야 보였다(요청). 요약 줄과 같은
+          줄(= 스크롤 밖)으로 올려 항상 보이게 한다. */}
+      <div className="examPrepLessonActionBar">
+        <div className="helpTipTitleRow">
+          <span className="eyebrow">시험대비 수업</span>
+          <HelpTip
+            label="시험대비 수업"
+            text="저장된 실제 수업 기준으로 수업일지와 알림톡을 연결합니다. 날짜나 시간이 다르면 일정 수정에서 이 수업 자체를 조정합니다."
+          />
+        </div>
+        <div aria-label="시험대비 수업 작업" className="examPrepActions" role="group">
+          {onToggleDailyJournal ? (
+            <label className="examPrepDailyJournalToggle">
+              <input
+                checked={false}
+                onChange={(event) => onToggleDailyJournal(lesson.lessonId, event.target.checked)}
+                type="checkbox"
+              />
+              데일리 알림톡 사용
+            </label>
+          ) : null}
+          <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
+            일정 수정
+          </button>
+          <button className="dangerSoftButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
+            일정 삭제
+          </button>
+        </div>
+      </div>
+
       <div className="examPrepSummaryGrid">
         <MetricCard density="compact" hint="시험대비" label="수업일" value={lesson.date} />
         <MetricCard density="compact" hint={lesson.status === "canceled" ? "취소됨" : "진행 예정"} label="시간" value={`${lesson.startTime || "미정"}-${lesson.endTime || "미정"}`} />
@@ -129,45 +159,6 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
         )}
       </section>
 
-      <section className="panel examPrepPanel">
-        <SectionHeader
-          actions={(
-            <>
-              {onToggleDailyJournal ? (
-                <label className="examPrepDailyJournalToggle">
-                  <input
-                    checked={false}
-                    onChange={(event) => onToggleDailyJournal(lesson.lessonId, event.target.checked)}
-                    type="checkbox"
-                  />
-                  데일리 알림톡 사용
-                </label>
-              ) : null}
-              <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
-                일정 수정
-              </button>
-              <button className="dangerSoftButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
-                일정 삭제
-              </button>
-            </>
-          )}
-          actionsClassName="examPrepActions"
-          density="slim"
-          descriptionNode={(
-            <p className="muted">
-              저장된 실제 수업 기준으로 수업일지와 알림톡을 연결합니다. 날짜나 시간이 다르면 일정 수정에서 이 수업 자체를 조정합니다.
-            </p>
-          )}
-          eyebrow="시험대비 수업"
-          title="시험대비"
-          titleAs="h3"
-        />
-
-        {/* 2026-10-02 · 연결된 시험정보 칩을 지웠다. 바로 위 학교별 참여 패널이 같은 학교를
-            인원·시간·참여 여부까지 보여주므로 칩은 같은 말을 한 번 더 할 뿐이었다(요청).
-            이로써 "2학기 중간고사" 라는 고사 이름은 이 모달에 더 이상 나오지 않는다 — 날짜와
-            학교로 어느 고사인지 알 수 있고, 고사 자체는 시험관리에서 본다. */}
-      </section>
         </div>
 
         <div className="examPrepLessonContentColumn">
