@@ -18,6 +18,7 @@
   \draw[line width=0.4pt] (1.0791,1.2372) -- (0.8419,1.3163) -- (0.7628,1.0791);
   % 라벨(원문 자리 그대로)
   \node[right=2pt, font=\small] at (1.05,0.95) {$\pt{P}$};
-  \node[left=2pt, font=\small] at (0,1.3333) {$\pt{Q}$};
+  % y 단위가 작아 교점(y=4/3)과 원점 사이에 라벨 둘이 안 들어간다. Q 는 교점 바로 위 오른쪽(선·곡선·접선이 없는 쪽)에 둔다.
+  \node[anchor=south west, inner sep=1.5pt, font=\small] at (0.10,1.3333) {$\pt{Q}$};
   \node[right=1pt, font=\small] at (0.3,3.15) {$y=x^3$};
 \end{tikzpicture}
