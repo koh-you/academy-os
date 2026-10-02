@@ -64,7 +64,9 @@ test("current exam management roster removes stale school and saves forward sche
 
   const detail = page.getByRole("dialog", { name: "시험대비" });
   await expect(detail).toContainText("1명");
-  await expect(detail).toContainText("안전고 2학기 중간고사");
+  // 2026-10-02 · 연결된 시험정보 칩을 지워 "안전고 2학기 중간고사" 문구는 더 이상 없다.
+  // 확인하려던 것(낡은 학교가 빠지고 현재 학교가 보인다)은 학교별 참여 패널과 명단으로 본다.
+  await expect(detail).toContainText("안전고");
   await expect(detail).not.toContainText("상계고");
   const contentInput = detail.getByLabel("정산 미리보기 학생 오늘 진행한 내용");
   await contentInput.fill("안전고 고1 함수 단원 오답 정리");

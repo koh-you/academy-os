@@ -110,6 +110,11 @@ test("one save applies per-school time and exclusion, and the exclusion survives
     (node) => window.getComputedStyle(node).gridTemplateColumns.split(" ").length
   );
   expect(columns).toBe(2);
+  // 2026-10-02 · 요약 카드 4개는 한 줄이다. 3열이던 동안은 3+1 로 접혀 본문 높이를 먹었다.
+  const summaryRowTops = await detail.locator(".examPrepSummaryGrid > div").evaluateAll(
+    (nodes) => [...new Set(nodes.map((node) => Math.round(node.getBoundingClientRect().top)))]
+  );
+  expect(summaryRowTops).toHaveLength(1);
   await expect(detail.locator(".examPrepLessonContentColumn .examPrepLessonContentEditor")).toBeVisible();
   // 학생마다 반복되던 예시글은 지웠다.
   expect(
@@ -162,6 +167,51 @@ test("one save applies per-school time and exclusion, and the exclusion survives
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("school rows and student rows line their time inputs up on the same columns", async ({ page, request }) => {
+  // 2026-10-02 · 학교 줄만 끝에 "학생별 시간" 버튼이 있어 그 줄의 시간 칸이 다른 줄보다
+  // 왼쪽으로 밀렸다(실측 283px vs 306px). 세 열 격자의 마지막 열을 고정 폭으로 묶었다.
+  const studentResponse = await request.post(`${safeApiBaseUrl}/api/students`, {
+    data: {
+      createOnly: true,
+      student: {
+        grade: "중3",
+        loginId: "safe_second_middle",
+        name: "안전중 둘째",
+        pin: "1234",
+        schoolName: "안전중",
+        status: "active",
+        studentId: "safe-second-middle-student"
+      }
+    }
+  });
+  expect(studentResponse.ok(), await studentResponse.text()).toBe(true);
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepRows(request, [middleSchoolRow], { allowRestore: true });
+  await postExamPrepLesson(
+    request,
+    ["safe-settlement-student", "safe-active-student", "safe-second-middle-student"],
+    "안전고 2학기 중간고사 · 안전중 2학기 중간고사"
+  );
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const panel = detail.locator(".examPrepSchoolPlanPanel");
+  await panel.getByRole("button", { name: "수정" }).click();
+  await panel.getByRole("button", { name: "학생별 시간" }).first().click();
+
+  const timeLefts = await panel.locator('.examPrepSchoolPlanTimes input[type="time"]').evaluateAll(
+    (nodes) => [...new Set(nodes.map((node) => Math.round(node.getBoundingClientRect().left)))].sort((a, b) => a - b)
+  );
+  // 시작·종료 두 칸뿐이어야 한다 — 줄마다 좌표가 갈리면 셋 이상이 된다.
+  expect(timeLefts).toHaveLength(2);
+
+  // 시간 칸이 한국어 12시간 표기를 자르지 않는다.
+  const clipped = await panel.locator('.examPrepSchoolPlanTimes input[type="time"]').evaluateAll(
+    (nodes) => nodes.filter((node) => node.scrollWidth > node.clientWidth + 1).length
+  );
+  expect(clipped).toBe(0);
 });
 
 test("a school whose students differ can be fixed per student", async ({ page, request }) => {
