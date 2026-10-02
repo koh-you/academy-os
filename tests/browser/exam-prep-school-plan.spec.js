@@ -105,21 +105,14 @@ test("one save applies per-school time and exclusion, and the exclusion survives
   await expect(panel.locator("input[type=\"time\"]")).toHaveCount(0);
   await expect(panel.getByRole("button", { name: "수정" })).toBeVisible();
 
-  // 가로 2열 — 학생별 진행 내용은 오른쪽 열에서 따로 스크롤한다.
-  const columns = await detail.locator(".examPrepLessonLayout").evaluate(
-    (node) => window.getComputedStyle(node).gridTemplateColumns.split(" ").length
-  );
-  expect(columns).toBe(2);
   // 2026-10-02 · 요약 카드 4개는 한 줄이다. 3열이던 동안은 3+1 로 접혀 본문 높이를 먹었다.
   const summaryRowTops = await detail.locator(".examPrepSummaryGrid > div").evaluateAll(
     (nodes) => [...new Set(nodes.map((node) => Math.round(node.getBoundingClientRect().top)))]
   );
   expect(summaryRowTops).toHaveLength(1);
-  await expect(detail.locator(".examPrepLessonContentColumn .examPrepLessonContentEditor")).toBeVisible();
-  // 학생마다 반복되던 예시글은 지웠다.
-  expect(
-    await detail.getByLabel("정산 미리보기 학생 오늘 강의 내용").getAttribute("placeholder")
-  ).toBeNull();
+  // 학생별 기록·알림톡은 수업일지가 맡는다 — 이 모달에는 그 칸이 없다.
+  await expect(detail.locator(".examPrepLessonContentEditor")).toHaveCount(0);
+  await expect(detail.getByRole("button", { name: "수업일지 · 알림톡" })).toBeVisible();
 
   await panel.getByRole("button", { name: "수정" }).click();
   // 입력만으로는 저장되지 않는다(화면 초안).
@@ -183,14 +176,13 @@ test("the schedule and delete actions stay above the scrolling columns", async (
 
   // 스크롤하는 열 안에 들어 있으면 안 된다.
   const insideScrollColumn = await scheduleButton.evaluate(
-    (node) => Boolean(node.closest(".examPrepLessonMainColumn") || node.closest(".examPrepLessonContentColumn"))
+    (node) => Boolean(node.closest(".examPrepLessonMainColumn"))
   );
   expect(insideScrollColumn).toBe(false);
 
-  // 두 열을 끝까지 내려도 버튼이 제자리에 있고 화면 안에 남는다.
+  // 본문을 끝까지 내려도 버튼이 제자리에 있고 화면 안에 남는다.
   const before = await scheduleButton.evaluate((node) => Math.round(node.getBoundingClientRect().top));
   await detail.locator(".examPrepLessonMainColumn").evaluate((node) => { node.scrollTop = node.scrollHeight; });
-  await detail.locator(".examPrepLessonContentColumn").evaluate((node) => { node.scrollTop = node.scrollHeight; });
   const after = await scheduleButton.evaluate((node) => Math.round(node.getBoundingClientRect().top));
   expect(after).toBe(before);
   const inViewport = await scheduleButton.evaluate((node) => {
@@ -199,55 +191,35 @@ test("the schedule and delete actions stay above the scrolling columns", async (
   });
   expect(inViewport).toBe(true);
 
-  // 학생별 칸은 수업일지와 같은 칸이라는 것을 라벨로 드러낸다(둘 다 record.lessonProgress).
-  await expect(detail.locator(".examPrepStudentContentHeading")).toContainText("학생별 기록 · 알림톡");
+  // 학생별 기록·알림톡은 수업일지가 맡는다.
+  await expect(detail.getByRole("button", { name: "수업일지 · 알림톡" })).toBeVisible();
 });
 
-test("the alimtalk comment is written in place, and the checkbox only changes the plan", async ({ page, request }) => {
-  // 2026-10-02 · 전에는 알림톡 코멘트를 쓰려면 체크박스가 화면을 일반 수업일지로 바꿔치웠다.
-  // 이제 시험대비 화면 안에서 강의 내용·코멘트를 적고, Solapi 실제 예약은 따로 누른다.
+test("records and alimtalk live in the lesson journal, not in this modal", async ({ page, request }) => {
+  // 2026-10-02 · 한때 이 모달 안에서 강의 내용·코멘트를 적고 알림톡까지 예약하게 했는데,
+  // 같은 칸(record.lessonProgress·teacherComment·studentComment)을 두 화면에서 적게 되어
+  // 어디에 쓰는 게 맞는지 알 수 없었고 액션이 한 줄에 일곱 개가 되어 넘쳤다(요청).
   await postExamPrepRows(request, [highSchoolRow]);
   await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
 
   await loginAsTeacher(page);
   const detail = await openExamPrepModal(page);
 
-  // 강의 내용과 두 코멘트를 같은 화면에서 적는다.
-  await detail.getByLabel("정산 미리보기 학생 오늘 강의 내용").fill("미적분 오답 정리");
-  await detail.getByLabel("정산 미리보기 학생 학부모 코멘트").fill("학부모께 전하는 말");
-  await detail.getByLabel("정산 미리보기 학생 학생 코멘트").fill("학생에게 전하는 말");
-  await detail.getByRole("button", { name: /학생별 기록 저장/ }).click();
-  await expect(detail.locator(".examPrepLessonContentEditor").getByRole("status")).toContainText("재조회 확인");
+  // 기록·알림톡 칸은 이 모달에 없다.
+  await expect(detail.locator(".examPrepLessonContentEditor")).toHaveCount(0);
+  await expect(detail.locator(".examPrepNotificationBar")).toHaveCount(0);
+  await expect(detail.getByLabel("정산 미리보기 학생 오늘 강의 내용")).toHaveCount(0);
 
-  const records = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
-  expect(records.records).toContainEqual(expect.objectContaining({
-    lessonId: "lesson_exam_prep_2026-08-09",
-    lessonProgress: "미적분 오답 정리",
-    studentComment: "학생에게 전하는 말",
-    studentId: "safe-settlement-student",
-    teacherComment: "학부모께 전하는 말"
-  }));
+  // 액션은 네 개뿐이다 — 수업일지 · 알림톡 / 일정 수정 / 일정 삭제.
+  const actionLabels = await detail.locator(".examPrepActions button").allInnerTexts();
+  expect(actionLabels.map((label) => label.trim())).toEqual(["수업일지 · 알림톡", "일정 수정", "일정 삭제"]);
 
-  // 화면은 그대로다 — 체크해도 수업일지로 바뀌지 않는다.
-  const notificationBar = detail.locator(".examPrepNotificationBar");
-  await expect(notificationBar).toContainText("보내지 않음");
-  await notificationBar.getByLabel("알림톡 사용").check();
-  await expect(detail.locator(".examPrepSchoolPlanPanel")).toBeVisible();
-  await expect(page.getByRole("dialog", { name: "수업일지" })).toHaveCount(0);
-  await expect(notificationBar).toContainText("예약");
-
-  // 체크만으로는 Solapi 요청이 나가지 않는다 — 예약은 별도 행동이다.
-  const reservationRequests = [];
-  page.on("request", (req) => {
-    if (req.url().includes("/api/notification-jobs")) reservationRequests.push(req.url());
-  });
-  await notificationBar.getByLabel("알림톡 사용").uncheck();
-  await notificationBar.getByLabel("알림톡 사용").check();
-  expect(reservationRequests).toEqual([]);
-
-  // 반영 버튼을 눌러야 예약이 일어난다.
-  await notificationBar.getByRole("button", { name: "Solapi 반영" }).click();
-  await expect(notificationBar.getByRole("status", { name: "시험대비 알림톡 반영 상태" })).toContainText("Solapi");
+  // 그 버튼이 수업일지를 열고, 거기서 돌아올 수 있다.
+  await detail.getByRole("button", { name: "수업일지 · 알림톡" }).click();
+  const journal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(journal).toBeVisible();
+  await journal.getByRole("button", { name: "시험대비 명단 화면" }).click();
+  await expect(page.locator(".examPrepSchoolPlanPanel")).toBeVisible();
 });
 
 test("school rows and student rows line their time inputs up on the same columns", async ({ page, request }) => {

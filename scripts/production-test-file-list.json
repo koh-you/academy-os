@@ -98,7 +98,6 @@
   "scripts/test-lesson-journal-rows-persistence.mjs",
   "scripts/test-exam-prep-schedule-plan.mjs",
   "scripts/test-exam-prep-schedule-api.mjs",
-  "scripts/test-exam-prep-student-content.mjs",
   "scripts/test-generated-lesson-plan-builder-exam-prep-content.mjs",
   "scripts/test-homework-teacher-status-save.mjs",
   "scripts/test-resource-material-persistence.mjs",

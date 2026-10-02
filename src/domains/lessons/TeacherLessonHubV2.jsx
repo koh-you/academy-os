@@ -67,12 +67,8 @@ export function TeacherLessonHubV2({
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
   onSaveExamPrepSchoolPlan,
-  onApplyExamPrepNotificationPlan,
   onToggleExamPrepJournalView,
   getExamPrepLessonExcludedSchools,
-  getExamPrepNotificationEnabled,
-  getExamPrepNotificationScheduledLabel,
-  onToggleExamPrepDailyJournal,
   onSaveRecord,
   onRestoreCanceledLesson,
   onScheduleMakeupTask,
@@ -226,19 +222,13 @@ export function TeacherLessonHubV2({
       >
         <ExamPrepLessonDetail
           attendanceSettings={attendanceSettings}
-          createEmptyRecord={nestedPanels.createEmptyRecord}
           examPrepExcludedSchools={getExamPrepLessonExcludedSchools?.(selectedLesson) ?? []}
           examPrepScheduleLessons={examPrepScheduleLessons}
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
           onSaveExamPrepSchedule={onSaveExamPrepSchedule}
-          onApplyExamPrepNotificationPlan={onApplyExamPrepNotificationPlan}
           onOpenJournalView={onToggleExamPrepJournalView}
           onSaveExamPrepSchoolPlan={onSaveExamPrepSchoolPlan}
-          examPrepNotificationEnabled={getExamPrepNotificationEnabled?.(selectedLesson) ?? false}
-          examPrepNotificationScheduledLabel={getExamPrepNotificationScheduledLabel?.(selectedLesson) ?? ""}
-          onToggleDailyJournal={onToggleExamPrepDailyJournal}
-          onSaveRecord={onSaveRecord}
           persistedLessons={persistedLessons}
           records={records}
           ScheduleModalComponent={ExamPrepScheduleModal}
