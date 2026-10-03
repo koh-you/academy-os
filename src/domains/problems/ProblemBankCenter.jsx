@@ -17,7 +17,7 @@ import {
   uploadProblemBankImages,
   wakeProblemBankApi
 } from "./problemBankApi.js";
-import { buildFolderTree, countBooksInFolder, findFolderNode } from "./problemBankModel.js";
+import { buildFolderTree, countBooksInFolder, findFolderNode, itemDisplayNumber } from "./problemBankModel.js";
 import "./problemBank.css";
 
 const imageBatchSize = 40;
@@ -625,9 +625,10 @@ export function ProblemBankCenter() {
                   <ul>
                     {reviewItems.slice(0, 120).map((item) => (
                       <li key={item.itemId}>
-                        <strong>{item.numberLabel}번</strong> <small>{item.printedPage}쪽</small>
+                        <strong>{itemDisplayNumber(item.numberLabel)}번</strong> <small>{item.printedPage}쪽</small>
+                        {item.typeLabel ? <small className="problemBankReviewType">{item.typeLabel}</small> : null}
                         <p className="problemBankReviewNote">{item.reviewNote}</p>
-                        {flaggedImages.get(item.itemId) ? <img alt={`${item.numberLabel}번`} src={flaggedImages.get(item.itemId)} /> : null}
+                        {flaggedImages.get(item.itemId) ? <img alt={`${itemDisplayNumber(item.numberLabel)}번`} src={flaggedImages.get(item.itemId)} /> : null}
                       </li>
                     ))}
                     {reviewItems.length > 120 ? <li>… 외 {reviewItems.length - 120}개</li> : null}

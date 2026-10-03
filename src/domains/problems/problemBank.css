@@ -122,6 +122,22 @@
 .problemBankPill.danger { background: #ffedd5; color: #c2410c; }
 .problemBankUnitSelect { background: transparent; border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 11.5px; padding: 2px 9px; }
 
+/* 단원 안의 교재 구획(개념 01 · 유형 001 … · 실전). 머리줄은 번호 칸보다 눈에 덜 띄게 둬서
+   구획은 읽히되 번호 훑기를 방해하지 않게 한다. */
+.problemBankTypeSection + .problemBankTypeSection { margin-top: 12px; }
+.problemBankTypeSectionHead {
+  align-items: baseline;
+  border-top: 1px solid var(--academy-border, #e2e6ec);
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 0 0 6px;
+  padding-top: 8px;
+}
+.problemBankTypeSection:first-child .problemBankTypeSectionHead { border-top: 0; padding-top: 0; }
+.problemBankTypeSectionHead span { color: var(--academy-text, #111827); font-size: 12.5px; font-weight: 600; }
+.problemBankTypeSectionHead small { color: var(--academy-text-muted, #6b7280); flex: 0 0 auto; font-size: 11px; }
+
 .problemBankNumberGrid { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); }
 .problemBankNumber {
   background: var(--academy-surface-muted, #f3f4f6);
@@ -237,6 +253,8 @@
 .problemBankReviewFilters .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 12.5px; padding: 3px 10px; }
 .problemBankReviewFilters .softButton[aria-pressed="true"] { background: var(--academy-text-strong, #111827); border-color: var(--academy-text-strong, #111827); color: #fff; }
 .problemBankReviewNote { font-size: 12.5px; margin: 2px 0 0; white-space: pre-wrap; }
+/* 검토 목록에도 교재 구획(유형)을 같이 보여 어느 자리 문항인지 바로 알게 한다. */
+.problemBankReviewType { color: var(--academy-text-muted, #6b7280); margin-left: 6px; }
 .problemBankFlagged { margin-top: 14px; }
 .problemBankFlagged h3 { font-size: 14px; margin: 0 0 4px; }
 .problemBankFlagged ul { display: grid; gap: 10px; list-style: none; margin: 8px 0 0; padding: 0; }
