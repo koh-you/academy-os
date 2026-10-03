@@ -74,7 +74,12 @@
 % [2] 시리즈 메타
 % =============================================================================
 % v6.20: 시리즈명 정정 · DeeP Math → Deep:it (마스터 확인 · 세션 57 계승)
+% 2026-09-26: 머리말 오른쪽의 시리즈명은 빼고, 꼬리말 왼쪽을 학원명으로 바꿨다(사용자 지시).
+%   \dmseriesname 은 옛 문서가 참조할 수 있어 정의만 남긴다 — 머리·꼬리말은 더 쓰지 않는다.
+%   학원이 달라지면 \dmacademyname 만 바꾼다(예전에는 꼬리말에 「공통수학2」가 박혀 있어
+%   어떤 교재를 뽑아도 그 이름이 찍혔다 — 교재명은 머리말 왼쪽 \dmchapname 이 이미 보여준다).
 \newcommand{\dmseriesname}{Deep{:}it}
+\newcommand{\dmacademyname}{으뜸수학 고태영T}
 \newcommand{\dmchapnum}{}
 \newcommand{\dmchapname}{}
 % v6.61 (세션 69): 대단원명 (마스트헤드 accent 라벨) · fallback "CHAPTER NN"
@@ -93,11 +98,9 @@
 %   - 하단 푸터 스펙 그대로 답지 계승 (\small\bfseries\color{dm-navydark})
 %   - 상단 헤더는 답지 상단과 동일 필체 (\sffamily), 콘텐츠(챕터명·Deep:it)는 유지
 \fancyhead[L]{\sffamily\small\color{dm-muted}\dmchapnum\ \ \dmchapname}
-\fancyhead[R]{\sffamily\bfseries\color{dm-navydark}\dmseriesname}
+\fancyhead[R]{}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{dm-rulelight}\leaders\hrule height 0.4pt\hfill}}
-\fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}DEPTH \& INSIGHT%
-  \hspace{2mm}\color{dm-rule}\textperiodcentered\hspace{2mm}%
-  \color{dm-navydark}공통수학2}
+\fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}\dmacademyname}
 \fancyfoot[R]{\sffamily\bfseries\color{dm-navy}\thepage}
 
 % v6.63 (세션 69): 챕터 첫 페이지 전용 스타일 — 헤더 텍스트 유지 · 가로 rule만 제거
@@ -108,10 +111,8 @@
   \renewcommand{\headrulewidth}{0pt}%
   \renewcommand{\headrule}{}%
   \fancyhead[L]{\sffamily\small\color{dm-muted}\dmchapnum\ \ \dmchapname}%
-  \fancyhead[R]{\sffamily\bfseries\color{dm-navydark}\dmseriesname}%
-  \fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}DEPTH \& INSIGHT%
-    \hspace{2mm}\color{dm-rule}\textperiodcentered\hspace{2mm}%
-    \color{dm-navydark}공통수학2}%
+  \fancyhead[R]{}%
+  \fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}\dmacademyname}%
   \fancyfoot[R]{\sffamily\bfseries\color{dm-navy}\thepage}%
 }
 

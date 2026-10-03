@@ -16,6 +16,9 @@ const getSundayDatesForExamPeriod =
     }
   });
 
+// 2026-10-01 · 기준이 시험 종료일에서 **시험 첫날** 로 바뀌었다. 첫날(08-01 토) 직전 일요일
+// 07-26 이 마지막 회차가 되고 거기서 3주를 거슬러 올라간다. 시험기간 안의 일요일은 이미
+// 시험이 시작된 뒤라 더 이상 만들지 않는다(창동고 10/11 사례).
 const period = {
   startDate: "2026-08-01",
   endDate: "2026-08-31"
@@ -24,14 +27,27 @@ const periodSnapshot = structuredClone(period);
 assert.deepEqual(
   getSundayDatesForExamPeriod(period),
   [
-    "2026-08-02",
-    "2026-08-09",
-    "2026-08-16",
-    "2026-08-23",
-    "2026-08-30"
+    "2026-07-05",
+    "2026-07-12",
+    "2026-07-19",
+    "2026-07-26"
   ]
 );
-assert.ok(formattedDates.length > 4);
+assert.equal(formattedDates.length, 4);
+
+// 종료일이 주말을 넘겨도 회차는 그대로다 — 창동고 보고의 핵심 회귀.
+assert.deepEqual(
+  getSundayDatesForExamPeriod({
+    startDate: "2026-10-07",
+    endDate: "2026-10-13"
+  }),
+  [
+    "2026-09-13",
+    "2026-09-20",
+    "2026-09-27",
+    "2026-10-04"
+  ]
+);
 assert.deepEqual(
   getSundayDatesForExamPeriod({
     date: "2026-08-12"
@@ -43,6 +59,41 @@ assert.deepEqual(
     "2026-08-09"
   ]
 );
+// 2026-10-01 · 수학시험일이 주말 뒤 평일이면 그 직전 일요일도 대비한다(총 5회가 되어도).
+// 시험기간 10/07(수)~10/13(화), 주말 10/10(토)·10/11(일)이 낀 창동고 형태.
+const weekendPeriod = { startDate: "2026-10-07", endDate: "2026-10-13" };
+const basePrepSundays = [
+  "2026-09-13",
+  "2026-09-20",
+  "2026-09-27",
+  "2026-10-04"
+];
+// 수학시험을 아직 안 적었으면 기본 4회만.
+assert.deepEqual(
+  getSundayDatesForExamPeriod(weekendPeriod),
+  basePrepSundays
+);
+// 수학시험이 주말 **앞**(10/08 목)이면 직전 일요일이 이미 기본 4회 안에 있어 늘지 않는다.
+assert.deepEqual(
+  getSundayDatesForExamPeriod(weekendPeriod, ["2026-10-08"]),
+  basePrepSundays
+);
+// 수학시험이 주말 **뒤**(10/12 월)면 직전 일요일 10/11 이 더해져 5회가 된다.
+assert.deepEqual(
+  getSundayDatesForExamPeriod(weekendPeriod, ["2026-10-12"]),
+  [...basePrepSundays, "2026-10-11"]
+);
+// 수학시험이 여러 개면 주말 뒤 시험 하나만으로도 추가되고, 중복은 생기지 않는다.
+assert.deepEqual(
+  getSundayDatesForExamPeriod(weekendPeriod, ["2026-10-08", "2026-10-13"]),
+  [...basePrepSundays, "2026-10-11"]
+);
+// 빈 값·깨진 날짜는 무시한다.
+assert.deepEqual(
+  getSundayDatesForExamPeriod(weekendPeriod, ["", null, "2026-13-99"]),
+  basePrepSundays
+);
+
 assert.deepEqual(
   getSundayDatesForExamPeriod({
     startDate: "2026-08-01"

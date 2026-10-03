@@ -11,7 +11,8 @@ function toExistingKoreaDateString(date) {
 }
 
 function getExistingSundayDatesForExamPeriod(
-  period = {}
+  period = {},
+  mathExamDates = []
 ) {
   if (!period.endDate && !period.date) return [];
   const startDate =
@@ -31,33 +32,27 @@ function getExistingSundayDatesForExamPeriod(
   ) {
     return [];
   }
-  const day = end.getDay();
-  const lastSunday = new Date(end);
-  lastSunday.setDate(end.getDate() - day);
-  const prepSundays = [3, 2, 1, 0].map(
-    (offset) => {
-      const date = new Date(lastSunday);
-      date.setDate(
-        lastSunday.getDate() - offset * 7
-      );
-      return toExistingKoreaDateString(date);
-    }
-  );
-  const inPeriodSundays = [];
-  const cursor = new Date(start);
-  while (cursor <= end) {
-    if (cursor.getDay() === 0) {
-      inPeriodSundays.push(
-        toExistingKoreaDateString(cursor)
-      );
-    }
-    cursor.setDate(cursor.getDate() + 1);
-  }
+  // 2026-10-01 · 기준은 시험 첫날이고, 수학시험일 직전 일요일을 더한다(주말 뒤 수학시험이면 5회).
+  const day = start.getDay();
+  const lastPrepSunday = new Date(start);
+  lastPrepSunday.setDate(start.getDate() - day);
+  const prepSundays = [3, 2, 1, 0].map((offset) => {
+    const date = new Date(lastPrepSunday);
+    date.setDate(
+      lastPrepSunday.getDate() - offset * 7
+    );
+    return toExistingKoreaDateString(date);
+  });
+  const mathExamSundays = (Array.isArray(mathExamDates) ? mathExamDates : [])
+    .map((value) => new Date(`${String(value ?? "").trim()}T00:00:00+09:00`))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .map((date) => {
+      const sunday = new Date(date);
+      sunday.setDate(date.getDate() - date.getDay());
+      return toExistingKoreaDateString(sunday);
+    });
   return [
-    ...new Set([
-      ...prepSundays,
-      ...inPeriodSundays
-    ])
+    ...new Set([...prepSundays, ...mathExamSundays])
   ].sort();
 }
 
@@ -76,11 +71,10 @@ const fullPeriodSnapshot =
 assert.deepEqual(
   getExistingSundayDatesForExamPeriod(fullPeriod),
   [
-    "2026-08-02",
-    "2026-08-09",
-    "2026-08-16",
-    "2026-08-23",
-    "2026-08-30"
+    "2026-07-05",
+    "2026-07-12",
+    "2026-07-19",
+    "2026-07-26"
   ]
 );
 assert.deepEqual(
@@ -118,15 +112,16 @@ assert.deepEqual(
   ]
 );
 assert.deepEqual(
+  // 시작 > 종료인 역전 입력. 기준이 시작일이므로 08-20(목) 직전 일요일 08-16 이 마지막 회차다.
   getExistingSundayDatesForExamPeriod({
     startDate: "2026-08-20",
     endDate: "2026-08-10"
   }),
   [
-    "2026-07-19",
     "2026-07-26",
     "2026-08-02",
-    "2026-08-09"
+    "2026-08-09",
+    "2026-08-16"
   ]
 );
 assert.deepEqual(
@@ -181,20 +176,15 @@ const helperBoundaries = [
   '`${endDate}T00:00:00+09:00`',
   "Number.isNaN(start.getTime()) ||",
   "Number.isNaN(end.getTime())",
-  "const day = end.getDay()",
-  "const lastSunday = new Date(end)",
-  "lastSunday.setDate(end.getDate() - day)",
-  "const prepSundays = [3, 2, 1, 0].map(",
+  "const day = start.getDay()",
+  "const lastPrepSunday = new Date(start)",
+  "lastPrepSunday.setDate(start.getDate() - day)",
+  "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+  "lastPrepSunday.getDate() - offset * 7",
   "return toKoreaDateString(date)",
-  "const inPeriodSundays = []",
-  "const cursor = new Date(start)",
-  "while (cursor <= end) {",
-  "if (cursor.getDay() === 0)",
-  "toKoreaDateString(cursor)",
-  "cursor.setDate(cursor.getDate() + 1)",
-  "...prepSundays,",
-  "...inPeriodSundays",
-  "].sort()"
+  "const mathExamSundays = (Array.isArray(mathExamDates) ? mathExamDates : [])",
+  "sunday.setDate(date.getDate() - date.getDay())",
+  "...new Set([...prepSundays, ...mathExamSundays])"
 ];
 let previousIndex = -1;
 for (const boundary of helperBoundaries) {

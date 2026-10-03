@@ -11,6 +11,18 @@ import "./testManagerPanels.css";
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   return (
     <WorkspaceTabs label="테스트 관리 항목">
+      {/* 2026-10-03 · 「시험지 제작」이 오답관리에서 넘어왔다. 만들고 -> 목록에 넣고 -> 응시를
+          기록하는 순서가 탭 순서다(요청). */}
+      <button
+        aria-selected={activeTab === "examPaper"}
+        className={activeTab === "examPaper" ? "active" : ""}
+        onClick={() => onChange?.("examPaper")}
+        role="tab"
+        type="button"
+      >
+        시험지 제작
+      </button>
+      <button aria-selected={activeTab === "answerPilot"} className={activeTab === "answerPilot" ? "active" : ""} onClick={() => onChange?.("answerPilot")} role="tab" type="button">채점 실험</button>
       <button
         aria-selected={activeTab === "attempts"}
         className={activeTab === "attempts" ? "active" : ""}

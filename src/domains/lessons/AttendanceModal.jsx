@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import {
@@ -32,6 +32,9 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, notificationJobs =
   const [confirmStep, setConfirmStep] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  // 2026-09-28 · 제목 줄이 <label> 밖으로 나오면서 htmlFor/id 로만 입력과 연결된다.
+  const checkInFieldId = useId();
+  const checkOutFieldId = useId();
   const calculatedLateMinutes = attendanceStatus === "late"
     ? calculateLateMinutesFromLessonTime(lesson, checkInTime, lateGraceMinutes)
     : "";
@@ -142,26 +145,39 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, notificationJobs =
         ))}
       </div>
       <div className="fieldGrid">
-        <label>
-          등원 시각
+        {/* 2026-09-28 · 등·하원 시각의 상시 <small> 안내를 제목 줄 물음표 뒤로 옮겼다.
+            물음표 트리거는 <button> 이고 button 은 labelable element 라 <label> 안에 두면
+            label 의 연결 대상이 버튼으로 바뀌어 입력칸이 접근 가능한 이름을 잃는다.
+            그래서 바깥은 <div> 로 두고 <label htmlFor> 이 제목 텍스트만 감싸 입력과 명시 연결한다. */}
+        <div className="attendanceTimeField">
+          <span className="helpTipTitleRow">
+            <label htmlFor={checkInFieldId}>등원 시각</label>
+            <HelpTip
+              label="등원 시각"
+              text="출결을 못 찍은 학생은 실제 등원 시각을 입력하세요. 지각 분은 수업 시작 기준으로 자동 계산됩니다."
+            />
+          </span>
           <input
             disabled={isFieldLocked}
+            id={checkInFieldId}
             type="time"
             value={checkInTime}
             onChange={(event) => setCheckInTime(event.target.value)}
           />
-          <small>출결을 못 찍은 학생은 실제 등원 시각을 입력하세요. 지각 분은 수업 시작 기준으로 자동 계산됩니다.</small>
-        </label>
-        <label>
-          하원 시각
+        </div>
+        <div className="attendanceTimeField">
+          <span className="helpTipTitleRow">
+            <label htmlFor={checkOutFieldId}>하원 시각</label>
+            <HelpTip label="하원 시각" text="하원 처리를 못 찍은 학생은 실제 하원 시각을 입력하세요." />
+          </span>
           <input
             disabled={isFieldLocked}
+            id={checkOutFieldId}
             type="time"
             value={checkOutTime}
             onChange={(event) => setCheckOutTime(event.target.value)}
           />
-          <small>하원 처리를 못 찍은 학생은 실제 하원 시각을 입력하세요.</small>
-        </label>
+        </div>
         <label>
           사유
           <input
@@ -209,14 +225,23 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, notificationJobs =
       ) : null}
       {confirmStep === "saveMode" ? (
         <div className="attendanceConfirmPanel">
-          <strong>{isPendingRevert ? "출결을 대기로 되돌릴까요?" : "출결을 어떻게 저장할까요?"}</strong>
-          <p>
-            {isPendingRevert
-              ? "출결 기록을 미체크(대기)로 되돌립니다. 등원·하원 시각과 사유는 지워지고, 이 저장으로 나가는 알림톡은 없습니다."
-              : values.attendanceStatus === "absent"
-                ? "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
-                : "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."}
-          </p>
+          {/* 2026-09-28 · 저장 방식 설명(결석/그 외 분기)은 제목 옆 물음표 뒤로 옮겼다. 제목·저장될 값
+              요약·[취소][저장만][저장 후 발송/예약] 은 그대로 보인다. 대기로 되돌릴 때의 문구는 시각·사유가
+              지워진다는 실행 직전 경고라 상시 노출을 유지한다(ui-principles §9). */}
+          <span className="helpTipTitleRow">
+            <strong>{isPendingRevert ? "출결을 대기로 되돌릴까요?" : "출결을 어떻게 저장할까요?"}</strong>
+            {isPendingRevert ? null : (
+              <HelpTip
+                label="저장 방식"
+                text={values.attendanceStatus === "absent"
+                  ? "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
+                  : "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."}
+              />
+            )}
+          </span>
+          {isPendingRevert ? (
+            <p>출결 기록을 미체크(대기)로 되돌립니다. 등원·하원 시각과 사유는 지워지고, 이 저장으로 나가는 알림톡은 없습니다.</p>
+          ) : null}
           <p className="attendanceConfirmSummary">저장될 값 · {confirmSummaryText}</p>
           {reservedAbsenceAlimtalkWarning ? (
             <p className="attendanceReservedAbsenceWarning">{reservedAbsenceAlimtalkWarning}</p>

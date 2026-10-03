@@ -66,7 +66,9 @@ export function TeacherLessonHubV2({
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
-  onToggleExamPrepDailyJournal,
+  onSaveExamPrepSchoolPlan,
+  onToggleExamPrepJournalView,
+  getExamPrepLessonExcludedSchools,
   onSaveRecord,
   onRestoreCanceledLesson,
   onScheduleMakeupTask,
@@ -166,9 +168,13 @@ export function TeacherLessonHubV2({
   }
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(selectedLesson, selectedMakeupTask);
   const isHomeworkMakeupLesson = isSupplementMakeupLesson && selectedMakeupTask?.taskType === "homework_makeup";
+  // 2026-10-02 · `데일리 알림톡 사용` 체크박스가 화면을 일반 수업일지로 바꿔치우던 분기를
+  // 끊었다. 알림톡은 이제 시험대비 화면 안에서 쓰고 예약한다. 수업일지로 가는 길 자체는
+  // 남긴다(숙제·과제 상태·코멘트 미리보기가 거기 있다) — 다만 알림톡 체크가 아니라
+  // `수업일지로 열기` 라는 제 이름의 버튼이 연다.
   const selectedLessonNotificationPlan = selectedLesson ? lessonNotificationPlans[selectedLesson.lessonId] : null;
-  const isExamPrepDailyJournalEnabled = selectedLessonNotificationPlan?.dailyJournalEnabled === true;
-  const isExamPrepLessonSelected = isExamPrepLesson(selectedLesson) && !isExamPrepDailyJournalEnabled;
+  const isExamPrepJournalViewEnabled = selectedLessonNotificationPlan?.journalViewEnabled === true;
+  const isExamPrepLessonSelected = isExamPrepLesson(selectedLesson) && !isExamPrepJournalViewEnabled;
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
     isHomeworkMakeupLesson ? (
       <Modal
@@ -204,6 +210,7 @@ export function TeacherLessonHubV2({
       <Modal
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal examPrepModal"
+        scrollable
         title="시험대비"
         titleAdornment={(
           <HelpTip
@@ -215,13 +222,13 @@ export function TeacherLessonHubV2({
       >
         <ExamPrepLessonDetail
           attendanceSettings={attendanceSettings}
-          createEmptyRecord={nestedPanels.createEmptyRecord}
+          examPrepExcludedSchools={getExamPrepLessonExcludedSchools?.(selectedLesson) ?? []}
           examPrepScheduleLessons={examPrepScheduleLessons}
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
           onSaveExamPrepSchedule={onSaveExamPrepSchedule}
-          onToggleDailyJournal={onToggleExamPrepDailyJournal}
-          onSaveRecord={onSaveRecord}
+          onOpenJournalView={onToggleExamPrepJournalView}
+          onSaveExamPrepSchoolPlan={onSaveExamPrepSchoolPlan}
           persistedLessons={persistedLessons}
           records={records}
           ScheduleModalComponent={ExamPrepScheduleModal}
@@ -258,7 +265,7 @@ export function TeacherLessonHubV2({
             attendanceSettings={attendanceSettings}
             integrationStatus={integrationStatus}
             lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
-            onToggleExamPrepDailyJournal={onToggleExamPrepDailyJournal}
+            onToggleExamPrepJournalView={onToggleExamPrepJournalView}
             notificationJobs={notificationJobs}
             homeworks={homeworks}
             lesson={selectedLesson}

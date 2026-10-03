@@ -1510,10 +1510,13 @@ summary:focus-visible {
   gap: 14px;
 }
 
+/* 2026-10-02 · 카드가 4개인데 3열이라 3+1 두 줄로 접혔다(요청). 4열 한 줄로 둔다.
+   카드는 공용 MetricCard(min-height 82px)라 높이는 아래 모달 전용 규칙에서 낮춘다.
+   좁은 화면은 아래 미디어쿼리에서 2열 -> 1열로 내려간다. */
 .examPrepSummaryGrid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .examPrepSummaryGrid > div {
@@ -1521,34 +1524,43 @@ summary:focus-visible {
   border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 8px;
   display: grid;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
-  padding: 14px;
+  padding: 9px 11px;
 }
 
 .examPrepSummaryGrid span,
 .examPrepSummaryGrid small {
   color: var(--academy-muted, #64748b);
+  font-size: 11px;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .examPrepSummaryGrid strong {
   color: var(--academy-text, #0f172a);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
   overflow-wrap: anywhere;
 }
 
-.examPrepPanel {
-  background: var(--status-info-bg, #eff6ff);
+/* 2026-10-02 · 일정 수정·삭제를 모달 상단으로 올리면서 아래쪽 `examPrepPanel`
+   섹션을 통째로 들어냈다. 연결된 시험정보 칩을 지운 뒤로는 머리글과 액션만 남아
+   있었다. */
+.examPrepLessonActionBar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
 }
 
-.examPrepPanel h3 {
-  font-size: 22px;
-  margin: 4px 0 8px;
+.examPrepLessonActionBar .eyebrow {
+  margin: 0;
 }
 
 .examPrepActions {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1561,22 +1573,6 @@ summary:focus-visible {
   font-weight: 900;
   min-height: 38px;
   padding: 0 14px;
-}
-
-.examPrepSourceChipList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.examPrepSourceChip {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 999px;
-  color: var(--academy-text, #0f172a);
-  font-size: 13px;
-  font-weight: 800;
-  padding: 6px 12px;
 }
 
 .lessonNotificationStatusRow {
@@ -3397,111 +3393,155 @@ summary:focus-visible {
   width: 100%;
 }
 
-.examPrepLessonContentEditor {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 12px;
+.examPrepSchoolPlanPanel {
   display: grid;
   gap: 10px;
-  margin-top: 14px;
-  padding: 14px;
 }
 
-.examPrepLessonContentEditor textarea {
-  min-height: 84px;
-  width: 100%;
-}
-
-.examPrepStudentContentHeading {
+.examPrepSchoolPlanHeader {
   align-items: flex-start;
   display: flex;
   gap: 12px;
   justify-content: space-between;
 }
 
-.examPrepStudentContentHeading strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 15px;
+.examPrepSchoolPlanHeader h3 {
+  margin: 0;
 }
 
-.examPrepStudentContentHeading > span {
-  background: var(--status-info-bg, #eff6ff);
-  border-radius: 999px;
-  color: var(--academy-focus-ring, #2563eb);
+.examPrepSchoolPlanHeaderActions {
+  display: flex;
   flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 900;
-  padding: 5px 9px;
+  gap: 8px;
 }
 
-.examPrepLegacyCommonContent {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-
-.examPrepLegacyCommonContent span {
-  color: var(--status-pending-text, #c2410c);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.examPrepLegacyCommonContent p {
-  color: var(--status-pending-text, #c2410c);
-  margin: 4px 0 0;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.examPrepStudentContentList {
+.examPrepSchoolPlanList {
   display: grid;
-  gap: 10px;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.examPrepStudentContentRow {
-  align-items: start;
+.examPrepSchoolPlanRow {
   background: var(--academy-surface, #fff);
   border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 10px;
   display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(130px, 0.36fr) minmax(0, 1fr);
-  padding: 12px;
+  gap: 8px;
+  padding: 8px 12px;
 }
 
-.examPrepStudentContentIdentity {
+/* 제외한 학교도 같은 목록에 남는다 — 체크 한 번으로 되돌릴 수 있어야 한다. */
+.examPrepSchoolPlanRow.excluded {
+  background: var(--academy-surface-muted, #f8fafc);
+}
+
+.examPrepSchoolPlanRow.excluded .examPrepSchoolPlanName,
+.examPrepSchoolPlanRow.excluded .examPrepSchoolPlanInclude strong {
+  color: var(--academy-muted, #64748b);
+}
+
+/* 2026-10-02 · 학교 줄과 학생 줄이 같은 3열 격자를 쓴다(이름 / 시간 / 작업). 전에는 학교
+   줄만 끝에 버튼이 있고 두 줄 다 flex 였어서, 학생 줄의 시간 칸이 버튼 폭만큼 더 오른쪽으로
+   밀려 세로로 어긋나 보였다(요청). 시간 칸 폭은 한국어 12시간 표기("오후 04:00" + 시계
+   아이콘)가 잘리지 않는 값이다 — 120px 에서는 분이 잘렸다. */
+.examPrepSchoolPlanRowMain,
+.examPrepSchoolPlanStudentList li {
+  align-items: center;
   display: grid;
-  gap: 4px;
+  gap: 10px;
+  /* 세 번째 열은 고정 폭이다. auto 로 두면 "학생별 시간" 버튼이 있는 줄만 열이 넓어져
+     시간 칸이 줄마다 좌우로 어긋났다(실측 283px vs 306px · 2026-10-02). */
+  grid-template-columns: minmax(0, 1fr) auto 132px;
+}
+
+.examPrepSchoolPlanIdentity {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   min-width: 0;
 }
 
-.examPrepStudentContentIdentity strong,
-.examPrepStudentContentIdentity small {
+.examPrepSchoolPlanInclude {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.examPrepSchoolPlanInclude input[type="checkbox"] {
+  flex: 0 0 auto;
+  height: 18px;
+  min-height: 0;
+  width: 18px;
+}
+
+.examPrepSchoolPlanName,
+.examPrepSchoolPlanInclude strong,
+.examPrepSchoolPlanStudentName {
   overflow-wrap: anywhere;
 }
 
-.examPrepStudentContentIdentity small {
-  color: var(--academy-muted, #64748b);
+.examPrepSchoolPlanStudentName {
   font-weight: 700;
-  line-height: 1.45;
 }
 
-.examPrepLessonContentFooter {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-}
-
-.examPrepLessonContentFooter span {
+.examPrepSchoolPlanMeta,
+.examPrepSchoolPlanTimeLabel {
   color: var(--academy-muted, #64748b);
   font-size: 12px;
-  line-height: 1.5;
+  font-weight: 700;
 }
 
-.examPrepLessonContentFooter button {
+.examPrepSchoolPlanTimes {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.examPrepSchoolPlanTimes input[type="time"] {
+  box-sizing: border-box;
   flex: 0 0 auto;
+  min-width: 0;
+  padding-inline: 8px;
+  width: 136px;
+}
+
+/* 버튼이 없는 줄도 같은 폭을 차지해야 시간 칸이 세로로 맞는다. */
+.examPrepSchoolPlanRowAction {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.examPrepSchoolPlanExpandButton {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.examPrepSchoolPlanStudentList {
+  border-top: 1px solid var(--academy-border, #d8e3f8);
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 0;
+}
+
+.examPrepSchoolPlanStatus {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.examPrepSchoolPlanStatus span {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
 }
 
 @media (max-width: 640px) {
@@ -3514,13 +3554,33 @@ summary:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .examPrepLessonContentFooter {
-    align-items: stretch;
-    flex-direction: column;
+  .examPrepSchoolPlanRowMain,
+  .examPrepSchoolPlanStudentList li {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .examPrepStudentContentRow {
-    grid-template-columns: minmax(0, 1fr);
+  .examPrepSchoolPlanTimes {
+    justify-content: flex-start;
+  }
+
+  .examPrepSchoolPlanRowAction {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 1100px) {
+  .modalCard.examPrepModal .modalScrollBody {
+    overflow: auto;
+  }
+
+  .modalCard.examPrepModal .examPrepLessonBody {
+    grid-template-rows: none;
+    height: auto;
+  }
+
+  .modalCard.examPrepModal .examPrepLessonMainColumn {
+    max-height: none;
+    overflow-y: visible;
   }
 }
 
@@ -5091,6 +5151,52 @@ button:disabled {
 .modalCard.homeworkMakeupScheduleModal {
   max-width: 1120px;
 }
+
+/* 2026-10-02 · 학생별 기록·알림톡을 수업일지로 넘기면서 오른쪽 열이 사라졌다. 남은 것은
+   학교별 참여·명단뿐이라 한 열로 충분하고, 모달도 1600 -> 1120px 로 좁힌다.
+   배경 패딩(56px × 2)을 빼야 카드 아래가 화면 밖으로 넘지 않는다(수업 등록 모달과 동일). */
+.modalCard.examPrepModal {
+  max-height: calc(100dvh - 112px);
+  max-width: 1120px;
+}
+
+/* 요약 카드는 공용 MetricCard 라 .examPrepSummaryGrid > div 규칙이 덮이지 않는다. 한 줄에
+   네 개를 두면서 본문 높이를 돌려주려면 이 모달 안에서만 낮춰야 한다(실측 98 -> 78px). */
+.modalCard.examPrepModal .examPrepSummaryGrid .metricCard {
+  gap: 1px;
+  min-height: 0;
+  padding: 8px 11px;
+}
+
+.modalCard.examPrepModal .examPrepSummaryGrid .metricCard strong {
+  font-size: 15px;
+}
+
+/* 모달 높이를 화면 안에 가두고(공용 scrollable) 본문 한 열만 스크롤한다. 가두지 않으면
+   카드가 명단 길이만큼 늘어나 페이지가 통째로 스크롤된다. */
+.modalCard.examPrepModal .modalScrollBody {
+  overflow: hidden;
+}
+
+.modalCard.examPrepModal .examPrepLessonBody {
+  display: grid;
+  gap: 14px;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+.modalCard.examPrepModal .examPrepLessonMainColumn {
+  align-content: start;
+  display: grid;
+  gap: 12px;
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
 
 .modalCard.studentPortalPreviewModal {
   background: var(--academy-surface, #ffffff);
@@ -8234,20 +8340,6 @@ textarea {
   justify-content: space-between;
   min-width: 0;
   padding: 11px 14px;
-}
-
-.examPrepDailyJournalToggle {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  display: inline-flex;
-  font-weight: 900;
-  gap: 6px;
-  min-height: var(--academy-touch-target);
-  padding: 0 12px;
 }
 
 .examPrepRosterRowMeta {
@@ -15656,6 +15748,10 @@ body.attendanceOnlyBody {
 
   .examPrepSummaryGrid {
     grid-template-columns: 1fr;
+  }
+
+  .modalCard.examPrepModal .examPrepSummaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .examPrepRosterHeader,

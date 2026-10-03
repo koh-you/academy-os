@@ -1,5 +1,6 @@
 // 시험지 제작 모델 fixture 검사 — 배점 분배 · 문항 순서 · 여러 교재 행에서 인쇄 항목 만들기 · 유형 라벨 목록.
 import assert from "node:assert/strict";
+import { prettifyMathLabel } from "../src/domains/problems/mathLabelText.js";
 import {
   buildPrintEntriesFromRows,
   distributeExamPoints,
@@ -80,3 +81,29 @@ assert.deepEqual(groupItemsByTypeSection([]).length, 0);
 assert.deepEqual(groupItemsByTypeSection([{ itemId: "a" }, { itemId: "b" }]).map((s) => [s.label, s.items.length]), [["", 2]]);
 
 console.log("problem bank exam model fixtures passed");
+
+// 유형 제목 속 수식을 읽을 수 있는 글자로 바꾼다. 교재 제목에는 전사본 LaTeX 이 그대로 들어 있고
+// (등록 교재 3,865개 제목 중 433개), 2026-10-03 에 단원 안 구획 머리줄을 넣으면서 화면에 드러났다.
+// 아래는 전부 실제 등록 교재의 제목에서 가져온 것이다.
+assert.equal(prettifyMathLabel(String.raw`유형 02 이차함수 $y=ax^2+bx+c$의 그래프`), "유형 02 이차함수 y=ax²+bx+c의 그래프");
+assert.equal(prettifyMathLabel(String.raw`유형 08 $\sqrt{a^2}$의 성질`), "유형 08 √(a²)의 성질");
+assert.equal(prettifyMathLabel(String.raw`유형 08 $30^\circ$, $45^\circ$의 삼각비의 값`), "유형 08 30°, 45°의 삼각비의 값");
+// 이 제목은 `${` 를 담고 있어 템플릿 문자열로 못 쓴다(빈 보간으로 읽힌다).
+assert.equal(prettifyMathLabel("유형 01 ${}_n\\mathrm{C}_r$의 계산"), "유형 01 ₙCᵣ의 계산");
+assert.equal(prettifyMathLabel(String.raw`유형 03 $\sum\limits_{k=1}^{n} r^k$의 꼴의 계산`), "유형 03 Σ_(k=1)ⁿ rᵏ의 꼴의 계산");
+assert.equal(prettifyMathLabel(String.raw`유형 10 $\dfrac{a^x-a^{-x}}{a^x+a^{-x}}$의 꼴`), "유형 10 (aˣ-a⁻ˣ)/(aˣ+a⁻ˣ)의 꼴");
+assert.equal(
+  prettifyMathLabel(String.raw`유형 041 확률의 곱셈정리; $\mathrm{P}(B)=\mathrm{P}(A\cap B)+\mathrm{P}(\comp{A}\cap B)$`),
+  "유형 041 확률의 곱셈정리; P(B)=P(A∩B)+P(Aᶜ∩B)"
+);
+// 유니코드에 없는 지수는 사라지게 두지 말고 `^(…)` 로 편다. 안쪽도 다시 변환한다.
+assert.equal(prettifyMathLabel(String.raw`유형 030 $y=a^{px+q}+r$ 꼴`), "유형 030 y=a^(px+q)+r 꼴");
+assert.equal(prettifyMathLabel(String.raw`유형 03 $\lim\limits_{h\to 0}\frac{f(a+h)-f(a)}{h}$의 꼴`), "유형 03 lim_(h→0)(f(a+h)-f(a))/h의 꼴");
+// 수식이 없으면 손대지 않는다.
+assert.equal(prettifyMathLabel("개념 01 두 점 사이의 거리"), "개념 01 두 점 사이의 거리");
+assert.equal(prettifyMathLabel(""), "");
+assert.equal(prettifyMathLabel(null), "");
+// `$` 가 홀수면 전사가 깨진 것이다. 더 깨뜨리지 말고 원문을 그대로 둔다.
+assert.equal(prettifyMathLabel(String.raw`유형 05 $x^2 의 값`), String.raw`유형 05 $x^2 의 값`);
+
+console.log("유형 제목 수식 변환 fixture 통과");

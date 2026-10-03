@@ -10,6 +10,7 @@ import {
   orderExamRows,
   printWidthMm
 } from "./problemBankModel.js";
+import { prettifyMathLabel } from "./mathLabelText.js";
 import { exportWrongAnswerPptx } from "./problemBankPptx.js";
 
 // 인쇄 워터마크는 서버 시험지 워터마크(src/shared/server/testPaperWatermark.js)와 같은 로고·같은 값이다:
@@ -41,6 +42,10 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
   const [totalPoints, setTotalPoints] = useState(100);
   const [pointOverrides, setPointOverrides] = useState(() => new Map());
   const [showSource, setShowSource] = useState(!isExam);
+  const [showType, setShowType] = useState(!isExam);
+  // 출처를 어디에 둘지. 각 문제 위(우상단) · 뒤에 따로 모으기 · 해설 영역.
+  // 시험지에서는 출처가 문제 옆에 있으면 답을 유추하는 단서가 되기도 해서 뒤로 뺄 수 있어야 한다.
+  const [sourcePlacement, setSourcePlacement] = useState("item");
 
   const orderedRows = useMemo(() => (isExam ? orderExamRows(rows, examOrder, shuffleSeed) : []), [isExam, rows, examOrder, shuffleSeed]);
   const entries = useMemo(
@@ -140,7 +145,6 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
               총점
               <input aria-label="총점" className="problemBankExamPointsInput" inputMode="numeric" min={0} onChange={(event) => setTotalPoints(event.target.value)} type="number" value={totalPoints} />
             </label>
-            <label><input checked={showSource} onChange={(event) => setShowSource(event.target.checked)} type="checkbox" /> 출처 표시</label>
           </>
         ) : null}
         <label>
@@ -158,13 +162,39 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
             <option value="wide">넓게</option>
           </select>
         </label>
-        <label><input checked={includeAnswers} disabled={answerEntries.length === 0} onChange={(event) => setIncludeAnswers(event.target.checked)} type="checkbox" /> 빠른정답 {answerEntries.length === 0 ? "(등록된 정답 없음)" : `(${answerEntries.length}/${printRows.length})`}</label>
-        <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /> 해설 {solutionEntries.length === 0 ? "(등록된 해설 없음)" : `(${solutionEntries.length}/${printRows.length})`}</label>
         <div className="problemBankPrintToolbarActions">
           <button className="softButton" onClick={onClose} type="button">닫기</button>
           <button className="softButton" disabled={pptxState.stage === "running"} onClick={savePptx} type="button">PPT 저장</button>
           <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
         </div>
+
+        {/* 넣을지 말지를 한 묶음으로 모은다. 예전에는 체크상자가 설정 사이에 흩어져 있었다. */}
+        <fieldset className="problemBankPrintOptions">
+          <legend>포함할 항목</legend>
+          {/* 라벨 글자는 반드시 요소로 감싼다 — `<input/> 해설` 처럼 쓰면 접근성 이름 앞에 공백이 붙어
+              「해설」로 시작하는 이름을 못 찾는다(2026-10-03 브라우저 검사가 이 자리에서 엉뚱한 칸을 눌렀다). */}
+          <label><input checked disabled type="checkbox" /><span>문제</span></label>
+          <label><input checked={includeAnswers} disabled={answerEntries.length === 0} onChange={(event) => setIncludeAnswers(event.target.checked)} type="checkbox" /><span>빠른정답</span><small>{answerEntries.length === 0 ? "없음" : `${answerEntries.length}/${printRows.length}`}</small></label>
+          <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /><span>해설</span><small>{solutionEntries.length === 0 ? "없음" : `${solutionEntries.length}/${printRows.length}`}</small></label>
+          <label><input checked={showSource} onChange={(event) => setShowSource(event.target.checked)} type="checkbox" /><span>출처</span><small>교재·단원·번호</small></label>
+          <label><input checked={showType} onChange={(event) => setShowType(event.target.checked)} type="checkbox" /><span>유형</span><small>개념·유형 이름</small></label>
+        </fieldset>
+
+        {showSource ? (
+          <fieldset className="problemBankPrintOptions problemBankSourcePlacement">
+            <legend>출처 위치</legend>
+            {[
+              ["item", "각 문제 위", "문항 오른쪽 위에 작게"],
+              ["tail", "뒤에 따로 모으기", "마지막 쪽에 번호순 목록"],
+              ["solution", "해설 영역", "해설 옆에만"]
+            ].map(([value, label, hint]) => (
+              <label className={sourcePlacement === value ? "picked" : ""} key={value}>
+                <input checked={sourcePlacement === value} name="sourcePlacement" onChange={() => setSourcePlacement(value)} type="radio" value={value} />
+                <span>{label}<small>{hint}</small></span>
+              </label>
+            ))}
+          </fieldset>
+        ) : null}
         {pptxState.message ? <small aria-live="polite" className={`problemBankPptxMessage stage-${pptxState.stage}`}>{pptxState.message}</small> : null}
         {isExam ? <small className="problemBankPptxMessage">배점은 번호 옆 칸에서 문항마다 고칠 수 있습니다 (합계 {pointsTotal}점).</small> : null}
       </div>
@@ -193,10 +223,11 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
         <div className="problemBankPrintColumns">
           {entries.map((entry, index) => (
             <article className={`problemBankPrintItem col-${printColumnSides[index]}`} key={entry.key}>
-              {!isExam || showSource ? (
+              {/* 출처·유형은 문항 오른쪽 위에 작게 올린다(교재가 그렇게 찍는다). 출처를 뒤로 모으면 유형만 남는다. */}
+              {(showSource && sourcePlacement === "item") || (showType && entry.typeLabel) ? (
                 <div className="problemBankPrintSource">
-                  <span>{entry.sourceLine}</span>
-                  {entry.typeLabel ? <span className="problemBankPrintType">{entry.typeLabel}</span> : null}
+                  {showSource && sourcePlacement === "item" ? <span>{entry.sourceLine}</span> : null}
+                  {showType && entry.typeLabel ? <span className="problemBankPrintType">{prettifyMathLabel(entry.typeLabel)}</span> : null}
                 </div>
               ) : null}
               <div className="problemBankPrintNumber">
@@ -230,6 +261,18 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
           ))}
         </div>
 
+        {/* 출처를 문제 옆에서 떼어 마지막에 번호순으로 모은다. 시험 중에 교재 이름이 단서가 되는 것을 피한다. */}
+        {showSource && sourcePlacement === "tail" && printRows.length ? (
+          <section className="problemBankPrintSourceList">
+            <h3>출처</h3>
+            <ol>
+              {printRows.map((row) => (
+                <li key={`${row.item.itemId}-source`}><b>{String(row.entryNumber).padStart(2, "0")}</b> {row.sourceLine}</li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+
         {includeAnswers && answerEntries.length ? (
           <section className="problemBankPrintAnswers">
             <h3>{isExam ? "정답" : "빠른정답"}</h3>
@@ -240,7 +283,7 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
                   <div key={row.item.itemId}>
                     <b>{String(row.entryNumber).padStart(2, "0")}</b>
                     <img alt={`${row.item.numberLabel}번 정답`} src={row.answerUrl} style={widthMm ? { width: `${Math.min(widthMm, 60)}mm` } : undefined} />
-                    {!isExam || showSource ? <small>{isExam ? row.sourceLine : `${row.item.numberLabel}번`}</small> : null}
+                    <small>{showSource && sourcePlacement !== "item" ? row.sourceLine : `${row.item.numberLabel}번`}</small>
                   </div>
                 );
               })}
@@ -254,7 +297,7 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
             <div className="problemBankPrintColumns">
               {solutionEntries.map((row) => (
                 <article className="problemBankPrintItem" key={`${row.item.itemId}-solution`}>
-                  {!isExam || showSource ? <div className="problemBankPrintSource"><span>{row.sourceLine}</span></div> : null}
+                  {showSource && sourcePlacement === "solution" ? <div className="problemBankPrintSource"><span>{row.sourceLine}</span></div> : null}
                   <div className="problemBankPrintNumber">{String(row.entryNumber).padStart(2, "0")}</div>
                   <img alt={`${row.item.numberLabel}번 해설`} src={row.solutionUrl} />
                 </article>

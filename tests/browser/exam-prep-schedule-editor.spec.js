@@ -64,14 +64,13 @@ test("current exam management roster removes stale school and saves forward sche
 
   const detail = page.getByRole("dialog", { name: "시험대비" });
   await expect(detail).toContainText("1명");
-  await expect(detail).toContainText("안전고 2학기 중간고사");
+  // 2026-10-02 · 연결된 시험정보 칩을 지워 "안전고 2학기 중간고사" 문구는 더 이상 없다.
+  // 확인하려던 것(낡은 학교가 빠지고 현재 학교가 보인다)은 학교별 참여 패널과 명단으로 본다.
+  await expect(detail).toContainText("안전고");
   await expect(detail).not.toContainText("상계고");
-  const contentInput = detail.getByLabel("정산 미리보기 학생 오늘 진행한 내용");
-  await contentInput.fill("안전고 고1 함수 단원 오답 정리");
-  const contentSaveResponse = page.waitForResponse((response) => response.url().includes("/api/lesson-records"));
-  await detail.getByRole("button", { name: /학생별 진행 내용 저장/ }).click();
-  expect((await contentSaveResponse).status()).toBe(200);
-  await expect(detail.getByRole("status")).toContainText("학생별 1명 재조회 확인");
+  // 2026-10-02 · 학생별 강의 내용·코멘트는 수업일지로 돌아갔다. 이 테스트의 주제는 명단과
+  // 일정 저장이므로 기록 부분은 빼고, 시험대비 모달에 그 칸이 없다는 것만 확인한다.
+  await expect(detail.locator(".examPrepLessonContentEditor")).toHaveCount(0);
   await detail.getByRole("button", { name: "일정 수정" }).click();
 
   const editor = page.getByRole("dialog", { name: "시험대비 일정 수정" });
@@ -96,12 +95,6 @@ test("current exam management roster removes stale school and saves forward sche
   expect(saved.studentIds).toEqual(["safe-settlement-student"]);
   expect(saved.lessonTopic).toBe("시험대비");
   expect(saved.specialLectureStudentSchedules).toContainEqual(expect.objectContaining({ studentId: "safe-settlement-student", startTime: "14:00", endTime: "16:00" }));
-  const rereadRecords = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
-  expect(rereadRecords.records).toContainEqual(expect.objectContaining({
-    lessonId: "lesson_exam_prep_2026-08-09",
-    lessonProgress: "안전고 고1 함수 단원 오답 정리",
-    studentId: "safe-settlement-student"
-  }));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 
@@ -109,7 +102,8 @@ test("current exam management roster removes stale school and saves forward sche
   await navigateCalendarToMonth(page, 2026, 8);
   const persistedDay = page.getByRole("gridcell", { name: /2026-08-09/ });
   await persistedDay.locator(".lessonPill").click();
-  await expect(page.getByRole("dialog", { name: "시험대비" }).getByLabel("정산 미리보기 학생 오늘 진행한 내용")).toHaveValue("안전고 고1 함수 단원 오답 정리");
+  // 저장한 학생 개별 시간이 새로고침 뒤에도 명단에 남는다.
+  await expect(page.getByRole("dialog", { name: "시험대비" })).toContainText("14:00-16:00");
 });
 
 test("exam prep schedule conflict returns 409 without stopping the safe API", async ({ request }) => {

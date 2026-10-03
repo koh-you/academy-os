@@ -22,7 +22,8 @@ export function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [
         lesson: { ...lesson, generatedKey }
       });
     });
-  candidates.push(...buildExamPrepLessonCandidates(rows, students));
+  // 생성 제어의 학교별 제외를 후보 단계에서 적용한다 — 명단·표시 라벨이 같은 원천에서 갈린다.
+  candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions));
 
   return candidates.map((candidate) => {
     const candidateKeys = new Set([candidate.generatedKey, ...getGeneratedLessonIdentityKeys(candidate.lesson)].filter(Boolean));

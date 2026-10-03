@@ -1,0 +1,325 @@
+import { expect, test } from "./fixtures.js";
+import { navigateCalendarToMonth } from "./safeSmokeSupport.js";
+
+const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
+const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
+
+async function loginAsTeacher(page) {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "선생님" }).click();
+  await page.getByLabel("선생님 아이디").fill("preview");
+  await page.getByLabel("선생님 비밀번호").fill("preview");
+  await page.getByRole("button", { name: "선생님 로그인" }).click();
+  await expect(page.getByRole("navigation", { name: "수업일지 달력 월 이동" })).toBeVisible();
+}
+
+async function readLesson(request, lessonId) {
+  const payload = await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json();
+  return payload.lessons.find((lesson) => lesson.lessonId === lessonId);
+}
+
+async function openExamPrepModal(page) {
+  await navigateCalendarToMonth(page, 2026, 8);
+  await page.getByRole("gridcell", { name: /2026-08-09/ }).locator(".lessonPill").click();
+  return page.getByRole("dialog", { name: "시험대비" });
+}
+
+// 안전고 고1(정산 미리보기 학생)과 안전중 중3(월경계 학생)이 같은 일요일 시험대비에 든다.
+// 날짜당 한 수업에 두 학교가 합쳐지는 형태를 그대로 만든다.
+//
+// safe API 의 시험정보 bulk 는 **없는 행에 updatedAt 이 있으면** allowRestore 없이는 CAS
+// 충돌로 거부한다(HTTP 200 + conflicts 라서 ok() 만으로는 안 잡힌다). 그래서 fixture 에 이미
+// 있는 safe-exam-prep-row 는 그 updatedAt 으로 갱신하고, 새로 넣는 안전중 행만 allowRestore
+// 로 만든다. conflicts 가 비었는지도 같이 본다 — 행이 안 들어가면 생성 후보가 없어 수업이
+// 달력에서 사라지고, 그때 실패 지점이 "pill 없음" 으로 멀리 밀린다.
+async function postExamPrepRows(request, rows, { allowRestore = false } = {}) {
+  const response = await request.post(`${safeApiBaseUrl}/api/exam-prep-rows/bulk`, {
+    data: { allowRestore, examPrepRows: rows }
+  });
+  const payload = await response.json();
+  expect(payload.conflicts, JSON.stringify(payload.conflicts)).toEqual([]);
+  return payload;
+}
+
+const highSchoolRow = {
+  examCycle: "2026-2-mid",
+  examPeriod: "2026-08-12 ~ 2026-08-14",
+  examPrepId: "safe-exam-prep-row",
+  grade: "고1",
+  schoolName: "안전고",
+  subject: "공통수학1",
+  updatedAt: "2026-08-03T00:00:00.000Z"
+};
+const middleSchoolRow = {
+  examCycle: "2026-2-mid",
+  examPeriod: "2026-08-12 ~ 2026-08-14",
+  examPrepId: "safe-exam-prep-middle",
+  grade: "중3",
+  schoolName: "안전중",
+  subject: "중3-2",
+  updatedAt: "2026-08-03T00:00:00.000Z"
+};
+
+async function postExamPrepLesson(request, studentIds, sourceLabel) {
+  const response = await request.post(`${safeApiBaseUrl}/api/lessons/bulk`, {
+    data: {
+      lessons: [{
+        className: "시험대비",
+        date: "2026-08-09",
+        endTime: "18:00",
+        generatedKey: "generated:exam_prep:2026-08-09",
+        lessonId: "lesson_exam_prep_2026-08-09",
+        lessonTopic: "시험대비",
+        lessonType: "examPrep",
+        sourceLabel,
+        sourceSchoolEventId: "generated:exam_prep:2026-08-09",
+        specialLectureStudentSchedules: [],
+        startTime: "13:00",
+        status: "scheduled",
+        studentIds,
+        updatedAt: "2026-08-03T00:00:00.000Z"
+      }]
+    }
+  });
+  expect(response.ok(), await response.text()).toBe(true);
+}
+
+test.beforeEach(async ({ request }) => {
+  await request.post(`${safeApiBaseUrl}/api/safe-fixture/reset`);
+});
+
+test("one save applies per-school time and exclusion, and the exclusion survives a reload", async ({ page, request }) => {
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepRows(request, [middleSchoolRow], { allowRestore: true });
+  await postExamPrepLesson(
+    request,
+    ["safe-settlement-student", "safe-active-student"],
+    "안전고 2학기 중간고사 · 안전중 2학기 중간고사"
+  );
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const panel = detail.locator(".examPrepSchoolPlanPanel");
+
+  // 평소에는 읽기 전용이다 — 행마다 버튼을 달지 않는다(수업일지와 같은 체계).
+  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(2);
+  await expect(panel.locator("input[type=\"time\"]")).toHaveCount(0);
+  await expect(panel.getByRole("button", { name: "수정" })).toBeVisible();
+
+  // 2026-10-02 · 요약 카드 4개는 한 줄이다. 3열이던 동안은 3+1 로 접혀 본문 높이를 먹었다.
+  const summaryRowTops = await detail.locator(".examPrepSummaryGrid > div").evaluateAll(
+    (nodes) => [...new Set(nodes.map((node) => Math.round(node.getBoundingClientRect().top)))]
+  );
+  expect(summaryRowTops).toHaveLength(1);
+  // 학생별 기록·알림톡은 수업일지가 맡는다 — 이 모달에는 그 칸이 없다.
+  await expect(detail.locator(".examPrepLessonContentEditor")).toHaveCount(0);
+  await expect(detail.getByRole("button", { name: "수업일지 · 알림톡" })).toBeVisible();
+
+  await panel.getByRole("button", { name: "수정" }).click();
+  // 입력만으로는 저장되지 않는다(화면 초안).
+  await panel.getByLabel("안전중 시작 시간").fill("14:00");
+  await panel.getByLabel("안전중 종료 시간").fill("17:00");
+  await panel.getByLabel("안전고 이 날짜 참여").uncheck();
+  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(
+    expect.arrayContaining(["safe-settlement-student", "safe-active-student"])
+  );
+
+  // 저장 하나가 시간과 제외를 함께 보낸다 — 요청도 한 번이다.
+  const saveResponses = [];
+  page.on("response", (response) => {
+    if (response.url().includes("/api/exam-prep-schedule/save")) saveResponses.push(response);
+  });
+  await panel.getByRole("button", { name: "저장" }).click();
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" })).toContainText("저장 완료 · 서버 재조회 일치");
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" })).toContainText("제외 안전고");
+  expect(saveResponses).toHaveLength(1);
+
+  const afterSave = await readLesson(request, "lesson_exam_prep_2026-08-09");
+  expect(afterSave.studentIds).toEqual(["safe-active-student"]);
+  expect(afterSave.specialLectureStudentSchedules).toEqual([
+    expect.objectContaining({ endTime: "17:00", startTime: "14:00", studentId: "safe-active-student" })
+  ]);
+  expect(afterSave.startTime).toBe("13:00");
+
+  // 제외한 학교는 같은 목록에 "이 날짜 제외" 로 남아 되돌릴 수 있다.
+  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(2);
+  await expect(panel.locator(".examPrepSchoolPlanRow.excluded")).toContainText("안전고");
+  await expect(panel.locator(".examPrepSchoolPlanRow.excluded")).toContainText("이 날짜 제외");
+
+  // 새로고침해도 유지된다 — 제외가 app_state 서버 원천에 남기 때문이다.
+  await page.reload();
+  const reopened = await openExamPrepModal(page);
+  const reopenedPanel = reopened.locator(".examPrepSchoolPlanPanel");
+  await expect(reopenedPanel.locator(".examPrepSchoolPlanRow.excluded")).toContainText("안전고");
+  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(["safe-active-student"]);
+
+  // 다시 포함하면 명단이 원천(시험정보 행) 기준으로 돌아온다.
+  await reopenedPanel.getByRole("button", { name: "수정" }).click();
+  await reopenedPanel.getByLabel("안전고 이 날짜 참여").check();
+  await reopenedPanel.getByRole("button", { name: "저장" }).click();
+  await expect(reopenedPanel.locator(".examPrepSchoolPlanRow.excluded")).toHaveCount(0);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("the schedule and delete actions stay above the scrolling columns", async ({ page, request }) => {
+  // 2026-10-02 · 일정 수정은 이 날짜에 오는 학생 전체의 일정을 조율하는 일인데, 스크롤하는
+  // 왼쪽 열 맨 아래에 있어 찾아 내려가야 보였다(요청). 요약 줄과 같은 스크롤 밖 영역으로 옮겼다.
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const scheduleButton = detail.getByRole("button", { name: "일정 수정" });
+  await expect(scheduleButton).toBeVisible();
+  await expect(detail.locator(".examPrepLessonActionBar")).toContainText("일정 수정");
+
+  // 스크롤하는 열 안에 들어 있으면 안 된다.
+  const insideScrollColumn = await scheduleButton.evaluate(
+    (node) => Boolean(node.closest(".examPrepLessonMainColumn"))
+  );
+  expect(insideScrollColumn).toBe(false);
+
+  // 본문을 끝까지 내려도 버튼이 제자리에 있고 화면 안에 남는다.
+  const before = await scheduleButton.evaluate((node) => Math.round(node.getBoundingClientRect().top));
+  await detail.locator(".examPrepLessonMainColumn").evaluate((node) => { node.scrollTop = node.scrollHeight; });
+  const after = await scheduleButton.evaluate((node) => Math.round(node.getBoundingClientRect().top));
+  expect(after).toBe(before);
+  const inViewport = await scheduleButton.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return rect.top >= 0 && rect.bottom <= window.innerHeight;
+  });
+  expect(inViewport).toBe(true);
+
+  // 학생별 기록·알림톡은 수업일지가 맡는다.
+  await expect(detail.getByRole("button", { name: "수업일지 · 알림톡" })).toBeVisible();
+});
+
+test("records and alimtalk live in the lesson journal, not in this modal", async ({ page, request }) => {
+  // 2026-10-02 · 한때 이 모달 안에서 강의 내용·코멘트를 적고 알림톡까지 예약하게 했는데,
+  // 같은 칸(record.lessonProgress·teacherComment·studentComment)을 두 화면에서 적게 되어
+  // 어디에 쓰는 게 맞는지 알 수 없었고 액션이 한 줄에 일곱 개가 되어 넘쳤다(요청).
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+
+  // 기록·알림톡 칸은 이 모달에 없다.
+  await expect(detail.locator(".examPrepLessonContentEditor")).toHaveCount(0);
+  await expect(detail.locator(".examPrepNotificationBar")).toHaveCount(0);
+  await expect(detail.getByLabel("정산 미리보기 학생 오늘 강의 내용")).toHaveCount(0);
+
+  // 액션은 네 개뿐이다 — 수업일지 · 알림톡 / 일정 수정 / 일정 삭제.
+  const actionLabels = await detail.locator(".examPrepActions button").allInnerTexts();
+  expect(actionLabels.map((label) => label.trim())).toEqual(["수업일지 · 알림톡", "일정 수정", "일정 삭제"]);
+
+  // 그 버튼이 수업일지를 열고, 거기서 돌아올 수 있다.
+  await detail.getByRole("button", { name: "수업일지 · 알림톡" }).click();
+  const journal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(journal).toBeVisible();
+  await journal.getByRole("button", { name: "시험대비 명단 화면" }).click();
+  await expect(page.locator(".examPrepSchoolPlanPanel")).toBeVisible();
+});
+
+test("school rows and student rows line their time inputs up on the same columns", async ({ page, request }) => {
+  // 2026-10-02 · 학교 줄만 끝에 "학생별 시간" 버튼이 있어 그 줄의 시간 칸이 다른 줄보다
+  // 왼쪽으로 밀렸다(실측 283px vs 306px). 세 열 격자의 마지막 열을 고정 폭으로 묶었다.
+  const studentResponse = await request.post(`${safeApiBaseUrl}/api/students`, {
+    data: {
+      createOnly: true,
+      student: {
+        grade: "중3",
+        loginId: "safe_second_middle",
+        name: "안전중 둘째",
+        pin: "1234",
+        schoolName: "안전중",
+        status: "active",
+        studentId: "safe-second-middle-student"
+      }
+    }
+  });
+  expect(studentResponse.ok(), await studentResponse.text()).toBe(true);
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepRows(request, [middleSchoolRow], { allowRestore: true });
+  await postExamPrepLesson(
+    request,
+    ["safe-settlement-student", "safe-active-student", "safe-second-middle-student"],
+    "안전고 2학기 중간고사 · 안전중 2학기 중간고사"
+  );
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const panel = detail.locator(".examPrepSchoolPlanPanel");
+  await panel.getByRole("button", { name: "수정" }).click();
+  await panel.getByRole("button", { name: "학생별 시간" }).first().click();
+
+  const timeLefts = await panel.locator('.examPrepSchoolPlanTimes input[type="time"]').evaluateAll(
+    (nodes) => [...new Set(nodes.map((node) => Math.round(node.getBoundingClientRect().left)))].sort((a, b) => a - b)
+  );
+  // 시작·종료 두 칸뿐이어야 한다 — 줄마다 좌표가 갈리면 셋 이상이 된다.
+  expect(timeLefts).toHaveLength(2);
+
+  // 시간 칸이 한국어 12시간 표기를 자르지 않는다.
+  const clipped = await panel.locator('.examPrepSchoolPlanTimes input[type="time"]').evaluateAll(
+    (nodes) => nodes.filter((node) => node.scrollWidth > node.clientWidth + 1).length
+  );
+  expect(clipped).toBe(0);
+});
+
+test("a school whose students differ can be fixed per student", async ({ page, request }) => {
+  // 학생별로 시간이 다른 학교는 학교 한 줄로는 못 고친다 — 그 학교만 펼쳐 학생 칸을 연다.
+  // 같은 학교에 학생이 둘 이상이어야 의미가 있으므로 안전중 학생을 하나 더 만든다.
+  const studentResponse = await request.post(`${safeApiBaseUrl}/api/students`, {
+    data: {
+      createOnly: true,
+      student: {
+        grade: "중3",
+        loginId: "safe_second_middle",
+        name: "안전중 둘째",
+        pin: "1234",
+        schoolName: "안전중",
+        status: "active",
+        studentId: "safe-second-middle-student"
+      }
+    }
+  });
+  expect(studentResponse.ok(), await studentResponse.text()).toBe(true);
+  await postExamPrepRows(request, [middleSchoolRow], { allowRestore: true });
+  await postExamPrepLesson(request, ["safe-active-student", "safe-second-middle-student"], "안전중 2학기 중간고사");
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const panel = detail.locator(".examPrepSchoolPlanPanel");
+
+  await panel.getByRole("button", { name: "수정" }).click();
+  await panel.getByRole("button", { name: "학생별 시간" }).first().click();
+  await panel.getByLabel("월경계 학생 시작 시간").fill("15:00");
+  await panel.getByLabel("월경계 학생 종료 시간").fill("18:00");
+  await panel.getByRole("button", { name: "저장" }).click();
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" })).toContainText("학생 시간 1명");
+
+  const saved = await readLesson(request, "lesson_exam_prep_2026-08-09");
+  expect(saved.specialLectureStudentSchedules).toEqual([
+    expect.objectContaining({ endTime: "18:00", startTime: "15:00", studentId: "safe-active-student" })
+  ]);
+  // 읽기 모드로 돌아오면 그 학교는 "학생별 시간 다름" 으로 보인다.
+  await expect(panel.locator(".examPrepSchoolPlanRow").first()).toContainText("학생별 시간 다름");
+});
+
+test("the last remaining school cannot be excluded", async ({ page, request }) => {
+  // 한 학교만 남으면 제외는 "그날을 아예 안 한다" 와 같아진다 — 그건 일정 삭제의 일이다.
+  await postExamPrepRows(request, [highSchoolRow]);
+  await postExamPrepLesson(request, ["safe-settlement-student"], "안전고 2학기 중간고사");
+
+  await loginAsTeacher(page);
+  const detail = await openExamPrepModal(page);
+  const panel = detail.locator(".examPrepSchoolPlanPanel");
+  await expect(panel.locator(".examPrepSchoolPlanRow")).toHaveCount(1);
+  await panel.getByRole("button", { name: "수정" }).click();
+  await panel.getByLabel("안전고 이 날짜 참여").uncheck();
+  await panel.getByRole("button", { name: "저장" }).click();
+  await expect(panel.getByRole("status", { name: "학교별 참여 저장 상태" }))
+    .toContainText("모든 학교를 빼려면 이 수업 자체를 삭제하세요");
+  expect((await readLesson(request, "lesson_exam_prep_2026-08-09")).studentIds).toEqual(["safe-settlement-student"]);
+  await expect(detail.getByRole("button", { name: "일정 삭제" })).toBeVisible();
+});

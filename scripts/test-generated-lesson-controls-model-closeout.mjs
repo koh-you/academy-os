@@ -47,7 +47,9 @@ const manualRemoved = normalizeGeneratedLessonControls(
   )
 );
 
+// 2026-10-01 · 날짜별 학교 제외가 제어에 더해졌다(examPrepSchoolPlan 참고).
 assert.deepEqual(normalized, {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: ["generated:manual:keep"],
   suppressedKeys: [
     "generated:suppressed:remove",
@@ -68,6 +70,7 @@ assert.deepEqual(suppressedRemoved.suppressedKeys, [
   "generated:suppressed:add"
 ]);
 assert.deepEqual(manualRemoved, {
+  examPrepSchoolExclusions: [],
   manualOverrideKeys: ["generated:manual:add"],
   suppressedKeys: [
     "generated:suppressed:keep",
@@ -81,6 +84,7 @@ assert.deepEqual(
     suppressedKeys: null
   }),
   {
+    examPrepSchoolExclusions: [],
     manualOverrideKeys: [],
     suppressedKeys: []
   }

@@ -171,6 +171,12 @@ export function canCurrentRoleUseAi() {
   return canTeacherRoleCallRoute(currentTeacherRole, "POST", "/api/ai/comment-polish");
 }
 
+// 답안지 AI 판독(유료)도 협력 교사에게 닫혀 있다. 숨기지 않고 잠근다 — 서버 정책에서 파생하므로
+// 나중에 열면 버튼도 같이 열린다.
+export function canCurrentRoleRecognizeAnswerSheet() {
+  return canTeacherRoleCallRoute(currentTeacherRole, "POST", "/api/answer-sheet-pilot/recognize");
+}
+
 export function roleAwareApiFetch(path, teacherRole, options = {}) {
   const pathname = String(path).split("?")[0];
   if (!canTeacherRoleCallRoute(teacherRole, "GET", pathname)) {

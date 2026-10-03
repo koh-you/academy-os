@@ -98,7 +98,6 @@
   "scripts/test-lesson-journal-rows-persistence.mjs",
   "scripts/test-exam-prep-schedule-plan.mjs",
   "scripts/test-exam-prep-schedule-api.mjs",
-  "scripts/test-exam-prep-student-content.mjs",
   "scripts/test-generated-lesson-plan-builder-exam-prep-content.mjs",
   "scripts/test-homework-teacher-status-save.mjs",
   "scripts/test-resource-material-persistence.mjs",
@@ -320,6 +319,7 @@
   "scripts/test-exam-period-sunday-dates-inventory.mjs",
   "scripts/test-exam-period-sunday-dates.mjs",
   "scripts/test-exam-period-sunday-dates-closeout.mjs",
+  "scripts/test-exam-prep-school-plan.mjs",
   "scripts/test-exam-prep-lesson-candidates-inventory.mjs",
   "scripts/test-exam-prep-lesson-candidates.mjs",
   "scripts/test-exam-prep-lesson-candidates-closeout.mjs",
@@ -443,6 +443,7 @@
   "scripts/test-problem-bank-scan-segmenter.mjs",
   "scripts/test-problem-bank-route-registry.mjs",
   "scripts/test-problem-bank-store.mjs",
+  "scripts/test-exam-paper-tab-placement.mjs",
   "scripts/test-problem-bank-exam-model.mjs",
   "scripts/test-problem-bank-folder-rules.mjs",
   "scripts/test-api-client-auth-header.mjs",
@@ -469,5 +470,6 @@
   "scripts/test-student-roster-effective-date.mjs",
   "scripts/test-student-schedule-timezone.mjs",
   "scripts/test-supplement-time-input-model.mjs",
-  "scripts/test-production-test-file-list.mjs"
+  "scripts/test-production-test-file-list.mjs",
+  "scripts/test-answer-sheet-pilot.mjs"
 ]

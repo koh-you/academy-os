@@ -489,7 +489,7 @@ const helperBoundaries = [
   'event.schoolName || "학교 미입력"',
   'event.examSubject || "수학"',
   "lesson: { ...lesson, generatedKey }",
-  "candidates.push(...buildExamPrepLessonCandidates(rows, students))",
+  "candidates.push(...buildExamPrepLessonCandidates(rows, students, safeControls.examPrepSchoolExclusions))",
   "return candidates.map((candidate) => {",
   "const candidateKeys = new Set(",
   "getGeneratedLessonIdentityKeys(candidate.lesson)",
