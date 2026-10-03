@@ -514,3 +514,64 @@
   gap: 6px;
   margin-bottom: 10px;
 }
+
+/* 자체 교재 편집 — 왼쪽 초안 목록 · 가운데 고르기 · 오른쪽 짜기. 데스크톱 작업 화면이라 3단을 기본으로 둔다. */
+.problemBankComposer {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.4fr) minmax(300px, 1.6fr);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .problemBankComposer { grid-template-columns: 1fr; }
+}
+.problemBankDraftList { display: flex; flex-direction: column; gap: 4px; list-style: none; margin: 8px 0 0; padding: 0; }
+.problemBankDraftList li { display: flex; align-items: center; gap: 4px; }
+.problemBankDraftList li > button:first-child {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  text-align: left;
+}
+.problemBankDraftList li.picked > button:first-child { background: var(--academy-surface-muted, #f3f4f6); border-color: var(--academy-border, #e2e6ec); }
+.problemBankDraftList small { color: var(--academy-text-muted, #6b7280); font-size: 12px; }
+.problemBankDraftDelete { background: none; border: none; color: var(--academy-text-muted, #6b7280); cursor: pointer; font-size: 16px; padding: 2px 6px; }
+
+.problemBankComposerBookPick { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
+.problemBankComposerBookPick select { padding: 6px 8px; }
+.problemBankComposerUnits { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; max-height: 60vh; overflow-y: auto; }
+.problemBankComposerSection { padding: 4px 0 8px 10px; }
+.problemBankComposerSectionHead { align-items: center; display: flex; gap: 6px; justify-content: space-between; }
+.problemBankComposerSectionHead > span { font-size: 12px; color: var(--academy-text-muted, #6b7280); }
+.problemBankComposerSectionHead input { flex: 1; font-size: 13px; padding: 4px 6px; }
+.problemBankComposerNumbers { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.problemBankComposerNumbers button { min-width: 30px; padding: 3px 5px; }
+
+.problemBankComposerFields { display: flex; flex-wrap: wrap; gap: 10px; }
+.problemBankComposerFields label { display: flex; flex: 1; flex-direction: column; font-size: 13px; gap: 4px; min-width: 180px; }
+.problemBankComposerSettings { margin-top: 10px; }
+.problemBankComposerHint { color: var(--academy-text-muted, #6b7280); font-size: 12px; margin: 4px 0 0; }
+.problemBankComposerSections { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.problemBankComposerDraftSection { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; padding: 8px; }
+/* 「여기에 담는 중」은 색이 아니라 굵은 왼쪽 선으로 표시한다 — 새 색을 만들지 않으려고. */
+.problemBankComposerDraftSection.target { border-left-width: 4px; }
+.problemBankComposerItems { display: flex; flex-direction: column; gap: 2px; list-style: none; margin: 6px 0 0; padding: 0; }
+.problemBankComposerItems li { align-items: center; display: flex; font-size: 13px; gap: 6px; }
+.problemBankComposerItems li strong { min-width: 22px; text-align: right; }
+.problemBankComposerItems li span { flex: 1; color: var(--academy-text-muted, #6b7280); font-size: 12px; }
+.problemBankComposerItems li button,
+.problemBankComposerSectionHead > button:not(.softButton) {
+  background: none;
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 1px 6px;
+}
+.problemBankComposerBar { align-items: center; display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }

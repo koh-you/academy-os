@@ -19,6 +19,7 @@ import {
 } from "./problemBankApi.js";
 import { prettifyMathLabel } from "./mathLabelText.js";
 import { buildFolderTree, countBooksInFolder, findFolderNode, splitBooksBySource } from "./problemBankModel.js";
+import { CollectionComposer } from "./CollectionComposer.jsx";
 import "./problemBank.css";
 
 const imageBatchSize = 40;
@@ -493,7 +494,7 @@ export function ProblemBankCenter() {
         <div className="panel problemBankListPanel">
           <h2>등록된 교재</h2>
           <div className="problemBankSourceTabs" role="group" aria-label="교재 구분">
-            {[["market", "시중 교재", bookGroups.market.length], ["composed", "자체 교재", bookGroups.composed.length]].map(([value, label, count]) => (
+            {[["market", "시중 교재", bookGroups.market.length], ["composed", "자체 교재", bookGroups.composed.length], ["compose", "편집 중", null]].map(([value, label, count]) => (
               <button
                 aria-pressed={bookSource === value}
                 className={`problemBankUnitChip${bookSource === value ? " picked" : ""}`}
@@ -501,10 +502,11 @@ export function ProblemBankCenter() {
                 onClick={() => { setBookSource(value); setFolderPath([]); }}
                 type="button"
               >
-                {label}<small>{count}</small>
+                {label}{count === null ? null : <small>{count}</small>}
               </button>
             ))}
           </div>
+          {bookSource === "compose" ? <CollectionComposer books={books} /> : (<>
           <nav aria-label="교재 폴더 경로" className="problemBankBreadcrumb">
             <button onClick={() => setFolderPath([])} type="button">전체 {visibleBooks.length}</button>
             {folderPath.map((segment, index) => (
@@ -546,6 +548,7 @@ export function ProblemBankCenter() {
               <li><EmptyState className="emptyState">이 폴더에는 교재가 없습니다.</EmptyState></li>
             ) : null}
           </ul>
+          </>)}
         </div>
 
         <div className="panel problemBankDetailPanel">

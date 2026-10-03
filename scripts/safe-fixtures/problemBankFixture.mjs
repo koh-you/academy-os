@@ -162,6 +162,38 @@ export function createProblemBankFixtureState() {
 }
 
 /** 안전 API 라우트. 처리했으면 true. */
+/** 가상 초안 저장소. 운영과 같은 계약을 흉내 낸다 — 통째 저장, 같은 문항은 한 번만, 저장 뒤 다시 읽어 돌려줌. */
+function collectionStore(state) {
+  state.problemBankCollections = state.problemBankCollections ?? [];
+  return state.problemBankCollections;
+}
+
+function collectionDetail(entry) {
+  return {
+    collection: {
+      collectionId: entry.collectionId,
+      title: entry.title,
+      folderPath: entry.folderPath,
+      subject: entry.subject,
+      grade: entry.grade,
+      status: entry.status,
+      printSettings: entry.printSettings,
+      publishedBookId: entry.publishedBookId ?? "",
+      note: entry.note ?? ""
+    },
+    sections: entry.sections.map((section, index) => ({ sectionId: `${entry.collectionId}-s${index}`, collectionId: entry.collectionId, position: index, title: section.title, note: section.note ?? "" })),
+    items: entry.items.map((item, index) => ({
+      entryId: `${entry.collectionId}-e${index}`,
+      collectionId: entry.collectionId,
+      sectionId: `${entry.collectionId}-s${item.sectionIndex}`,
+      position: index,
+      itemId: item.itemId,
+      includeVariants: Boolean(item.includeVariants),
+      note: ""
+    }))
+  };
+}
+
 export async function handleProblemBankFixtureRoute({ request, requestUrl, state, readJson, sendJson, response }) {
   const { pathname } = requestUrl;
   const bank = state.problemBank;
@@ -202,6 +234,70 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
     const missingPaths = new Set(missing.map((entry) => entry.storagePath));
     const stored = Object.fromEntries(bank.items.flatMap((item) => item.regions).filter((region) => !missingPaths.has(region.storagePath)).map((region) => [region.storagePath.replace(/^[^/]+\//, ""), { size: 0, md5: "" }]));
     sendJson(response, 200, { ok: true, safeFixture: true, bookId: requested, regionCount, storedCount: regionCount - missing.length, missing, orphanCount: 0, stored });
+    return true;
+  }
+  if (request.method === "GET" && pathname === "/api/problem-bank/collections") {
+    const list = collectionStore(state).map((entry) => ({
+      collectionId: entry.collectionId,
+      title: entry.title,
+      folderPath: entry.folderPath,
+      status: entry.status,
+      itemCount: entry.items.length
+    }));
+    sendJson(response, 200, { ok: true, safeFixture: true, collections: list });
+    return true;
+  }
+  if (request.method === "GET" && pathname === "/api/problem-bank/collection") {
+    const requested = requestUrl.searchParams.get("collectionId") ?? "";
+    const entry = collectionStore(state).find((row) => row.collectionId === requested);
+    if (!entry) {
+      sendJson(response, 404, { ok: false, safeFixture: true, error: "초안을 찾지 못했습니다." });
+      return true;
+    }
+    sendJson(response, 200, { ok: true, safeFixture: true, ...collectionDetail(entry) });
+    return true;
+  }
+  if (request.method === "POST" && pathname === "/api/problem-bank/collection") {
+    const payload = await readJson(request);
+    const title = String(payload.title ?? "").trim();
+    if (!title) {
+      sendJson(response, 400, { ok: false, safeFixture: true, error: "교재 이름을 적어 주세요." });
+      return true;
+    }
+    const store = collectionStore(state);
+    const sections = Array.isArray(payload.sections) ? payload.sections : [];
+    const seen = new Set();
+    const items = (Array.isArray(payload.items) ? payload.items : []).filter((item) => {
+      const itemId = String(item?.itemId ?? "");
+      const sectionIndex = Number(item?.sectionIndex);
+      if (!itemId || !sections[sectionIndex] || seen.has(itemId)) return false;
+      seen.add(itemId);
+      return true;
+    });
+    const collectionId = String(payload.collectionId ?? "") || `pbc_${store.length + 1}`;
+    const next = {
+      collectionId,
+      title,
+      folderPath: String(payload.folderPath ?? ""),
+      subject: String(payload.subject ?? ""),
+      grade: String(payload.grade ?? ""),
+      status: "draft",
+      printSettings: payload.printSettings ?? {},
+      sections: sections.map((section, index) => ({ title: String(section?.title ?? `구획 ${index + 1}`), note: String(section?.note ?? "") })),
+      items: items.map((item) => ({ itemId: String(item.itemId), sectionIndex: Number(item.sectionIndex), includeVariants: Boolean(item.includeVariants) }))
+    };
+    const at = store.findIndex((row) => row.collectionId === collectionId);
+    if (at >= 0) store[at] = next;
+    else store.push(next);
+    sendJson(response, 200, { ok: true, safeFixture: true, ...collectionDetail(next) });
+    return true;
+  }
+  if (request.method === "DELETE" && pathname === "/api/problem-bank/collection") {
+    const requested = requestUrl.searchParams.get("collectionId") ?? "";
+    const store = collectionStore(state);
+    const at = store.findIndex((row) => row.collectionId === requested);
+    if (at >= 0) store.splice(at, 1);
+    sendJson(response, 200, { ok: true, safeFixture: true, collectionId: requested, deleted: at >= 0 });
     return true;
   }
   if (request.method === "GET" && pathname === "/api/problem-bank/books") {
