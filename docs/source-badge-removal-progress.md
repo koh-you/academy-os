@@ -77,10 +77,10 @@
 
 ```bash
 node scripts/latex-bank/retypeset-all.mjs --upload-only --ids \
-  ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1,lssen-cm2,ssen-m32,rpm-cm1,rpm-cm2,rpm-alg,rpm-calc1,rpm-calc2,rpm-geo,rpm-prob,rpm-m31,rpm-m32
+  ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1,lssen-cm2,ssen-m32,rpm-cm1,rpm-cm2,rpm-alg,rpm-calc1,rpm-calc2,rpm-geo,rpm-prob,rpm-m31,rpm-m32,gn-cm1,gn-cm2,gn-alg,gn-calc1,gn-calc2,gn-geo
 ```
 
-갱신: 2026-10-03 11:54
+갱신: 2026-10-03 12:55
 
 ## 재개 방법
 
