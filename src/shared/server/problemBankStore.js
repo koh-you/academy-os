@@ -765,19 +765,30 @@ export function createProblemBankStore({
   }
 
   /**
-   * 제작 요청 — **상태만** 바꾼다. 실제 조판은 XeLaTeX 이 필요해 서버에서 돌 수 없고,
-   * 지금 34권이 등록된 것과 같은 로컬 경로(build-collection.mjs → upload-package.mjs)로 돈다.
-   * 그래서 이 표식은 「사람이 돌려야 할 일이 있다」는 뜻이고, 등록이 끝나면 published 로 바뀐다.
+   * 초안의 제작 상태를 바꾼다.
+   *
+   * 조판은 XeLaTeX 이 필요해 서버에서 돌 수 없고, 지금 34권이 등록된 것과 같은 로컬 경로
+   * (build-collection.mjs → upload-package.mjs)로 돈다. 그래서 서버가 하는 일은 **표식**뿐이다 —
+   *   requested  화면에서 「제작 요청」을 눌렀다. 사람이 돌려야 할 일이 있다는 뜻.
+   *   published  등록까지 끝났다. 어느 교재가 됐는지(publishedBookId)를 같이 적는다.
+   * published 로 닫지 않으면 초안이 영원히 「제작 대기」로 남는다.
    */
-  async function requestProblemBankCollectionBuild(collectionId) {
+  async function setProblemBankCollectionStatus(collectionId, { status, publishedBookId } = {}) {
     requireDatabase();
     const id = textOf(collectionId);
     if (!id) throw createStatusError("초안 id 가 없습니다.", 400);
+    const next = status === "published" ? "published" : "requested";
     const rows = await listRows("problem_bank_collections", `select=*&collection_id=eq.${encodeURIComponent(id)}`);
     if (!rows[0]) throw createStatusError("초안을 찾지 못했습니다.", 404, "not_found");
     const items = await listRows("problem_bank_collection_items", `select=entry_id&collection_id=eq.${encodeURIComponent(id)}`);
     if (!items.length) throw createStatusError("담긴 문항이 없어 제작할 수 없습니다.", 400);
-    await upsertRows("problem_bank_collections", [{ ...rows[0], status: "requested", updated_at: new Date().toISOString() }], { onConflict: "collection_id" });
+    const now = new Date().toISOString();
+    await upsertRows("problem_bank_collections", [{
+      ...rows[0],
+      status: next,
+      ...(next === "published" ? { published_book_id: textOf(publishedBookId) || rows[0].published_book_id || null, published_at: now } : {}),
+      updated_at: now
+    }], { onConflict: "collection_id" });
     return getProblemBankCollection(id);
   }
 
@@ -806,7 +817,7 @@ export function createProblemBankStore({
     listProblemBankCollections,
     getProblemBankCollection,
     saveProblemBankCollection,
-    requestProblemBankCollectionBuild,
+    setProblemBankCollectionStatus,
     deleteProblemBankCollection
   };
 }

@@ -34,9 +34,9 @@ const registry = createProblemBankRouteRegistry({
     calls.push(`saveCollection:${payload?.title}:${(payload?.items ?? []).length}`);
     return { collection: { collectionId: "pbc_1", title: payload?.title }, sections: [], items: payload?.items ?? [] };
   },
-  requestProblemBankCollectionBuild: async (collectionId) => {
-    calls.push(`requestBuild:${collectionId}`);
-    return { collection: { collectionId, status: "requested" }, sections: [], items: [] };
+  setProblemBankCollectionStatus: async (collectionId, options) => {
+    calls.push(`setStatus:${collectionId}:${options?.status ?? ""}:${options?.publishedBookId ?? ""}`);
+    return { collection: { collectionId, status: options?.status ?? "requested" }, sections: [], items: [] };
   },
   deleteProblemBankCollection: async (collectionId) => {
     calls.push(`deleteCollection:${collectionId}`);
@@ -214,10 +214,15 @@ assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/coll
 assert.ok(calls.includes("saveCollection:내신대비 지수·로그:1"));
 assert.equal(sends.at(-1).body.ok, true);
 
-rawBody = { collectionId: "pbc_1" };
+rawBody = { collectionId: "pbc_1", status: "requested" };
 assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection-build")), true);
-assert.ok(calls.includes("requestBuild:pbc_1"));
+assert.ok(calls.includes("setStatus:pbc_1:requested:"));
 assert.equal(sends.at(-1).body.collection.status, "requested");
+
+// 등록까지 끝나면 「제작 완료」로 닫고 어느 교재가 됐는지 적는다. 안 닫으면 영원히 「제작 대기」다.
+rawBody = { collectionId: "pbc_1", status: "published", publishedBookId: "pbk_made01" };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection-build")), true);
+assert.ok(calls.includes("setStatus:pbc_1:published:pbk_made01"));
 
 assert.equal(await registry.dispatch(makeRequest("DELETE", "/api/problem-bank/collection?collectionId=pbc_1")), true);
 assert.ok(calls.includes("deleteCollection:pbc_1"));

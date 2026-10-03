@@ -45,7 +45,7 @@ export const problemBankRouteSignatures = Object.freeze([
  * @param {() => Promise<*>} deps.listProblemBankCollections
  * @param {(collectionId: string) => Promise<*>} deps.getProblemBankCollection
  * @param {(payload: *) => Promise<*>} deps.saveProblemBankCollection
- * @param {(collectionId: string) => Promise<*>} deps.requestProblemBankCollectionBuild
+ * @param {(collectionId: string, options: *) => Promise<*>} deps.setProblemBankCollectionStatus
  * @param {(collectionId: string) => Promise<*>} deps.deleteProblemBankCollection
  * @param {(dataUrl: string) => { buffer: *, mimeType: string }} deps.parseDataUrl
  * @param {(request: *, options?: { limitBytes?: number }) => Promise<Record<string, *>>} deps.readJsonBody
@@ -71,7 +71,7 @@ export function createProblemBankRouteRegistry({
   listProblemBankCollections,
   getProblemBankCollection,
   saveProblemBankCollection,
-  requestProblemBankCollectionBuild,
+  setProblemBankCollectionStatus,
   deleteProblemBankCollection,
   parseDataUrl,
   readJsonBody,
@@ -193,7 +193,10 @@ export function createProblemBankRouteRegistry({
       }
       if (request.method === "POST" && pathname === "/api/problem-bank/collection-build") {
         const payload = await readJsonBody(request);
-        const detail = await requestProblemBankCollectionBuild(payload?.collectionId ?? "");
+        const detail = await setProblemBankCollectionStatus(payload?.collectionId ?? "", {
+          status: payload?.status,
+          publishedBookId: payload?.publishedBookId
+        });
         sendJson(request, response, 200, { ok: true, ...detail });
         return true;
       }

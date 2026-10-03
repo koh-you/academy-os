@@ -444,6 +444,7 @@
   "scripts/test-problem-bank-route-registry.mjs",
   "scripts/test-problem-bank-store.mjs",
   "scripts/test-exam-paper-tab-placement.mjs",
+  "scripts/test-collection-draft-model.mjs",
   "scripts/test-problem-bank-exam-model.mjs",
   "scripts/test-problem-bank-folder-rules.mjs",
   "scripts/test-api-client-auth-header.mjs",

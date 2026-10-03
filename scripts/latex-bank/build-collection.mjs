@@ -8,7 +8,8 @@
 // 사용:
 //   node scripts/latex-bank/build-collection.mjs --collection pbc_xxx --out <패키지폴더>
 //   node scripts/latex-bank/build-collection.mjs --collection-file <초안.json> --out <패키지폴더>
-//   ... --dry  조판까지만 하고 패키지는 만들지 않는다
+//   ... --dry     조판까지만 하고 패키지는 만들지 않는다
+//   ... --upload  등록까지 하고 초안을 「제작 완료」로 닫는다(--collection 으로 읽었을 때만)
 //
 // `--collection` 은 운영 서버에서 초안을 읽는다(ACADEMY_TEACHER_TOKEN 필요 · GET 만 한다).
 // `--collection-file` 은 같은 모양의 JSON 을 파일에서 읽는다(서버 없이 확인할 때).
@@ -199,4 +200,30 @@ const build = await execFileAsync(process.execPath, buildArgs, { maxBuffer: 64 *
 for (const line of build.stdout.trim().split("\n").slice(-4)) console.log(`  ${line}`);
 
 console.log(`\n패키지 ${packageDir}`);
-console.log(`다음: node scripts/problem-bank/upload-package.mjs --package "${packageDir}" --confirm`);
+
+const wantsUpload = args.upload === true || String(args.upload ?? "") === "true";
+if (!wantsUpload) {
+  console.log(`다음: node scripts/problem-bank/upload-package.mjs --package "${packageDir}" --confirm`);
+  process.exit(0);
+}
+
+const uploadToken = process.env.ACADEMY_TEACHER_TOKEN;
+if (!uploadToken) throw new Error("--upload 에는 ACADEMY_TEACHER_TOKEN 이 필요합니다.");
+const upload = await execFileAsync(process.execPath, [
+  path.resolve("scripts/problem-bank/upload-package.mjs"), "--package", packageDir, "--confirm"
+], { env: { ...process.env, ACADEMY_TEACHER_TOKEN: uploadToken }, maxBuffer: 64 * 1024 * 1024, timeout: 60 * 60 * 1000 });
+for (const line of upload.stdout.trim().split("\n").slice(-4)) console.log(`  ${line}`);
+if (/실패 [1-9]/.test(upload.stdout)) throw new Error("등록이 실패해 초안 상태를 바꾸지 않았습니다.");
+
+// 초안을 「제작 완료」로 닫는다. 안 닫으면 화면에 영원히 「제작 대기」로 남는다.
+if (args["collection-file"]) {
+  console.log("\n--collection-file 로 읽어 초안 상태는 바꾸지 않았습니다(서버에 없는 초안).");
+} else {
+  const response = await fetch(`${API_BASE}/api/problem-bank/collection-build`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${uploadToken}`, "content-type": "application/json" },
+    body: JSON.stringify({ collectionId, status: "published", publishedBookId: bookId })
+  });
+  if (!response.ok) throw new Error(`초안을 「제작 완료」로 바꾸지 못했습니다: HTTP ${response.status}`);
+  console.log(`\n초안 ${collectionId} → 제작 완료 · 교재 ${bookId}`);
+}
