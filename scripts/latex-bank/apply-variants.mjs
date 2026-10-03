@@ -28,9 +28,20 @@ const response = JSON.parse(await readFile(path.resolve(String(args.response)), 
 
 const CHOICE_MARKS = ["①", "②", "③", "④", "⑤"];
 
-/** 본문에서 숫자만 뽑는다. 하나도 안 바뀌었으면 「숫자변형」이 아니다. */
-function numbersOf(text) {
-  return (String(text ?? "").match(/\d+(?:\.\d+)?/g) ?? []).join(",");
+/**
+ * 문항에서 숫자만 뽑는다. 하나도 안 바뀌었으면 「숫자변형」이 아니다.
+ *
+ * 본문만 보면 안 된다 — 「다음 중 옳은 것은?」 류는 본문이 발문 한 줄이고 **보기**가 문항의 내용이다.
+ * 본문만 비교했더니 멀쩡한 변형이 「바뀐 것이 없다」로 거절됐다(2026-10-03 유형 01 거듭제곱근).
+ */
+function numbersOf(item) {
+  const text = [String(item?.body ?? ""), ...(Array.isArray(item?.choices) ? item.choices.map(String) : [])].join(" ");
+  return (text.match(/\d+(?:\.\d+)?/g) ?? []).join(",");
+}
+
+/** 본문과 보기를 합친 글. 「아무것도 안 바뀌었다」를 가리는 데 쓴다. */
+function contentOf(item) {
+  return [String(item?.body ?? "").trim(), ...(Array.isArray(item?.choices) ? item.choices.map((choice) => String(choice).trim()) : [])].join("|");
 }
 
 /** 문항이 어느 그룹에 있는지 — 변형을 원본 바로 뒤에 끼우려면 그룹을 알아야 한다. */
@@ -58,9 +69,9 @@ for (const [id, variant] of entries) {
 
   if (!Number.isInteger(variant.variant_level) || variant.variant_level < 1) fail("variant_level 이 1 이상의 정수가 아니다");
   if (!String(variant.body ?? "").trim()) fail("body 가 비었다");
-  if (String(variant.body ?? "").trim() === String(original.body ?? "").trim()) fail("body 가 원본과 같다 — 바뀐 것이 없다");
-  if (numbersOf(variant.body) === numbersOf(original.body) && !variant.figure_changed) {
-    fail("본문 숫자가 원본과 똑같다 — 숫자변형이 아니다(그림만 바꿨으면 figure_changed: true 를 적는다)");
+  if (contentOf(variant) === contentOf(original)) fail("본문도 보기도 원본과 같다 — 바뀐 것이 없다");
+  if (numbersOf(variant) === numbersOf(original) && !variant.figure_changed) {
+    fail("본문·보기의 숫자가 원본과 똑같다 — 숫자변형이 아니다(그림만 바꿨으면 figure_changed: true 를 적는다)");
   }
   if (!String(variant.solution ?? "").trim()) fail("solution 이 없다 — 답을 검증할 수 없으므로 거부한다");
   else if (String(variant.solution).trim().length < 10) fail("solution 이 너무 짧다(중간값을 적어야 검증할 수 있다)");
