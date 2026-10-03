@@ -30,6 +30,7 @@ import {
   wrongRateBand,
   wrongRateLegend
 } from "./problemBankModel.js";
+import { prettifyMathLabel } from "./mathLabelText.js";
 import { WrongAnswerPrintSheet } from "./WrongAnswerPrintSheet.jsx";
 import "./problemBank.css";
 
@@ -78,6 +79,8 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   // 시험지 바구니: itemId → { item, bookTitle, unitTitle, unitPosition, addedAt }. 교재를 바꿔도 남는다.
   const [examCart, setExamCart] = useState(() => new Map());
   const [typeFilter, setTypeFilter] = useState("");
+  // 단원을 접어 둔다. 구획 머리줄이 생기면서 한 단원이 화면을 꽉 채워 뒤 단원이 안 보인다는 지적(2026-10-03).
+  const [collapsedUnits, setCollapsedUnits] = useState(() => new Set());
   const imageRequestsRef = useRef(new Set());
 
   useEffect(() => {
@@ -158,6 +161,14 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   const unitPositionById = useMemo(() => new Map(units.map((unit) => [unit.unitId, unit.position ?? 0])), [units]);
   const typeLabels = useMemo(() => listTypeLabels(items), [items]);
   const matchesTypeFilter = (item) => !typeFilter || item.typeLabel === typeFilter;
+  const isPicked = (item) => (isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId));
+  /** 묶음의 선택 상태: none · some · all. 토글 단추의 모양과 읽어 주는 글을 이걸로 정한다. */
+  const groupPickState = (groupItems) => {
+    const targets = groupItems.filter(matchesTypeFilter);
+    if (!targets.length) return { state: "none", picked: 0, total: 0 };
+    const picked = targets.filter(isPicked).length;
+    return { state: picked === 0 ? "none" : picked === targets.length ? "all" : "some", picked, total: targets.length };
+  };
 
   const ensureImages = useCallback(async (itemIds) => {
     const missing = itemIds.filter((itemId) => !imagesByItem.has(itemId) && !imageRequestsRef.current.has(itemId));
@@ -277,16 +288,41 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
     setSaveMessage(picked.length ? `오답률 ${pickThreshold}% 이상 문항 ${picked.length}개를 골랐습니다.` : `오답률 ${pickThreshold}% 이상인 문항이 아직 없습니다. 학생별 오답에서 기록이 쌓이면 여기 집계됩니다.`);
   }
 
-  function selectUnitItems(group) {
+  /**
+   * 한 묶음(단원 또는 구획)을 통째로 고르거나 통째로 푼다.
+   *
+   * 예전에는 「단원 전체 선택」만 있고 푸는 길이 없어 하나씩 눌러 취소해야 했다(2026-10-03 사용자 지적).
+   * 버튼을 둘로 늘리는 대신 **지금 상태를 보여 주는 토글 하나**로 둔다 — 하나도 안 골랐으면 전부 고르고,
+   * 하나라도 골랐으면 전부 푼다. 문항을 하나씩 토글하지 않고 한 번의 상태 갱신으로 처리한다.
+   */
+  function toggleGroupPicked(groupItems) {
+    const targets = groupItems.filter(matchesTypeFilter);
+    if (!targets.length) return;
     if (isExamMode) {
-      group.items.filter(matchesTypeFilter).forEach((item) => {
-        if (!examCart.has(item.itemId)) toggleExamCart(item);
+      setExamCart((current) => {
+        const next = new Map(current);
+        const allPicked = targets.every((item) => next.has(item.itemId));
+        if (allPicked) targets.forEach((item) => next.delete(item.itemId));
+        else if (bookDetail) {
+          targets.forEach((item) => {
+            if (next.has(item.itemId)) return;
+            next.set(item.itemId, {
+              item,
+              bookTitle: bookDetail.book.title,
+              unitTitle: unitTitleById.get(item.unitId) ?? "",
+              unitPosition: unitPositionById.get(item.unitId) ?? 0,
+              addedAt: Date.now() + next.size / 1000
+            });
+          });
+        }
+        return next;
       });
       return;
     }
     setSelectedItemIds((current) => {
       const next = new Set(current);
-      group.items.forEach((item) => next.add(item.itemId));
+      const allPicked = targets.every((item) => next.has(item.itemId));
+      targets.forEach((item) => (allPicked ? next.delete(item.itemId) : next.add(item.itemId)));
       return next;
     });
   }
@@ -415,7 +451,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
               구역·유형
               <select aria-label="구역·유형 필터" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
                 <option value="">전체</option>
-                {typeLabels.map((label) => <option key={label} value={label}>{label}</option>)}
+                {typeLabels.map((label) => <option key={label} value={label}>{prettifyMathLabel(label)}</option>)}
               </select>
             </label>
             <div className="problemBankSelectionActions">
@@ -511,6 +547,35 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
         <div className="problemBankBody">
           <div className="problemBankUnits">
             {bookLoading ? <EmptyState className="emptyState">교재를 불러오는 중입니다…</EmptyState> : null}
+            {/* 단원 바로가기. 구획 머리줄이 생기면서 한 단원이 길어져 뒤 단원이 화면 밖으로 밀렸다(2026-10-03). */}
+            {!bookLoading && bookDetail && unitGroups.length > 1 ? (
+              <nav aria-label="단원 바로가기" className="problemBankUnitJump">
+                <button
+                  className="problemBankUnitJumpAll"
+                  onClick={() => setCollapsedUnits((current) => (current.size ? new Set() : new Set(unitGroups.map((g) => g.unit.unitId || "orphan"))))}
+                  type="button"
+                >{collapsedUnits.size ? "모두 펼치기" : "모두 접기"}</button>
+                {unitGroups.map((group) => {
+                  const key = group.unit.unitId || "orphan";
+                  const pick = groupPickState(group.items);
+                  if (pick.total === 0) return null;
+                  return (
+                    <button
+                      className={`problemBankUnitChip${pick.picked ? " picked" : ""}`}
+                      key={key}
+                      onClick={() => {
+                        setCollapsedUnits((current) => { const next = new Set(current); next.delete(key); return next; });
+                        document.getElementById(`unit-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      type="button"
+                    >
+                      {group.unit.title}
+                      <small>{pick.picked ? `${pick.picked}/${group.items.length}` : group.items.length}</small>
+                    </button>
+                  );
+                })}
+              </nav>
+            ) : null}
             {!bookLoading && bookDetail && unitGroups.map((group) => {
               const recordedInUnit = group.items.filter((item) => (itemStats.get(item.itemId)?.attempted ?? 0) > 0).length;
               const unitWrong = group.items.reduce((sum, item) => sum + (itemStats.get(item.itemId)?.wrong ?? 0), 0);
@@ -518,13 +583,30 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
               const unitCurrentWrong = group.items.reduce((sum, item) => sum + (itemStats.get(item.itemId)?.currentWrong ?? 0), 0);
               const myWrongInUnit = selectedStudent ? group.items.filter((item) => studentStates.get(item.itemId) === "wrong").length : 0;
               const percent = (numerator, denominator) => (denominator ? Math.round((numerator / denominator) * 100) : 0);
+              const unitKey = group.unit.unitId || "orphan";
+              const collapsed = collapsedUnits.has(unitKey);
+              const unitPick = groupPickState(group.items);
+              // 유형으로 거르면 해당 유형이 없는 단원은 빈 카드만 남는다. 아예 접어서 보여 주지 않는다.
+              if (unitPick.total === 0) return null;
               return (
-                <section className="problemBankUnitCard" key={group.unit.unitId || "orphan"}>
+                <section className="problemBankUnitCard" id={`unit-${group.unit.unitId || "orphan"}`} key={group.unit.unitId || "orphan"}>
                   <header className="problemBankUnitHead">
-                    <div>
-                      <strong>{bookDetail.book.title} {group.unit.title}</strong>
-                      <small>{[bookDetail.book.folderPath, bookDetail.book.title, group.unit.title].filter(Boolean).join(" / ")}</small>
-                    </div>
+                    <button
+                      aria-expanded={!collapsed}
+                      className="problemBankUnitToggle"
+                      onClick={() => setCollapsedUnits((current) => {
+                        const next = new Set(current);
+                        if (next.has(unitKey)) next.delete(unitKey); else next.add(unitKey);
+                        return next;
+                      })}
+                      type="button"
+                    >
+                      <i aria-hidden="true">{collapsed ? "▸" : "▾"}</i>
+                      <span>
+                        <strong>{bookDetail.book.title} {group.unit.title}</strong>
+                        <small>{[bookDetail.book.folderPath, bookDetail.book.title, group.unit.title].filter(Boolean).join(" / ")}</small>
+                      </span>
+                    </button>
                     <div className="problemBankUnitStats">
                       {isExamMode ? (
                         <span className="problemBankPill mine">담음 {group.items.filter((item) => examCart.has(item.itemId)).length}/{group.items.length}</span>
@@ -536,18 +618,37 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                           <span className="problemBankPill danger">현재 {percent(unitCurrentWrong, unitAttempted)}%</span>
                         </>
                       )}
-                      <button className="problemBankUnitSelect" onClick={() => selectUnitItems(group)} type="button">{isExamMode ? "단원 전체 담기" : "단원 전체 선택"}</button>
+                      {/* 고르기와 풀기를 한 단추에 담는다 — 하나도 안 골랐으면 전부 고르고, 하나라도 골랐으면 전부 푼다. */}
+                      <button
+                        aria-pressed={unitPick.state !== "none"}
+                        className={`problemBankPickToggle pick-${unitPick.state}`}
+                        disabled={unitPick.total === 0}
+                        onClick={() => toggleGroupPicked(group.items)}
+                        type="button"
+                      >
+                        <i aria-hidden="true">{unitPick.state === "all" ? "☑" : unitPick.state === "some" ? "▣" : "☐"}</i>
+                        {unitPick.state === "none" ? `단원 전체 ${isExamMode ? "담기" : "선택"}` : `단원 ${unitPick.picked}개 ${isExamMode ? "빼기" : "선택 해제"}`}
+                      </button>
                     </div>
                   </header>
                   {/* 단원 안을 교재의 구획(개념 01 · 유형 001 … · 실전)으로 한 번 더 나눈다 — 교재를 펴 놓은 것과 같은 순서로 보이게. */}
-                  {groupItemsByTypeSection(group.items.filter(matchesTypeFilter)).map((section, sectionIndex) => (
+                  {!collapsed && groupItemsByTypeSection(group.items.filter(matchesTypeFilter)).map((section, sectionIndex) => {
+                    const pick = groupPickState(section.items);
+                    return (
                     <div className="problemBankTypeSection" key={`${group.unit.unitId}|${section.label}|${sectionIndex}`}>
-                      {section.label ? (
-                        <h4 className="problemBankTypeSectionHead">
-                          <span>{section.label}</span>
-                          <small>{section.items.length}문항</small>
-                        </h4>
-                      ) : null}
+                      <h4 className="problemBankTypeSectionHead" title={section.label || undefined}>
+                        {/* 구획(줄) 단위 고르기·풀기. 교재의 「개념 01」·「유형 003」 한 줄이 그대로 한 번에 담긴다. */}
+                        <button
+                          aria-pressed={pick.state !== "none"}
+                          className={`problemBankPickToggle compact pick-${pick.state}`}
+                          onClick={() => toggleGroupPicked(section.items)}
+                          type="button"
+                        >
+                          <i aria-hidden="true">{pick.state === "all" ? "☑" : pick.state === "some" ? "▣" : "☐"}</i>
+                          <span className="problemBankTypeSectionName">{section.label ? prettifyMathLabel(section.label) : "구획 없음"}</span>
+                        </button>
+                        <small>{pick.picked ? `${pick.picked}/${section.items.length}` : `${section.items.length}문항`}</small>
+                      </h4>
                       <div className="problemBankNumberGrid">
                         {section.items.map((item) => {
                           const band = wrongRateBand(itemStats.get(item.itemId));
@@ -571,7 +672,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                               className={classes}
                               key={item.itemId}
                               onClick={(event) => handleItemClick(item, event)}
-                              title={[item.printedPage ? `${item.printedPage}쪽 ${itemDisplayNumber(item.numberLabel)}번` : null, item.typeLabel].filter(Boolean).join(" · ") || undefined}
+                              title={[item.printedPage ? `${item.printedPage}쪽 ${itemDisplayNumber(item.numberLabel)}번` : null, prettifyMathLabel(item.typeLabel)].filter(Boolean).join(" · ") || undefined}
                               type="button"
                             >
                               {itemDisplayNumber(item.numberLabel)}
@@ -583,7 +684,8 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                         })}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </section>
               );
             })}
@@ -612,7 +714,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
             </header>
             {previewItem ? (
               <div className="problemBankPreviewBody">
-                {previewItem.typeLabel ? <p className="problemBankTypeLabel">{previewItem.typeLabel}</p> : null}
+                {previewItem.typeLabel ? <p className="problemBankTypeLabel" title={previewItem.typeLabel}>{prettifyMathLabel(previewItem.typeLabel)}</p> : null}
                 {previewRegions.length === 0 ? <p className="muted">이미지를 불러오는 중…</p> : null}
                 {previewPassage || previewBody ? (
                   <button aria-label="문항 이미지 크게 보기" className="problemBankZoomButton" onClick={() => setZoomOpen(true)} type="button">
