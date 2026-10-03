@@ -64,6 +64,36 @@ const sourceItemId = (id) => String(id).replace(/v\d+$/, "");
 const variantStep = (id) => Number(String(id).match(/v(\d+)$/)?.[1] ?? 0);
 // 번호는 원본 번호로 찍는다 — 「19번과 그 숫자변형」이라 둘 다 19번이다.
 // v 를 안 떼면 `19v1` 에서 숫자만 남아 191번이 된다.
+/**
+ * 수식 안의 `\,`(얇은 공백)를 같은 폭의 kern 으로 바꾼다. `\,` 는 math glue 라 줄바꿈 지점이 되어
+ * 좁은 낱장에서 뒷부분이 다음 줄로 밀려 잘린다(라이트쎈 공통수학2 0678).
+ *
+ * **단, `\fbox{…}` 같은 글상자 안은 건드리지 않는다.** 그 안은 수식 모드가 아니라서 math 전용인
+ * `\mkern` 을 넣으면 컴파일이 통째로 깨진다 — `\fbox{\,㈎\,}` 가 들어 있는 RPM 중3-2 0261 이
+ * 「Missing $ inserted」로 책 전체를 멈춰 세웠다(2026-10-03). 글상자 안의 `\,` 는 원래도 줄바꿈
+ * 지점이 아니므로 바꿀 이유도 없다.
+ */
+function narrowMathSpaces(math) {
+  const boxes = /\\(?:fbox|mbox|text|textrm|textbf|hbox)\{/g;
+  let out = "";
+  let at = 0;
+  for (let found = boxes.exec(math); found; found = boxes.exec(math)) {
+    const open = found.index + found[0].length - 1;
+    const close = matchingBrace(math, open);
+    if (close < 0) break;
+    out += narrowOutsideBoxes(math.slice(at, found.index)) + math.slice(found.index, close + 1);
+    at = close + 1;
+    boxes.lastIndex = at;
+  }
+  return out + narrowOutsideBoxes(math.slice(at));
+}
+
+/** 쉼표 뒤에도 TeX 이 glue 를 넣으므로 `,\,` 는 `{,}`(Ord) + kern 으로 바꾼다. */
+function narrowOutsideBoxes(text) {
+  // 쉼표 뒤 `\mathopen{}`: 다음 `-3` 이 이항 연산자로 잡혀 「, − 3」 처럼 벌어지지 않게(Open 뒤의 Bin 은 Ord).
+  return text.replace(/,\\,/g, "{,}\\mkern3mu\\mathopen{}").replace(/\\,/g, "\\mkern3mu ");
+}
+
 const bookNumber = (id) => Number((id.includes("-") ? sourceItemId(id).split("-")[1] : sourceItemId(id)).replace(/\D/g, ""));
 
 /** figures/crops.json — 벡터 PDF 에서 크롭한 그림의 원문 크기(pt). 있으면 원문 크기 그대로 넣고 폭이 넓으면 본문 아래에 둔다. */
@@ -310,7 +340,7 @@ async function main() {
     typeof value === "string"
       ? value
           // 쉼표 뒤 `\mathopen{}`: 다음 `-3` 이 이항 연산자로 잡혀 「, − 3」 처럼 벌어지지 않게(Open 뒤의 Bin 은 Ord 가 된다 · 개념원리 219-u4).
-          .replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu\\mathopen{}").replace(/\\,/g, "\\mkern3mu "))
+          .replace(/\$([^$]*)\$/g, (math) => narrowMathSpaces(math))
           // 배점 「[5점]」 이 줄 끝에서 「[5」「점]」 로 갈라지지 않게(100발100중 서술형). 앞 낱말과도 붙인다(「[6점]」 홀로 둘째 줄).
           .replace(/ \[(\d+)점\]/g, "~\\mbox{[$1점]}")
           .replace(/\[(\d+)점\]/g, "\\mbox{[$1점]}")
