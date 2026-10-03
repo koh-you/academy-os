@@ -30,8 +30,8 @@ assert.deepEqual(
 const testManagerTabIds = [...tabsSource.matchAll(/onChange\?\.\("(\w+)"\)/g)].map((match) => match[1]);
 assert.deepEqual(
   testManagerTabIds,
-  ["examPaper", "attempts", "history", "library", "watermark"],
-  "시험지관리 탭 순서: 제작 → 응시 기록 → 학생 이력 → 시험지 목록 → 워터마크"
+  ["examPaper", "answerPilot", "attempts", "history", "library", "watermark"],
+  "시험지관리 탭 순서: 제작 → 채점 실험 → 응시 기록 → 학생 이력 → 시험지 목록 → 워터마크"
 );
 assert.ok(tabsSource.includes("시험지 제작"), "시험지관리 탭에 제작 라벨이 있다");
 

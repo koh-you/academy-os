@@ -1,0 +1,27 @@
+.answerSheetPilot { display: grid; gap: 16px; min-width: 0; }
+.answerSheetPilot p { margin: 0; line-height: 1.6; }
+.answerSheetPilot button { border: 1px solid #cbd8e6; border-radius: 8px; padding: 8px 12px; background: #f8fafc; color: #243b53; font: inherit; font-weight: 600; cursor: pointer; }
+.answerSheetPilot button:hover:not(:disabled), .answerSheetPilot button[aria-pressed=true] { background: #e8f1ff; border-color: #91b8ed; }
+.answerSheetPilot button:disabled { opacity: .5; cursor: default; }
+.pilotHeading > button { background: #243b53; color: white; }
+.pilotTableWrap th { white-space: nowrap; }
+.pilotTableWrap td:nth-child(2) { min-width: 130px; }
+.pilotHeading { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+.pilotHeading h2 { margin: 0 0 8px; }
+.pilotNotice { background: #eff6ff; color: #204365; border-radius: 10px; padding: 12px 16px; }
+.pilotControls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px solid #dbe3eb; padding: 14px; border-radius: 10px; min-width: 0; }
+.pilotControls label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pilotControls input[type=file] { max-width: 230px; }
+.pilotWorkspace { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(240px, 1fr); gap: 20px; align-items: start; }
+.pilotTableWrap { overflow-x: auto; }
+.pilotTableWrap table { width: 100%; border-collapse: collapse; }
+.pilotTableWrap td, .pilotTableWrap th { padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+.pilotTableWrap td input:not([type=checkbox]) { width: 100%; min-width: 90px; }
+.pilotTableWrap td select { max-width: 140px; display: block; margin-top: 5px; }
+.pilotTableWrap small { display: block; color: #945600; }
+.pilotSelectedRow { background: #f0f7ff; }
+.pilotPreview { position: sticky; top: 18px; display: grid; gap: 12px; }
+.pilotPreview img, .pilotPreview svg { width: 100%; border: 1px solid #dbe3eb; background: white; }
+.pilotPreview img { max-height: 650px; object-fit: contain; }
+.pilotError { color: #ad2636; }
+@media(max-width: 1000px) { .pilotWorkspace { grid-template-columns: 1fr; } .pilotPreview { position: static; } .pilotHeading { flex-wrap: wrap; } }
