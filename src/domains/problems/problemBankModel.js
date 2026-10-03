@@ -273,14 +273,34 @@ export function assignPrintColumns(entries) {
   });
 }
 
-export function buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem }) {
+/**
+ * 고른 문항 뒤에 그 숫자변형을 끼운다.
+ *
+ * 변형은 별도 교재가 아니라 같은 책 안의 자매 문항이고(`variantOf` 가 원본 itemId 를 가리킨다),
+ * 평소 목록에는 안 보이다가 「숫자변형 함께 넣기」를 켤 때만 원본 옆에 선다. 변형이 없는 문항은
+ * 혼자 선다 — 빈 자리를 만들지 않는다.
+ *
+ * @param {Array<{ item: object }>} rows 인쇄할 행(원본만 들어 있다)
+ * @param {Map<string, object[]>} variantsBySource 원본 itemId → 변형 문항들(단계 순)
+ */
+export function withNumberVariants(rows, variantsBySource) {
+  if (!variantsBySource?.size) return rows;
+  const out = [];
+  for (const row of rows) {
+    out.push(row);
+    for (const variant of variantsBySource.get(row.item.itemId) ?? []) out.push({ ...row, item: variant });
+  }
+  return out;
+}
+
+export function buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem, variantsBySource }) {
   const unitTitleById = new Map(units.map((unit) => [unit.unitId, unit.title]));
   const selected = new Set(selectedItemIds);
   const rows = [...items]
     .filter((entry) => selected.has(entry.itemId))
     .sort((a, b) => a.numberSort - b.numberSort)
     .map((item) => ({ item, bookTitle: book.title, unitTitle: unitTitleById.get(item.unitId) ?? "" }));
-  return buildPrintEntriesFromRows(rows, imagesByItem);
+  return buildPrintEntriesFromRows(withNumberVariants(rows, variantsBySource), imagesByItem);
 }
 
 /**
@@ -289,7 +309,9 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
  * @param {Array<{ item: object, bookTitle: string, unitTitle: string }>} rows
  */
 export function buildPrintEntriesFromRows(rows, imagesByItem) {
-  const sourceLine = (row) => [row.bookTitle, row.unitTitle, `${row.item.numberLabel}번`].filter(Boolean).join(" · ");
+  // 변형의 번호표는 `10-19v1` 이지만 출처는 원본 번호로 읽어야 한다 — 원본을 찾아갈 수 있어야 쓸모가 있다.
+  const numberText = (item) => (item.variantOf ? `${String(item.numberLabel).replace(/v\d+$/, "")}번 숫자변형` : `${item.numberLabel}번`);
+  const sourceLine = (row) => [row.bookTitle, row.unitTitle, numberText(row.item)].filter(Boolean).join(" · ");
   const regionOf = (item, kind) => (imagesByItem.get(item.itemId) ?? []).find((region) => region.kind === kind) ?? null;
   const urlOf = (item, kind) => regionOf(item, kind)?.url ?? "";
   const bboxOf = (item, kind) => (item.regions ?? []).find((region) => region.kind === kind)?.bboxNormalized ?? null;

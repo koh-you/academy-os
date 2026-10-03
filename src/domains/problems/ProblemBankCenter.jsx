@@ -441,9 +441,13 @@ export function ProblemBankCenter() {
   const flaggedItems = (detail?.items ?? []).filter((item) => item.reviewStatus === "flagged");
   const reviewCounts = flaggedItems.reduce((counts, item) => ({ ...counts, [reviewSeverity(item.reviewNote)]: (counts[reviewSeverity(item.reviewNote)] ?? 0) + 1 }), {});
   const reviewItems = flaggedItems.filter((item) => reviewFilter === "all" || reviewSeverity(item.reviewNote) === reviewFilter);
-  const solutionItems = (detail?.items ?? []).filter((item) => item.hasSolution).length;
-  const answerItems = (detail?.items ?? []).filter((item) => item.regions.some((region) => region.kind === "answer")).length;
-  const passageItems = (detail?.items ?? []).filter((item) => item.hasSubquestions).length;
+  // 교재의 수는 **교재에 실린 문항**의 수다. 숫자변형은 우리가 덧붙인 자매 문항이라 따로 센다 —
+  // 섞어 세면 등록 결과를 원본 교재의 문항 수와 대조할 수 없다.
+  const bookItems = (detail?.items ?? []).filter((item) => !item.variantOf);
+  const variantItems = (detail?.items ?? []).filter((item) => item.variantOf).length;
+  const solutionItems = bookItems.filter((item) => item.hasSolution).length;
+  const answerItems = bookItems.filter((item) => item.regions.some((region) => region.kind === "answer")).length;
+  const passageItems = bookItems.filter((item) => item.hasSubquestions).length;
 
   return (
     <section className="problemBankCenter">
@@ -551,7 +555,7 @@ export function ProblemBankCenter() {
                   </dd>
                 </div>
                 <div><dt>학년 · 과목</dt><dd>{[detail.book.grade, detail.book.subject].filter(Boolean).join(" · ") || "—"}</dd></div>
-                <div><dt>문항</dt><dd>{detail.items.length}개 · 해설 {solutionItems}개 · 빠른정답 {answerItems}개</dd></div>
+                <div><dt>문항</dt><dd>{bookItems.length}개 · 해설 {solutionItems}개 · 빠른정답 {answerItems}개{variantItems ? ` · 숫자변형 ${variantItems}개` : ""}</dd></div>
               </dl>
               <div className="problemBankTools">
                 <button className="softButton" disabled={audit.stage === "running"} onClick={runAudit} title="등록이 중간에 끊겨 이미지가 안 보일 때 빠진 파일을 찾습니다." type="button">이미지 누락 검사</button>

@@ -138,7 +138,11 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   );
   const studentFilter = useMemo(() => new Set(filteredStudents.map((student) => student.studentId)), [filteredStudents]);
   const selectedStudent = activeStudents.find((student) => student.studentId === selectedStudentId) ?? null;
-  const items = bookDetail?.items ?? [];
+  const loadedItems = bookDetail?.items ?? [];
+  // 숫자변형은 원본의 자매 문항이다(`variantOf` 가 원본 itemId). 목록·통계·선택에서는 빼고,
+  // 오답지·시험지의 「숫자변형 함께 넣기」를 켤 때만 원본 옆에 세운다. 섞어 두면 교재에 없는
+  // 문항이 번호 사이에 끼어 교재 순서가 무너진다.
+  const items = useMemo(() => loadedItems.filter((item) => !item.variantOf), [loadedItems]);
   const units = bookDetail?.units ?? [];
   const itemStats = useMemo(() => computeItemStats(attempts, studentFilter), [attempts, studentFilter]);
   const metrics = useMemo(
@@ -157,6 +161,22 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
     return map;
   }, [attempts, selectedStudentId, items]);
   const itemById = useMemo(() => new Map(items.map((item) => [item.itemId, item])), [items]);
+  // 원본 itemId → 변형 문항들. 시험지 바구니는 여러 교재를 오가며 담으므로 **지나온 교재의 변형도** 들고 있는다.
+  const [variantsBySource, setVariantsBySource] = useState(() => new Map());
+  useEffect(() => {
+    const found = loadedItems.filter((item) => item.variantOf);
+    if (!found.length) return;
+    setVariantsBySource((current) => {
+      const next = new Map(current);
+      for (const variant of found) {
+        const list = (next.get(variant.variantOf) ?? []).filter((entry) => entry.itemId !== variant.itemId);
+        list.push(variant);
+        list.sort((a, b) => (a.variantLevel ?? 0) - (b.variantLevel ?? 0));
+        next.set(variant.variantOf, list);
+      }
+      return next;
+    });
+  }, [loadedItems]);
   const unitTitleById = useMemo(() => new Map(units.map((unit) => [unit.unitId, unit.title])), [units]);
   const unitPositionById = useMemo(() => new Map(units.map((unit) => [unit.unitId, unit.position ?? 0])), [units]);
   const typeLabels = useMemo(() => listTypeLabels(items), [items]);
@@ -330,7 +350,9 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   async function openPrint() {
     const targetIds = isExamMode ? [...examCart.keys()] : [...selectedItemIds];
     if (targetIds.length === 0) return;
-    await ensureImages(targetIds);
+    // 변형 이미지도 같이 받는다. 인쇄지 안에서 「숫자변형 함께 넣기」를 켜는 순간 받아 오면 빈 칸이 먼저 보인다.
+    const variantIds = targetIds.flatMap((itemId) => (variantsBySource.get(itemId) ?? []).map((variant) => variant.itemId));
+    await ensureImages([...targetIds, ...variantIds]);
     setIsPrintOpen(true);
   }
 
@@ -795,6 +817,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
           imagesByItem={imagesByItem}
           rows={examRows}
           variant="exam"
+          variantsBySource={variantsBySource}
           onClose={() => setIsPrintOpen(false)}
         />
       ) : null}
@@ -806,6 +829,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
           selectedItemIds={[...selectedItemIds]}
           student={selectedStudent}
           units={units}
+          variantsBySource={variantsBySource}
           onClose={() => setIsPrintOpen(false)}
         />
       ) : null}

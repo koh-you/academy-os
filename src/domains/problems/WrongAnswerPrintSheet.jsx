@@ -8,7 +8,8 @@ import {
   distributeExamPoints,
   flattenPrintItems,
   orderExamRows,
-  printWidthMm
+  printWidthMm,
+  withNumberVariants
 } from "./problemBankModel.js";
 import { prettifyMathLabel } from "./mathLabelText.js";
 import { exportWrongAnswerPptx } from "./problemBankPptx.js";
@@ -28,7 +29,7 @@ const watermarkOpacity = 0.1;
  * - "exam"(시험지): 여러 교재에서 담은 rows(문항 + 출처)를 시험지 순서(교재순·담은순·섞기)로 싣고, 제목·배점·
  *   수험자 정보 칸을 넣는다. 배점은 총점을 문항 수로 나눈 정수(나머지는 앞 문항부터 +1)이며 문항마다 고칠 수 있다.
  */
-export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, selectedItemIds = [], rows = [], imagesByItem, student, onClose }) {
+export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, selectedItemIds = [], rows = [], imagesByItem, student, variantsBySource, onClose }) {
   const isExam = variant === "exam";
   const [includeAnswers, setIncludeAnswers] = useState(false);
   const [includeSolutions, setIncludeSolutions] = useState(false);
@@ -46,11 +47,21 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
   // 출처를 어디에 둘지. 각 문제 위(우상단) · 뒤에 따로 모으기 · 해설 영역.
   // 시험지에서는 출처가 문제 옆에 있으면 답을 유추하는 단서가 되기도 해서 뒤로 뺄 수 있어야 한다.
   const [sourcePlacement, setSourcePlacement] = useState("item");
+  // 숫자변형을 원본 옆에 같이 낼지. 기본은 끔 — 켜면 문항 수가 늘어 쪽 수가 달라진다.
+  const [includeVariants, setIncludeVariants] = useState(false);
 
   const orderedRows = useMemo(() => (isExam ? orderExamRows(rows, examOrder, shuffleSeed) : []), [isExam, rows, examOrder, shuffleSeed]);
+  // 고른 문항 중 변형을 가진 것이 몇 개인가. 하나도 없으면 토글을 아예 내리지 않는다(눌러도 아무 일도 안 일어나는 칸을 두지 않는다).
+  const sourceIds = isExam ? rows.map((row) => row.item.itemId) : selectedItemIds;
+  const variantCount = variantsBySource?.size
+    ? sourceIds.reduce((sum, itemId) => sum + (variantsBySource.get(itemId)?.length ?? 0), 0)
+    : 0;
+  const appliedVariants = includeVariants && variantCount ? variantsBySource : null;
   const entries = useMemo(
-    () => (isExam ? buildPrintEntriesFromRows(orderedRows, imagesByItem) : buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem })),
-    [isExam, orderedRows, book, units, items, selectedItemIds, imagesByItem]
+    () => (isExam
+      ? buildPrintEntriesFromRows(withNumberVariants(orderedRows, appliedVariants), imagesByItem)
+      : buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem, variantsBySource: appliedVariants })),
+    [isExam, orderedRows, book, units, items, selectedItemIds, imagesByItem, appliedVariants]
   );
   const printRows = useMemo(() => flattenPrintItems(entries), [entries]);
   const printColumnSides = useMemo(() => assignPrintColumns(entries), [entries]);
@@ -178,6 +189,9 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
           <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /><span>해설</span><small>{solutionEntries.length === 0 ? "없음" : `${solutionEntries.length}/${printRows.length}`}</small></label>
           <label><input checked={showSource} onChange={(event) => setShowSource(event.target.checked)} type="checkbox" /><span>출처</span><small>교재·단원·번호</small></label>
           <label><input checked={showType} onChange={(event) => setShowType(event.target.checked)} type="checkbox" /><span>유형</span><small>개념·유형 이름</small></label>
+          {variantCount > 0 ? (
+            <label><input checked={includeVariants} onChange={(event) => setIncludeVariants(event.target.checked)} type="checkbox" /><span>숫자변형</span><small>원본 옆에 {variantCount}개</small></label>
+          ) : null}
         </fieldset>
 
         {showSource ? (

@@ -18,22 +18,8 @@ const pdfjs = { ...pdfjsCore, getDocument: (params) => pdfjsCore.getDocument({ .
 
 export { pdfjs };
 
-export function parseArgs(argv) {
-  const args = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (!arg.startsWith("--")) continue;
-    const key = arg.slice(2);
-    const next = argv[index + 1];
-    if (next === undefined || next.startsWith("--")) {
-      args[key] = true;
-    } else {
-      args[key] = next;
-      index += 1;
-    }
-  }
-  return args;
-}
+// parseArgs 는 args.mjs 로 옮겼다(canvas 없이 쓰는 스크립트용). 기존 호출부를 위해 그대로 다시 내보낸다.
+export { parseArgs } from "./args.mjs";
 
 export function parsePageRange(value, pageCount) {
   if (!value) return [1, pageCount];
