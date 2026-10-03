@@ -108,6 +108,30 @@ const items = Array.from({ length: 20 }, (_, index) => {
   };
 });
 
+// 숫자변형: 2번 문항에 변형 하나를 붙인다(`variantOf` 가 원본 itemId). 평소 목록에는 안 보이고
+// 오답지·시험지의 「숫자변형 함께 넣기」를 켤 때만 원본 옆에 선다.
+const variantItems = [2].map((number) => {
+  const sourceLabel = String(number).padStart(4, "0");
+  const numberLabel = `${sourceLabel}v1`;
+  const source = items.find((item) => item.numberLabel === sourceLabel);
+  return {
+    ...source,
+    itemId: `${bookId}-${numberLabel}`,
+    numberLabel,
+    numberSort: number + 0.1,
+    variantOf: `${bookId}-${sourceLabel}`,
+    variantLevel: 1,
+    reviewNote: `숫자변형 문항(원본 ${sourceLabel})`,
+    regions: (source.regions ?? []).map((region) => ({
+      ...region,
+      regionId: region.regionId.replace(sourceLabel, numberLabel),
+      itemId: `${bookId}-${numberLabel}`,
+      storagePath: region.storagePath.replace(sourceLabel, numberLabel)
+    }))
+  };
+});
+items.push(...variantItems);
+
 export function createProblemBankFixtureState() {
   return {
     books: [

@@ -157,6 +157,17 @@ test("학생별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조�
   await expect(sheet.locator(".problemBankPrintSolutions img[alt='0002번 해설']")).toBeVisible();
   await sheet.locator(".problemBankPrintAnswers").screenshot({ path: "test-results/problem-bank-print-answers.png" });
   await sheet.locator(".problemBankPrintSolutions").screenshot({ path: "test-results/problem-bank-print-solutions.png" });
+  // 숫자변형: 0002 번에 변형이 하나 붙어 있다. 평소 목록에도 인쇄에도 안 나오고, 켤 때만 원본 바로 뒤에 선다.
+  const variantToggle = includeOptions(page).getByLabel(/^숫자변형/);
+  await expect(variantToggle).toBeVisible();
+  await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(2);
+  await variantToggle.check();
+  await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(3);
+  // 출처는 변형 번호표(0002v1)가 아니라 원본 번호로 읽어야 원본을 찾아갈 수 있다.
+  await expect(sheet.locator(".problemBankPrintSource").nth(1)).toContainText("0002번 숫자변형");
+  await variantToggle.uncheck();
+  await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(2);
+
   // PPT 저장: 표지 + 문항 2장 + 해설 2장 = 5장짜리 파일이 내려온다.
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "PPT 저장" }).click();
@@ -241,7 +252,8 @@ test("교재관리: 교재 상세·검토 목록·누락 검사를 보고 교재
   await bookList.locator(".problemBankBookItem").first().click();
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
   // 교재 상세는 정보 표시(수정 폼 없음), 도구는 한 줄.
-  await expect(page.locator(".problemBankInfo")).toContainText("해설 10개 · 빠른정답 10개");
+  // 교재의 수는 교재에 실린 문항만 센다 — 우리가 덧붙인 숫자변형은 따로 적는다.
+  await expect(page.locator(".problemBankInfo")).toContainText("20개 · 해설 10개 · 빠른정답 10개 · 숫자변형 1개");
   await expect(page.locator(".problemBankEditForm")).toHaveCount(0);
   const tools = page.locator(".problemBankTools");
   await expect(tools.getByRole("button", { name: "정답·해설만 다시 올리기" })).toBeVisible();

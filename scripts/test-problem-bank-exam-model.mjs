@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { prettifyMathLabel } from "../src/domains/problems/mathLabelText.js";
 import {
   buildPrintEntriesFromRows,
+  withNumberVariants,
   distributeExamPoints,
   flattenPrintItems,
   groupItemsByTypeSection,
@@ -107,3 +108,34 @@ assert.equal(prettifyMathLabel(null), "");
 assert.equal(prettifyMathLabel(String.raw`유형 05 $x^2 의 값`), String.raw`유형 05 $x^2 의 값`);
 
 console.log("유형 제목 수식 변환 fixture 통과");
+
+// ── 숫자변형: 고른 문항 뒤에 변형이 서고, 변형 없는 문항은 혼자 선다 ────────────────────────
+const variantRows = [
+  { item: { itemId: "b-19", numberLabel: "10-19" }, bookTitle: "쎈B 대수", unitTitle: "지수" },
+  { item: { itemId: "b-20", numberLabel: "10-20" }, bookTitle: "쎈B 대수", unitTitle: "지수" }
+];
+const variantMap = new Map([
+  ["b-19", [
+    { itemId: "b-19v1", numberLabel: "10-19v1", variantOf: "b-19", variantLevel: 1 },
+    { itemId: "b-19v2", numberLabel: "10-19v2", variantOf: "b-19", variantLevel: 2 }
+  ]]
+]);
+assert.deepEqual(
+  withNumberVariants(variantRows, variantMap).map((row) => row.item.itemId),
+  ["b-19", "b-19v1", "b-19v2", "b-20"]
+);
+// 변형이 하나도 없으면 순서도 개수도 그대로다(토글을 켜도 아무 일이 없어야 한다).
+assert.deepEqual(withNumberVariants(variantRows, new Map()).map((row) => row.item.itemId), ["b-19", "b-20"]);
+assert.deepEqual(withNumberVariants(variantRows, null).map((row) => row.item.itemId), ["b-19", "b-20"]);
+// 변형은 교재·단원 출처를 원본에서 물려받는다 — 원본과 같은 자리에서 나온 문항이다.
+assert.equal(withNumberVariants(variantRows, variantMap)[1].bookTitle, "쎈B 대수");
+assert.equal(withNumberVariants(variantRows, variantMap)[1].unitTitle, "지수");
+
+// 출처 줄은 변형 번호표(`10-19v1`)가 아니라 **원본 번호**로 읽어야 원본을 찾아갈 수 있다.
+const variantEntries = buildPrintEntriesFromRows(withNumberVariants(variantRows, variantMap), new Map());
+assert.equal(variantEntries[0].sourceLine, "쎈B 대수 · 지수 · 10-19번");
+assert.equal(variantEntries[1].sourceLine, "쎈B 대수 · 지수 · 10-19번 숫자변형");
+assert.equal(variantEntries[2].sourceLine, "쎈B 대수 · 지수 · 10-19번 숫자변형");
+assert.equal(variantEntries[3].sourceLine, "쎈B 대수 · 지수 · 10-20번");
+
+console.log("숫자변형 fixture 통과");

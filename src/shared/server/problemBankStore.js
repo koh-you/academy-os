@@ -111,7 +111,10 @@ export function createProblemBankStore({
       hasSolution: Boolean(row.has_solution),
       hasSubquestions: Boolean(row.has_subquestions),
       reviewStatus: row.review_status ?? "ai_checked",
-      reviewNote: row.review_note ?? ""
+      reviewNote: row.review_note ?? "",
+      // 숫자변형: 이 문항이 어느 문항의 변형인가. 원본이면 빈 문자열이다.
+      variantOf: row.variant_of ?? "",
+      variantLevel: row.variant_level ?? 0
     };
   }
 
@@ -271,6 +274,11 @@ export function createProblemBankStore({
       has_subquestions: Boolean(item.has_subquestions) || Boolean(item.has_shared_passage),
       review_status: ["ai_checked", "flagged", "human_ok"].includes(item.review_status) ? item.review_status : "ai_checked",
       review_note: textOf(item.review_note),
+      // 변형 문항일 때만 넣는다. 늘 넣으면 마이그레이션(20261003_problem_bank_variants.sql)을
+      // 아직 적용하지 않은 환경에서 **보통 교재 등록까지** 「없는 칸」으로 막힌다.
+      ...(textOf(item.variant_of)
+        ? { variant_of: textOf(item.variant_of), variant_level: integerOf(item.variant_level, 1) }
+        : {}),
       updated_at: now
     }));
     const regionRows = items.flatMap((item) => (item.regions ?? []).map((region, index) => ({

@@ -58,7 +58,13 @@ function bankUnits(bank) {
 
 /** id 「12-13」(쪽-번호) → 책에 찍힌 문항 번호 13. 「0013」(id_style number · RPM) → 13. */
 // 「12-e1」(쪽-예제 번호 · 100발100중 집중공략·서술형 예제)은 숫자 부분만 번호로 쓴다.
-const bookNumber = (id) => Number((id.includes("-") ? id.split("-")[1] : id).replace(/\D/g, ""));
+/** 변형 문항 id 에서 `v1` 꼬리를 뗀 원본 id. 변형은 원본의 자매 문항이라 번호·쪽·출처를 원본에서 물려받는다. */
+const sourceItemId = (id) => String(id).replace(/v\d+$/, "");
+/** 변형 단계(`10-19v2` → 2). 원본이면 0. */
+const variantStep = (id) => Number(String(id).match(/v(\d+)$/)?.[1] ?? 0);
+// 번호는 원본 번호로 찍는다 — 「19번과 그 숫자변형」이라 둘 다 19번이다.
+// v 를 안 떼면 `19v1` 에서 숫자만 남아 191번이 된다.
+const bookNumber = (id) => Number((id.includes("-") ? sourceItemId(id).split("-")[1] : sourceItemId(id)).replace(/\D/g, ""));
 
 /** figures/crops.json — 벡터 PDF 에서 크롭한 그림의 원문 크기(pt). 있으면 원문 크기 그대로 넣고 폭이 넓으면 본문 아래에 둔다. */
 let cropSizes = {};
@@ -179,9 +185,10 @@ function renderItemBody(id, rawItem, group, bank) {
   // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
   const item = { ...rawItem, body: placeTrailingConditions(String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{")) };
   // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
+  const sourceId = sourceItemId(id);
   const badgeText = bank.id_style === "number"
-    ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
-    : `${bank.book} ${id.split("-")[0]}쪽 ${kindLabel(id.split("-")[1])}`;
+    ? `${bank.book} ${sourceId}번${item.page ? ` · ${item.page}쪽` : ""}`
+    : `${bank.book} ${sourceId.split("-")[0]}쪽 ${kindLabel(sourceId.split("-")[1])}`;
   // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
   // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
   const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
@@ -435,28 +442,44 @@ async function main() {
     const byLabel = new Map(manifest.items.map((item) => [item.number_label, item]));
     // --bank-only(스캔 교재): 전사본(items.json)이 문항 목록의 원천이다. 전사 에이전트가 쪽에서 찾아 넣은 문항(스캔 크롭이 놓친 번호)은
     // 「쪽-번호」 id 로 manifest 항목을 만들어 넣고, 전사본에 없는 manifest 항목(유형 라벨 상자·단원 간지·지시문 조각으로 잘못 잘린 것)은 뺀다.
+    // 숫자변형 문항(`<원본>v1`)은 스캔에 없다 — 어느 책이든 전사본으로 manifest 항목을 만들어 준다.
+    // --bank-only 는 거기에 더해 전사본에 없는 스캔 항목을 빼고 단원도 전사본으로 다시 세운다.
+    let added = 0;
+    for (const { unit, group } of unitGroups) {
+      for (const id of group.items) {
+        if (byLabel.has(id)) continue;
+        const isVariant = Boolean(bank.items?.[id]?.variant_of);
+        if (!args["bank-only"] && !isVariant) continue;
+        const sourceId = sourceItemId(id);
+        const [pageText, numberText] = sourceId.split("-");
+        const bookNumbered = bank.id_style === "number";
+        // 변형의 쪽은 원본에서 물려받는다(전사본에 원본의 page 가 있다).
+        const printedPage = bookNumbered
+          ? Number(bank.items[sourceId]?.page ?? bank.items[id]?.page ?? 0)
+          : Number(pageText);
+        // 「30-e1」(쪽-예제 번호)은 숫자 부분만 번호로(예제는 같은 번호 문항보다 앞).
+        const baseSort = bookNumbered
+          ? Number(sourceId)
+          : printedPage * 100 + Number(String(numberText).replace(/\D/g, "")) - (String(numberText).startsWith("e") ? 0.5 : 0);
+        // 변형은 원본 바로 뒤에 선다(19 → 19.1 → 19.2). 안 그러면 191번 자리로 날아간다.
+        const numberSort = baseSort + variantStep(id) / 10;
+        const unitIndex = manifest.units.findIndex((entry) => entry.code === unit.code);
+        const synthesized = {
+          item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
+          column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: false, group_key: null,
+          review_status: "ai_checked",
+          review_note: isVariant ? `숫자변형 문항(원본 ${sourceId})` : "스캔 크롭에 없어 전사본(쪽 렌더)으로 추가한 문항",
+          regions: [],
+          ...(isVariant ? { variant_of: `${manifest.book.book_id}-${sourceId}`, variant_level: bank.items[id].variant_level ?? 1 } : {})
+        };
+        byLabel.set(id, synthesized);
+        manifest.items.push(synthesized);
+        added += 1;
+      }
+    }
+    if (added) manifest.items.sort((a, b) => a.number_sort - b.number_sort);
     if (args["bank-only"]) {
       const bankIds = new Set(unitGroups.flatMap(({ group }) => group.items));
-      let added = 0;
-      for (const { unit, group } of unitGroups) {
-        for (const id of group.items) {
-          if (byLabel.has(id)) continue;
-          const [pageText, numberText] = id.split("-");
-          const bookNumbered = bank.id_style === "number";
-          const printedPage = bookNumbered ? Number(bank.items[id]?.page ?? 0) : Number(pageText);
-          // 「30-e1」(쪽-예제 번호)은 숫자 부분만 번호로(예제는 같은 번호 문항보다 앞).
-          const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(String(numberText).replace(/\D/g, "")) - (String(numberText).startsWith("e") ? 0.5 : 0);
-          const unitIndex = manifest.units.findIndex((entry) => entry.code === unit.code);
-          const synthesized = {
-            item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
-            column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: false, group_key: null,
-            review_status: "ai_checked", review_note: "스캔 크롭에 없어 전사본(쪽 렌더)으로 추가한 문항", regions: []
-          };
-          byLabel.set(id, synthesized);
-          manifest.items.push(synthesized);
-          added += 1;
-        }
-      }
       const before = manifest.items.length;
       manifest.items = manifest.items.filter((item) => bankIds.has(item.number_label));
       manifest.items.sort((a, b) => a.number_sort - b.number_sort);
@@ -600,6 +623,15 @@ ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) >
       const typesetIds = new Set(existing.items.filter((item) => String(item.review_note ?? "").includes("latex 조판본")).map((item) => item.item_id));
       for (const entry of exported) typesetIds.add(entry.item_id);
       existing.items = existing.items.map((item) => exported.find((entry) => entry.item_id === item.item_id) ?? item);
+      // 패치는 「바꾸기」만 하던 탓에 **새 문항이 조용히 빠졌다** — 숫자변형처럼 패키지에 없던 문항을
+      // --only 로 넣으면 png 는 쓰이는데 manifest 에는 안 들어가 등록되지 않는다.
+      const known = new Set(existing.items.map((item) => item.item_id));
+      const appended = exported.filter((entry) => !known.has(entry.item_id));
+      if (appended.length) {
+        existing.items.push(...appended);
+        existing.items.sort((a, b) => a.number_sort - b.number_sort);
+        console.log(`  패치: 새 문항 ${appended.length}개 추가 (${appended.map((entry) => entry.number_label).join(", ")})`);
+      }
       existing.typeset = { ...(existing.typeset ?? {}), items: typesetIds.size };
       await writeFile(path.join(exportDir, "manifest.json"), JSON.stringify(existing, null, 2), "utf8");
       console.log(`export 패치: ${exported.length}문항 갱신 → ${exportDir} (조판본 ${typesetIds.size}문항)`);
