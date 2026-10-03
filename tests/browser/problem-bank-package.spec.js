@@ -74,9 +74,11 @@ test("교재관리: 문항과 정답·해설이 든 폴더 하나로 한 번에 
   await expect(message).toContainText("준비됨");
   await expect(message).toContainText("문항 2 · 해설 2 · 답 2");
   await page.getByRole("button", { name: "등록", exact: true }).click();
-  // 가상 서버의 교재는 문항 20개라 「문항 수 불일치」로 끝나지만, 요청 순서와 파일 이름은 그대로 검증된다.
+  // 가상 서버의 교재가 이 패키지보다 크므로 「문항 수 불일치」로 끝나지만, 요청 순서와 파일 이름은 그대로 검증된다.
+  // 서버 쪽 숫자는 fixture 가 커지면 같이 변하므로(지금은 교재 20 + 숫자변형 1) 묶지 않는다 — 이 검사의 뜻은
+  // 「부분 패키지를 올리면 확인 필요로 알린다」이지 특정 개수가 아니다.
   await expect(message).toContainText("확인 필요");
-  await expect(message).toContainText(/서버 문항 20 \/ 패키지 2/);
+  await expect(message).toContainText(/서버 문항 \d+ \/ 패키지 2 — 같은 폴더를 다시 등록하세요/);
   expect(posts.map((post) => post.path)).toEqual(["import", "images", "import-answers", "images"]);
   expect([...posts[1].files].sort()).toEqual(["items/pbk_safefixture1-0001.jpg", "items/pbk_safefixture1-0002.jpg"]);
   expect([...posts[3].files].sort()).toEqual([
