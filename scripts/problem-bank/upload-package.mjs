@@ -68,7 +68,17 @@ function collectKeys(manifest, kind) {
 /** 서버에 이미 같은 내용이 있는 파일은 건너뛴다. */
 async function planUploads(bookId, entries, files) {
   let stored = {};
-  try { stored = (await api("GET", `/api/problem-bank/book-audit?bookId=${encodeURIComponent(bookId)}`)).stored ?? {}; } catch { stored = {}; }
+  // book-audit 이 실패하면 「서버에 아무것도 없다」와 구별되지 않는다. 토큰이 만료된 채로 점검하면 모든 책이
+  // 「올릴 것 = 전체 · 건너뜀 0」으로 보여 멀쩡히 등록된 책을 누락으로 오판한다(2026-10-03 에 34권을 그렇게 읽었다).
+  // 인증·권한 오류는 멈추고, 그 밖의 오류(책이 아직 없음 등)만 빈 서버로 본다.
+  try {
+    stored = (await api("GET", `/api/problem-bank/book-audit?bookId=${encodeURIComponent(bookId)}`)).stored ?? {};
+  } catch (error) {
+    if (/HTTP (401|403)/.test(error.message)) {
+      throw new Error(`서버 대조(book-audit)가 ${error.message.includes("401") ? "401 인증 실패" : "403 권한 부족"} — 토큰을 확인하세요. 이대로면 등록된 책도 누락으로 보입니다.`);
+    }
+    stored = {};
+  }
   const pending = [];
   let skipped = 0;
   let missing = 0;
