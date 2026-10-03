@@ -77,10 +77,18 @@
 
 ```bash
 node scripts/latex-bank/retypeset-all.mjs --upload-only --ids \
-  ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1,lssen-cm2,ssen-m32,rpm-cm1,rpm-cm2,rpm-alg,rpm-calc1,rpm-calc2,rpm-geo,rpm-prob,rpm-m31,rpm-m32,gn-cm1,gn-cm2,gn-alg,gn-calc1,gn-calc2,gn-geo
+  rpm-m3-2,ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1,lssen-cm2,ssen-m32,rpm-cm1,rpm-cm2,rpm-alg,rpm-calc1,rpm-calc2,rpm-geo,rpm-prob,rpm-m31,rpm-m32,gn-cm1,gn-cm2,gn-alg,gn-calc1,gn-calc2,gn-geo,gn-prob,gn-m31,gn-m32,bb-m31-fin,bb-m32-mid,bb-m32-fin
 ```
 
-갱신: 2026-10-03 12:55
+갱신: 2026-10-03 13:42
+
+## 캠페인 완료 (2026-10-03)
+
+34권 **조판은 전부 끝났다.** 등록만 토큰 만료로 막혀 있다 — 위 명령 한 번이면 끝난다.
+
+- 조판 중 드러난 결함: `rpm-m3-2` 0261 의 `box{\,㈎\,}` 가 `\,` → `\mkern` 치환 때문에
+  **책 전체를 멈춰 세웠다**. 고쳐서 644문항 통과(#460). 34권 전수 확인 결과 같은 자리는 이 하나뿐이다.
+- 토큰이 만료돼도 조판은 계속 성공했고, 패키지는 전부 디스크에 남아 있다.
 
 ## 재개 방법
 
