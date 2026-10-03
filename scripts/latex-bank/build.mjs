@@ -180,19 +180,41 @@ function placeTrailingConditions(text) {
   return out;
 }
 
-/** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
-function renderItemBody(id, rawItem, group, bank) {
-  // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
-  const item = { ...rawItem, body: placeTrailingConditions(String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{")) };
-  // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
+/**
+ * 문항 하나의 출처 글(교재·쪽·번호). 조판본 이미지에 **넣지 않는 것이 기본**이다.
+ *
+ * 출처는 이미 서버 데이터(교재 제목 · printed_page · number_label)에 있다. 이미지에까지 박으면
+ * 오답지·시험지의 「출처」 토글을 꺼도 안 지워진다 — 시험지에서 출처를 숨기려 해도 학생에게
+ * 「쎈B 대수 10쪽 19번」이 그대로 보여 원본을 찾아 답을 볼 수 있었다(2026-10-03 확인).
+ * 그래서 출처는 데이터로만 두고, 어디에 보일지는 산출물이 정한다.
+ *
+ * 자체 교재처럼 **종이 자체에 출처를 남겨야 할 때만** `--source-badge` 로 켠다.
+ */
+function sourceBadgeText(id, item, bank) {
   const sourceId = sourceItemId(id);
-  const badgeText = bank.id_style === "number"
+  // 문항별 덮어쓰기: 자체 교재는 자기 제목이 아니라 **원본 교재**를 가리켜야 한다.
+  if (item.source_badge) return String(item.source_badge);
+  return bank.id_style === "number"
     ? `${bank.book} ${sourceId}번${item.page ? ` · ${item.page}쪽` : ""}`
     : `${bank.book} ${sourceId.split("-")[0]}쪽 ${kindLabel(sourceId.split("-")[1])}`;
+}
+
+/** 문항 하나의 본문 LaTeX(번호·꼬리표 배지 포함 · dmpnum 두 번째 인자). */
+function renderItemBody(id, rawItem, group, bank, options = {}) {
+  // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
+  const item = { ...rawItem, body: placeTrailingConditions(String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{")) };
+  // 배지에 남는 것: 교재 자신의 꼬리표(대표 문제 · 서술형 · 숫자변형). 그건 출처가 아니라 문항의 성질이라
+  // 이미지에 있어야 한다. 출처는 options.sourceBadge 를 켤 때만 앞에 붙는다.
+  const badgeParts = [
+    ...(options.sourceBadge ? [sourceBadgeText(id, item, bank)] : []),
+    ...(item.tag ? [String(item.tag)] : [])
+  ];
   // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
   // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
-  const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
-  const parts = [badge];
+  const badge = badgeParts.length
+    ? `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeParts.join(" · ")}}}}`
+    : "";
+  const parts = badge ? [badge] : [];
   if (item.figure && figurePlacement(item) === "side") {
     // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
     // 좁은 폭에서 한글 양쪽 정렬은 어간이 크게 벌어지므로 왼쪽 정렬(\raggedright).
@@ -273,6 +295,9 @@ async function compile(xelatex, dir, file) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  // --source-badge: 출처(교재·쪽·번호)를 문항 이미지 안에 넣는다. 기본은 끔 — 출처는 데이터로만 두고
+  // 오답지·시험지·PPT 가 각자 켜고 끈다. 이미지에 박으면 시험지에서 출처를 못 지운다(2026-10-03).
+  const sourceBadge = args["source-badge"] === true || String(args["source-badge"] ?? "") === "true";
   if (!args.bank) {
     console.error("사용: --bank latex-bank/<책> [--review] [--export [폴더]] [--package output/problem-bank/<책>]");
     process.exit(2);
@@ -320,7 +345,7 @@ async function main() {
       // 첨자·지수 자리의 빈칸 상자(\blank)는 본문 크기로 찍혀 원문(작은 상자)과 어긋난다 — 첨자 안에서는 작은 상자로 바꾼다.
       // \blank[0.8em] 을 \text 안에 그대로 쓰면 세로로 길고 좁은 상자가 된다(개념원리 78-18) — 첨자용은 fboxsep 을 줄인 작은 정사각형으로 따로 그린다.
       const supBlank = "$1{\\text{\\scriptsize\\setlength{\\fboxsep}{1.5pt}\\framebox[1.5em]{\\rule{0pt}{1.6ex}}}}";
-      const itemTex = renderItemBody(id, item, group, bank).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, supBlank).replace(/([_^])\\blank(?![\[\w])/g, supBlank);
+      const itemTex = renderItemBody(id, item, group, bank, { sourceBadge }).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, supBlank).replace(/([_^])\\blank(?![\[\w])/g, supBlank);
       await writeFile(path.join(dir, "items", `${id}.tex`), `${header.join("\n")}\n${itemTex}\n`, "utf8");
     }
   }
