@@ -6,17 +6,68 @@
 \newcommand{\pt}[1]{\mathrm{#1}}
 \newcommand{\seg}[1]{\overline{\mathrm{#1}}}
 \newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
-\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\centering\vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+\newcommand{\vecAB}[1]{\overrightarrow{\mathrm{#1}}}
+% 조건 상자. 본문에서는 수식을 안 끊지만(\binoppenalty) 이 상자는 폭이 고정이라 긴 식이 테두리 밖으로 삐져나간다
+% (검수 지적 쎈B 대수 126-41·126-43·21-17 — 「(2n-1)·1」 끝이 상자 밖에 찍힌다). 상자 안에서만 연산자·관계 뒤 줄바꿈을 허용한다.
+% 들어가는 식은 그대로 한 줄로 두고, 넘칠 때만 TeX 가 끊는다(원문도 그 자리에서 두 줄로 간다).
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.96\linewidth}\centering\binoppenalty=700 \relpenalty=500 \vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
+\newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
+\newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
+% 보기 상자도 같다. ㄱ·ㄴ·ㄷ 줄은 \\ 로 나누므로 \parskip 이 먹지 않아, 분수가 든 줄이 다음 줄과 맞닿는다
+% (검수 지적 쎈B 대수 62-08·78-40·79-46 · 미적분1 11-24·27-46). 줄 겹침 여유를 본문보다 넉넉히 주고, 긴 줄은 상자 안에서 끊는다.
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.96\linewidth}\binoppenalty=700 \relpenalty=500 \lineskiplimit=3pt \lineskip=4pt \vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
 \newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
 \newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
-\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{4mm}}
 % 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
 \newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \binoppenalty=10000 \relpenalty=10000
+% 수식 안 글루는 늘이지 않는다. 낱장 폭(110mm)에서 긴 수식이 한 덩어리로 묶이면 남은 늘임이 \medmuskip·\thickmuskip 으로
+% 들어가 「y  =  2x^2  -  3x」 처럼 연산자 둘레가 벌어진다(검수 지적 쎈B 공통수학1 95-42·95-44·130-35·136-67·26-68 등).
+% 늘임은 낱말 사이로만 보낸다.
+\thinmuskip=3mu \medmuskip=4mu \thickmuskip=5mu
+\newlength{\dmfigw}
+% 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
+% 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
+\emergencystretch=2em
+% 한글 음절 사이 늘임을 끈다. 좁은 낱장 폭(110mm)에 끊을 수 없는 긴 수식이 들어가면 kotex 가 남은 늘임을 음절 사이로
+% 보내 「함 수 … 에 대 하 여」처럼 낱말이 무너진다(검수 지적 쎈B 미적분1 8-06·10-20·40-56·55-68 · 대수 51-36·54-64·90-11 등).
+% 늘임은 낱말 사이로만 가게 하고, 그래도 모자라 줄이 넘치는 자리는 위 \emergencystretch 가 받는다.
+% xetexko 는 음절마다 줄바꿈 자리를 두고 그 glue 에 plus.08em 을 주는데(xetexko.sty \XeKo@stretchshrink),
+% 한 줄에 음절이 20개면 1.6em 까지 벌어진다. 늘임만 0 으로 두고 줄임(minus.04em)은 남겨 과밀 줄은 여전히 붙일 수 있게 한다.
+\xetexkostretchshrink{plus0em minus.04em}
+% 본문 속 \dfrac 처럼 키 큰 수식이 든 줄은 기본 \lineskip(1pt)으로는 위아래 줄과 맞닿는다
+% (검수 지적 쎈B 미적분1 76-11·77-14·79-26·55-70·41-64 · 대수 62-08·36-34 등 — 분모가 아랫줄 글자 위에 올라탄다).
+% 줄 사이가 2pt 보다 좁아지는 자리에서만 3pt 를 확보한다. 보통 줄은 \baselineskip 그대로라 쪽 배치가 바뀌지 않는다.
+\lineskiplimit=2pt \lineskip=3pt
 \newcommand{\nob}[1]{\mbox{#1}}
-\newcommand{\cond}[1]{\mbox{(단, #1)}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\newcommand{\cond}[1]{\mbox{(단,}\nobreakspace#1)}
+% 본문 끝의 「(단, …)」(build 가 \cond 를 \dmcondfill{조건}{배점 상자} 로 바꾼 것): 같은 줄에 들어가면 그 줄 오른쪽 끝, 안 들어가면 다음 줄 오른쪽 끝에 두고
+% 앞 줄은 fill 로 채워 어간이 벌어지지 않게 한다(TeXbook 의 증명 끝 기호 배치 · 검수 지적 개념원리 미적분Ⅱ 185-e19·106-e1 ⑴). 조건이 줄 폭(-2em)보다 넓으면
+% (그림 옆 0.58 폭의 긴 조건) 예전처럼 「(단,」 만 앞 낱말에 붙이고 안쪽에서 줄을 바꾼다.
+\newlength{\dmcondw}
+\newcommand{\dmcondfill}[2]{%
+  \settowidth{\dmcondw}{\mbox{(단,~#1)#2}}%
+  \ifdim\dmcondw<\dimexpr\linewidth-2em\relax
+    \unskip\nobreak\hfill\penalty0\hskip1.5em\hbox{}\nobreak\hfill\mbox{(단,~#1)#2}%
+  \else
+    \cond{#1}#2%
+  \fi}
+% 짧은 5지선다 한 줄 배치(원본이 보기 5개를 한 줄에 둔 것 · 검수 지적). \dmchoicesi 는 한 줄 5칸(칸 사이 fill · choices_layout "i" 강제).
+% \dmchoicesauto{지주}{①}…{⑤} 는 build 가 시각 길이로 고른 후보를 TeX 이 실제 폭으로 재서, 칸 사이 최소 1.5em 으로 낱장 본문 폭(110mm 낱장 여백 6mm·번호 9mm
+% 를 뺀 89mm · 현재 줄 폭이 더 좁으면 그 폭) 안에 들어가면 한 줄, 아니면 choices32(3+2 · 분수 지주 포함)로 되돌린다. 번호 기호는 sty 환경과 같은 \small.
+\newlength{\dmchoicesw}\newlength{\dmchoiceslim}
+\newcommand{\dmchoicesi}[5]{\par\medskip\noindent\mbox{\small ①\ #1}\hfill\mbox{\small ②\ #2}\hfill\mbox{\small ③\ #3}\hfill\mbox{\small ④\ #4}\hfill\mbox{\small ⑤\ #5}\par\medskip}
+\newcommand{\dmchoicesauto}[6]{%
+  \settowidth{\dmchoicesw}{\mbox{\small ①\ #2}\hskip1.5em\mbox{\small ②\ #3}\hskip1.5em\mbox{\small ③\ #4}\hskip1.5em\mbox{\small ④\ #5}\hskip1.5em\mbox{\small ⑤\ #6}}%
+  \setlength{\dmchoiceslim}{\linewidth}\ifdim\dmchoiceslim>89mm \setlength{\dmchoiceslim}{89mm}\fi
+  \ifdim\dmchoicesw<\dmchoiceslim \dmchoicesi{#2}{#3}{#4}{#5}{#6}\else\begin{choices32}{#1#2}{#1#3}{#1#4}{#1#5}{#1#6}\end{choices32}\fi}
 \raggedbottom
 
 \begin{document}
@@ -25,201 +76,201 @@
 \setcounter{dmproblemcount}{0}
 \dmsection{교과서 01-1 삼각비의 뜻}
 \dmpassage{오른쪽 그림의 직각삼각형~$\pt{ABC}$에서 다음 삼각비의 값을 구하시오.}
-\begin{center}\includegraphics[width=45.3pt]{figures/fig-g0001-0006.png}\end{center}
-\setcounter{dmproblemcount}{0}\dmpnum{0001}{\input{items/0001}}\vspace{4mm}
-\setcounter{dmproblemcount}{1}\dmpnum{0002}{\input{items/0002}}\vspace{4mm}
-\setcounter{dmproblemcount}{2}\dmpnum{0003}{\input{items/0003}}\vspace{4mm}
-\setcounter{dmproblemcount}{3}\dmpnum{0004}{\input{items/0004}}\vspace{4mm}
-\setcounter{dmproblemcount}{4}\dmpnum{0005}{\input{items/0005}}\vspace{4mm}
-\setcounter{dmproblemcount}{5}\dmpnum{0006}{\input{items/0006}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{45.3pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0001-0006.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{0}\dmpnum{0001}{\input{items/0001}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{0002}{\input{items/0002}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{0003}{\input{items/0003}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{0004}{\input{items/0004}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{0005}{\input{items/0005}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{0006}{\input{items/0006}}\vspace{8mm}
 \dmpassage{오른쪽 그림과 같은 직각삼각형~$\pt{ABC}$에 대하여 다음을 구하시오.}
-\begin{center}\includegraphics[width=87.3pt]{figures/fig-g0007-0008.png}\end{center}
-\setcounter{dmproblemcount}{6}\dmpnum{0007}{\input{items/0007}}\vspace{4mm}
-\setcounter{dmproblemcount}{7}\dmpnum{0008}{\input{items/0008}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{87.3pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0007-0008.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{6}\dmpnum{0007}{\input{items/0007}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{0008}{\input{items/0008}}\vspace{8mm}
 \dmpassage{직각삼각형~$\pt{ABC}$에서 삼각비의 값이 다음과 같이 주어질 때, $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{8}\dmpnum{0009}{\input{items/0009}}\vspace{4mm}
-\setcounter{dmproblemcount}{9}\dmpnum{0010}{\input{items/0010}}\vspace{4mm}
-\setcounter{dmproblemcount}{10}\dmpnum{0011}{\input{items/0011}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{0009}{\input{items/0009}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{0010}{\input{items/0010}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{10}\dmpnum{0011}{\input{items/0011}}\vspace{8mm}
 \dmsection{교과서 01-2 $30^\circ$, $45^\circ$, $60^\circ$의 삼각비의 값}
 \dmpassage{다음을 계산하시오.}
-\setcounter{dmproblemcount}{11}\dmpnum{0012}{\input{items/0012}}\vspace{4mm}
-\setcounter{dmproblemcount}{12}\dmpnum{0013}{\input{items/0013}}\vspace{4mm}
-\setcounter{dmproblemcount}{13}\dmpnum{0014}{\input{items/0014}}\vspace{4mm}
-\setcounter{dmproblemcount}{14}\dmpnum{0015}{\input{items/0015}}\vspace{4mm}
-\setcounter{dmproblemcount}{15}\dmpnum{0016}{\input{items/0016}}\vspace{4mm}
-\setcounter{dmproblemcount}{16}\dmpnum{0017}{\input{items/0017}}\vspace{4mm}
+\setcounter{dmproblemcount}{11}\dmpnum{0012}{\input{items/0012}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{0013}{\input{items/0013}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{0014}{\input{items/0014}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{0015}{\input{items/0015}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{0016}{\input{items/0016}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{0017}{\input{items/0017}}\vspace{8mm}
 \dmpassage{$0^\circ<x<90^\circ$일 때, 다음을 만족시키는 $x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{17}\dmpnum{0018}{\input{items/0018}}\vspace{4mm}
-\setcounter{dmproblemcount}{18}\dmpnum{0019}{\input{items/0019}}\vspace{4mm}
-\setcounter{dmproblemcount}{19}\dmpnum{0020}{\input{items/0020}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{17}\dmpnum{0018}{\input{items/0018}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{18}\dmpnum{0019}{\input{items/0019}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{19}\dmpnum{0020}{\input{items/0020}}\vspace{8mm}
 \dmpassage{삼각비의 값을 이용하여 다음 그림에서 $x$, $y$의 값을 각각 구하시오.}
-\setcounter{dmproblemcount}{20}\dmpnum{0021}{\input{items/0021}}\vspace{4mm}
-\setcounter{dmproblemcount}{21}\dmpnum{0022}{\input{items/0022}}\vspace{4mm}
-\setcounter{dmproblemcount}{22}\dmpnum{0023}{\input{items/0023}}\vspace{4mm}
-\setcounter{dmproblemcount}{23}\dmpnum{0024}{\input{items/0024}}\vspace{4mm}
+\setcounter{dmproblemcount}{20}\dmpnum{0021}{\input{items/0021}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{0022}{\input{items/0022}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{0023}{\input{items/0023}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{0024}{\input{items/0024}}\vspace{8mm}
 \dmsection{교과서 01-3 예각의 삼각비의 값}
 \dmpassage{오른쪽 그림과 같이 반지름의 길이가 1인 사분원에서 다음 삼각비의 값과 길이가 같은 선분을 구하시오.}
-\begin{center}\includegraphics[width=64.4pt]{figures/fig-g0025-0029.png}\end{center}
-\setcounter{dmproblemcount}{24}\dmpnum{0025}{\input{items/0025}}\vspace{4mm}
-\setcounter{dmproblemcount}{25}\dmpnum{0026}{\input{items/0026}}\vspace{4mm}
-\setcounter{dmproblemcount}{26}\dmpnum{0027}{\input{items/0027}}\vspace{4mm}
-\setcounter{dmproblemcount}{27}\dmpnum{0028}{\input{items/0028}}\vspace{4mm}
-\setcounter{dmproblemcount}{28}\dmpnum{0029}{\input{items/0029}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{64.4pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0025-0029.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{24}\dmpnum{0025}{\input{items/0025}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{0026}{\input{items/0026}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{0027}{\input{items/0027}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{0028}{\input{items/0028}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{0029}{\input{items/0029}}\vspace{8mm}
 \dmpassage{오른쪽 그림은 반지름의 길이가 1인 사분원을 좌표평면 위에 나타낸 것이다. 다음 삼각비의 값을 구하시오.}
-\begin{center}\includegraphics[width=86.0pt]{figures/fig-g0030-0034.png}\end{center}
-\setcounter{dmproblemcount}{29}\dmpnum{0030}{\input{items/0030}}\vspace{4mm}
-\setcounter{dmproblemcount}{30}\dmpnum{0031}{\input{items/0031}}\vspace{4mm}
-\setcounter{dmproblemcount}{31}\dmpnum{0032}{\input{items/0032}}\vspace{4mm}
-\setcounter{dmproblemcount}{32}\dmpnum{0033}{\input{items/0033}}\vspace{4mm}
-\setcounter{dmproblemcount}{33}\dmpnum{0034}{\input{items/0034}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{86.0pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0030-0034.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{29}\dmpnum{0030}{\input{items/0030}}\vspace{8mm}
+\setcounter{dmproblemcount}{30}\dmpnum{0031}{\input{items/0031}}\vspace{8mm}
+\setcounter{dmproblemcount}{31}\dmpnum{0032}{\input{items/0032}}\vspace{8mm}
+\setcounter{dmproblemcount}{32}\dmpnum{0033}{\input{items/0033}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{0034}{\input{items/0034}}\vspace{8mm}
 \dmsection{교과서 01-4 $0^\circ$와 $90^\circ$의 삼각비의 값}
 \dmpassage{다음을 계산하시오.}
-\setcounter{dmproblemcount}{34}\dmpnum{0035}{\input{items/0035}}\vspace{4mm}
-\setcounter{dmproblemcount}{35}\dmpnum{0036}{\input{items/0036}}\vspace{4mm}
-\setcounter{dmproblemcount}{36}\dmpnum{0037}{\input{items/0037}}\vspace{4mm}
-\setcounter{dmproblemcount}{37}\dmpnum{0038}{\input{items/0038}}\vspace{4mm}
-\setcounter{dmproblemcount}{38}\dmpnum{0039}{\input{items/0039}}\vspace{4mm}
+\setcounter{dmproblemcount}{34}\dmpnum{0035}{\input{items/0035}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{0036}{\input{items/0036}}\vspace{8mm}
+\setcounter{dmproblemcount}{36}\dmpnum{0037}{\input{items/0037}}\vspace{8mm}
+\setcounter{dmproblemcount}{37}\dmpnum{0038}{\input{items/0038}}\vspace{8mm}
+\setcounter{dmproblemcount}{38}\dmpnum{0039}{\input{items/0039}}\vspace{8mm}
 \dmpassage{다음 \blank\ 안에 $>$, $=$, $<$ 중 알맞은 것을 써넣으시오.}
-\setcounter{dmproblemcount}{39}\dmpnum{0040}{\input{items/0040}}\vspace{4mm}
-\setcounter{dmproblemcount}{40}\dmpnum{0041}{\input{items/0041}}\vspace{4mm}
-\setcounter{dmproblemcount}{41}\dmpnum{0042}{\input{items/0042}}\vspace{4mm}
-\setcounter{dmproblemcount}{42}\dmpnum{0043}{\input{items/0043}}\vspace{4mm}
-\setcounter{dmproblemcount}{43}\dmpnum{0044}{\input{items/0044}}\vspace{4mm}
+\setcounter{dmproblemcount}{39}\dmpnum{0040}{\input{items/0040}}\vspace{8mm}
+\setcounter{dmproblemcount}{40}\dmpnum{0041}{\input{items/0041}}\vspace{8mm}
+\setcounter{dmproblemcount}{41}\dmpnum{0042}{\input{items/0042}}\vspace{8mm}
+\setcounter{dmproblemcount}{42}\dmpnum{0043}{\input{items/0043}}\vspace{8mm}
+\setcounter{dmproblemcount}{43}\dmpnum{0044}{\input{items/0044}}\vspace{8mm}
 \dmsection{교과서 01-5 삼각비의 표}
 \dmpassage{아래 삼각비의 표를 이용하여 다음 삼각비의 값을 구하시오.}
-\begin{center}\includegraphics[width=239.3pt]{figures/fig-g0045-0050.png}\end{center}
-\setcounter{dmproblemcount}{44}\dmpnum{0045}{\input{items/0045}}\vspace{4mm}
-\setcounter{dmproblemcount}{45}\dmpnum{0046}{\input{items/0046}}\vspace{4mm}
-\setcounter{dmproblemcount}{46}\dmpnum{0047}{\input{items/0047}}\vspace{4mm}
-\setcounter{dmproblemcount}{47}\dmpnum{0048}{\input{items/0048}}\vspace{4mm}
-\setcounter{dmproblemcount}{48}\dmpnum{0049}{\input{items/0049}}\vspace{4mm}
-\setcounter{dmproblemcount}{49}\dmpnum{0050}{\input{items/0050}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{239.3pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0045-0050.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{44}\dmpnum{0045}{\input{items/0045}}\vspace{8mm}
+\setcounter{dmproblemcount}{45}\dmpnum{0046}{\input{items/0046}}\vspace{8mm}
+\setcounter{dmproblemcount}{46}\dmpnum{0047}{\input{items/0047}}\vspace{8mm}
+\setcounter{dmproblemcount}{47}\dmpnum{0048}{\input{items/0048}}\vspace{8mm}
+\setcounter{dmproblemcount}{48}\dmpnum{0049}{\input{items/0049}}\vspace{8mm}
+\setcounter{dmproblemcount}{49}\dmpnum{0050}{\input{items/0050}}\vspace{8mm}
 \dmpassage{위의 삼각비의 표를 이용하여 다음을 만족시키는 $x$의 크기를 구하시오.}
-\begin{center}\includegraphics[width=239.3pt]{figures/fig-g0045-0050.png}\end{center}
-\setcounter{dmproblemcount}{50}\dmpnum{0051}{\input{items/0051}}\vspace{4mm}
-\setcounter{dmproblemcount}{51}\dmpnum{0052}{\input{items/0052}}\vspace{4mm}
-\setcounter{dmproblemcount}{52}\dmpnum{0053}{\input{items/0053}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{239.3pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0045-0050.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{50}\dmpnum{0051}{\input{items/0051}}\vspace{8mm}
+\setcounter{dmproblemcount}{51}\dmpnum{0052}{\input{items/0052}}\vspace{8mm}
+\setcounter{dmproblemcount}{52}\dmpnum{0053}{\input{items/0053}}\vspace{8mm}
 \dmsection{유형 01 삼각비의 값}
-\setcounter{dmproblemcount}{53}\dmpnum{0054}{\input{items/0054}}\vspace{4mm}
-\setcounter{dmproblemcount}{54}\dmpnum{0055}{\input{items/0055}}\vspace{4mm}
-\setcounter{dmproblemcount}{55}\dmpnum{0056}{\input{items/0056}}\vspace{4mm}
-\setcounter{dmproblemcount}{56}\dmpnum{0057}{\input{items/0057}}\vspace{4mm}
-\setcounter{dmproblemcount}{57}\dmpnum{0058}{\input{items/0058}}\vspace{4mm}
-\setcounter{dmproblemcount}{58}\dmpnum{0059}{\input{items/0059}}\vspace{4mm}
-\setcounter{dmproblemcount}{59}\dmpnum{0060}{\input{items/0060}}\vspace{4mm}
+\setcounter{dmproblemcount}{53}\dmpnum{0054}{\input{items/0054}}\vspace{8mm}
+\setcounter{dmproblemcount}{54}\dmpnum{0055}{\input{items/0055}}\vspace{8mm}
+\setcounter{dmproblemcount}{55}\dmpnum{0056}{\input{items/0056}}\vspace{8mm}
+\setcounter{dmproblemcount}{56}\dmpnum{0057}{\input{items/0057}}\vspace{8mm}
+\setcounter{dmproblemcount}{57}\dmpnum{0058}{\input{items/0058}}\vspace{8mm}
+\setcounter{dmproblemcount}{58}\dmpnum{0059}{\input{items/0059}}\vspace{8mm}
+\setcounter{dmproblemcount}{59}\dmpnum{0060}{\input{items/0060}}\vspace{8mm}
 \dmsection{유형 02 한 변의 길이와 삼각비의 값을 알 때, 삼각형의 변의 길이 구하기}
-\setcounter{dmproblemcount}{60}\dmpnum{0061}{\input{items/0061}}\vspace{4mm}
-\setcounter{dmproblemcount}{61}\dmpnum{0062}{\input{items/0062}}\vspace{4mm}
-\setcounter{dmproblemcount}{62}\dmpnum{0063}{\input{items/0063}}\vspace{4mm}
-\setcounter{dmproblemcount}{63}\dmpnum{0064}{\input{items/0064}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{60}\dmpnum{0061}{\input{items/0061}}\vspace{8mm}
+\setcounter{dmproblemcount}{61}\dmpnum{0062}{\input{items/0062}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{62}\dmpnum{0063}{\input{items/0063}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{63}\dmpnum{0064}{\input{items/0064}}\vspace{8mm}
 \dmsection{유형 03 한 삼각비의 값을 알 때, 다른 삼각비의 값 구하기}
-\setcounter{dmproblemcount}{64}\dmpnum{0065}{\input{items/0065}}\vspace{4mm}
-\setcounter{dmproblemcount}{65}\dmpnum{0066}{\input{items/0066}}\vspace{4mm}
-\setcounter{dmproblemcount}{66}\dmpnum{0067}{\input{items/0067}}\vspace{4mm}
-\setcounter{dmproblemcount}{67}\dmpnum{0068}{\input{items/0068}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{64}\dmpnum{0065}{\input{items/0065}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{65}\dmpnum{0066}{\input{items/0066}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{66}\dmpnum{0067}{\input{items/0067}}\vspace{8mm}
+\setcounter{dmproblemcount}{67}\dmpnum{0068}{\input{items/0068}}\vspace{8mm}
 \dmsection{유형 04 직각삼각형의 닮음을 이용한 삼각비의 값 구하기 (1)}
-\setcounter{dmproblemcount}{68}\dmpnum{0069}{\input{items/0069}}\vspace{4mm}
-\setcounter{dmproblemcount}{69}\dmpnum{0070}{\input{items/0070}}\vspace{4mm}
-\setcounter{dmproblemcount}{70}\dmpnum{0071}{\input{items/0071}}\vspace{4mm}
-\setcounter{dmproblemcount}{71}\dmpnum{0072}{\input{items/0072}}\vspace{4mm}
+\setcounter{dmproblemcount}{68}\dmpnum{0069}{\input{items/0069}}\vspace{8mm}
+\setcounter{dmproblemcount}{69}\dmpnum{0070}{\input{items/0070}}\vspace{8mm}
+\setcounter{dmproblemcount}{70}\dmpnum{0071}{\input{items/0071}}\vspace{8mm}
+\setcounter{dmproblemcount}{71}\dmpnum{0072}{\input{items/0072}}\vspace{8mm}
 \dmsection{유형 05 직각삼각형의 닮음을 이용한 삼각비의 값 구하기 (2)}
-\setcounter{dmproblemcount}{72}\dmpnum{0073}{\input{items/0073}}\vspace{4mm}
-\setcounter{dmproblemcount}{73}\dmpnum{0074}{\input{items/0074}}\vspace{4mm}
-\setcounter{dmproblemcount}{74}\dmpnum{0075}{\input{items/0075}}\vspace{4mm}
-\setcounter{dmproblemcount}{75}\dmpnum{0076}{\input{items/0076}}\vspace{4mm}
+\setcounter{dmproblemcount}{72}\dmpnum{0073}{\input{items/0073}}\vspace{8mm}
+\setcounter{dmproblemcount}{73}\dmpnum{0074}{\input{items/0074}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{74}\dmpnum{0075}{\input{items/0075}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{75}\dmpnum{0076}{\input{items/0076}}\vspace{8mm}
 \dmsection{유형 06 직선의 방정식과 삼각비}
-\setcounter{dmproblemcount}{76}\dmpnum{0077}{\input{items/0077}}\vspace{4mm}
-\setcounter{dmproblemcount}{77}\dmpnum{0078}{\input{items/0078}}\vspace{4mm}
-\setcounter{dmproblemcount}{78}\dmpnum{0079}{\input{items/0079}}\vspace{4mm}
-\setcounter{dmproblemcount}{79}\dmpnum{0080}{\input{items/0080}}\vspace{4mm}
+\setcounter{dmproblemcount}{76}\dmpnum{0077}{\input{items/0077}}\vspace{8mm}
+\setcounter{dmproblemcount}{77}\dmpnum{0078}{\input{items/0078}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{78}\dmpnum{0079}{\input{items/0079}}\vspace{8mm}
+\setcounter{dmproblemcount}{79}\dmpnum{0080}{\input{items/0080}}\vspace{8mm}
 \dmsection{유형 07 입체도형에서 삼각비의 값 구하기}
-\setcounter{dmproblemcount}{80}\dmpnum{0081}{\input{items/0081}}\vspace{4mm}
-\setcounter{dmproblemcount}{81}\dmpnum{0082}{\input{items/0082}}\vspace{4mm}
-\setcounter{dmproblemcount}{82}\dmpnum{0083}{\input{items/0083}}\vspace{4mm}
+\setcounter{dmproblemcount}{80}\dmpnum{0081}{\input{items/0081}}\vspace{8mm}
+\setcounter{dmproblemcount}{81}\dmpnum{0082}{\input{items/0082}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{82}\dmpnum{0083}{\input{items/0083}}\vspace{8mm}
 \dmsection{유형 08 $30^\circ$, $45^\circ$, $60^\circ$의 삼각비의 값}
-\setcounter{dmproblemcount}{83}\dmpnum{0084}{\input{items/0084}}\vspace{4mm}
-\setcounter{dmproblemcount}{84}\dmpnum{0085}{\input{items/0085}}\vspace{4mm}
-\setcounter{dmproblemcount}{85}\dmpnum{0086}{\input{items/0086}}\vspace{4mm}
-\setcounter{dmproblemcount}{86}\dmpnum{0087}{\input{items/0087}}\vspace{4mm}
+\setcounter{dmproblemcount}{83}\dmpnum{0084}{\input{items/0084}}\vspace{8mm}
+\setcounter{dmproblemcount}{84}\dmpnum{0085}{\input{items/0085}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{85}\dmpnum{0086}{\input{items/0086}}\vspace{8mm}
+\setcounter{dmproblemcount}{86}\dmpnum{0087}{\input{items/0087}}\vspace{8mm}
 \dmsection{유형 09 특수한 각의 삼각비의 값을 이용하여 각의 크기 구하기}
-\setcounter{dmproblemcount}{87}\dmpnum{0088}{\input{items/0088}}\vspace{4mm}
-\setcounter{dmproblemcount}{88}\dmpnum{0089}{\input{items/0089}}\vspace{4mm}
-\setcounter{dmproblemcount}{89}\dmpnum{0090}{\input{items/0090}}\vspace{4mm}
-\setcounter{dmproblemcount}{90}\dmpnum{0091}{\input{items/0091}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{87}\dmpnum{0088}{\input{items/0088}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{88}\dmpnum{0089}{\input{items/0089}}\vspace{8mm}
+\setcounter{dmproblemcount}{89}\dmpnum{0090}{\input{items/0090}}\vspace{8mm}
+\setcounter{dmproblemcount}{90}\dmpnum{0091}{\input{items/0091}}\vspace{8mm}
 \dmsection{유형 10 특수한 각의 삼각비의 값을 이용하여 변의 길이 구하기}
-\setcounter{dmproblemcount}{91}\dmpnum{0092}{\input{items/0092}}\vspace{4mm}
-\setcounter{dmproblemcount}{92}\dmpnum{0093}{\input{items/0093}}\vspace{4mm}
-\setcounter{dmproblemcount}{93}\dmpnum{0094}{\input{items/0094}}\vspace{4mm}
-\setcounter{dmproblemcount}{94}\dmpnum{0095}{\input{items/0095}}\vspace{4mm}
-\setcounter{dmproblemcount}{95}\dmpnum{0096}{\input{items/0096}}\vspace{4mm}
-\setcounter{dmproblemcount}{96}\dmpnum{0097}{\input{items/0097}}\vspace{4mm}
-\setcounter{dmproblemcount}{97}\dmpnum{0098}{\input{items/0098}}\vspace{4mm}
+\setcounter{dmproblemcount}{91}\dmpnum{0092}{\input{items/0092}}\vspace{8mm}
+\setcounter{dmproblemcount}{92}\dmpnum{0093}{\input{items/0093}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{93}\dmpnum{0094}{\input{items/0094}}\vspace{8mm}
+\setcounter{dmproblemcount}{94}\dmpnum{0095}{\input{items/0095}}\vspace{8mm}
+\setcounter{dmproblemcount}{95}\dmpnum{0096}{\input{items/0096}}\vspace{8mm}
+\setcounter{dmproblemcount}{96}\dmpnum{0097}{\input{items/0097}}\vspace{8mm}
+\setcounter{dmproblemcount}{97}\dmpnum{0098}{\input{items/0098}}\vspace{8mm}
 \dmsection{유형 11 직선의 기울기와 삼각비}
-\setcounter{dmproblemcount}{98}\dmpnum{0099}{\input{items/0099}}\vspace{4mm}
-\setcounter{dmproblemcount}{99}\dmpnum{0100}{\input{items/0100}}\vspace{4mm}
-\setcounter{dmproblemcount}{100}\dmpnum{0101}{\input{items/0101}}\vspace{4mm}
-\setcounter{dmproblemcount}{101}\dmpnum{0102}{\input{items/0102}}\vspace{4mm}
+\setcounter{dmproblemcount}{98}\dmpnum{0099}{\input{items/0099}}\vspace{8mm}
+\setcounter{dmproblemcount}{99}\dmpnum{0100}{\input{items/0100}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{100}\dmpnum{0101}{\input{items/0101}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{101}\dmpnum{0102}{\input{items/0102}}\vspace{8mm}
 \dmsection{유형 12 사분원을 이용하여 삼각비의 값 구하기}
-\setcounter{dmproblemcount}{102}\dmpnum{0103}{\input{items/0103}}\vspace{4mm}
-\setcounter{dmproblemcount}{103}\dmpnum{0104}{\input{items/0104}}\vspace{4mm}
-\setcounter{dmproblemcount}{104}\dmpnum{0105}{\input{items/0105}}\vspace{4mm}
+\setcounter{dmproblemcount}{102}\dmpnum{0103}{\input{items/0103}}\vspace{8mm}
+\setcounter{dmproblemcount}{103}\dmpnum{0104}{\input{items/0104}}\vspace{8mm}
+\setcounter{dmproblemcount}{104}\dmpnum{0105}{\input{items/0105}}\vspace{8mm}
 \dmsection{유형 13 $0^\circ$, $90^\circ$의 삼각비의 값}
-\setcounter{dmproblemcount}{105}\dmpnum{0106}{\input{items/0106}}\vspace{4mm}
-\setcounter{dmproblemcount}{106}\dmpnum{0107}{\input{items/0107}}\vspace{4mm}
-\setcounter{dmproblemcount}{107}\dmpnum{0108}{\input{items/0108}}\vspace{4mm}
+\setcounter{dmproblemcount}{105}\dmpnum{0106}{\input{items/0106}}\vspace{8mm}
+\setcounter{dmproblemcount}{106}\dmpnum{0107}{\input{items/0107}}\vspace{8mm}
+\setcounter{dmproblemcount}{107}\dmpnum{0108}{\input{items/0108}}\vspace{8mm}
 \dmsection{유형 14 각의 크기에 따른 삼각비의 값의 대소 관계}
-\setcounter{dmproblemcount}{108}\dmpnum{0109}{\input{items/0109}}\vspace{4mm}
-\setcounter{dmproblemcount}{109}\dmpnum{0110}{\input{items/0110}}\vspace{4mm}
-\setcounter{dmproblemcount}{110}\dmpnum{0111}{\input{items/0111}}\vspace{4mm}
-\setcounter{dmproblemcount}{111}\dmpnum{0112}{\input{items/0112}}\vspace{4mm}
+\setcounter{dmproblemcount}{108}\dmpnum{0109}{\input{items/0109}}\vspace{8mm}
+\setcounter{dmproblemcount}{109}\dmpnum{0110}{\input{items/0110}}\vspace{8mm}
+\setcounter{dmproblemcount}{110}\dmpnum{0111}{\input{items/0111}}\vspace{8mm}
+\setcounter{dmproblemcount}{111}\dmpnum{0112}{\input{items/0112}}\vspace{8mm}
 \dmsection{유형 15 삼각비의 표를 이용하여 삼각비의 값 구하기}
-\setcounter{dmproblemcount}{112}\dmpnum{0113}{\input{items/0113}}\vspace{4mm}
-\setcounter{dmproblemcount}{113}\dmpnum{0114}{\input{items/0114}}\vspace{4mm}
-\setcounter{dmproblemcount}{114}\dmpnum{0115}{\input{items/0115}}\vspace{4mm}
+\setcounter{dmproblemcount}{112}\dmpnum{0113}{\input{items/0113}}\vspace{8mm}
+\setcounter{dmproblemcount}{113}\dmpnum{0114}{\input{items/0114}}\vspace{8mm}
+\setcounter{dmproblemcount}{114}\dmpnum{0115}{\input{items/0115}}\vspace{8mm}
 \dmsection{유형 16 삼각비의 표를 이용하여 변의 길이 구하기}
-\setcounter{dmproblemcount}{115}\dmpnum{0116}{\input{items/0116}}\vspace{4mm}
+\setcounter{dmproblemcount}{115}\dmpnum{0116}{\input{items/0116}}\vspace{8mm}
 \dmpassage{아래 삼각비의 표를 이용하여 다음 물음에 답하시오.}
-\begin{center}\includegraphics[width=240.7pt]{figures/fig-g0117-0118.png}\end{center}
-\setcounter{dmproblemcount}{116}\dmpnum{0117}{\input{items/0117}}\vspace{4mm}
-\setcounter{dmproblemcount}{117}\dmpnum{0118}{\input{items/0118}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{240.7pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0117-0118.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{116}\dmpnum{0117}{\input{items/0117}}\vspace{8mm}
+\setcounter{dmproblemcount}{117}\dmpnum{0118}{\input{items/0118}}\vspace{8mm}
 \dmsection{유형 17 특수한 각의 삼각비를 이용하여 다른 삼각비의 값 구하기}
-\setcounter{dmproblemcount}{118}\dmpnum{0119}{\input{items/0119}}\vspace{4mm}
-\setcounter{dmproblemcount}{119}\dmpnum{0120}{\input{items/0120}}\vspace{4mm}
-\setcounter{dmproblemcount}{120}\dmpnum{0121}{\input{items/0121}}\vspace{4mm}
+\setcounter{dmproblemcount}{118}\dmpnum{0119}{\input{items/0119}}\vspace{8mm}
+\setcounter{dmproblemcount}{119}\dmpnum{0120}{\input{items/0120}}\vspace{8mm}
+\setcounter{dmproblemcount}{120}\dmpnum{0121}{\input{items/0121}}\vspace{8mm}
 \dmsection{유형 18 삼각비의 값의 대소 관계를 이용한 식의 계산}
-\setcounter{dmproblemcount}{121}\dmpnum{0122}{\input{items/0122}}\vspace{4mm}
-\setcounter{dmproblemcount}{122}\dmpnum{0123}{\input{items/0123}}\vspace{4mm}
-\setcounter{dmproblemcount}{123}\dmpnum{0124}{\input{items/0124}}\vspace{4mm}
-\setcounter{dmproblemcount}{124}\dmpnum{0125}{\input{items/0125}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{121}\dmpnum{0122}{\input{items/0122}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{122}\dmpnum{0123}{\input{items/0123}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{123}\dmpnum{0124}{\input{items/0124}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{124}\dmpnum{0125}{\input{items/0125}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{125}\dmpnum{0126}{\input{items/0126}}\vspace{4mm}
-\setcounter{dmproblemcount}{126}\dmpnum{0127}{\input{items/0127}}\vspace{4mm}
-\setcounter{dmproblemcount}{127}\dmpnum{0128}{\input{items/0128}}\vspace{4mm}
-\setcounter{dmproblemcount}{128}\dmpnum{0129}{\input{items/0129}}\vspace{4mm}
-\setcounter{dmproblemcount}{129}\dmpnum{0130}{\input{items/0130}}\vspace{4mm}
-\setcounter{dmproblemcount}{130}\dmpnum{0131}{\input{items/0131}}\vspace{4mm}
-\setcounter{dmproblemcount}{131}\dmpnum{0132}{\input{items/0132}}\vspace{4mm}
-\setcounter{dmproblemcount}{132}\dmpnum{0133}{\input{items/0133}}\vspace{4mm}
-\setcounter{dmproblemcount}{133}\dmpnum{0134}{\input{items/0134}}\vspace{4mm}
-\setcounter{dmproblemcount}{134}\dmpnum{0135}{\input{items/0135}}\vspace{4mm}
-\setcounter{dmproblemcount}{135}\dmpnum{0136}{\input{items/0136}}\vspace{4mm}
-\setcounter{dmproblemcount}{136}\dmpnum{0137}{\input{items/0137}}\vspace{4mm}
-\setcounter{dmproblemcount}{137}\dmpnum{0138}{\input{items/0138}}\vspace{4mm}
-\setcounter{dmproblemcount}{138}\dmpnum{0139}{\input{items/0139}}\vspace{4mm}
-\setcounter{dmproblemcount}{139}\dmpnum{0140}{\input{items/0140}}\vspace{4mm}
-\setcounter{dmproblemcount}{140}\dmpnum{0141}{\input{items/0141}}\vspace{4mm}
-\setcounter{dmproblemcount}{141}\dmpnum{0142}{\input{items/0142}}\vspace{4mm}
-\setcounter{dmproblemcount}{142}\dmpnum{0143}{\input{items/0143}}\vspace{4mm}
-\setcounter{dmproblemcount}{143}\dmpnum{0144}{\input{items/0144}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{125}\dmpnum{0126}{\input{items/0126}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{126}\dmpnum{0127}{\input{items/0127}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{127}\dmpnum{0128}{\input{items/0128}}\vspace{8mm}
+\setcounter{dmproblemcount}{128}\dmpnum{0129}{\input{items/0129}}\vspace{8mm}
+\setcounter{dmproblemcount}{129}\dmpnum{0130}{\input{items/0130}}\vspace{8mm}
+\setcounter{dmproblemcount}{130}\dmpnum{0131}{\input{items/0131}}\vspace{8mm}
+\setcounter{dmproblemcount}{131}\dmpnum{0132}{\input{items/0132}}\vspace{8mm}
+\setcounter{dmproblemcount}{132}\dmpnum{0133}{\input{items/0133}}\vspace{8mm}
+\setcounter{dmproblemcount}{133}\dmpnum{0134}{\input{items/0134}}\vspace{8mm}
+\setcounter{dmproblemcount}{134}\dmpnum{0135}{\input{items/0135}}\vspace{8mm}
+\setcounter{dmproblemcount}{135}\dmpnum{0136}{\input{items/0136}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{136}\dmpnum{0137}{\input{items/0137}}\vspace{8mm}
+\setcounter{dmproblemcount}{137}\dmpnum{0138}{\input{items/0138}}\vspace{8mm}
+\setcounter{dmproblemcount}{138}\dmpnum{0139}{\input{items/0139}}\vspace{8mm}
+\setcounter{dmproblemcount}{139}\dmpnum{0140}{\input{items/0140}}\vspace{8mm}
+\setcounter{dmproblemcount}{140}\dmpnum{0141}{\input{items/0141}}\vspace{8mm}
+\setcounter{dmproblemcount}{141}\dmpnum{0142}{\input{items/0142}}\vspace{8mm}
+\setcounter{dmproblemcount}{142}\dmpnum{0143}{\input{items/0143}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{143}\dmpnum{0144}{\input{items/0144}}\vspace{8mm}
 \dmsection{서술형 주관식}
-\setcounter{dmproblemcount}{144}\dmpnum{0145}{\input{items/0145}}\vspace{4mm}
-\setcounter{dmproblemcount}{145}\dmpnum{0146}{\input{items/0146}}\vspace{4mm}
-\setcounter{dmproblemcount}{146}\dmpnum{0147}{\input{items/0147}}\vspace{4mm}
-\setcounter{dmproblemcount}{147}\dmpnum{0148}{\input{items/0148}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{144}\dmpnum{0145}{\input{items/0145}}\vspace{8mm}
+\setcounter{dmproblemcount}{145}\dmpnum{0146}{\input{items/0146}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{146}\dmpnum{0147}{\input{items/0147}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{147}\dmpnum{0148}{\input{items/0148}}\vspace{8mm}
 \dmsection{실력 UP}
-\setcounter{dmproblemcount}{148}\dmpnum{0149}{\input{items/0149}}\vspace{4mm}
-\setcounter{dmproblemcount}{149}\dmpnum{0150}{\input{items/0150}}\vspace{4mm}
-\setcounter{dmproblemcount}{150}\dmpnum{0151}{\input{items/0151}}\vspace{4mm}
+\setcounter{dmproblemcount}{148}\dmpnum{0149}{\input{items/0149}}\vspace{8mm}
+\setcounter{dmproblemcount}{149}\dmpnum{0150}{\input{items/0150}}\vspace{8mm}
+\setcounter{dmproblemcount}{150}\dmpnum{0151}{\input{items/0151}}\vspace{8mm}
 \vspace*{0pt plus 1filll}
 \clearpage
 \renewcommand{\dmchapunit}{02 삼각비의 활용}
@@ -227,276 +278,276 @@
 \setcounter{dmproblemcount}{0}
 \dmsection{교과서 02-1 직각삼각형의 변의 길이}
 \dmpassage{다음 그림의 직각삼각형~$\pt{ABC}$에 대하여 \blank~안에 알맞은 수를 써넣으시오.}
-\setcounter{dmproblemcount}{151}\dmpnum{0152}{\input{items/0152}}\vspace{4mm}
-\setcounter{dmproblemcount}{152}\dmpnum{0153}{\input{items/0153}}\vspace{4mm}
-\setcounter{dmproblemcount}{153}\dmpnum{0154}{\input{items/0154}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{151}\dmpnum{0152}{\input{items/0152}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{152}\dmpnum{0153}{\input{items/0153}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{153}\dmpnum{0154}{\input{items/0154}}\vspace{8mm}
 \dmpassage{다음 그림의 직각삼각형~$\pt{ABC}$에서 $x$, $y$의 값을 각각 구하시오. (단, $\sin 35^\circ=0.57$, $\cos 35^\circ=0.82$, $\sin 50^\circ=0.77$, $\cos 50^\circ=0.64$로 계산한다.)}
-\setcounter{dmproblemcount}{154}\dmpnum{0155}{\input{items/0155}}\vspace{4mm}
-\setcounter{dmproblemcount}{155}\dmpnum{0156}{\input{items/0156}}\vspace{4mm}
+\setcounter{dmproblemcount}{154}\dmpnum{0155}{\input{items/0155}}\vspace{8mm}
+\setcounter{dmproblemcount}{155}\dmpnum{0156}{\input{items/0156}}\vspace{8mm}
 \dmsection{교과서 02-2 일반 삼각형의 변의 길이}
-\setcounter{dmproblemcount}{156}\dmpnum{0157}{\input{items/0157}}\vspace{4mm}
-\setcounter{dmproblemcount}{157}\dmpnum{0158}{\input{items/0158}}\vspace{4mm}
-\setcounter{dmproblemcount}{158}\dmpnum{0159}{\input{items/0159}}\vspace{4mm}
+\setcounter{dmproblemcount}{156}\dmpnum{0157}{\input{items/0157}}\vspace{8mm}
+\setcounter{dmproblemcount}{157}\dmpnum{0158}{\input{items/0158}}\vspace{8mm}
+\setcounter{dmproblemcount}{158}\dmpnum{0159}{\input{items/0159}}\vspace{8mm}
 \dmsection{교과서 02-3 삼각형의 높이}
-\setcounter{dmproblemcount}{159}\dmpnum{0160}{\input{items/0160}}\vspace{4mm}
-\setcounter{dmproblemcount}{160}\dmpnum{0161}{\input{items/0161}}\vspace{4mm}
+\setcounter{dmproblemcount}{159}\dmpnum{0160}{\input{items/0160}}\vspace{8mm}
+\setcounter{dmproblemcount}{160}\dmpnum{0161}{\input{items/0161}}\vspace{8mm}
 \dmsection{교과서 02-4 삼각형의 넓이}
 \dmpassage{다음 삼각형의 넓이를 구하시오.}
-\setcounter{dmproblemcount}{161}\dmpnum{0162}{\input{items/0162}}\vspace{4mm}
-\setcounter{dmproblemcount}{162}\dmpnum{0163}{\input{items/0163}}\vspace{4mm}
-\setcounter{dmproblemcount}{163}\dmpnum{0164}{\input{items/0164}}\vspace{4mm}
-\setcounter{dmproblemcount}{164}\dmpnum{0165}{\input{items/0165}}\vspace{4mm}
+\setcounter{dmproblemcount}{161}\dmpnum{0162}{\input{items/0162}}\vspace{8mm}
+\setcounter{dmproblemcount}{162}\dmpnum{0163}{\input{items/0163}}\vspace{8mm}
+\setcounter{dmproblemcount}{163}\dmpnum{0164}{\input{items/0164}}\vspace{8mm}
+\setcounter{dmproblemcount}{164}\dmpnum{0165}{\input{items/0165}}\vspace{8mm}
 \dmsection{교과서 02-5 사각형의 넓이}
 \dmpassage{다음 평행사변형의 넓이를 구하시오.}
-\setcounter{dmproblemcount}{165}\dmpnum{0166}{\input{items/0166}}\vspace{4mm}
-\setcounter{dmproblemcount}{166}\dmpnum{0167}{\input{items/0167}}\vspace{4mm}
-\setcounter{dmproblemcount}{167}\dmpnum{0168}{\input{items/0168}}\vspace{4mm}
-\setcounter{dmproblemcount}{168}\dmpnum{0169}{\input{items/0169}}\vspace{4mm}
+\setcounter{dmproblemcount}{165}\dmpnum{0166}{\input{items/0166}}\vspace{8mm}
+\setcounter{dmproblemcount}{166}\dmpnum{0167}{\input{items/0167}}\vspace{8mm}
+\setcounter{dmproblemcount}{167}\dmpnum{0168}{\input{items/0168}}\vspace{8mm}
+\setcounter{dmproblemcount}{168}\dmpnum{0169}{\input{items/0169}}\vspace{8mm}
 \dmpassage{다음 사각형의 넓이를 구하시오.}
-\setcounter{dmproblemcount}{169}\dmpnum{0170}{\input{items/0170}}\vspace{4mm}
-\setcounter{dmproblemcount}{170}\dmpnum{0171}{\input{items/0171}}\vspace{4mm}
-\setcounter{dmproblemcount}{171}\dmpnum{0172}{\input{items/0172}}\vspace{4mm}
-\setcounter{dmproblemcount}{172}\dmpnum{0173}{\input{items/0173}}\vspace{4mm}
+\setcounter{dmproblemcount}{169}\dmpnum{0170}{\input{items/0170}}\vspace{8mm}
+\setcounter{dmproblemcount}{170}\dmpnum{0171}{\input{items/0171}}\vspace{8mm}
+\setcounter{dmproblemcount}{171}\dmpnum{0172}{\input{items/0172}}\vspace{8mm}
+\setcounter{dmproblemcount}{172}\dmpnum{0173}{\input{items/0173}}\vspace{8mm}
 \dmsection{유형 01 직각삼각형의 변의 길이 구하기}
-\setcounter{dmproblemcount}{173}\dmpnum{0174}{\input{items/0174}}\vspace{4mm}
-\setcounter{dmproblemcount}{174}\dmpnum{0175}{\input{items/0175}}\vspace{4mm}
-\setcounter{dmproblemcount}{175}\dmpnum{0176}{\input{items/0176}}\vspace{4mm}
+\setcounter{dmproblemcount}{173}\dmpnum{0174}{\input{items/0174}}\vspace{8mm}
+\setcounter{dmproblemcount}{174}\dmpnum{0175}{\input{items/0175}}\vspace{8mm}
+\setcounter{dmproblemcount}{175}\dmpnum{0176}{\input{items/0176}}\vspace{8mm}
 \dmsection{유형 02 입체도형에서 직각삼각형의 변의 길이의 활용}
-\setcounter{dmproblemcount}{176}\dmpnum{0177}{\input{items/0177}}\vspace{4mm}
-\setcounter{dmproblemcount}{177}\dmpnum{0178}{\input{items/0178}}\vspace{4mm}
-\setcounter{dmproblemcount}{178}\dmpnum{0179}{\input{items/0179}}\vspace{4mm}
-\setcounter{dmproblemcount}{179}\dmpnum{0180}{\input{items/0180}}\vspace{4mm}
+\setcounter{dmproblemcount}{176}\dmpnum{0177}{\input{items/0177}}\vspace{8mm}
+\setcounter{dmproblemcount}{177}\dmpnum{0178}{\input{items/0178}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{178}\dmpnum{0179}{\input{items/0179}}\vspace{8mm}
+\setcounter{dmproblemcount}{179}\dmpnum{0180}{\input{items/0180}}\vspace{8mm}
 \dmsection{유형 03 실생활에서의 직각삼각형의 변의 길이}
-\setcounter{dmproblemcount}{180}\dmpnum{0181}{\input{items/0181}}\vspace{4mm}
-\setcounter{dmproblemcount}{181}\dmpnum{0182}{\input{items/0182}}\vspace{4mm}
-\setcounter{dmproblemcount}{182}\dmpnum{0183}{\input{items/0183}}\vspace{4mm}
-\setcounter{dmproblemcount}{183}\dmpnum{0184}{\input{items/0184}}\vspace{4mm}
+\setcounter{dmproblemcount}{180}\dmpnum{0181}{\input{items/0181}}\vspace{8mm}
+\setcounter{dmproblemcount}{181}\dmpnum{0182}{\input{items/0182}}\vspace{8mm}
+\setcounter{dmproblemcount}{182}\dmpnum{0183}{\input{items/0183}}\vspace{8mm}
+\setcounter{dmproblemcount}{183}\dmpnum{0184}{\input{items/0184}}\vspace{8mm}
 \dmsection{유형 04 삼각형의 변의 길이 구하기 – 두 변의 길이와 그 끼인각의 크기를 아는 경우}
-\setcounter{dmproblemcount}{184}\dmpnum{0185}{\input{items/0185}}\vspace{4mm}
-\setcounter{dmproblemcount}{185}\dmpnum{0186}{\input{items/0186}}\vspace{4mm}
-\setcounter{dmproblemcount}{186}\dmpnum{0187}{\input{items/0187}}\vspace{4mm}
-\setcounter{dmproblemcount}{187}\dmpnum{0188}{\input{items/0188}}\vspace{4mm}
+\setcounter{dmproblemcount}{184}\dmpnum{0185}{\input{items/0185}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{185}\dmpnum{0186}{\input{items/0186}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{186}\dmpnum{0187}{\input{items/0187}}\vspace{8mm}
+\setcounter{dmproblemcount}{187}\dmpnum{0188}{\input{items/0188}}\vspace{8mm}
 \dmsection{유형 05 삼각형의 변의 길이 구하기 – 한 변의 길이와 그 양 끝 각의 크기를 아는 경우}
-\setcounter{dmproblemcount}{188}\dmpnum{0189}{\input{items/0189}}\vspace{4mm}
-\setcounter{dmproblemcount}{189}\dmpnum{0190}{\input{items/0190}}\vspace{4mm}
-\setcounter{dmproblemcount}{190}\dmpnum{0191}{\input{items/0191}}\vspace{4mm}
-\setcounter{dmproblemcount}{191}\dmpnum{0192}{\input{items/0192}}\vspace{4mm}
+\setcounter{dmproblemcount}{188}\dmpnum{0189}{\input{items/0189}}\vspace{8mm}
+\setcounter{dmproblemcount}{189}\dmpnum{0190}{\input{items/0190}}\vspace{8mm}
+\setcounter{dmproblemcount}{190}\dmpnum{0191}{\input{items/0191}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{191}\dmpnum{0192}{\input{items/0192}}\vspace{8mm}
 \dmsection{유형 06 삼각형의 높이 구하기 – 주어진 각이 모두 예각인 경우}
-\setcounter{dmproblemcount}{192}\dmpnum{0193}{\input{items/0193}}\vspace{4mm}
-\setcounter{dmproblemcount}{193}\dmpnum{0194}{\input{items/0194}}\vspace{4mm}
-\setcounter{dmproblemcount}{194}\dmpnum{0195}{\input{items/0195}}\vspace{4mm}
-\setcounter{dmproblemcount}{195}\dmpnum{0196}{\input{items/0196}}\vspace{4mm}
+\setcounter{dmproblemcount}{192}\dmpnum{0193}{\input{items/0193}}\vspace{8mm}
+\setcounter{dmproblemcount}{193}\dmpnum{0194}{\input{items/0194}}\vspace{8mm}
+\setcounter{dmproblemcount}{194}\dmpnum{0195}{\input{items/0195}}\vspace{8mm}
+\setcounter{dmproblemcount}{195}\dmpnum{0196}{\input{items/0196}}\vspace{8mm}
 \dmsection{유형 07 삼각형의 높이 구하기 – 주어진 각 중 한 각이 둔각인 경우}
-\setcounter{dmproblemcount}{196}\dmpnum{0197}{\input{items/0197}}\vspace{4mm}
-\setcounter{dmproblemcount}{197}\dmpnum{0198}{\input{items/0198}}\vspace{4mm}
-\setcounter{dmproblemcount}{198}\dmpnum{0199}{\input{items/0199}}\vspace{4mm}
+\setcounter{dmproblemcount}{196}\dmpnum{0197}{\input{items/0197}}\vspace{8mm}
+\setcounter{dmproblemcount}{197}\dmpnum{0198}{\input{items/0198}}\vspace{8mm}
+\setcounter{dmproblemcount}{198}\dmpnum{0199}{\input{items/0199}}\vspace{8mm}
 \dmsection{유형 08 삼각형의 넓이 – 예각이 주어진 경우}
-\setcounter{dmproblemcount}{199}\dmpnum{0200}{\input{items/0200}}\vspace{4mm}
-\setcounter{dmproblemcount}{200}\dmpnum{0201}{\input{items/0201}}\vspace{4mm}
-\setcounter{dmproblemcount}{201}\dmpnum{0202}{\input{items/0202}}\vspace{4mm}
-\setcounter{dmproblemcount}{202}\dmpnum{0203}{\input{items/0203}}\vspace{4mm}
+\setcounter{dmproblemcount}{199}\dmpnum{0200}{\input{items/0200}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{200}\dmpnum{0201}{\input{items/0201}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{201}\dmpnum{0202}{\input{items/0202}}\vspace{8mm}
+\setcounter{dmproblemcount}{202}\dmpnum{0203}{\input{items/0203}}\vspace{8mm}
 \dmsection{유형 09 삼각형의 넓이 – 둔각이 주어진 경우}
-\setcounter{dmproblemcount}{203}\dmpnum{0204}{\input{items/0204}}\vspace{4mm}
-\setcounter{dmproblemcount}{204}\dmpnum{0205}{\input{items/0205}}\vspace{4mm}
-\setcounter{dmproblemcount}{205}\dmpnum{0206}{\input{items/0206}}\vspace{4mm}
-\setcounter{dmproblemcount}{206}\dmpnum{0207}{\input{items/0207}}\vspace{4mm}
+\setcounter{dmproblemcount}{203}\dmpnum{0204}{\input{items/0204}}\vspace{8mm}
+\setcounter{dmproblemcount}{204}\dmpnum{0205}{\input{items/0205}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{205}\dmpnum{0206}{\input{items/0206}}\vspace{8mm}
+\setcounter{dmproblemcount}{206}\dmpnum{0207}{\input{items/0207}}\vspace{8mm}
 \dmsection{유형 10 다각형의 넓이}
-\setcounter{dmproblemcount}{207}\dmpnum{0208}{\input{items/0208}}\vspace{4mm}
-\setcounter{dmproblemcount}{208}\dmpnum{0209}{\input{items/0209}}\vspace{4mm}
-\setcounter{dmproblemcount}{209}\dmpnum{0210}{\input{items/0210}}\vspace{4mm}
+\setcounter{dmproblemcount}{207}\dmpnum{0208}{\input{items/0208}}\vspace{8mm}
+\setcounter{dmproblemcount}{208}\dmpnum{0209}{\input{items/0209}}\vspace{8mm}
+\setcounter{dmproblemcount}{209}\dmpnum{0210}{\input{items/0210}}\vspace{8mm}
 \dmsection{유형 11 평행사변형의 넓이}
-\setcounter{dmproblemcount}{210}\dmpnum{0211}{\input{items/0211}}\vspace{4mm}
-\setcounter{dmproblemcount}{211}\dmpnum{0212}{\input{items/0212}}\vspace{4mm}
-\setcounter{dmproblemcount}{212}\dmpnum{0213}{\input{items/0213}}\vspace{4mm}
-\setcounter{dmproblemcount}{213}\dmpnum{0214}{\input{items/0214}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{210}\dmpnum{0211}{\input{items/0211}}\vspace{8mm}
+\setcounter{dmproblemcount}{211}\dmpnum{0212}{\input{items/0212}}\vspace{8mm}
+\setcounter{dmproblemcount}{212}\dmpnum{0213}{\input{items/0213}}\vspace{8mm}
+\setcounter{dmproblemcount}{213}\dmpnum{0214}{\input{items/0214}}\vspace{8mm}
 \dmsection{유형 12 사각형의 넓이}
-\setcounter{dmproblemcount}{214}\dmpnum{0215}{\input{items/0215}}\vspace{4mm}
-\setcounter{dmproblemcount}{215}\dmpnum{0216}{\input{items/0216}}\vspace{4mm}
-\setcounter{dmproblemcount}{216}\dmpnum{0217}{\input{items/0217}}\vspace{4mm}
-\setcounter{dmproblemcount}{217}\dmpnum{0218}{\input{items/0218}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{214}\dmpnum{0215}{\input{items/0215}}\vspace{8mm}
+\setcounter{dmproblemcount}{215}\dmpnum{0216}{\input{items/0216}}\vspace{8mm}
+\setcounter{dmproblemcount}{216}\dmpnum{0217}{\input{items/0217}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{217}\dmpnum{0218}{\input{items/0218}}\vspace{8mm}
 \dmsection{유형 13 실생활에서 직각삼각형의 변의 길이의 활용}
-\setcounter{dmproblemcount}{218}\dmpnum{0219}{\input{items/0219}}\vspace{4mm}
-\setcounter{dmproblemcount}{219}\dmpnum{0220}{\input{items/0220}}\vspace{4mm}
-\setcounter{dmproblemcount}{220}\dmpnum{0221}{\input{items/0221}}\vspace{4mm}
+\setcounter{dmproblemcount}{218}\dmpnum{0219}{\input{items/0219}}\vspace{8mm}
+\setcounter{dmproblemcount}{219}\dmpnum{0220}{\input{items/0220}}\vspace{8mm}
+\setcounter{dmproblemcount}{220}\dmpnum{0221}{\input{items/0221}}\vspace{8mm}
 \dmsection{유형 14 정다각형의 넓이}
-\setcounter{dmproblemcount}{221}\dmpnum{0222}{\input{items/0222}}\vspace{4mm}
-\setcounter{dmproblemcount}{222}\dmpnum{0223}{\input{items/0223}}\vspace{4mm}
-\setcounter{dmproblemcount}{223}\dmpnum{0224}{\input{items/0224}}\vspace{4mm}
+\setcounter{dmproblemcount}{221}\dmpnum{0222}{\input{items/0222}}\vspace{8mm}
+\setcounter{dmproblemcount}{222}\dmpnum{0223}{\input{items/0223}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{223}\dmpnum{0224}{\input{items/0224}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{224}\dmpnum{0225}{\input{items/0225}}\vspace{4mm}
-\setcounter{dmproblemcount}{225}\dmpnum{0226}{\input{items/0226}}\vspace{4mm}
-\setcounter{dmproblemcount}{226}\dmpnum{0227}{\input{items/0227}}\vspace{4mm}
-\setcounter{dmproblemcount}{227}\dmpnum{0228}{\input{items/0228}}\vspace{4mm}
-\setcounter{dmproblemcount}{228}\dmpnum{0229}{\input{items/0229}}\vspace{4mm}
-\setcounter{dmproblemcount}{229}\dmpnum{0230}{\input{items/0230}}\vspace{4mm}
-\setcounter{dmproblemcount}{230}\dmpnum{0231}{\input{items/0231}}\vspace{4mm}
-\setcounter{dmproblemcount}{231}\dmpnum{0232}{\input{items/0232}}\vspace{4mm}
-\setcounter{dmproblemcount}{232}\dmpnum{0233}{\input{items/0233}}\vspace{4mm}
-\setcounter{dmproblemcount}{233}\dmpnum{0234}{\input{items/0234}}\vspace{4mm}
-\setcounter{dmproblemcount}{234}\dmpnum{0235}{\input{items/0235}}\vspace{4mm}
-\setcounter{dmproblemcount}{235}\dmpnum{0236}{\input{items/0236}}\vspace{4mm}
-\setcounter{dmproblemcount}{236}\dmpnum{0237}{\input{items/0237}}\vspace{4mm}
-\setcounter{dmproblemcount}{237}\dmpnum{0238}{\input{items/0238}}\vspace{4mm}
+\setcounter{dmproblemcount}{224}\dmpnum{0225}{\input{items/0225}}\vspace{8mm}
+\setcounter{dmproblemcount}{225}\dmpnum{0226}{\input{items/0226}}\vspace{8mm}
+\setcounter{dmproblemcount}{226}\dmpnum{0227}{\input{items/0227}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{227}\dmpnum{0228}{\input{items/0228}}\vspace{8mm}
+\setcounter{dmproblemcount}{228}\dmpnum{0229}{\input{items/0229}}\vspace{8mm}
+\setcounter{dmproblemcount}{229}\dmpnum{0230}{\input{items/0230}}\vspace{8mm}
+\setcounter{dmproblemcount}{230}\dmpnum{0231}{\input{items/0231}}\vspace{8mm}
+\setcounter{dmproblemcount}{231}\dmpnum{0232}{\input{items/0232}}\vspace{8mm}
+\setcounter{dmproblemcount}{232}\dmpnum{0233}{\input{items/0233}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{233}\dmpnum{0234}{\input{items/0234}}\vspace{8mm}
+\setcounter{dmproblemcount}{234}\dmpnum{0235}{\input{items/0235}}\vspace{8mm}
+\setcounter{dmproblemcount}{235}\dmpnum{0236}{\input{items/0236}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{236}\dmpnum{0237}{\input{items/0237}}\vspace{8mm}
+\setcounter{dmproblemcount}{237}\dmpnum{0238}{\input{items/0238}}\vspace{8mm}
 \dmsection{서술형 주관식}
-\setcounter{dmproblemcount}{238}\dmpnum{0239}{\input{items/0239}}\vspace{4mm}
-\setcounter{dmproblemcount}{239}\dmpnum{0240}{\input{items/0240}}\vspace{4mm}
-\setcounter{dmproblemcount}{240}\dmpnum{0241}{\input{items/0241}}\vspace{4mm}
-\setcounter{dmproblemcount}{241}\dmpnum{0242}{\input{items/0242}}\vspace{4mm}
+\setcounter{dmproblemcount}{238}\dmpnum{0239}{\input{items/0239}}\vspace{8mm}
+\setcounter{dmproblemcount}{239}\dmpnum{0240}{\input{items/0240}}\vspace{8mm}
+\setcounter{dmproblemcount}{240}\dmpnum{0241}{\input{items/0241}}\vspace{8mm}
+\setcounter{dmproblemcount}{241}\dmpnum{0242}{\input{items/0242}}\vspace{8mm}
 \dmsection{실력 UP}
-\setcounter{dmproblemcount}{242}\dmpnum{0243}{\input{items/0243}}\vspace{4mm}
-\setcounter{dmproblemcount}{243}\dmpnum{0244}{\input{items/0244}}\vspace{4mm}
-\setcounter{dmproblemcount}{244}\dmpnum{0245}{\input{items/0245}}\vspace{4mm}
-\setcounter{dmproblemcount}{245}\dmpnum{0246}{\input{items/0246}}\vspace{4mm}
+\setcounter{dmproblemcount}{242}\dmpnum{0243}{\input{items/0243}}\vspace{8mm}
+\setcounter{dmproblemcount}{243}\dmpnum{0244}{\input{items/0244}}\vspace{8mm}
+\setcounter{dmproblemcount}{244}\dmpnum{0245}{\input{items/0245}}\vspace{8mm}
+\setcounter{dmproblemcount}{245}\dmpnum{0246}{\input{items/0246}}\vspace{8mm}
 \vspace*{0pt plus 1filll}
 \clearpage
 \renewcommand{\dmchapunit}{03 원과 직선}
 \dmchapter{03}{원과 직선}
 \setcounter{dmproblemcount}{0}
 \dmsection{교과서 03-1 현의 수직이등분선}
-\setcounter{dmproblemcount}{246}\dmpnum{0247}{\input{items/0247}}\vspace{4mm}
+\setcounter{dmproblemcount}{246}\dmpnum{0247}{\input{items/0247}}\vspace{8mm}
 \dmpassage{다음 그림에서 $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{247}\dmpnum{0248}{\input{items/0248}}\vspace{4mm}
-\setcounter{dmproblemcount}{248}\dmpnum{0249}{\input{items/0249}}\vspace{4mm}
-\setcounter{dmproblemcount}{249}\dmpnum{0250}{\input{items/0250}}\vspace{4mm}
-\setcounter{dmproblemcount}{250}\dmpnum{0251}{\input{items/0251}}\vspace{4mm}
+\setcounter{dmproblemcount}{247}\dmpnum{0248}{\input{items/0248}}\vspace{8mm}
+\setcounter{dmproblemcount}{248}\dmpnum{0249}{\input{items/0249}}\vspace{8mm}
+\setcounter{dmproblemcount}{249}\dmpnum{0250}{\input{items/0250}}\vspace{8mm}
+\setcounter{dmproblemcount}{250}\dmpnum{0251}{\input{items/0251}}\vspace{8mm}
 \dmsection{교과서 03-2 현의 길이}
 \dmpassage{다음 그림에서 $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{251}\dmpnum{0252}{\input{items/0252}}\vspace{4mm}
-\setcounter{dmproblemcount}{252}\dmpnum{0253}{\input{items/0253}}\vspace{4mm}
-\setcounter{dmproblemcount}{253}\dmpnum{0254}{\input{items/0254}}\vspace{4mm}
-\setcounter{dmproblemcount}{254}\dmpnum{0255}{\input{items/0255}}\vspace{4mm}
-\setcounter{dmproblemcount}{255}\dmpnum{0256}{\input{items/0256}}\vspace{4mm}
-\setcounter{dmproblemcount}{256}\dmpnum{0257}{\input{items/0257}}\vspace{4mm}
+\setcounter{dmproblemcount}{251}\dmpnum{0252}{\input{items/0252}}\vspace{8mm}
+\setcounter{dmproblemcount}{252}\dmpnum{0253}{\input{items/0253}}\vspace{8mm}
+\setcounter{dmproblemcount}{253}\dmpnum{0254}{\input{items/0254}}\vspace{8mm}
+\setcounter{dmproblemcount}{254}\dmpnum{0255}{\input{items/0255}}\vspace{8mm}
+\setcounter{dmproblemcount}{255}\dmpnum{0256}{\input{items/0256}}\vspace{8mm}
+\setcounter{dmproblemcount}{256}\dmpnum{0257}{\input{items/0257}}\vspace{8mm}
 \dmsection{교과서 03-3 원의 접선의 길이}
 \dmpassage{다음 그림에서 두 점~$\pt{A}$, $\pt{B}$는 원~$\pt{O}$의 접점일 때, $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{257}\dmpnum{0258}{\input{items/0258}}\vspace{4mm}
-\setcounter{dmproblemcount}{258}\dmpnum{0259}{\input{items/0259}}\vspace{4mm}
-\setcounter{dmproblemcount}{259}\dmpnum{0260}{\input{items/0260}}\vspace{4mm}
+\setcounter{dmproblemcount}{257}\dmpnum{0258}{\input{items/0258}}\vspace{8mm}
+\setcounter{dmproblemcount}{258}\dmpnum{0259}{\input{items/0259}}\vspace{8mm}
+\setcounter{dmproblemcount}{259}\dmpnum{0260}{\input{items/0260}}\vspace{8mm}
 \dmsection{교과서 03-4 삼각형의 내접원}
-\setcounter{dmproblemcount}{260}\dmpnum{0261}{\input{items/0261}}\vspace{4mm}
+\setcounter{dmproblemcount}{260}\dmpnum{0261}{\input{items/0261}}\vspace{8mm}
 \dmpassage{다음 그림에서 원~$\pt{O}$는 $\triangle\pt{ABC}$의 내접원이고 세 점~$\pt{D}$, $\pt{E}$, $\pt{F}$는 접점일 때, $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{261}\dmpnum{0262}{\input{items/0262}}\vspace{4mm}
-\setcounter{dmproblemcount}{262}\dmpnum{0263}{\input{items/0263}}\vspace{4mm}
-\setcounter{dmproblemcount}{263}\dmpnum{0264}{\input{items/0264}}\vspace{4mm}
+\setcounter{dmproblemcount}{261}\dmpnum{0262}{\input{items/0262}}\vspace{8mm}
+\setcounter{dmproblemcount}{262}\dmpnum{0263}{\input{items/0263}}\vspace{8mm}
+\setcounter{dmproblemcount}{263}\dmpnum{0264}{\input{items/0264}}\vspace{8mm}
 \dmsection{교과서 03-5 원에 외접하는 사각형}
 \dmpassage{다음 그림에서 $\square\pt{ABCD}$가 원~$\pt{O}$에 외접할 때, $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{264}\dmpnum{0265}{\input{items/0265}}\vspace{4mm}
-\setcounter{dmproblemcount}{265}\dmpnum{0266}{\input{items/0266}}\vspace{4mm}
+\setcounter{dmproblemcount}{264}\dmpnum{0265}{\input{items/0265}}\vspace{8mm}
+\setcounter{dmproblemcount}{265}\dmpnum{0266}{\input{items/0266}}\vspace{8mm}
 \dmsection{유형 01 현의 수직이등분선 (1)}
-\setcounter{dmproblemcount}{266}\dmpnum{0267}{\input{items/0267}}\vspace{4mm}
-\setcounter{dmproblemcount}{267}\dmpnum{0268}{\input{items/0268}}\vspace{4mm}
-\setcounter{dmproblemcount}{268}\dmpnum{0269}{\input{items/0269}}\vspace{4mm}
-\setcounter{dmproblemcount}{269}\dmpnum{0270}{\input{items/0270}}\vspace{4mm}
+\setcounter{dmproblemcount}{266}\dmpnum{0267}{\input{items/0267}}\vspace{8mm}
+\setcounter{dmproblemcount}{267}\dmpnum{0268}{\input{items/0268}}\vspace{8mm}
+\setcounter{dmproblemcount}{268}\dmpnum{0269}{\input{items/0269}}\vspace{8mm}
+\setcounter{dmproblemcount}{269}\dmpnum{0270}{\input{items/0270}}\vspace{8mm}
 \dmsection{유형 02 현의 수직이등분선 (2)}
-\setcounter{dmproblemcount}{270}\dmpnum{0271}{\input{items/0271}}\vspace{4mm}
-\setcounter{dmproblemcount}{271}\dmpnum{0272}{\input{items/0272}}\vspace{4mm}
-\setcounter{dmproblemcount}{272}\dmpnum{0273}{\input{items/0273}}\vspace{4mm}
+\setcounter{dmproblemcount}{270}\dmpnum{0271}{\input{items/0271}}\vspace{8mm}
+\setcounter{dmproblemcount}{271}\dmpnum{0272}{\input{items/0272}}\vspace{8mm}
+\setcounter{dmproblemcount}{272}\dmpnum{0273}{\input{items/0273}}\vspace{8mm}
 \dmsection{유형 03 현의 수직이등분선 (3)}
-\setcounter{dmproblemcount}{273}\dmpnum{0274}{\input{items/0274}}\vspace{4mm}
-\setcounter{dmproblemcount}{274}\dmpnum{0275}{\input{items/0275}}\vspace{4mm}
-\setcounter{dmproblemcount}{275}\dmpnum{0276}{\input{items/0276}}\vspace{4mm}
-\setcounter{dmproblemcount}{276}\dmpnum{0277}{\input{items/0277}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{273}\dmpnum{0274}{\input{items/0274}}\vspace{8mm}
+\setcounter{dmproblemcount}{274}\dmpnum{0275}{\input{items/0275}}\vspace{8mm}
+\setcounter{dmproblemcount}{275}\dmpnum{0276}{\input{items/0276}}\vspace{8mm}
+\setcounter{dmproblemcount}{276}\dmpnum{0277}{\input{items/0277}}\vspace{8mm}
 \dmsection{유형 04 현의 수직이등분선 (4)}
-\setcounter{dmproblemcount}{277}\dmpnum{0278}{\input{items/0278}}\vspace{4mm}
-\setcounter{dmproblemcount}{278}\dmpnum{0279}{\input{items/0279}}\vspace{4mm}
-\setcounter{dmproblemcount}{279}\dmpnum{0280}{\input{items/0280}}\vspace{4mm}
+\setcounter{dmproblemcount}{277}\dmpnum{0278}{\input{items/0278}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{278}\dmpnum{0279}{\input{items/0279}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{279}\dmpnum{0280}{\input{items/0280}}\vspace{8mm}
 \dmsection{유형 05 현의 길이 (1)}
-\setcounter{dmproblemcount}{280}\dmpnum{0281}{\input{items/0281}}\vspace{4mm}
-\setcounter{dmproblemcount}{281}\dmpnum{0282}{\input{items/0282}}\vspace{4mm}
-\setcounter{dmproblemcount}{282}\dmpnum{0283}{\input{items/0283}}\vspace{4mm}
-\setcounter{dmproblemcount}{283}\dmpnum{0284}{\input{items/0284}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{280}\dmpnum{0281}{\input{items/0281}}\vspace{8mm}
+\setcounter{dmproblemcount}{281}\dmpnum{0282}{\input{items/0282}}\vspace{8mm}
+\setcounter{dmproblemcount}{282}\dmpnum{0283}{\input{items/0283}}\vspace{8mm}
+\setcounter{dmproblemcount}{283}\dmpnum{0284}{\input{items/0284}}\vspace{8mm}
 \dmsection{유형 06 현의 길이 (2) - 삼각형이 주어진 경우}
-\setcounter{dmproblemcount}{284}\dmpnum{0285}{\input{items/0285}}\vspace{4mm}
-\setcounter{dmproblemcount}{285}\dmpnum{0286}{\input{items/0286}}\vspace{4mm}
-\setcounter{dmproblemcount}{286}\dmpnum{0287}{\input{items/0287}}\vspace{4mm}
-\setcounter{dmproblemcount}{287}\dmpnum{0288}{\input{items/0288}}\vspace{4mm}
+\setcounter{dmproblemcount}{284}\dmpnum{0285}{\input{items/0285}}\vspace{8mm}
+\setcounter{dmproblemcount}{285}\dmpnum{0286}{\input{items/0286}}\vspace{8mm}
+\setcounter{dmproblemcount}{286}\dmpnum{0287}{\input{items/0287}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{287}\dmpnum{0288}{\input{items/0288}}\vspace{8mm}
 \dmsection{유형 07 원의 접선의 길이 (1)}
-\setcounter{dmproblemcount}{288}\dmpnum{0289}{\input{items/0289}}\vspace{4mm}
-\setcounter{dmproblemcount}{289}\dmpnum{0290}{\input{items/0290}}\vspace{4mm}
-\setcounter{dmproblemcount}{290}\dmpnum{0291}{\input{items/0291}}\vspace{4mm}
+\setcounter{dmproblemcount}{288}\dmpnum{0289}{\input{items/0289}}\vspace{8mm}
+\setcounter{dmproblemcount}{289}\dmpnum{0290}{\input{items/0290}}\vspace{8mm}
+\setcounter{dmproblemcount}{290}\dmpnum{0291}{\input{items/0291}}\vspace{8mm}
 \dmsection{유형 08 원의 접선의 길이 (2)}
-\setcounter{dmproblemcount}{291}\dmpnum{0292}{\input{items/0292}}\vspace{4mm}
-\setcounter{dmproblemcount}{292}\dmpnum{0293}{\input{items/0293}}\vspace{4mm}
-\setcounter{dmproblemcount}{293}\dmpnum{0294}{\input{items/0294}}\vspace{4mm}
-\setcounter{dmproblemcount}{294}\dmpnum{0295}{\input{items/0295}}\vspace{4mm}
+\setcounter{dmproblemcount}{291}\dmpnum{0292}{\input{items/0292}}\vspace{8mm}
+\setcounter{dmproblemcount}{292}\dmpnum{0293}{\input{items/0293}}\vspace{8mm}
+\setcounter{dmproblemcount}{293}\dmpnum{0294}{\input{items/0294}}\vspace{8mm}
+\setcounter{dmproblemcount}{294}\dmpnum{0295}{\input{items/0295}}\vspace{8mm}
 \dmsection{유형 09 원의 접선의 길이 (3)}
-\setcounter{dmproblemcount}{295}\dmpnum{0296}{\input{items/0296}}\vspace{4mm}
-\setcounter{dmproblemcount}{296}\dmpnum{0297}{\input{items/0297}}\vspace{4mm}
-\setcounter{dmproblemcount}{297}\dmpnum{0298}{\input{items/0298}}\vspace{4mm}
+\setcounter{dmproblemcount}{295}\dmpnum{0296}{\input{items/0296}}\vspace{8mm}
+\setcounter{dmproblemcount}{296}\dmpnum{0297}{\input{items/0297}}\vspace{8mm}
+\setcounter{dmproblemcount}{297}\dmpnum{0298}{\input{items/0298}}\vspace{8mm}
 \dmsection{유형 10 원의 접선의 성질의 응용}
-\setcounter{dmproblemcount}{298}\dmpnum{0299}{\input{items/0299}}\vspace{4mm}
-\setcounter{dmproblemcount}{299}\dmpnum{0300}{\input{items/0300}}\vspace{4mm}
-\setcounter{dmproblemcount}{300}\dmpnum{0301}{\input{items/0301}}\vspace{4mm}
-\setcounter{dmproblemcount}{301}\dmpnum{0302}{\input{items/0302}}\vspace{4mm}
-\setcounter{dmproblemcount}{302}\dmpnum{0303}{\input{items/0303}}\vspace{4mm}
-\setcounter{dmproblemcount}{303}\dmpnum{0304}{\input{items/0304}}\vspace{4mm}
+\setcounter{dmproblemcount}{298}\dmpnum{0299}{\input{items/0299}}\vspace{8mm}
+\setcounter{dmproblemcount}{299}\dmpnum{0300}{\input{items/0300}}\vspace{8mm}
+\setcounter{dmproblemcount}{300}\dmpnum{0301}{\input{items/0301}}\vspace{8mm}
+\setcounter{dmproblemcount}{301}\dmpnum{0302}{\input{items/0302}}\vspace{8mm}
+\setcounter{dmproblemcount}{302}\dmpnum{0303}{\input{items/0303}}\vspace{8mm}
+\setcounter{dmproblemcount}{303}\dmpnum{0304}{\input{items/0304}}\vspace{8mm}
 \dmsection{유형 11 반원에서의 접선}
-\setcounter{dmproblemcount}{304}\dmpnum{0305}{\input{items/0305}}\vspace{4mm}
-\setcounter{dmproblemcount}{305}\dmpnum{0306}{\input{items/0306}}\vspace{4mm}
-\setcounter{dmproblemcount}{306}\dmpnum{0307}{\input{items/0307}}\vspace{4mm}
-\setcounter{dmproblemcount}{307}\dmpnum{0308}{\input{items/0308}}\vspace{4mm}
+\setcounter{dmproblemcount}{304}\dmpnum{0305}{\input{items/0305}}\vspace{8mm}
+\setcounter{dmproblemcount}{305}\dmpnum{0306}{\input{items/0306}}\vspace{8mm}
+\setcounter{dmproblemcount}{306}\dmpnum{0307}{\input{items/0307}}\vspace{8mm}
+\setcounter{dmproblemcount}{307}\dmpnum{0308}{\input{items/0308}}\vspace{8mm}
 \dmsection{유형 12 동심원에서의 접선의 활용}
-\setcounter{dmproblemcount}{308}\dmpnum{0309}{\input{items/0309}}\vspace{4mm}
-\setcounter{dmproblemcount}{309}\dmpnum{0310}{\input{items/0310}}\vspace{4mm}
-\setcounter{dmproblemcount}{310}\dmpnum{0311}{\input{items/0311}}\vspace{4mm}
+\setcounter{dmproblemcount}{308}\dmpnum{0309}{\input{items/0309}}\vspace{8mm}
+\setcounter{dmproblemcount}{309}\dmpnum{0310}{\input{items/0310}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{310}\dmpnum{0311}{\input{items/0311}}\vspace{8mm}
 \dmsection{유형 13 삼각형의 내접원}
-\setcounter{dmproblemcount}{311}\dmpnum{0312}{\input{items/0312}}\vspace{4mm}
-\setcounter{dmproblemcount}{312}\dmpnum{0313}{\input{items/0313}}\vspace{4mm}
-\setcounter{dmproblemcount}{313}\dmpnum{0314}{\input{items/0314}}\vspace{4mm}
-\setcounter{dmproblemcount}{314}\dmpnum{0315}{\input{items/0315}}\vspace{4mm}
+\setcounter{dmproblemcount}{311}\dmpnum{0312}{\input{items/0312}}\vspace{8mm}
+\setcounter{dmproblemcount}{312}\dmpnum{0313}{\input{items/0313}}\vspace{8mm}
+\setcounter{dmproblemcount}{313}\dmpnum{0314}{\input{items/0314}}\vspace{8mm}
+\setcounter{dmproblemcount}{314}\dmpnum{0315}{\input{items/0315}}\vspace{8mm}
 \dmsection{유형 14 직각삼각형의 내접원}
-\setcounter{dmproblemcount}{315}\dmpnum{0316}{\input{items/0316}}\vspace{4mm}
-\setcounter{dmproblemcount}{316}\dmpnum{0317}{\input{items/0317}}\vspace{4mm}
-\setcounter{dmproblemcount}{317}\dmpnum{0318}{\input{items/0318}}\vspace{4mm}
-\setcounter{dmproblemcount}{318}\dmpnum{0319}{\input{items/0319}}\vspace{4mm}
+\setcounter{dmproblemcount}{315}\dmpnum{0316}{\input{items/0316}}\vspace{8mm}
+\setcounter{dmproblemcount}{316}\dmpnum{0317}{\input{items/0317}}\vspace{8mm}
+\setcounter{dmproblemcount}{317}\dmpnum{0318}{\input{items/0318}}\vspace{8mm}
+\setcounter{dmproblemcount}{318}\dmpnum{0319}{\input{items/0319}}\vspace{8mm}
 \dmsection{유형 15 원에 외접하는 사각형의 성질 (1)}
-\setcounter{dmproblemcount}{319}\dmpnum{0320}{\input{items/0320}}\vspace{4mm}
-\setcounter{dmproblemcount}{320}\dmpnum{0321}{\input{items/0321}}\vspace{4mm}
-\setcounter{dmproblemcount}{321}\dmpnum{0322}{\input{items/0322}}\vspace{4mm}
-\setcounter{dmproblemcount}{322}\dmpnum{0323}{\input{items/0323}}\vspace{4mm}
-\setcounter{dmproblemcount}{323}\dmpnum{0324}{\input{items/0324}}\vspace{4mm}
-\setcounter{dmproblemcount}{324}\dmpnum{0325}{\input{items/0325}}\vspace{4mm}
+\setcounter{dmproblemcount}{319}\dmpnum{0320}{\input{items/0320}}\vspace{8mm}
+\setcounter{dmproblemcount}{320}\dmpnum{0321}{\input{items/0321}}\vspace{8mm}
+\setcounter{dmproblemcount}{321}\dmpnum{0322}{\input{items/0322}}\vspace{8mm}
+\setcounter{dmproblemcount}{322}\dmpnum{0323}{\input{items/0323}}\vspace{8mm}
+\setcounter{dmproblemcount}{323}\dmpnum{0324}{\input{items/0324}}\vspace{8mm}
+\setcounter{dmproblemcount}{324}\dmpnum{0325}{\input{items/0325}}\vspace{8mm}
 \dmsection{유형 16 원에 외접하는 사각형의 성질 (2)}
-\setcounter{dmproblemcount}{325}\dmpnum{0326}{\input{items/0326}}\vspace{4mm}
-\setcounter{dmproblemcount}{326}\dmpnum{0327}{\input{items/0327}}\vspace{4mm}
-\setcounter{dmproblemcount}{327}\dmpnum{0328}{\input{items/0328}}\vspace{4mm}
+\setcounter{dmproblemcount}{325}\dmpnum{0326}{\input{items/0326}}\vspace{8mm}
+\setcounter{dmproblemcount}{326}\dmpnum{0327}{\input{items/0327}}\vspace{8mm}
+\setcounter{dmproblemcount}{327}\dmpnum{0328}{\input{items/0328}}\vspace{8mm}
 \dmsection{유형 17 원에 외접하는 사각형의 성질의 활용}
-\setcounter{dmproblemcount}{328}\dmpnum{0329}{\input{items/0329}}\vspace{4mm}
-\setcounter{dmproblemcount}{329}\dmpnum{0330}{\input{items/0330}}\vspace{4mm}
-\setcounter{dmproblemcount}{330}\dmpnum{0331}{\input{items/0331}}\vspace{4mm}
+\setcounter{dmproblemcount}{328}\dmpnum{0329}{\input{items/0329}}\vspace{8mm}
+\setcounter{dmproblemcount}{329}\dmpnum{0330}{\input{items/0330}}\vspace{8mm}
+\setcounter{dmproblemcount}{330}\dmpnum{0331}{\input{items/0331}}\vspace{8mm}
 \dmsection{유형 18 접하는 원에서의 응용}
-\setcounter{dmproblemcount}{331}\dmpnum{0332}{\input{items/0332}}\vspace{4mm}
-\setcounter{dmproblemcount}{332}\dmpnum{0333}{\input{items/0333}}\vspace{4mm}
-\setcounter{dmproblemcount}{333}\dmpnum{0334}{\input{items/0334}}\vspace{4mm}
+\setcounter{dmproblemcount}{331}\dmpnum{0332}{\input{items/0332}}\vspace{8mm}
+\setcounter{dmproblemcount}{332}\dmpnum{0333}{\input{items/0333}}\vspace{8mm}
+\setcounter{dmproblemcount}{333}\dmpnum{0334}{\input{items/0334}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{334}\dmpnum{0335}{\input{items/0335}}\vspace{4mm}
-\setcounter{dmproblemcount}{335}\dmpnum{0336}{\input{items/0336}}\vspace{4mm}
-\setcounter{dmproblemcount}{336}\dmpnum{0337}{\input{items/0337}}\vspace{4mm}
-\setcounter{dmproblemcount}{337}\dmpnum{0338}{\input{items/0338}}\vspace{4mm}
-\setcounter{dmproblemcount}{338}\dmpnum{0339}{\input{items/0339}}\vspace{4mm}
-\setcounter{dmproblemcount}{339}\dmpnum{0340}{\input{items/0340}}\vspace{4mm}
-\setcounter{dmproblemcount}{340}\dmpnum{0341}{\input{items/0341}}\vspace{4mm}
-\setcounter{dmproblemcount}{341}\dmpnum{0342}{\input{items/0342}}\vspace{4mm}
-\setcounter{dmproblemcount}{342}\dmpnum{0343}{\input{items/0343}}\vspace{4mm}
-\setcounter{dmproblemcount}{343}\dmpnum{0344}{\input{items/0344}}\vspace{4mm}
-\setcounter{dmproblemcount}{344}\dmpnum{0345}{\input{items/0345}}\vspace{4mm}
-\setcounter{dmproblemcount}{345}\dmpnum{0346}{\input{items/0346}}\vspace{4mm}
-\setcounter{dmproblemcount}{346}\dmpnum{0347}{\input{items/0347}}\vspace{4mm}
-\setcounter{dmproblemcount}{347}\dmpnum{0348}{\input{items/0348}}\vspace{4mm}
-\setcounter{dmproblemcount}{348}\dmpnum{0349}{\input{items/0349}}\vspace{4mm}
-\setcounter{dmproblemcount}{349}\dmpnum{0350}{\input{items/0350}}\vspace{4mm}
-\setcounter{dmproblemcount}{350}\dmpnum{0351}{\input{items/0351}}\vspace{4mm}
-\setcounter{dmproblemcount}{351}\dmpnum{0352}{\input{items/0352}}\vspace{4mm}
-\setcounter{dmproblemcount}{352}\dmpnum{0353}{\input{items/0353}}\vspace{4mm}
+\setcounter{dmproblemcount}{334}\dmpnum{0335}{\input{items/0335}}\vspace{8mm}
+\setcounter{dmproblemcount}{335}\dmpnum{0336}{\input{items/0336}}\vspace{8mm}
+\setcounter{dmproblemcount}{336}\dmpnum{0337}{\input{items/0337}}\vspace{8mm}
+\setcounter{dmproblemcount}{337}\dmpnum{0338}{\input{items/0338}}\vspace{8mm}
+\setcounter{dmproblemcount}{338}\dmpnum{0339}{\input{items/0339}}\vspace{8mm}
+\setcounter{dmproblemcount}{339}\dmpnum{0340}{\input{items/0340}}\vspace{8mm}
+\setcounter{dmproblemcount}{340}\dmpnum{0341}{\input{items/0341}}\vspace{8mm}
+\setcounter{dmproblemcount}{341}\dmpnum{0342}{\input{items/0342}}\vspace{8mm}
+\setcounter{dmproblemcount}{342}\dmpnum{0343}{\input{items/0343}}\vspace{8mm}
+\setcounter{dmproblemcount}{343}\dmpnum{0344}{\input{items/0344}}\vspace{8mm}
+\setcounter{dmproblemcount}{344}\dmpnum{0345}{\input{items/0345}}\vspace{8mm}
+\setcounter{dmproblemcount}{345}\dmpnum{0346}{\input{items/0346}}\vspace{8mm}
+\setcounter{dmproblemcount}{346}\dmpnum{0347}{\input{items/0347}}\vspace{8mm}
+\setcounter{dmproblemcount}{347}\dmpnum{0348}{\input{items/0348}}\vspace{8mm}
+\setcounter{dmproblemcount}{348}\dmpnum{0349}{\input{items/0349}}\vspace{8mm}
+\setcounter{dmproblemcount}{349}\dmpnum{0350}{\input{items/0350}}\vspace{8mm}
+\setcounter{dmproblemcount}{350}\dmpnum{0351}{\input{items/0351}}\vspace{8mm}
+\setcounter{dmproblemcount}{351}\dmpnum{0352}{\input{items/0352}}\vspace{8mm}
+\setcounter{dmproblemcount}{352}\dmpnum{0353}{\input{items/0353}}\vspace{8mm}
 \dmsection{서술형 주관식}
-\setcounter{dmproblemcount}{353}\dmpnum{0354}{\input{items/0354}}\vspace{4mm}
-\setcounter{dmproblemcount}{354}\dmpnum{0355}{\input{items/0355}}\vspace{4mm}
-\setcounter{dmproblemcount}{355}\dmpnum{0356}{\input{items/0356}}\vspace{4mm}
-\setcounter{dmproblemcount}{356}\dmpnum{0357}{\input{items/0357}}\vspace{4mm}
+\setcounter{dmproblemcount}{353}\dmpnum{0354}{\input{items/0354}}\vspace{8mm}
+\setcounter{dmproblemcount}{354}\dmpnum{0355}{\input{items/0355}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{355}\dmpnum{0356}{\input{items/0356}}\vspace{8mm}
+\setcounter{dmproblemcount}{356}\dmpnum{0357}{\input{items/0357}}\vspace{8mm}
 \dmsection{실력 UP}
-\setcounter{dmproblemcount}{357}\dmpnum{0358}{\input{items/0358}}\vspace{4mm}
-\setcounter{dmproblemcount}{358}\dmpnum{0359}{\input{items/0359}}\vspace{4mm}
-\setcounter{dmproblemcount}{359}\dmpnum{0360}{\input{items/0360}}\vspace{4mm}
+\setcounter{dmproblemcount}{357}\dmpnum{0358}{\input{items/0358}}\vspace{8mm}
+\setcounter{dmproblemcount}{358}\dmpnum{0359}{\input{items/0359}}\vspace{8mm}
+\setcounter{dmproblemcount}{359}\dmpnum{0360}{\input{items/0360}}\vspace{8mm}
 \vspace*{0pt plus 1filll}
 \clearpage
 \renewcommand{\dmchapunit}{04 원주각}
@@ -504,203 +555,203 @@
 \setcounter{dmproblemcount}{0}
 \dmsection{교과서 04-1 원주각과 중심각}
 \dmpassage{다음 그림에서 $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{360}\dmpnum{0361}{\input{items/0361}}\vspace{4mm}
-\setcounter{dmproblemcount}{361}\dmpnum{0362}{\input{items/0362}}\vspace{4mm}
-\setcounter{dmproblemcount}{362}\dmpnum{0363}{\input{items/0363}}\vspace{4mm}
-\setcounter{dmproblemcount}{363}\dmpnum{0364}{\input{items/0364}}\vspace{4mm}
+\setcounter{dmproblemcount}{360}\dmpnum{0361}{\input{items/0361}}\vspace{8mm}
+\setcounter{dmproblemcount}{361}\dmpnum{0362}{\input{items/0362}}\vspace{8mm}
+\setcounter{dmproblemcount}{362}\dmpnum{0363}{\input{items/0363}}\vspace{8mm}
+\setcounter{dmproblemcount}{363}\dmpnum{0364}{\input{items/0364}}\vspace{8mm}
 \dmsection{교과서 04-2 원주각의 성질}
 \dmpassage{다음 그림에서 $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{364}\dmpnum{0365}{\input{items/0365}}\vspace{4mm}
-\setcounter{dmproblemcount}{365}\dmpnum{0366}{\input{items/0366}}\vspace{4mm}
-\setcounter{dmproblemcount}{366}\dmpnum{0367}{\input{items/0367}}\vspace{4mm}
-\setcounter{dmproblemcount}{367}\dmpnum{0368}{\input{items/0368}}\vspace{4mm}
+\setcounter{dmproblemcount}{364}\dmpnum{0365}{\input{items/0365}}\vspace{8mm}
+\setcounter{dmproblemcount}{365}\dmpnum{0366}{\input{items/0366}}\vspace{8mm}
+\setcounter{dmproblemcount}{366}\dmpnum{0367}{\input{items/0367}}\vspace{8mm}
+\setcounter{dmproblemcount}{367}\dmpnum{0368}{\input{items/0368}}\vspace{8mm}
 \dmsection{교과서 04-3 원주각의 크기와 호의 길이}
 \dmpassage{다음 그림에서 $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{368}\dmpnum{0369}{\input{items/0369}}\vspace{4mm}
-\setcounter{dmproblemcount}{369}\dmpnum{0370}{\input{items/0370}}\vspace{4mm}
-\setcounter{dmproblemcount}{370}\dmpnum{0371}{\input{items/0371}}\vspace{4mm}
-\setcounter{dmproblemcount}{371}\dmpnum{0372}{\input{items/0372}}\vspace{4mm}
-\setcounter{dmproblemcount}{372}\dmpnum{0373}{\input{items/0373}}\vspace{4mm}
-\setcounter{dmproblemcount}{373}\dmpnum{0374}{\input{items/0374}}\vspace{4mm}
+\setcounter{dmproblemcount}{368}\dmpnum{0369}{\input{items/0369}}\vspace{8mm}
+\setcounter{dmproblemcount}{369}\dmpnum{0370}{\input{items/0370}}\vspace{8mm}
+\setcounter{dmproblemcount}{370}\dmpnum{0371}{\input{items/0371}}\vspace{8mm}
+\setcounter{dmproblemcount}{371}\dmpnum{0372}{\input{items/0372}}\vspace{8mm}
+\setcounter{dmproblemcount}{372}\dmpnum{0373}{\input{items/0373}}\vspace{8mm}
+\setcounter{dmproblemcount}{373}\dmpnum{0374}{\input{items/0374}}\vspace{8mm}
 \dmsection{교과서 04-4 네 점이 한 원 위에 있을 조건}
 \dmpassage{다음 그림에서 네 점~$\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$가 한 원 위에 있을 때, $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{374}\dmpnum{0375}{\input{items/0375}}\vspace{4mm}
-\setcounter{dmproblemcount}{375}\dmpnum{0376}{\input{items/0376}}\vspace{4mm}
-\setcounter{dmproblemcount}{376}\dmpnum{0377}{\input{items/0377}}\vspace{4mm}
-\setcounter{dmproblemcount}{377}\dmpnum{0378}{\input{items/0378}}\vspace{4mm}
+\setcounter{dmproblemcount}{374}\dmpnum{0375}{\input{items/0375}}\vspace{8mm}
+\setcounter{dmproblemcount}{375}\dmpnum{0376}{\input{items/0376}}\vspace{8mm}
+\setcounter{dmproblemcount}{376}\dmpnum{0377}{\input{items/0377}}\vspace{8mm}
+\setcounter{dmproblemcount}{377}\dmpnum{0378}{\input{items/0378}}\vspace{8mm}
 \dmsection{교과서 04-5 원에 내접하는 사각형의 성질}
 \dmpassage{다음 그림에서 $\square\pt{ABCD}$가 원에 내접할 때, $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{378}\dmpnum{0379}{\input{items/0379}}\vspace{4mm}
-\setcounter{dmproblemcount}{379}\dmpnum{0380}{\input{items/0380}}\vspace{4mm}
+\setcounter{dmproblemcount}{378}\dmpnum{0379}{\input{items/0379}}\vspace{8mm}
+\setcounter{dmproblemcount}{379}\dmpnum{0380}{\input{items/0380}}\vspace{8mm}
 \dmsection{교과서 04-6 사각형이 원에 내접하기 위한 조건}
-\setcounter{dmproblemcount}{380}\dmpnum{0381}{\input{items/0381}}\vspace{4mm}
+\setcounter{dmproblemcount}{380}\dmpnum{0381}{\input{items/0381}}\vspace{8mm}
 \dmpassage{다음 그림에서 $\square\pt{ABCD}$가 원에 내접하도록 하는 $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{381}\dmpnum{0382}{\input{items/0382}}\vspace{4mm}
-\setcounter{dmproblemcount}{382}\dmpnum{0383}{\input{items/0383}}\vspace{4mm}
-\setcounter{dmproblemcount}{383}\dmpnum{0384}{\input{items/0384}}\vspace{4mm}
-\setcounter{dmproblemcount}{384}\dmpnum{0385}{\input{items/0385}}\vspace{4mm}
+\setcounter{dmproblemcount}{381}\dmpnum{0382}{\input{items/0382}}\vspace{8mm}
+\setcounter{dmproblemcount}{382}\dmpnum{0383}{\input{items/0383}}\vspace{8mm}
+\setcounter{dmproblemcount}{383}\dmpnum{0384}{\input{items/0384}}\vspace{8mm}
+\setcounter{dmproblemcount}{384}\dmpnum{0385}{\input{items/0385}}\vspace{8mm}
 \dmsection{교과서 04-7 접선과 현이 이루는 각}
 \dmpassage{다음 그림에서 직선~$\pt{TT'}$이 원의 접선이고 점~$\pt{B}$가 접점일 때, $\angle x$의 크기를 구하시오.}
-\setcounter{dmproblemcount}{385}\dmpnum{0386}{\input{items/0386}}\vspace{4mm}
-\setcounter{dmproblemcount}{386}\dmpnum{0387}{\input{items/0387}}\vspace{4mm}
-\setcounter{dmproblemcount}{387}\dmpnum{0388}{\input{items/0388}}\vspace{4mm}
-\setcounter{dmproblemcount}{388}\dmpnum{0389}{\input{items/0389}}\vspace{4mm}
-\setcounter{dmproblemcount}{389}\dmpnum{0390}{\input{items/0390}}\vspace{4mm}
-\setcounter{dmproblemcount}{390}\dmpnum{0391}{\input{items/0391}}\vspace{4mm}
+\setcounter{dmproblemcount}{385}\dmpnum{0386}{\input{items/0386}}\vspace{8mm}
+\setcounter{dmproblemcount}{386}\dmpnum{0387}{\input{items/0387}}\vspace{8mm}
+\setcounter{dmproblemcount}{387}\dmpnum{0388}{\input{items/0388}}\vspace{8mm}
+\setcounter{dmproblemcount}{388}\dmpnum{0389}{\input{items/0389}}\vspace{8mm}
+\setcounter{dmproblemcount}{389}\dmpnum{0390}{\input{items/0390}}\vspace{8mm}
+\setcounter{dmproblemcount}{390}\dmpnum{0391}{\input{items/0391}}\vspace{8mm}
 \dmpassage{다음 그림에서 직선~$\pt{PQ}$가 두 원의 공통인 접선이고 점~$\pt{T}$가 접점일 때, $\angle x$, $\angle y$의 크기를 각각 구하시오.}
-\setcounter{dmproblemcount}{391}\dmpnum{0392}{\input{items/0392}}\vspace{4mm}
-\setcounter{dmproblemcount}{392}\dmpnum{0393}{\input{items/0393}}\vspace{4mm}
-\setcounter{dmproblemcount}{393}\dmpnum{0394}{\input{items/0394}}\vspace{4mm}
+\setcounter{dmproblemcount}{391}\dmpnum{0392}{\input{items/0392}}\vspace{8mm}
+\setcounter{dmproblemcount}{392}\dmpnum{0393}{\input{items/0393}}\vspace{8mm}
+\setcounter{dmproblemcount}{393}\dmpnum{0394}{\input{items/0394}}\vspace{8mm}
 \dmsection{유형 01 원주각과 중심각의 크기}
-\setcounter{dmproblemcount}{394}\dmpnum{0395}{\input{items/0395}}\vspace{4mm}
-\setcounter{dmproblemcount}{395}\dmpnum{0396}{\input{items/0396}}\vspace{4mm}
-\setcounter{dmproblemcount}{396}\dmpnum{0397}{\input{items/0397}}\vspace{4mm}
-\setcounter{dmproblemcount}{397}\dmpnum{0398}{\input{items/0398}}\vspace{4mm}
-\setcounter{dmproblemcount}{398}\dmpnum{0399}{\input{items/0399}}\vspace{4mm}
-\setcounter{dmproblemcount}{399}\dmpnum{0400}{\input{items/0400}}\vspace{4mm}
-\setcounter{dmproblemcount}{400}\dmpnum{0401}{\input{items/0401}}\vspace{4mm}
+\setcounter{dmproblemcount}{394}\dmpnum{0395}{\input{items/0395}}\vspace{8mm}
+\setcounter{dmproblemcount}{395}\dmpnum{0396}{\input{items/0396}}\vspace{8mm}
+\setcounter{dmproblemcount}{396}\dmpnum{0397}{\input{items/0397}}\vspace{8mm}
+\setcounter{dmproblemcount}{397}\dmpnum{0398}{\input{items/0398}}\vspace{8mm}
+\setcounter{dmproblemcount}{398}\dmpnum{0399}{\input{items/0399}}\vspace{8mm}
+\setcounter{dmproblemcount}{399}\dmpnum{0400}{\input{items/0400}}\vspace{8mm}
+\setcounter{dmproblemcount}{400}\dmpnum{0401}{\input{items/0401}}\vspace{8mm}
 \dmsection{유형 02 두 접선이 주어진 경우 원주각과 중심각의 크기}
-\setcounter{dmproblemcount}{401}\dmpnum{0402}{\input{items/0402}}\vspace{4mm}
-\setcounter{dmproblemcount}{402}\dmpnum{0403}{\input{items/0403}}\vspace{4mm}
-\setcounter{dmproblemcount}{403}\dmpnum{0404}{\input{items/0404}}\vspace{4mm}
-\setcounter{dmproblemcount}{404}\dmpnum{0405}{\input{items/0405}}\vspace{4mm}
+\setcounter{dmproblemcount}{401}\dmpnum{0402}{\input{items/0402}}\vspace{8mm}
+\setcounter{dmproblemcount}{402}\dmpnum{0403}{\input{items/0403}}\vspace{8mm}
+\setcounter{dmproblemcount}{403}\dmpnum{0404}{\input{items/0404}}\vspace{8mm}
+\setcounter{dmproblemcount}{404}\dmpnum{0405}{\input{items/0405}}\vspace{8mm}
 \dmsection{유형 03 원주각의 성질}
-\setcounter{dmproblemcount}{405}\dmpnum{0406}{\input{items/0406}}\vspace{4mm}
-\setcounter{dmproblemcount}{406}\dmpnum{0407}{\input{items/0407}}\vspace{4mm}
-\setcounter{dmproblemcount}{407}\dmpnum{0408}{\input{items/0408}}\vspace{4mm}
-\setcounter{dmproblemcount}{408}\dmpnum{0409}{\input{items/0409}}\vspace{4mm}
-\setcounter{dmproblemcount}{409}\dmpnum{0410}{\input{items/0410}}\vspace{4mm}
-\setcounter{dmproblemcount}{410}\dmpnum{0411}{\input{items/0411}}\vspace{4mm}
-\setcounter{dmproblemcount}{411}\dmpnum{0412}{\input{items/0412}}\vspace{4mm}
+\setcounter{dmproblemcount}{405}\dmpnum{0406}{\input{items/0406}}\vspace{8mm}
+\setcounter{dmproblemcount}{406}\dmpnum{0407}{\input{items/0407}}\vspace{8mm}
+\setcounter{dmproblemcount}{407}\dmpnum{0408}{\input{items/0408}}\vspace{8mm}
+\setcounter{dmproblemcount}{408}\dmpnum{0409}{\input{items/0409}}\vspace{8mm}
+\setcounter{dmproblemcount}{409}\dmpnum{0410}{\input{items/0410}}\vspace{8mm}
+\setcounter{dmproblemcount}{410}\dmpnum{0411}{\input{items/0411}}\vspace{8mm}
+\setcounter{dmproblemcount}{411}\dmpnum{0412}{\input{items/0412}}\vspace{8mm}
 \dmsection{유형 04 반원에 대한 원주각의 크기}
-\setcounter{dmproblemcount}{412}\dmpnum{0413}{\input{items/0413}}\vspace{4mm}
-\setcounter{dmproblemcount}{413}\dmpnum{0414}{\input{items/0414}}\vspace{4mm}
-\setcounter{dmproblemcount}{414}\dmpnum{0415}{\input{items/0415}}\vspace{4mm}
-\setcounter{dmproblemcount}{415}\dmpnum{0416}{\input{items/0416}}\vspace{4mm}
-\setcounter{dmproblemcount}{416}\dmpnum{0417}{\input{items/0417}}\vspace{4mm}
-\setcounter{dmproblemcount}{417}\dmpnum{0418}{\input{items/0418}}\vspace{4mm}
-\setcounter{dmproblemcount}{418}\dmpnum{0419}{\input{items/0419}}\vspace{4mm}
+\setcounter{dmproblemcount}{412}\dmpnum{0413}{\input{items/0413}}\vspace{8mm}
+\setcounter{dmproblemcount}{413}\dmpnum{0414}{\input{items/0414}}\vspace{8mm}
+\setcounter{dmproblemcount}{414}\dmpnum{0415}{\input{items/0415}}\vspace{8mm}
+\setcounter{dmproblemcount}{415}\dmpnum{0416}{\input{items/0416}}\vspace{8mm}
+\setcounter{dmproblemcount}{416}\dmpnum{0417}{\input{items/0417}}\vspace{8mm}
+\setcounter{dmproblemcount}{417}\dmpnum{0418}{\input{items/0418}}\vspace{8mm}
+\setcounter{dmproblemcount}{418}\dmpnum{0419}{\input{items/0419}}\vspace{8mm}
 \dmsection{유형 05 원주각의 성질과 삼각비의 값}
-\setcounter{dmproblemcount}{419}\dmpnum{0420}{\input{items/0420}}\vspace{4mm}
-\setcounter{dmproblemcount}{420}\dmpnum{0421}{\input{items/0421}}\vspace{4mm}
-\setcounter{dmproblemcount}{421}\dmpnum{0422}{\input{items/0422}}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{419}\dmpnum{0420}{\input{items/0420}}\vspace{8mm}
+\setcounter{dmproblemcount}{420}\dmpnum{0421}{\input{items/0421}}\vspace{8mm}
+\setcounter{dmproblemcount}{421}\dmpnum{0422}{\input{items/0422}}\vspace{8mm}
 \dmsection{유형 06 원주각의 크기와 호의 길이 (1)}
-\setcounter{dmproblemcount}{422}\dmpnum{0423}{\input{items/0423}}\vspace{4mm}
-\setcounter{dmproblemcount}{423}\dmpnum{0424}{\input{items/0424}}\vspace{4mm}
-\setcounter{dmproblemcount}{424}\dmpnum{0425}{\input{items/0425}}\vspace{4mm}
-\setcounter{dmproblemcount}{425}\dmpnum{0426}{\input{items/0426}}\vspace{4mm}
-\setcounter{dmproblemcount}{426}\dmpnum{0427}{\input{items/0427}}\vspace{4mm}
-\setcounter{dmproblemcount}{427}\dmpnum{0428}{\input{items/0428}}\vspace{4mm}
-\setcounter{dmproblemcount}{428}\dmpnum{0429}{\input{items/0429}}\vspace{4mm}
+\setcounter{dmproblemcount}{422}\dmpnum{0423}{\input{items/0423}}\vspace{8mm}
+\setcounter{dmproblemcount}{423}\dmpnum{0424}{\input{items/0424}}\vspace{8mm}
+\setcounter{dmproblemcount}{424}\dmpnum{0425}{\input{items/0425}}\vspace{8mm}
+\setcounter{dmproblemcount}{425}\dmpnum{0426}{\input{items/0426}}\vspace{8mm}
+\setcounter{dmproblemcount}{426}\dmpnum{0427}{\input{items/0427}}\vspace{8mm}
+\setcounter{dmproblemcount}{427}\dmpnum{0428}{\input{items/0428}}\vspace{8mm}
+\setcounter{dmproblemcount}{428}\dmpnum{0429}{\input{items/0429}}\vspace{8mm}
 \dmsection{유형 07 원주각의 크기와 호의 길이 (2)}
-\setcounter{dmproblemcount}{429}\dmpnum{0430}{\input{items/0430}}\vspace{4mm}
-\setcounter{dmproblemcount}{430}\dmpnum{0431}{\input{items/0431}}\vspace{4mm}
-\setcounter{dmproblemcount}{431}\dmpnum{0432}{\input{items/0432}}\vspace{4mm}
-\setcounter{dmproblemcount}{432}\dmpnum{0433}{\input{items/0433}}\vspace{4mm}
+\setcounter{dmproblemcount}{429}\dmpnum{0430}{\input{items/0430}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{430}\dmpnum{0431}{\input{items/0431}}\vspace{8mm}
+\setcounter{dmproblemcount}{431}\dmpnum{0432}{\input{items/0432}}\vspace{8mm}
+\setcounter{dmproblemcount}{432}\dmpnum{0433}{\input{items/0433}}\vspace{8mm}
 \dmsection{유형 08 원주각의 크기와 호의 길이 (3)}
-\setcounter{dmproblemcount}{433}\dmpnum{0434}{\input{items/0434}}\vspace{4mm}
-\setcounter{dmproblemcount}{434}\dmpnum{0435}{\input{items/0435}}\vspace{4mm}
-\setcounter{dmproblemcount}{435}\dmpnum{0436}{\input{items/0436}}\vspace{4mm}
-\setcounter{dmproblemcount}{436}\dmpnum{0437}{\input{items/0437}}\vspace{4mm}
+\setcounter{dmproblemcount}{433}\dmpnum{0434}{\input{items/0434}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{434}\dmpnum{0435}{\input{items/0435}}\vspace{8mm}
+\setcounter{dmproblemcount}{435}\dmpnum{0436}{\input{items/0436}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{436}\dmpnum{0437}{\input{items/0437}}\vspace{8mm}
 \dmsection{유형 09 네 점이 한 원 위에 있을 조건}
-\setcounter{dmproblemcount}{437}\dmpnum{0438}{\input{items/0438}}\vspace{4mm}
-\setcounter{dmproblemcount}{438}\dmpnum{0439}{\input{items/0439}}\vspace{4mm}
-\setcounter{dmproblemcount}{439}\dmpnum{0440}{\input{items/0440}}\vspace{4mm}
-\setcounter{dmproblemcount}{440}\dmpnum{0441}{\input{items/0441}}\vspace{4mm}
+\setcounter{dmproblemcount}{437}\dmpnum{0438}{\input{items/0438}}\vspace{8mm}
+\setcounter{dmproblemcount}{438}\dmpnum{0439}{\input{items/0439}}\vspace{8mm}
+\setcounter{dmproblemcount}{439}\dmpnum{0440}{\input{items/0440}}\vspace{8mm}
+\setcounter{dmproblemcount}{440}\dmpnum{0441}{\input{items/0441}}\vspace{8mm}
 \dmsection{유형 10 원에 내접하는 사각형의 성질 (1)}
-\setcounter{dmproblemcount}{441}\dmpnum{0442}{\input{items/0442}}\vspace{4mm}
-\setcounter{dmproblemcount}{442}\dmpnum{0443}{\input{items/0443}}\vspace{4mm}
-\setcounter{dmproblemcount}{443}\dmpnum{0444}{\input{items/0444}}\vspace{4mm}
-\setcounter{dmproblemcount}{444}\dmpnum{0445}{\input{items/0445}}\vspace{4mm}
-\setcounter{dmproblemcount}{445}\dmpnum{0446}{\input{items/0446}}\vspace{4mm}
-\setcounter{dmproblemcount}{446}\dmpnum{0447}{\input{items/0447}}\vspace{4mm}
-\setcounter{dmproblemcount}{447}\dmpnum{0448}{\input{items/0448}}\vspace{4mm}
+\setcounter{dmproblemcount}{441}\dmpnum{0442}{\input{items/0442}}\vspace{8mm}
+\setcounter{dmproblemcount}{442}\dmpnum{0443}{\input{items/0443}}\vspace{8mm}
+\setcounter{dmproblemcount}{443}\dmpnum{0444}{\input{items/0444}}\vspace{8mm}
+\setcounter{dmproblemcount}{444}\dmpnum{0445}{\input{items/0445}}\vspace{8mm}
+\setcounter{dmproblemcount}{445}\dmpnum{0446}{\input{items/0446}}\vspace{8mm}
+\setcounter{dmproblemcount}{446}\dmpnum{0447}{\input{items/0447}}\vspace{8mm}
+\setcounter{dmproblemcount}{447}\dmpnum{0448}{\input{items/0448}}\vspace{8mm}
 \dmsection{유형 11 원에 내접하는 사각형의 성질 (2)}
-\setcounter{dmproblemcount}{448}\dmpnum{0449}{\input{items/0449}}\vspace{4mm}
-\setcounter{dmproblemcount}{449}\dmpnum{0450}{\input{items/0450}}\vspace{4mm}
-\setcounter{dmproblemcount}{450}\dmpnum{0451}{\input{items/0451}}\vspace{4mm}
-\setcounter{dmproblemcount}{451}\dmpnum{0452}{\input{items/0452}}\vspace{4mm}
+\setcounter{dmproblemcount}{448}\dmpnum{0449}{\input{items/0449}}\vspace{8mm}
+\setcounter{dmproblemcount}{449}\dmpnum{0450}{\input{items/0450}}\vspace{8mm}
+\setcounter{dmproblemcount}{450}\dmpnum{0451}{\input{items/0451}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{451}\dmpnum{0452}{\input{items/0452}}\vspace{8mm}
 \dmsection{유형 12 원에 내접하는 다각형}
-\setcounter{dmproblemcount}{452}\dmpnum{0453}{\input{items/0453}}\vspace{4mm}
-\setcounter{dmproblemcount}{453}\dmpnum{0454}{\input{items/0454}}\vspace{4mm}
-\setcounter{dmproblemcount}{454}\dmpnum{0455}{\input{items/0455}}\vspace{4mm}
-\setcounter{dmproblemcount}{455}\dmpnum{0456}{\input{items/0456}}\vspace{4mm}
+\setcounter{dmproblemcount}{452}\dmpnum{0453}{\input{items/0453}}\vspace{8mm}
+\setcounter{dmproblemcount}{453}\dmpnum{0454}{\input{items/0454}}\vspace{8mm}
+\setcounter{dmproblemcount}{454}\dmpnum{0455}{\input{items/0455}}\vspace{8mm}
+\setcounter{dmproblemcount}{455}\dmpnum{0456}{\input{items/0456}}\vspace{8mm}
 \dmsection{유형 13 원에 내접하는 사각형과 삼각형의 외각의 성질}
-\setcounter{dmproblemcount}{456}\dmpnum{0457}{\input{items/0457}}\vspace{4mm}
-\setcounter{dmproblemcount}{457}\dmpnum{0458}{\input{items/0458}}\vspace{4mm}
-\setcounter{dmproblemcount}{458}\dmpnum{0459}{\input{items/0459}}\vspace{4mm}
+\setcounter{dmproblemcount}{456}\dmpnum{0457}{\input{items/0457}}\vspace{8mm}
+\setcounter{dmproblemcount}{457}\dmpnum{0458}{\input{items/0458}}\vspace{8mm}
+\setcounter{dmproblemcount}{458}\dmpnum{0459}{\input{items/0459}}\vspace{8mm}
 \dmsection{유형 14 두 원에서 내접하는 사각형의 성질의 활용}
-\setcounter{dmproblemcount}{459}\dmpnum{0460}{\input{items/0460}}\vspace{4mm}
-\setcounter{dmproblemcount}{460}\dmpnum{0461}{\input{items/0461}}\vspace{4mm}
-\setcounter{dmproblemcount}{461}\dmpnum{0462}{\input{items/0462}}\vspace{4mm}
-\setcounter{dmproblemcount}{462}\dmpnum{0463}{\input{items/0463}}\vspace{4mm}
+\setcounter{dmproblemcount}{459}\dmpnum{0460}{\input{items/0460}}\vspace{8mm}
+\setcounter{dmproblemcount}{460}\dmpnum{0461}{\input{items/0461}}\vspace{8mm}
+\setcounter{dmproblemcount}{461}\dmpnum{0462}{\input{items/0462}}\vspace{8mm}
+\setcounter{dmproblemcount}{462}\dmpnum{0463}{\input{items/0463}}\vspace{8mm}
 \dmsection{유형 15 사각형이 원에 내접하기 위한 조건}
-\setcounter{dmproblemcount}{463}\dmpnum{0464}{\input{items/0464}}\vspace{4mm}
-\setcounter{dmproblemcount}{464}\dmpnum{0465}{\input{items/0465}}\vspace{4mm}
-\setcounter{dmproblemcount}{465}\dmpnum{0466}{\input{items/0466}}\vspace{4mm}
-\setcounter{dmproblemcount}{466}\dmpnum{0467}{\input{items/0467}}\vspace{4mm}
-\setcounter{dmproblemcount}{467}\dmpnum{0468}{\input{items/0468}}\vspace{4mm}
-\setcounter{dmproblemcount}{468}\dmpnum{0469}{\input{items/0469}}\vspace{4mm}
+\setcounter{dmproblemcount}{463}\dmpnum{0464}{\input{items/0464}}\vspace{8mm}
+\setcounter{dmproblemcount}{464}\dmpnum{0465}{\input{items/0465}}\vspace{8mm}
+\setcounter{dmproblemcount}{465}\dmpnum{0466}{\input{items/0466}}\vspace{8mm}
+\setcounter{dmproblemcount}{466}\dmpnum{0467}{\input{items/0467}}\vspace{8mm}
+\setcounter{dmproblemcount}{467}\dmpnum{0468}{\input{items/0468}}\vspace{8mm}
+\setcounter{dmproblemcount}{468}\dmpnum{0469}{\input{items/0469}}\vspace{8mm}
 \dmsection{유형 16 접선과 현이 이루는 각}
-\setcounter{dmproblemcount}{469}\dmpnum{0470}{\input{items/0470}}\vspace{4mm}
-\setcounter{dmproblemcount}{470}\dmpnum{0471}{\input{items/0471}}\vspace{4mm}
-\setcounter{dmproblemcount}{471}\dmpnum{0472}{\input{items/0472}}\vspace{4mm}
-\setcounter{dmproblemcount}{472}\dmpnum{0473}{\input{items/0473}}\vspace{4mm}
-\setcounter{dmproblemcount}{473}\dmpnum{0474}{\input{items/0474}}\vspace{4mm}
-\setcounter{dmproblemcount}{474}\dmpnum{0475}{\input{items/0475}}\vspace{4mm}
-\setcounter{dmproblemcount}{475}\dmpnum{0476}{\input{items/0476}}\vspace{4mm}
+\setcounter{dmproblemcount}{469}\dmpnum{0470}{\input{items/0470}}\vspace{8mm}
+\setcounter{dmproblemcount}{470}\dmpnum{0471}{\input{items/0471}}\vspace{8mm}
+\setcounter{dmproblemcount}{471}\dmpnum{0472}{\input{items/0472}}\vspace{8mm}
+\setcounter{dmproblemcount}{472}\dmpnum{0473}{\input{items/0473}}\vspace{8mm}
+\setcounter{dmproblemcount}{473}\dmpnum{0474}{\input{items/0474}}\vspace{8mm}
+\setcounter{dmproblemcount}{474}\dmpnum{0475}{\input{items/0475}}\vspace{8mm}
+\setcounter{dmproblemcount}{475}\dmpnum{0476}{\input{items/0476}}\vspace{8mm}
 \dmsection{유형 17 접선과 현이 이루는 각의 활용 – 원에 내접하는 사각형}
-\setcounter{dmproblemcount}{476}\dmpnum{0477}{\input{items/0477}}\vspace{4mm}
-\setcounter{dmproblemcount}{477}\dmpnum{0478}{\input{items/0478}}\vspace{4mm}
-\setcounter{dmproblemcount}{478}\dmpnum{0479}{\input{items/0479}}\vspace{4mm}
-\setcounter{dmproblemcount}{479}\dmpnum{0480}{\input{items/0480}}\vspace{4mm}
+\setcounter{dmproblemcount}{476}\dmpnum{0477}{\input{items/0477}}\vspace{8mm}
+\setcounter{dmproblemcount}{477}\dmpnum{0478}{\input{items/0478}}\vspace{8mm}
+\setcounter{dmproblemcount}{478}\dmpnum{0479}{\input{items/0479}}\vspace{8mm}
+\setcounter{dmproblemcount}{479}\dmpnum{0480}{\input{items/0480}}\vspace{8mm}
 \dmsection{유형 18 접선과 현이 이루는 각의 활용 – 할선이 원의 중심을 지날 때}
-\setcounter{dmproblemcount}{480}\dmpnum{0481}{\input{items/0481}}\vspace{4mm}
-\setcounter{dmproblemcount}{481}\dmpnum{0482}{\input{items/0482}}\vspace{4mm}
-\setcounter{dmproblemcount}{482}\dmpnum{0483}{\input{items/0483}}\vspace{4mm}
-\setcounter{dmproblemcount}{483}\dmpnum{0484}{\input{items/0484}}\vspace{4mm}
+\setcounter{dmproblemcount}{480}\dmpnum{0481}{\input{items/0481}}\vspace{8mm}
+\setcounter{dmproblemcount}{481}\dmpnum{0482}{\input{items/0482}}\vspace{8mm}
+\setcounter{dmproblemcount}{482}\dmpnum{0483}{\input{items/0483}}\vspace{8mm}
+\setcounter{dmproblemcount}{483}\dmpnum{0484}{\input{items/0484}}\vspace{8mm}
 \dmsection{유형 19 접선과 현이 이루는 각의 활용 – 한 점에서 원에 그은 두 접선}
-\setcounter{dmproblemcount}{484}\dmpnum{0485}{\input{items/0485}}\vspace{4mm}
-\setcounter{dmproblemcount}{485}\dmpnum{0486}{\input{items/0486}}\vspace{4mm}
-\setcounter{dmproblemcount}{486}\dmpnum{0487}{\input{items/0487}}\vspace{4mm}
-\setcounter{dmproblemcount}{487}\dmpnum{0488}{\input{items/0488}}\vspace{4mm}
+\setcounter{dmproblemcount}{484}\dmpnum{0485}{\input{items/0485}}\vspace{8mm}
+\setcounter{dmproblemcount}{485}\dmpnum{0486}{\input{items/0486}}\vspace{8mm}
+\setcounter{dmproblemcount}{486}\dmpnum{0487}{\input{items/0487}}\vspace{8mm}
+\setcounter{dmproblemcount}{487}\dmpnum{0488}{\input{items/0488}}\vspace{8mm}
 \dmsection{유형 20 두 원에서 접선과 현이 이루는 각}
-\setcounter{dmproblemcount}{488}\dmpnum{0489}{\input{items/0489}}\vspace{4mm}
-\setcounter{dmproblemcount}{489}\dmpnum{0490}{\input{items/0490}}\vspace{4mm}
-\setcounter{dmproblemcount}{490}\dmpnum{0491}{\input{items/0491}}\vspace{4mm}
-\setcounter{dmproblemcount}{491}\dmpnum{0492}{\input{items/0492}}\vspace{4mm}
-\setcounter{dmproblemcount}{492}\dmpnum{0493}{\input{items/0493}}\vspace{4mm}
-\setcounter{dmproblemcount}{493}\dmpnum{0494}{\input{items/0494}}\vspace{4mm}
+\setcounter{dmproblemcount}{488}\dmpnum{0489}{\input{items/0489}}\vspace{8mm}
+\setcounter{dmproblemcount}{489}\dmpnum{0490}{\input{items/0490}}\vspace{8mm}
+\setcounter{dmproblemcount}{490}\dmpnum{0491}{\input{items/0491}}\vspace{8mm}
+\setcounter{dmproblemcount}{491}\dmpnum{0492}{\input{items/0492}}\vspace{8mm}
+\setcounter{dmproblemcount}{492}\dmpnum{0493}{\input{items/0493}}\vspace{8mm}
+\setcounter{dmproblemcount}{493}\dmpnum{0494}{\input{items/0494}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{494}\dmpnum{0495}{\input{items/0495}}\vspace{4mm}
-\setcounter{dmproblemcount}{495}\dmpnum{0496}{\input{items/0496}}\vspace{4mm}
-\setcounter{dmproblemcount}{496}\dmpnum{0497}{\input{items/0497}}\vspace{4mm}
-\setcounter{dmproblemcount}{497}\dmpnum{0498}{\input{items/0498}}\vspace{4mm}
-\setcounter{dmproblemcount}{498}\dmpnum{0499}{\input{items/0499}}\vspace{4mm}
-\setcounter{dmproblemcount}{499}\dmpnum{0500}{\input{items/0500}}\vspace{4mm}
-\setcounter{dmproblemcount}{500}\dmpnum{0501}{\input{items/0501}}\vspace{4mm}
-\setcounter{dmproblemcount}{501}\dmpnum{0502}{\input{items/0502}}\vspace{4mm}
-\setcounter{dmproblemcount}{502}\dmpnum{0503}{\input{items/0503}}\vspace{4mm}
-\setcounter{dmproblemcount}{503}\dmpnum{0504}{\input{items/0504}}\vspace{4mm}
-\setcounter{dmproblemcount}{504}\dmpnum{0505}{\input{items/0505}}\vspace{4mm}
-\setcounter{dmproblemcount}{505}\dmpnum{0506}{\input{items/0506}}\vspace{4mm}
-\setcounter{dmproblemcount}{506}\dmpnum{0507}{\input{items/0507}}\vspace{4mm}
-\setcounter{dmproblemcount}{507}\dmpnum{0508}{\input{items/0508}}\vspace{4mm}
-\setcounter{dmproblemcount}{508}\dmpnum{0509}{\input{items/0509}}\vspace{4mm}
-\setcounter{dmproblemcount}{509}\dmpnum{0510}{\input{items/0510}}\vspace{4mm}
-\setcounter{dmproblemcount}{510}\dmpnum{0511}{\input{items/0511}}\vspace{4mm}
-\setcounter{dmproblemcount}{511}\dmpnum{0512}{\input{items/0512}}\vspace{4mm}
-\setcounter{dmproblemcount}{512}\dmpnum{0513}{\input{items/0513}}\vspace{4mm}
-\setcounter{dmproblemcount}{513}\dmpnum{0514}{\input{items/0514}}\vspace{4mm}
+\setcounter{dmproblemcount}{494}\dmpnum{0495}{\input{items/0495}}\vspace{8mm}
+\setcounter{dmproblemcount}{495}\dmpnum{0496}{\input{items/0496}}\vspace{8mm}
+\setcounter{dmproblemcount}{496}\dmpnum{0497}{\input{items/0497}}\vspace{8mm}
+\setcounter{dmproblemcount}{497}\dmpnum{0498}{\input{items/0498}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{498}\dmpnum{0499}{\input{items/0499}}\vspace{8mm}
+\setcounter{dmproblemcount}{499}\dmpnum{0500}{\input{items/0500}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{500}\dmpnum{0501}{\input{items/0501}}\vspace{8mm}
+\setcounter{dmproblemcount}{501}\dmpnum{0502}{\input{items/0502}}\vspace{8mm}
+\setcounter{dmproblemcount}{502}\dmpnum{0503}{\input{items/0503}}\vspace{8mm}
+\setcounter{dmproblemcount}{503}\dmpnum{0504}{\input{items/0504}}\vspace{8mm}
+\setcounter{dmproblemcount}{504}\dmpnum{0505}{\input{items/0505}}\vspace{8mm}
+\setcounter{dmproblemcount}{505}\dmpnum{0506}{\input{items/0506}}\vspace{8mm}
+\setcounter{dmproblemcount}{506}\dmpnum{0507}{\input{items/0507}}\vspace{8mm}
+\setcounter{dmproblemcount}{507}\dmpnum{0508}{\input{items/0508}}\vspace{8mm}
+\setcounter{dmproblemcount}{508}\dmpnum{0509}{\input{items/0509}}\vspace{8mm}
+\setcounter{dmproblemcount}{509}\dmpnum{0510}{\input{items/0510}}\vspace{8mm}
+\setcounter{dmproblemcount}{510}\dmpnum{0511}{\input{items/0511}}\vspace{8mm}
+\setcounter{dmproblemcount}{511}\dmpnum{0512}{\input{items/0512}}\vspace{8mm}
+\setcounter{dmproblemcount}{512}\dmpnum{0513}{\input{items/0513}}\vspace{8mm}
+\setcounter{dmproblemcount}{513}\dmpnum{0514}{\input{items/0514}}\vspace{8mm}
 \dmsection{서술형 주관식}
-\setcounter{dmproblemcount}{514}\dmpnum{0515}{\input{items/0515}}\vspace{4mm}
-\setcounter{dmproblemcount}{515}\dmpnum{0516}{\input{items/0516}}\vspace{4mm}
-\setcounter{dmproblemcount}{516}\dmpnum{0517}{\input{items/0517}}\vspace{4mm}
-\setcounter{dmproblemcount}{517}\dmpnum{0518}{\input{items/0518}}\vspace{4mm}
+\setcounter{dmproblemcount}{514}\dmpnum{0515}{\input{items/0515}}\vspace{8mm}
+\setcounter{dmproblemcount}{515}\dmpnum{0516}{\input{items/0516}}\vspace{8mm}
+\setcounter{dmproblemcount}{516}\dmpnum{0517}{\input{items/0517}}\vspace{8mm}
+\setcounter{dmproblemcount}{517}\dmpnum{0518}{\input{items/0518}}\vspace{8mm}
 \dmsection{실력 UP}
-\setcounter{dmproblemcount}{518}\dmpnum{0519}{\input{items/0519}}\vspace{4mm}
-\setcounter{dmproblemcount}{519}\dmpnum{0520}{\input{items/0520}}\vspace{4mm}
-\setcounter{dmproblemcount}{520}\dmpnum{0521}{\input{items/0521}}\vspace{4mm}
+\setcounter{dmproblemcount}{518}\dmpnum{0519}{\input{items/0519}}\vspace{8mm}
+\setcounter{dmproblemcount}{519}\dmpnum{0520}{\input{items/0520}}\vspace{8mm}
+\setcounter{dmproblemcount}{520}\dmpnum{0521}{\input{items/0521}}\vspace{8mm}
 \vspace*{0pt plus 1filll}
 \clearpage
 \renewcommand{\dmchapunit}{05 대푯값과 산포도}
@@ -708,167 +759,167 @@
 \setcounter{dmproblemcount}{0}
 \dmsection{교과서 05-1 대푯값}
 \dmpassage{다음 자료의 평균을 구하시오.}
-\setcounter{dmproblemcount}{521}\dmpnum{0522}{\input{items/0522}}\vspace{4mm}
-\setcounter{dmproblemcount}{522}\dmpnum{0523}{\input{items/0523}}\vspace{4mm}
-\setcounter{dmproblemcount}{523}\dmpnum{0524}{\input{items/0524}}\vspace{4mm}
+\setcounter{dmproblemcount}{521}\dmpnum{0522}{\input{items/0522}}\vspace{8mm}
+\setcounter{dmproblemcount}{522}\dmpnum{0523}{\input{items/0523}}\vspace{8mm}
+\setcounter{dmproblemcount}{523}\dmpnum{0524}{\input{items/0524}}\vspace{8mm}
 \dmpassage{다음 자료의 중앙값을 구하시오.}
-\setcounter{dmproblemcount}{524}\dmpnum{0525}{\input{items/0525}}\vspace{4mm}
-\setcounter{dmproblemcount}{525}\dmpnum{0526}{\input{items/0526}}\vspace{4mm}
-\setcounter{dmproblemcount}{526}\dmpnum{0527}{\input{items/0527}}\vspace{4mm}
-\setcounter{dmproblemcount}{527}\dmpnum{0528}{\input{items/0528}}\vspace{4mm}
+\setcounter{dmproblemcount}{524}\dmpnum{0525}{\input{items/0525}}\vspace{8mm}
+\setcounter{dmproblemcount}{525}\dmpnum{0526}{\input{items/0526}}\vspace{8mm}
+\setcounter{dmproblemcount}{526}\dmpnum{0527}{\input{items/0527}}\vspace{8mm}
+\setcounter{dmproblemcount}{527}\dmpnum{0528}{\input{items/0528}}\vspace{8mm}
 \dmpassage{다음 자료의 최빈값을 구하시오.}
-\setcounter{dmproblemcount}{528}\dmpnum{0529}{\input{items/0529}}\vspace{4mm}
-\setcounter{dmproblemcount}{529}\dmpnum{0530}{\input{items/0530}}\vspace{4mm}
-\setcounter{dmproblemcount}{530}\dmpnum{0531}{\input{items/0531}}\vspace{4mm}
-\setcounter{dmproblemcount}{531}\dmpnum{0532}{\input{items/0532}}\vspace{4mm}
-\setcounter{dmproblemcount}{532}\dmpnum{0533}{\input{items/0533}}\vspace{4mm}
+\setcounter{dmproblemcount}{528}\dmpnum{0529}{\input{items/0529}}\vspace{8mm}
+\setcounter{dmproblemcount}{529}\dmpnum{0530}{\input{items/0530}}\vspace{8mm}
+\setcounter{dmproblemcount}{530}\dmpnum{0531}{\input{items/0531}}\vspace{8mm}
+\setcounter{dmproblemcount}{531}\dmpnum{0532}{\input{items/0532}}\vspace{8mm}
+\setcounter{dmproblemcount}{532}\dmpnum{0533}{\input{items/0533}}\vspace{8mm}
 \dmsection{교과서 05-2 산포도와 표준편차}
 \dmpassage{어떤 자료의 편차가 다음과 같을 때, $x$의 값을 구하시오.}
-\setcounter{dmproblemcount}{533}\dmpnum{0534}{\input{items/0534}}\vspace{4mm}
-\setcounter{dmproblemcount}{534}\dmpnum{0535}{\input{items/0535}}\vspace{4mm}
-\setcounter{dmproblemcount}{535}\dmpnum{0536}{\input{items/0536}}\vspace{4mm}
-\setcounter{dmproblemcount}{536}\dmpnum{0537}{\input{items/0537}}\vspace{4mm}
-\setcounter{dmproblemcount}{537}\dmpnum{0538}{\input{items/0538}}\vspace{4mm}
+\setcounter{dmproblemcount}{533}\dmpnum{0534}{\input{items/0534}}\vspace{8mm}
+\setcounter{dmproblemcount}{534}\dmpnum{0535}{\input{items/0535}}\vspace{8mm}
+\setcounter{dmproblemcount}{535}\dmpnum{0536}{\input{items/0536}}\vspace{8mm}
+\setcounter{dmproblemcount}{536}\dmpnum{0537}{\input{items/0537}}\vspace{8mm}
+\setcounter{dmproblemcount}{537}\dmpnum{0538}{\input{items/0538}}\vspace{8mm}
 \dmsection{유형 01 평균}
-\setcounter{dmproblemcount}{538}\dmpnum{0539}{\input{items/0539}}\vspace{4mm}
-\setcounter{dmproblemcount}{539}\dmpnum{0540}{\input{items/0540}}\vspace{4mm}
-\setcounter{dmproblemcount}{540}\dmpnum{0541}{\input{items/0541}}\vspace{4mm}
+\setcounter{dmproblemcount}{538}\dmpnum{0539}{\input{items/0539}}\vspace{8mm}
+\setcounter{dmproblemcount}{539}\dmpnum{0540}{\input{items/0540}}\vspace{8mm}
+\setcounter{dmproblemcount}{540}\dmpnum{0541}{\input{items/0541}}\vspace{8mm}
 \dmsection{유형 02 중앙값}
-\setcounter{dmproblemcount}{541}\dmpnum{0542}{\input{items/0542}}\vspace{4mm}
-\setcounter{dmproblemcount}{542}\dmpnum{0543}{\input{items/0543}}\vspace{4mm}
-\setcounter{dmproblemcount}{543}\dmpnum{0544}{\input{items/0544}}\vspace{4mm}
+\setcounter{dmproblemcount}{541}\dmpnum{0542}{\input{items/0542}}\vspace{8mm}
+\setcounter{dmproblemcount}{542}\dmpnum{0543}{\input{items/0543}}\vspace{8mm}
+\setcounter{dmproblemcount}{543}\dmpnum{0544}{\input{items/0544}}\vspace{8mm}
 \dmsection{유형 03 최빈값}
-\setcounter{dmproblemcount}{544}\dmpnum{0545}{\input{items/0545}}\vspace{4mm}
-\setcounter{dmproblemcount}{545}\dmpnum{0546}{\input{items/0546}}\vspace{4mm}
-\setcounter{dmproblemcount}{546}\dmpnum{0547}{\input{items/0547}}\vspace{4mm}
+\setcounter{dmproblemcount}{544}\dmpnum{0545}{\input{items/0545}}\vspace{8mm}
+\setcounter{dmproblemcount}{545}\dmpnum{0546}{\input{items/0546}}\vspace{8mm}
+\setcounter{dmproblemcount}{546}\dmpnum{0547}{\input{items/0547}}\vspace{8mm}
 \dmsection{유형 04 여러 가지 자료에서 대푯값 구하기}
-\setcounter{dmproblemcount}{547}\dmpnum{0548}{\input{items/0548}}\vspace{4mm}
-\setcounter{dmproblemcount}{548}\dmpnum{0549}{\input{items/0549}}\vspace{4mm}
-\setcounter{dmproblemcount}{549}\dmpnum{0550}{\input{items/0550}}\vspace{4mm}
+\setcounter{dmproblemcount}{547}\dmpnum{0548}{\input{items/0548}}\vspace{8mm}
+\setcounter{dmproblemcount}{548}\dmpnum{0549}{\input{items/0549}}\vspace{8mm}
+\setcounter{dmproblemcount}{549}\dmpnum{0550}{\input{items/0550}}\vspace{8mm}
 \dmsection{유형 05 대푯값이 주어졌을 때, 변량 구하기}
-\setcounter{dmproblemcount}{550}\dmpnum{0551}{\input{items/0551}}\vspace{4mm}
-\setcounter{dmproblemcount}{551}\dmpnum{0552}{\input{items/0552}}\vspace{4mm}
-\setcounter{dmproblemcount}{552}\dmpnum{0553}{\input{items/0553}}\vspace{4mm}
-\setcounter{dmproblemcount}{553}\dmpnum{0554}{\input{items/0554}}\vspace{4mm}
-\setcounter{dmproblemcount}{554}\dmpnum{0555}{\input{items/0555}}\vspace{4mm}
-\setcounter{dmproblemcount}{555}\dmpnum{0556}{\input{items/0556}}\vspace{4mm}
-\setcounter{dmproblemcount}{556}\dmpnum{0557}{\input{items/0557}}\vspace{4mm}
+\setcounter{dmproblemcount}{550}\dmpnum{0551}{\input{items/0551}}\vspace{8mm}
+\setcounter{dmproblemcount}{551}\dmpnum{0552}{\input{items/0552}}\vspace{8mm}
+\setcounter{dmproblemcount}{552}\dmpnum{0553}{\input{items/0553}}\vspace{8mm}
+\setcounter{dmproblemcount}{553}\dmpnum{0554}{\input{items/0554}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{554}\dmpnum{0555}{\input{items/0555}}\vspace{8mm}
+\setcounter{dmproblemcount}{555}\dmpnum{0556}{\input{items/0556}}\vspace{8mm}
+\setcounter{dmproblemcount}{556}\dmpnum{0557}{\input{items/0557}}\vspace{8mm}
 \dmsection{유형 06 편차}
-\setcounter{dmproblemcount}{557}\dmpnum{0558}{\input{items/0558}}\vspace{4mm}
-\setcounter{dmproblemcount}{558}\dmpnum{0559}{\input{items/0559}}\vspace{4mm}
-\setcounter{dmproblemcount}{559}\dmpnum{0560}{\input{items/0560}}\vspace{4mm}
+\setcounter{dmproblemcount}{557}\dmpnum{0558}{\input{items/0558}}\vspace{8mm}
+\setcounter{dmproblemcount}{558}\dmpnum{0559}{\input{items/0559}}\vspace{8mm}
+\setcounter{dmproblemcount}{559}\dmpnum{0560}{\input{items/0560}}\vspace{8mm}
 \dmsection{유형 07 분산과 표준편차}
-\setcounter{dmproblemcount}{560}\dmpnum{0561}{\input{items/0561}}\vspace{4mm}
-\setcounter{dmproblemcount}{561}\dmpnum{0562}{\input{items/0562}}\vspace{4mm}
-\setcounter{dmproblemcount}{562}\dmpnum{0563}{\input{items/0563}}\vspace{4mm}
-\setcounter{dmproblemcount}{563}\dmpnum{0564}{\input{items/0564}}\vspace{4mm}
-\setcounter{dmproblemcount}{564}\dmpnum{0565}{\input{items/0565}}\vspace{4mm}
-\setcounter{dmproblemcount}{565}\dmpnum{0566}{\input{items/0566}}\vspace{4mm}
+\setcounter{dmproblemcount}{560}\dmpnum{0561}{\input{items/0561}}\vspace{8mm}
+\setcounter{dmproblemcount}{561}\dmpnum{0562}{\input{items/0562}}\vspace{8mm}
+\setcounter{dmproblemcount}{562}\dmpnum{0563}{\input{items/0563}}\vspace{8mm}
+\setcounter{dmproblemcount}{563}\dmpnum{0564}{\input{items/0564}}\vspace{8mm}
+\setcounter{dmproblemcount}{564}\dmpnum{0565}{\input{items/0565}}\vspace{8mm}
+\setcounter{dmproblemcount}{565}\dmpnum{0566}{\input{items/0566}}\vspace{8mm}
 \dmsection{유형 08 평균과 분산을 이용하여 식의 값 구하기}
-\setcounter{dmproblemcount}{566}\dmpnum{0567}{\input{items/0567}}\vspace{4mm}
-\setcounter{dmproblemcount}{567}\dmpnum{0568}{\input{items/0568}}\vspace{4mm}
-\setcounter{dmproblemcount}{568}\dmpnum{0569}{\input{items/0569}}\vspace{4mm}
-\setcounter{dmproblemcount}{569}\dmpnum{0570}{\input{items/0570}}\vspace{4mm}
+\setcounter{dmproblemcount}{566}\dmpnum{0567}{\input{items/0567}}\vspace{8mm}
+\setcounter{dmproblemcount}{567}\dmpnum{0568}{\input{items/0568}}\vspace{8mm}
+\setcounter{dmproblemcount}{568}\dmpnum{0569}{\input{items/0569}}\vspace{8mm}
+\setcounter{dmproblemcount}{569}\dmpnum{0570}{\input{items/0570}}\vspace{8mm}
 \dmsection{유형 09 자료의 이해}
-\setcounter{dmproblemcount}{570}\dmpnum{0571}{\input{items/0571}}\vspace{4mm}
-\setcounter{dmproblemcount}{571}\dmpnum{0572}{\input{items/0572}}\vspace{4mm}
-\setcounter{dmproblemcount}{572}\dmpnum{0573}{\input{items/0573}}\vspace{4mm}
-\setcounter{dmproblemcount}{573}\dmpnum{0574}{\input{items/0574}}\vspace{4mm}
-\setcounter{dmproblemcount}{574}\dmpnum{0575}{\input{items/0575}}\vspace{4mm}
+\setcounter{dmproblemcount}{570}\dmpnum{0571}{\input{items/0571}}\vspace{8mm}
+\setcounter{dmproblemcount}{571}\dmpnum{0572}{\input{items/0572}}\vspace{8mm}
+\setcounter{dmproblemcount}{572}\dmpnum{0573}{\input{items/0573}}\vspace{8mm}
+\setcounter{dmproblemcount}{573}\dmpnum{0574}{\input{items/0574}}\vspace{8mm}
+\setcounter{dmproblemcount}{574}\dmpnum{0575}{\input{items/0575}}\vspace{8mm}
 \dmsection{유형 10 두 집단 전체의 평균, 분산, 표준편차}
-\setcounter{dmproblemcount}{575}\dmpnum{0576}{\input{items/0576}}\vspace{4mm}
-\setcounter{dmproblemcount}{576}\dmpnum{0577}{\input{items/0577}}\vspace{4mm}
-\setcounter{dmproblemcount}{577}\dmpnum{0578}{\input{items/0578}}\vspace{4mm}
+\setcounter{dmproblemcount}{575}\dmpnum{0576}{\input{items/0576}}\vspace{8mm}
+\setcounter{dmproblemcount}{576}\dmpnum{0577}{\input{items/0577}}\vspace{8mm}
+\setcounter{dmproblemcount}{577}\dmpnum{0578}{\input{items/0578}}\vspace{8mm}
 \dmsection{유형 11 변화된 변량의 평균, 분산, 표준편차}
-\setcounter{dmproblemcount}{578}\dmpnum{0579}{\input{items/0579}}\vspace{4mm}
-\setcounter{dmproblemcount}{579}\dmpnum{0580}{\input{items/0580}}\vspace{4mm}
-\setcounter{dmproblemcount}{580}\dmpnum{0581}{\input{items/0581}}\vspace{4mm}
+\setcounter{dmproblemcount}{578}\dmpnum{0579}{\input{items/0579}}\vspace{8mm}
+\setcounter{dmproblemcount}{579}\dmpnum{0580}{\input{items/0580}}\vspace{8mm}
+\setcounter{dmproblemcount}{580}\dmpnum{0581}{\input{items/0581}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{581}\dmpnum{0582}{\input{items/0582}}\vspace{4mm}
-\setcounter{dmproblemcount}{582}\dmpnum{0583}{\input{items/0583}}\vspace{4mm}
-\setcounter{dmproblemcount}{583}\dmpnum{0584}{\input{items/0584}}\vspace{4mm}
-\setcounter{dmproblemcount}{584}\dmpnum{0585}{\input{items/0585}}\vspace{4mm}
-\setcounter{dmproblemcount}{585}\dmpnum{0586}{\input{items/0586}}\vspace{4mm}
-\setcounter{dmproblemcount}{586}\dmpnum{0587}{\input{items/0587}}\vspace{4mm}
-\setcounter{dmproblemcount}{587}\dmpnum{0588}{\input{items/0588}}\vspace{4mm}
-\setcounter{dmproblemcount}{588}\dmpnum{0589}{\input{items/0589}}\vspace{4mm}
-\setcounter{dmproblemcount}{589}\dmpnum{0590}{\input{items/0590}}\vspace{4mm}
-\setcounter{dmproblemcount}{590}\dmpnum{0591}{\input{items/0591}}\vspace{4mm}
-\setcounter{dmproblemcount}{591}\dmpnum{0592}{\input{items/0592}}\vspace{4mm}
-\setcounter{dmproblemcount}{592}\dmpnum{0593}{\input{items/0593}}\vspace{4mm}
-\setcounter{dmproblemcount}{593}\dmpnum{0594}{\input{items/0594}}\vspace{4mm}
-\setcounter{dmproblemcount}{594}\dmpnum{0595}{\input{items/0595}}\vspace{4mm}
+\setcounter{dmproblemcount}{581}\dmpnum{0582}{\input{items/0582}}\vspace{8mm}
+\setcounter{dmproblemcount}{582}\dmpnum{0583}{\input{items/0583}}\vspace{8mm}
+\setcounter{dmproblemcount}{583}\dmpnum{0584}{\input{items/0584}}\vspace{8mm}
+\setcounter{dmproblemcount}{584}\dmpnum{0585}{\input{items/0585}}\vspace{8mm}
+\setcounter{dmproblemcount}{585}\dmpnum{0586}{\input{items/0586}}\vspace{8mm}
+\setcounter{dmproblemcount}{586}\dmpnum{0587}{\input{items/0587}}\vspace{8mm}
+\setcounter{dmproblemcount}{587}\dmpnum{0588}{\input{items/0588}}\vspace{8mm}
+\setcounter{dmproblemcount}{588}\dmpnum{0589}{\input{items/0589}}\vspace{8mm}
+\setcounter{dmproblemcount}{589}\dmpnum{0590}{\input{items/0590}}\vspace{8mm}
+\setcounter{dmproblemcount}{590}\dmpnum{0591}{\input{items/0591}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{591}\dmpnum{0592}{\input{items/0592}}\vspace{8mm}
+\setcounter{dmproblemcount}{592}\dmpnum{0593}{\input{items/0593}}\vspace{8mm}
+\setcounter{dmproblemcount}{593}\dmpnum{0594}{\input{items/0594}}\vspace{8mm}
+\setcounter{dmproblemcount}{594}\dmpnum{0595}{\input{items/0595}}\vspace{8mm}
 \dmsection{서술형 주관식}
-\setcounter{dmproblemcount}{595}\dmpnum{0596}{\input{items/0596}}\vspace{4mm}
-\setcounter{dmproblemcount}{596}\dmpnum{0597}{\input{items/0597}}\vspace{4mm}
-\setcounter{dmproblemcount}{597}\dmpnum{0598}{\input{items/0598}}\vspace{4mm}
-\setcounter{dmproblemcount}{598}\dmpnum{0599}{\input{items/0599}}\vspace{4mm}
+\setcounter{dmproblemcount}{595}\dmpnum{0596}{\input{items/0596}}\vspace{8mm}
+\setcounter{dmproblemcount}{596}\dmpnum{0597}{\input{items/0597}}\vspace{8mm}
+\setcounter{dmproblemcount}{597}\dmpnum{0598}{\input{items/0598}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{598}\dmpnum{0599}{\input{items/0599}}\vspace{8mm}
 \dmsection{실력 UP}
-\setcounter{dmproblemcount}{599}\dmpnum{0600}{\input{items/0600}}\vspace{4mm}
-\setcounter{dmproblemcount}{600}\dmpnum{0601}{\input{items/0601}}\vspace{4mm}
-\setcounter{dmproblemcount}{601}\dmpnum{0602}{\input{items/0602}}\vspace{4mm}
+\setcounter{dmproblemcount}{599}\dmpnum{0600}{\input{items/0600}}\vspace{8mm}
+\setcounter{dmproblemcount}{600}\dmpnum{0601}{\input{items/0601}}\vspace{8mm}
+\setcounter{dmproblemcount}{601}\dmpnum{0602}{\input{items/0602}}\vspace{8mm}
 \vspace*{0pt plus 1filll}
 \clearpage
 \renewcommand{\dmchapunit}{06 상관관계}
 \dmchapter{06}{상관관계}
 \setcounter{dmproblemcount}{0}
 \dmsection{교과서 06-1 산점도}
-\setcounter{dmproblemcount}{602}\dmpnum{0603}{\input{items/0603}}\vspace{4mm}
-\setcounter{dmproblemcount}{603}\dmpnum{0604}{\input{items/0604}}\vspace{4mm}
+\setcounter{dmproblemcount}{602}\dmpnum{0603}{\input{items/0603}}\vspace{8mm}
+\setcounter{dmproblemcount}{603}\dmpnum{0604}{\input{items/0604}}\vspace{8mm}
 \dmsection{교과서 06-2 상관관계}
 \dmpassage{다음 \textbf{보기}의 산점도에 대하여 물음에 답하시오.}
-\begin{center}\includegraphics[width=240.4pt]{figures/fig-g0605-0607.png}\end{center}
-\setcounter{dmproblemcount}{604}\dmpnum{0605}{\input{items/0605}}\vspace{4mm}
-\setcounter{dmproblemcount}{605}\dmpnum{0606}{\input{items/0606}}\vspace{4mm}
-\setcounter{dmproblemcount}{606}\dmpnum{0607}{\input{items/0607}}\vspace{4mm}
-\setcounter{dmproblemcount}{607}\dmpnum{0608}{\input{items/0608}}\vspace{4mm}
+\begin{center}\setlength{\dmfigw}{240.4pt}\ifdim\dmfigw>\linewidth\setlength{\dmfigw}{\linewidth}\fi\includegraphics[width=\dmfigw]{figures/fig-g0605-0607.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{604}\dmpnum{0605}{\input{items/0605}}\vspace{8mm}
+\setcounter{dmproblemcount}{605}\dmpnum{0606}{\input{items/0606}}\vspace{8mm}
+\setcounter{dmproblemcount}{606}\dmpnum{0607}{\input{items/0607}}\vspace{8mm}
+\setcounter{dmproblemcount}{607}\dmpnum{0608}{\input{items/0608}}\vspace{8mm}
 \dmpassage{다음 두 변량 사이의 상관관계를 말하시오.}
-\setcounter{dmproblemcount}{608}\dmpnum{0609}{\input{items/0609}}\vspace{4mm}
-\setcounter{dmproblemcount}{609}\dmpnum{0610}{\input{items/0610}}\vspace{4mm}
-\setcounter{dmproblemcount}{610}\dmpnum{0611}{\input{items/0611}}\vspace{4mm}
+\setcounter{dmproblemcount}{608}\dmpnum{0609}{\input{items/0609}}\vspace{8mm}
+\setcounter{dmproblemcount}{609}\dmpnum{0610}{\input{items/0610}}\vspace{8mm}
+\setcounter{dmproblemcount}{610}\dmpnum{0611}{\input{items/0611}}\vspace{8mm}
 \dmsection{유형 01 산점도와 상관관계의 뜻}
-\setcounter{dmproblemcount}{611}\dmpnum{0612}{\input{items/0612}}\vspace{4mm}
-\setcounter{dmproblemcount}{612}\dmpnum{0613}{\input{items/0613}}\vspace{4mm}
-\setcounter{dmproblemcount}{613}\dmpnum{0614}{\input{items/0614}}\vspace{4mm}
-\setcounter{dmproblemcount}{614}\dmpnum{0615}{\input{items/0615}}\vspace{4mm}
+\setcounter{dmproblemcount}{611}\dmpnum{0612}{\input{items/0612}}\vspace{8mm}
+\setcounter{dmproblemcount}{612}\dmpnum{0613}{\input{items/0613}}\vspace{8mm}
+\setcounter{dmproblemcount}{613}\dmpnum{0614}{\input{items/0614}}\vspace{8mm}
+\setcounter{dmproblemcount}{614}\dmpnum{0615}{\input{items/0615}}\vspace{8mm}
 \dmsection{유형 02 산점도와 상관관계}
-\setcounter{dmproblemcount}{615}\dmpnum{0616}{\input{items/0616}}\vspace{4mm}
-\setcounter{dmproblemcount}{616}\dmpnum{0617}{\input{items/0617}}\vspace{4mm}
-\setcounter{dmproblemcount}{617}\dmpnum{0618}{\input{items/0618}}\vspace{4mm}
-\setcounter{dmproblemcount}{618}\dmpnum{0619}{\input{items/0619}}\vspace{4mm}
-\setcounter{dmproblemcount}{619}\dmpnum{0620}{\input{items/0620}}\vspace{4mm}
+\setcounter{dmproblemcount}{615}\dmpnum{0616}{\input{items/0616}}\vspace{8mm}
+\setcounter{dmproblemcount}{616}\dmpnum{0617}{\input{items/0617}}\vspace{8mm}
+\setcounter{dmproblemcount}{617}\dmpnum{0618}{\input{items/0618}}\vspace{8mm}
+\setcounter{dmproblemcount}{618}\dmpnum{0619}{\input{items/0619}}\vspace{8mm}
+\setcounter{dmproblemcount}{619}\dmpnum{0620}{\input{items/0620}}\vspace{8mm}
 \dmsection{유형 03 산점도의 이해 (1)}
-\setcounter{dmproblemcount}{620}\dmpnum{0621}{\input{items/0621}}\vspace{4mm}
-\setcounter{dmproblemcount}{621}\dmpnum{0622}{\input{items/0622}}\vspace{4mm}
-\setcounter{dmproblemcount}{622}\dmpnum{0623}{\input{items/0623}}\vspace{4mm}
-\setcounter{dmproblemcount}{623}\dmpnum{0624}{\input{items/0624}}\vspace{4mm}
-\setcounter{dmproblemcount}{624}\dmpnum{0625}{\input{items/0625}}\vspace{4mm}
+\setcounter{dmproblemcount}{620}\dmpnum{0621}{\input{items/0621}}\vspace{8mm}
+\setcounter{dmproblemcount}{621}\dmpnum{0622}{\input{items/0622}}\vspace{8mm}
+\setcounter{dmproblemcount}{622}\dmpnum{0623}{\input{items/0623}}\vspace{8mm}
+\setcounter{dmproblemcount}{623}\dmpnum{0624}{\input{items/0624}}\vspace{8mm}
+\setcounter{dmproblemcount}{624}\dmpnum{0625}{\input{items/0625}}\vspace{8mm}
 \dmsection{유형 04 산점도의 이해 (2)}
-\setcounter{dmproblemcount}{625}\dmpnum{0626}{\input{items/0626}}\vspace{4mm}
-\setcounter{dmproblemcount}{626}\dmpnum{0627}{\input{items/0627}}\vspace{4mm}
-\setcounter{dmproblemcount}{627}\dmpnum{0628}{\input{items/0628}}\vspace{4mm}
-\setcounter{dmproblemcount}{628}\dmpnum{0629}{\input{items/0629}}\vspace{4mm}
+\setcounter{dmproblemcount}{625}\dmpnum{0626}{\input{items/0626}}\vspace{8mm}
+\setcounter{dmproblemcount}{626}\dmpnum{0627}{\input{items/0627}}\vspace{8mm}
+\setcounter{dmproblemcount}{627}\dmpnum{0628}{\input{items/0628}}\vspace{8mm}
+\setcounter{dmproblemcount}{628}\dmpnum{0629}{\input{items/0629}}\vspace{8mm}
 \dmsection{유형 05 변량을 추가(삭제)했을 경우 상관관계 구하기}
-\setcounter{dmproblemcount}{629}\dmpnum{0630}{\input{items/0630}}\vspace{4mm}
-\setcounter{dmproblemcount}{630}\dmpnum{0631}{\input{items/0631}}\vspace{4mm}
+\setcounter{dmproblemcount}{629}\dmpnum{0630}{\input{items/0630}}\vspace{8mm}
+\setcounter{dmproblemcount}{630}\dmpnum{0631}{\input{items/0631}}\vspace{8mm}
 \dmsection{유형 06 산점도에서의 합 또는 평균}
-\setcounter{dmproblemcount}{631}\dmpnum{0632}{\input{items/0632}}\vspace{4mm}
-\setcounter{dmproblemcount}{632}\dmpnum{0633}{\input{items/0633}}\vspace{4mm}
-\setcounter{dmproblemcount}{633}\dmpnum{0634}{\input{items/0634}}\vspace{4mm}
+\setcounter{dmproblemcount}{631}\dmpnum{0632}{\input{items/0632}}\vspace{8mm}
+\setcounter{dmproblemcount}{632}\dmpnum{0633}{\input{items/0633}}\vspace{8mm}
+\setcounter{dmproblemcount}{633}\dmpnum{0634}{\input{items/0634}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{634}\dmpnum{0635}{\input{items/0635}}\vspace{4mm}
-\setcounter{dmproblemcount}{635}\dmpnum{0636}{\input{items/0636}}\vspace{4mm}
-\setcounter{dmproblemcount}{636}\dmpnum{0637}{\input{items/0637}}\vspace{4mm}
-\setcounter{dmproblemcount}{637}\dmpnum{0638}{\input{items/0638}}\vspace{4mm}
-\setcounter{dmproblemcount}{638}\dmpnum{0639}{\input{items/0639}}\vspace{4mm}
-\setcounter{dmproblemcount}{639}\dmpnum{0640}{\input{items/0640}}\vspace{4mm}
+\setcounter{dmproblemcount}{634}\dmpnum{0635}{\input{items/0635}}\vspace{8mm}
+\setcounter{dmproblemcount}{635}\dmpnum{0636}{\input{items/0636}}\vspace{8mm}
+\setcounter{dmproblemcount}{636}\dmpnum{0637}{\input{items/0637}}\vspace{8mm}
+\setcounter{dmproblemcount}{637}\dmpnum{0638}{\input{items/0638}}\vspace{8mm}
+\setcounter{dmproblemcount}{638}\dmpnum{0639}{\input{items/0639}}\vspace{8mm}
+\setcounter{dmproblemcount}{639}\dmpnum{0640}{\input{items/0640}}\vspace{8mm}
 \dmsection{서술형 주관식}
-\setcounter{dmproblemcount}{640}\dmpnum{0641}{\input{items/0641}}\vspace{4mm}
+\setcounter{dmproblemcount}{640}\dmpnum{0641}{\input{items/0641}}\vspace{8mm}
 \dmsection{중단원 마무리하기}
-\setcounter{dmproblemcount}{641}\dmpnum{0642}{\input{items/0642}}\vspace{4mm}
+\setcounter{dmproblemcount}{641}\dmpnum{0642}{\input{items/0642}}\vspace{8mm}
 \dmsection{실력 UP}
-\setcounter{dmproblemcount}{642}\dmpnum{0643}{\input{items/0643}}\vspace{4mm}
-\setcounter{dmproblemcount}{643}\dmpnum{0644}{\input{items/0644}}\vspace{4mm}
+\setcounter{dmproblemcount}{642}\dmpnum{0643}{\input{items/0643}}\vspace{8mm}
+\setcounter{dmproblemcount}{643}\dmpnum{0644}{\input{items/0644}}\vspace{8mm}
 \vspace*{0pt plus 1filll}
 \clearpage
 \dmsection{정답}
@@ -1053,27 +1104,27 @@
 \noindent\textbf{0176}\ $0.5$\par
 \noindent\textbf{0177}\ ⑤\par
 \noindent\textbf{0178}\ ③\par
-\noindent\textbf{0179}\ $192\,\mathrm{cm}^3$\par
-\noindent\textbf{0180}\ $9\sqrt{3}\pi\,\mathrm{cm}^3$\par
-\noindent\textbf{0181}\ $(10\sqrt{3}+1.5)\,\mathrm{m}$\par
-\noindent\textbf{0182}\ $18\sqrt{3}\,\mathrm{m}$\par
-\noindent\textbf{0183}\ $(15\sqrt{3}-15)\,\mathrm{m}$\par
-\noindent\textbf{0184}\ $(10\sqrt{3}+30)\,\mathrm{m}$\par
-\noindent\textbf{0185}\ $2\sqrt{31}\,\mathrm{cm}$\par
+\noindent\textbf{0179}\ $192\mkern3mu \mathrm{cm}^3$\par
+\noindent\textbf{0180}\ $9\sqrt{3}\pi\mkern3mu \mathrm{cm}^3$\par
+\noindent\textbf{0181}\ $(10\sqrt{3}+1.5)\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0182}\ $18\sqrt{3}\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0183}\ $(15\sqrt{3}-15)\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0184}\ $(10\sqrt{3}+30)\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0185}\ $2\sqrt{31}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0186}\ $10$\par
 \noindent\textbf{0187}\ $4\sqrt{5}$\par
 \noindent\textbf{0188}\ $3\sqrt{7}$\par
 \noindent\textbf{0189}\ $6\sqrt{6}$\par
 \noindent\textbf{0190}\ $4\sqrt{2}$\par
 \noindent\textbf{0191}\ ④\par
-\noindent\textbf{0192}\ $(3\sqrt{3}+9)\,\mathrm{cm}$\par
+\noindent\textbf{0192}\ $(3\sqrt{3}+9)\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0193}\ $5(3-\sqrt{3})$\par
 \noindent\textbf{0194}\ ④\par
-\noindent\textbf{0195}\ $30(\sqrt{3}-1)\,\mathrm{m}$\par
-\noindent\textbf{0196}\ $9(3-\sqrt{3})\,\mathrm{cm}^2$\par
-\noindent\textbf{0197}\ $150\sqrt{3}\,\mathrm{m}$\par
+\noindent\textbf{0195}\ $30(\sqrt{3}-1)\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0196}\ $9(3-\sqrt{3})\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0197}\ $150\sqrt{3}\mkern3mu \mathrm{m}$\par
 \noindent\textbf{0198}\ ①\par
-\noindent\textbf{0199}\ $5(\sqrt{3}+1)\,\mathrm{m}$\par
+\noindent\textbf{0199}\ $5(\sqrt{3}+1)\mkern3mu \mathrm{m}$\par
 \noindent\textbf{0200}\ ③\par
 \noindent\textbf{0201}\ $45^\circ$\par
 \noindent\textbf{0202}\ $27\sqrt{3}$\par
@@ -1087,38 +1138,38 @@
 \noindent\textbf{0210}\ $57$\par
 \noindent\textbf{0211}\ ③\par
 \noindent\textbf{0212}\ $12$\par
-\noindent\textbf{0213}\ $5\sqrt{3}\,\mathrm{cm}^2$\par
+\noindent\textbf{0213}\ $5\sqrt{3}\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0214}\ $15\sqrt{2}$\par
 \noindent\textbf{0215}\ $8$\par
 \noindent\textbf{0216}\ ⑤\par
 \noindent\textbf{0217}\ $35\sqrt{3}$\par
 \noindent\textbf{0218}\ $60^\circ$\par
 \noindent\textbf{0219}\ ③\par
-\noindent\textbf{0220}\ $2\sqrt{31}\,\mathrm{km}$\par
-\noindent\textbf{0221}\ $4(3-\sqrt{3})\,\mathrm{m/s}$\par
+\noindent\textbf{0220}\ $2\sqrt{31}\mkern3mu \mathrm{km}$\par
+\noindent\textbf{0221}\ $4(3-\sqrt{3})\mkern3mu \mathrm{m/s}$\par
 \noindent\textbf{0222}\ ③\par
 \noindent\textbf{0223}\ ④\par
 \noindent\textbf{0224}\ $10$\par
 \noindent\textbf{0225}\ ②\par
 \noindent\textbf{0226}\ ⑤\par
-\noindent\textbf{0227}\ $10\sqrt{3}\,\mathrm{m}$\par
+\noindent\textbf{0227}\ $10\sqrt{3}\mkern3mu \mathrm{m}$\par
 \noindent\textbf{0228}\ ④\par
-\noindent\textbf{0229}\ $71.7\,\mathrm{m}$\par
+\noindent\textbf{0229}\ $71.7\mkern3mu \mathrm{m}$\par
 \noindent\textbf{0230}\ ③\par
 \noindent\textbf{0231}\ ⑤\par
 \noindent\textbf{0232}\ ②\par
 \noindent\textbf{0233}\ $28\sqrt{2}$\par
 \noindent\textbf{0234}\ $2(3-\sqrt{3})$\par
 \noindent\textbf{0235}\ ⑤\par
-\noindent\textbf{0236}\ $9\,\mathrm{cm}^2$\par
+\noindent\textbf{0236}\ $9\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0237}\ ③\par
 \noindent\textbf{0238}\ ③\par
-\noindent\textbf{0239}\ $(2+2\sqrt{3})\,\mathrm{m}$\par
-\noindent\textbf{0240}\ $36(\sqrt{3}-1)\,\mathrm{cm}^2$\par
-\noindent\textbf{0241}\ $(12\pi-9\sqrt{3})\,\mathrm{cm}^2$\par
+\noindent\textbf{0239}\ $(2+2\sqrt{3})\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0240}\ $36(\sqrt{3}-1)\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0241}\ $(12\pi-9\sqrt{3})\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0242}\ $3$\par
-\noindent\textbf{0243}\ $12\sqrt{2}\,\mathrm{cm}^2$\par
-\noindent\textbf{0244}\ $4\,\mathrm{cm}$\par
+\noindent\textbf{0243}\ $12\sqrt{2}\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0244}\ $4\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0245}\ $\dfrac{3}{5}$\par
 \noindent\textbf{0246}\ ⑤\par
 \noindent\textbf{03 원과 직선}\par\smallskip
@@ -1135,7 +1186,7 @@
 \noindent\textbf{0257}\ $36^\circ$\par
 \noindent\textbf{0258}\ $135^\circ$\par
 \noindent\textbf{0259}\ $50^\circ$\par
-\noindent\textbf{0260}\ (1) $10\,\mathrm{cm}$ (2) $5\sqrt{5}\,\mathrm{cm}$\par
+\noindent\textbf{0260}\ (1) $10\mkern3mu \mathrm{cm}$ (2) $5\sqrt{5}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0261}\ ㈎ $5-x$ \quad ㈏ $6-x$ \quad ㈐ $2$\par
 \noindent\textbf{0262}\ $13$\par
 \noindent\textbf{0263}\ $4$\par
@@ -1143,35 +1194,35 @@
 \noindent\textbf{0265}\ $7$\par
 \noindent\textbf{0266}\ $5$\par
 \noindent\textbf{0267}\ ③\par
-\noindent\textbf{0268}\ $6\,\mathrm{cm}$\par
-\noindent\textbf{0269}\ $60\,\mathrm{cm}^2$\par
+\noindent\textbf{0268}\ $6\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0269}\ $60\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0270}\ $2\sqrt{37}$\par
-\noindent\textbf{0271}\ $\dfrac{37}{5}\,\mathrm{cm}$\par
+\noindent\textbf{0271}\ $\dfrac{37}{5}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0272}\ ③\par
-\noindent\textbf{0273}\ $8\,\mathrm{cm}$\par
+\noindent\textbf{0273}\ $8\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0274}\ ③\par
-\noindent\textbf{0275}\ $4\,\mathrm{cm}$\par
-\noindent\textbf{0276}\ $32\,\mathrm{cm}^2$\par
-\noindent\textbf{0277}\ $10\pi\,\mathrm{cm}$\par
+\noindent\textbf{0275}\ $4\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0276}\ $32\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0277}\ $10\pi\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0278}\ ⑤\par
 \noindent\textbf{0279}\ $10$\par
 \noindent\textbf{0280}\ ②\par
 \noindent\textbf{0281}\ $10$\par
-\noindent\textbf{0282}\ $60\,\mathrm{cm}^2$\par
+\noindent\textbf{0282}\ $60\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0283}\ ②\par
-\noindent\textbf{0284}\ $8\,\mathrm{cm}$\par
+\noindent\textbf{0284}\ $8\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0285}\ $66^\circ$\par
 \noindent\textbf{0286}\ $40^\circ$\par
 \noindent\textbf{0287}\ $12$\par
-\noindent\textbf{0288}\ $64\pi\,\mathrm{cm}^2$\par
+\noindent\textbf{0288}\ $64\pi\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0289}\ ②\par
-\noindent\textbf{0290}\ $60\,\mathrm{cm}^2$\par
-\noindent\textbf{0291}\ $5\sqrt{3}\,\mathrm{cm}$\par
+\noindent\textbf{0290}\ $60\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0291}\ $5\sqrt{3}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0292}\ $46^\circ$\par
 \noindent\textbf{0293}\ $35^\circ$\par
-\noindent\textbf{0294}\ $40\pi\,\mathrm{cm}^2$\par
-\noindent\textbf{0295}\ $10\,\mathrm{cm}$\par
-\noindent\textbf{0296}\ $16\sqrt{3}\,\mathrm{cm}^2$\par
+\noindent\textbf{0294}\ $40\pi\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0295}\ $10\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0296}\ $16\sqrt{3}\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0297}\ $2\sqrt{5}$\par
 \noindent\textbf{0298}\ ③\par
 \noindent\textbf{0299}\ ②\par
@@ -1179,41 +1230,41 @@
 \noindent\textbf{0301}\ $7$\par
 \noindent\textbf{0302}\ ④\par
 \noindent\textbf{0303}\ ③\par
-\noindent\textbf{0304}\ $16\sqrt{3}\,\mathrm{cm}$\par
-\noindent\textbf{0305}\ $4\sqrt{15}\,\mathrm{cm}$\par
-\noindent\textbf{0306}\ $12\sqrt{2}\,\mathrm{cm}^2$\par
-\noindent\textbf{0307}\ $13\sqrt{10}\,\mathrm{cm}^2$\par
-\noindent\textbf{0308}\ $5\,\mathrm{cm}$\par
+\noindent\textbf{0304}\ $16\sqrt{3}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0305}\ $4\sqrt{15}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0306}\ $12\sqrt{2}\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0307}\ $13\sqrt{10}\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0308}\ $5\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0309}\ ⑤\par
-\noindent\textbf{0310}\ $16\,\mathrm{cm}$\par
-\noindent\textbf{0311}\ $7\,\mathrm{cm}$\par
-\noindent\textbf{0312}\ $7\,\mathrm{cm}$\par
-\noindent\textbf{0313}\ $7\,\mathrm{cm}$\par
-\noindent\textbf{0314}\ $2\,\mathrm{cm}$\par
-\noindent\textbf{0315}\ $16\,\mathrm{cm}$\par
-\noindent\textbf{0316}\ $2\,\mathrm{cm}$\par
-\noindent\textbf{0317}\ $(\sqrt{3}-1)\,\mathrm{cm}$\par
-\noindent\textbf{0318}\ $4\pi\,\mathrm{cm}^2$\par
-\noindent\textbf{0319}\ $30\,\mathrm{cm}^2$\par
+\noindent\textbf{0310}\ $16\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0311}\ $7\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0312}\ $7\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0313}\ $7\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0314}\ $2\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0315}\ $16\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0316}\ $2\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0317}\ $(\sqrt{3}-1)\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0318}\ $4\pi\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0319}\ $30\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0320}\ ④\par
-\noindent\textbf{0321}\ $8\,\mathrm{cm}$\par
+\noindent\textbf{0321}\ $8\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0322}\ ②\par
 \noindent\textbf{0323}\ ②\par
 \noindent\textbf{0324}\ ③\par
-\noindent\textbf{0325}\ $12\,\mathrm{cm}$\par
-\noindent\textbf{0326}\ $4\,\mathrm{cm}$\par
-\noindent\textbf{0327}\ $72\,\mathrm{cm}^2$\par
-\noindent\textbf{0328}\ $5\,\mathrm{cm}$\par
-\noindent\textbf{0329}\ $6\,\mathrm{cm}$\par
-\noindent\textbf{0330}\ $2\,\mathrm{cm}$\par
+\noindent\textbf{0325}\ $12\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0326}\ $4\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0327}\ $72\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0328}\ $5\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0329}\ $6\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0330}\ $2\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0331}\ ③\par
-\noindent\textbf{0332}\ $4\,\mathrm{cm}$\par
-\noindent\textbf{0333}\ $(9+6\sqrt{2})\,\mathrm{cm}$\par
-\noindent\textbf{0334}\ $4\,\mathrm{cm}$\par
+\noindent\textbf{0332}\ $4\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0333}\ $(9+6\sqrt{2})\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0334}\ $4\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0335}\ ⑤\par
 \noindent\textbf{0336}\ ⑤\par
-\noindent\textbf{0337}\ $2\sqrt{3}\,\mathrm{cm}$\par
-\noindent\textbf{0338}\ $2\sqrt{5}\,\mathrm{cm}^2$\par
+\noindent\textbf{0337}\ $2\sqrt{3}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0338}\ $2\sqrt{5}\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0339}\ ③\par
 \noindent\textbf{0340}\ $128^\circ$\par
 \noindent\textbf{0341}\ ②\par
@@ -1226,16 +1277,16 @@
 \noindent\textbf{0348}\ ④\par
 \noindent\textbf{0349}\ ②\par
 \noindent\textbf{0350}\ ③\par
-\noindent\textbf{0351}\ $2\,\mathrm{cm}$\par
+\noindent\textbf{0351}\ $2\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0352}\ ③\par
 \noindent\textbf{0353}\ ③\par
-\noindent\textbf{0354}\ $25\pi\,\mathrm{cm}^2$\par
-\noindent\textbf{0355}\ $4\pi\,\mathrm{cm}^2$\par
-\noindent\textbf{0356}\ $8\,\mathrm{cm}$\par
-\noindent\textbf{0357}\ $\sqrt{30}\,\mathrm{cm}$\par
-\noindent\textbf{0358}\ $6\,\mathrm{cm}$\par
-\noindent\textbf{0359}\ $4\,\mathrm{cm}$\par
-\noindent\textbf{0360}\ $12\,\mathrm{cm}$\par
+\noindent\textbf{0354}\ $25\pi\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0355}\ $4\pi\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{0356}\ $8\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0357}\ $\sqrt{30}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0358}\ $6\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0359}\ $4\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{0360}\ $12\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{04 원주각}\par\smallskip
 \noindent\textbf{0361}\ $55^\circ$\par
 \noindent\textbf{0362}\ $40^\circ$\par
@@ -1296,7 +1347,7 @@
 \noindent\textbf{0417}\ $110^\circ$\par
 \noindent\textbf{0418}\ ③\par
 \noindent\textbf{0419}\ $16^\circ$\par
-\noindent\textbf{0420}\ $2\sqrt{13}\,\mathrm{cm}$\par
+\noindent\textbf{0420}\ $2\sqrt{13}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0421}\ ①\par
 \noindent\textbf{0422}\ $\dfrac{12}{25}$\par
 \noindent\textbf{0423}\ $56^\circ$\par
@@ -1308,7 +1359,7 @@
 \noindent\textbf{0429}\ $35^\circ$\par
 \noindent\textbf{0430}\ $120^\circ$\par
 \noindent\textbf{0431}\ $20^\circ$\par
-\noindent\textbf{0432}\ $24\pi\,\mathrm{cm}$\par
+\noindent\textbf{0432}\ $24\pi\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0433}\ $75^\circ$\par
 \noindent\textbf{0434}\ $\angle x=60^\circ$, $\angle y=80^\circ$, $\angle z=40^\circ$\par
 \noindent\textbf{0435}\ $56^\circ$\par
@@ -1387,7 +1438,7 @@
 \noindent\textbf{0508}\ ④\par
 \noindent\textbf{0509}\ ②\par
 \noindent\textbf{0510}\ $37^\circ$\par
-\noindent\textbf{0511}\ $8\sqrt{3}\,\mathrm{cm}^2$\par
+\noindent\textbf{0511}\ $8\sqrt{3}\mkern3mu \mathrm{cm}^2$\par
 \noindent\textbf{0512}\ $78^\circ$\par
 \noindent\textbf{0513}\ ③\par
 \noindent\textbf{0514}\ ③\par
@@ -1396,7 +1447,7 @@
 \noindent\textbf{0517}\ $37^\circ$\par
 \noindent\textbf{0518}\ $6^\circ$\par
 \noindent\textbf{0519}\ $\angle x=25^\circ$, $\angle y=90^\circ$\par
-\noindent\textbf{0520}\ $3\sqrt{6}\,\mathrm{cm}$\par
+\noindent\textbf{0520}\ $3\sqrt{6}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0521}\ ⑤\par
 \noindent\textbf{05 대푯값과 산포도}\par\smallskip
 \noindent\textbf{0522}\ $6$\par
@@ -1424,7 +1475,7 @@
 \noindent\textbf{0544}\ $8$\par
 \noindent\textbf{0545}\ $31.5$\par
 \noindent\textbf{0546}\ 창훈, 진수, 태연\par
-\noindent\textbf{0547}\ $13.5\,\mathrm{kg}$\par
+\noindent\textbf{0547}\ $13.5\mkern3mu \mathrm{kg}$\par
 \noindent\textbf{0548}\ $29$\par
 \noindent\textbf{0549}\ $48.7$\par
 \noindent\textbf{0550}\ ②\par
@@ -1466,7 +1517,7 @@
 \noindent\textbf{0586}\ ⑤\par
 \noindent\textbf{0587}\ $1$\par
 \noindent\textbf{0588}\ ⑤\par
-\noindent\textbf{0589}\ $\sqrt{6}\,\mathrm{cm}$\par
+\noindent\textbf{0589}\ $\sqrt{6}\mkern3mu \mathrm{cm}$\par
 \noindent\textbf{0590}\ $8$\par
 \noindent\textbf{0591}\ $1.2$\par
 \noindent\textbf{0592}\ ②\par
@@ -1502,7 +1553,7 @@
 \noindent\textbf{0621}\ ②\par
 \noindent\textbf{0622}\ (1) 양의 상관관계 (2) $\pt{E}$\par
 \noindent\textbf{0623}\ $\pt{A}$\par
-\noindent\textbf{0624}\ $35\,\%$\par
+\noindent\textbf{0624}\ $35\mkern3mu \%$\par
 \noindent\textbf{0625}\ ⑤\par
 \noindent\textbf{0626}\ ③\par
 \noindent\textbf{0627}\ (1) 3명 (2) 70점\par
@@ -1521,7 +1572,7 @@
 \noindent\textbf{0640}\ ⑤\par
 \noindent\textbf{0641}\ $12$\par
 \noindent\textbf{0642}\ $0$\par
-\noindent\textbf{0643}\ $25\,\%$\par
+\noindent\textbf{0643}\ $25\mkern3mu \%$\par
 \noindent\textbf{0644}\ 90점\par
 \end{multicols}
 \end{document}
