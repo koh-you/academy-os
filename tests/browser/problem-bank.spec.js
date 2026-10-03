@@ -169,8 +169,9 @@ test("학생별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조�
 test("시험지 제작: 유형으로 걸러 바구니에 담고 제목·배점·순서를 정해 시험지 미리보기를 연다", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
+  // 2026-10-03 · 제작 탭이 오답관리에서 시험지관리로 옮겨졌다(요청). 보드는 그대로 공유한다.
   const navigation = page.getByRole("navigation", { name: "주요 화면" });
-  await navigation.getByRole("button", { name: /오답관리/ }).click();
+  await navigation.getByRole("button", { name: /시험지관리/ }).click();
   await page.getByRole("tab", { name: "시험지 제작" }).click();
   const board = page.locator(".problemBankBoard");
   await expect(board.getByRole("heading", { name: "시험지 제작 · 문항 담기" })).toBeVisible();

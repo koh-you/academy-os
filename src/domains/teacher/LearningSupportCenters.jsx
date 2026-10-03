@@ -116,11 +116,14 @@ function WrongProblemBoard({
 
   return (
     <section className="wrongProblemBoard">
+      {/* 2026-10-03 · 「시험지 제작」을 시험지관리로 옮겼다. 제작 -> 시험지 목록 -> 응시 기록이
+          한 메뉴 안에서 이어져야 하는데 제작만 여기 있었고, 오답관리 하위 탭으로 보이는 것도
+          맞지 않았다(요청). 오답은 시험지를 풀어서도, 문제지를 직접 풀어서도 생기므로 시험지
+          하위가 아니라 두 출처가 합류하는 자리다. */}
       <WorkspaceTabs label="오답관리 작업 구분">
         {[
           ["bookWrong", "교재별 오답"],
-          ["studentWrong", "학생별 오답"],
-          ["examPaper", "시험지 제작"]
+          ["studentWrong", "학생별 오답"]
         ].map(([tab, label]) => (
           <button
             aria-selected={activeTab === tab}
@@ -137,9 +140,6 @@ function WrongProblemBoard({
 
       {activeTab === "bookWrong" ? (
         <BookWrongAnswerBoard mode="class" students={activeStudents} />
-      ) : activeTab === "examPaper" ? (
-        // 시험지 제작: 등록된 교재(조판본 포함)의 문항을 바구니에 담아 제목·배점·수험자 칸이 있는 시험지로 인쇄한다.
-        <BookWrongAnswerBoard mode="exam" students={activeStudents} />
       ) : (
         <>
           <FilterBar
@@ -864,7 +864,7 @@ export function MaterialManager({
     <section className="materialManagerPage">
       {/* 형제 화면(오답관리·보충관리)과 같은 공용 PageHeader 로 시작한다. 탭 패널 제목은 h2 다(2026-09-19 U10 · support-01/shots-14). */}
       <PageHeader
-        description="응시 기록을 남기고 학생별 테스트 이력·시험지 목록·워터마크 도구를 한 곳에서 씁니다."
+        description="교재 문항으로 시험지를 만들고, 응시 기록·학생별 이력·시험지 목록·워터마크를 한 곳에서 씁니다."
         title="시험지관리"
       />
       <TestManagerTabs activeTab={activeTab} onChange={setActiveTab} />
@@ -948,6 +948,14 @@ export function MaterialManager({
           onSave={onSaveTestPaperLibrary}
           saveState={testPaperLibrarySaveState}
         />
+      ) : null}
+
+      {/* 2026-10-03 · 오답관리에서 옮겨 온 시험지 제작. 문항은 교재관리에 등록된 교재에서
+          그대로 뽑아 바구니에 담는다 — 메뉴 위치와 문항 출처는 별개다.
+          보드(교재 트리·문항 격자·이미지 로딩·인쇄 시트)는 오답관리와 같은 BookWrongAnswerBoard
+          를 mode 로 공유한다. 입구만 다르고 아래는 같은 엔진이다(요청). */}
+      {activeTab === "examPaper" ? (
+        <BookWrongAnswerBoard mode="exam" students={students} />
       ) : null}
 
       {activeTab === "watermark" ? <WatermarkToolPanel /> : null}
