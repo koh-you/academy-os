@@ -13,16 +13,23 @@ export function downloadPilotBlob(blob, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export const A4_POINTS = Object.freeze([595.28, 841.89]);
+
 /**
- * 이미지를 PDF 한 쪽으로 감싼다. **원본 비율을 지킨다** — 예전에는 A4(595×842)에 늘려 넣어서
+ * 이미지를 PDF 한 쪽으로 감싼다.
+ *
+ * `pageSize` 를 주면 그 크기의 쪽에 비율을 지켜 담는다(남는 자리는 비워 둔다) — 인쇄용 답안지는 **반드시 A4** 여야 한다.
+ * 주지 않으면 쪽 크기를 이미지 크기로 맞춘다. 판독으로 보내는 쪽이 그 경우다 — 예전에는 올린 사진을 A4 에 **늘려** 넣어서
  * 4:3 사진의 손글씨가 눌린 채로 판독기에 갔다.
  */
-export async function imageToPilotPdf(image) {
+export async function imageToPilotPdf(image, { pageSize } = {}) {
   const { PDFDocument } = await import("pdf-lib");
   const pdf = await PDFDocument.create();
   const embedded = image.startsWith("data:image/jpeg") ? await pdf.embedJpg(image) : await pdf.embedPng(image);
-  const page = pdf.addPage([embedded.width, embedded.height]);
-  page.drawImage(embedded, { x: 0, y: 0, width: embedded.width, height: embedded.height });
+  const [pageWidth, pageHeight] = pageSize ?? [embedded.width, embedded.height];
+  const scale = Math.min(pageWidth / embedded.width, pageHeight / embedded.height);
+  const width = embedded.width * scale, height = embedded.height * scale;
+  pdf.addPage([pageWidth, pageHeight]).drawImage(embedded, { x: (pageWidth - width) / 2, y: (pageHeight - height) / 2, width, height });
   return pdf.saveAsBase64();
 }
 
@@ -86,7 +93,8 @@ export async function downloadBlankAnswerSheet() {
   }
   c.font = "23px sans-serif";
   c.fillText("공통 답안지 v1  ·  원본 크기(A4)로 출력  ·  1 / 1", 108, 2240);
-  const base64 = await imageToPilotPdf(canvas.toDataURL("image/png"));
+  // 인쇄해서 손으로 쓰는 종이다. 반드시 A4 쪽이어야 칸 위치와 안내문(「원본 크기(A4)로 출력」)이 맞는다.
+  const base64 = await imageToPilotPdf(canvas.toDataURL("image/png"), { pageSize: A4_POINTS });
   downloadPilotBlob(new Blob([Uint8Array.from(atob(base64), (v) => v.charCodeAt(0))], { type: "application/pdf" }), "공통답안지-20문항.pdf");
 }
 
