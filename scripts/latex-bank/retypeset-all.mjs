@@ -95,8 +95,8 @@ for (const row of todo) {
       const text = result.stdout;
       for (const line of text.trim().split("\n").slice(-4)) console.log(`  ${line}`);
       if (/실패 [1-9]/.test(text)) { console.log(`✗ ${row.bank}: 등록 실패 — 표를 바꾸지 않습니다`); continue; }
-      // 진행 표시(` 문항 이미지 40/420`)가 아니라 **계획 줄**을 읽는다 — 진행 표시는 중간 값이라
-      // 「40/420 교체」처럼 사실과 다른 기록이 남는다(2026-10-03 베이직쎈 공통수학2 에서 실제로 그랬다).
+      // 진행 표시는 CR 로 덮어쓰는 중간 값이라 그대로 적으면 「40/420 교체」처럼 사실과 다른 기록이
+      // 남는다(2026-10-03 베이직쎈 공통수학2 에서 실제로 그랬다). **계획 줄**을 읽는다.
       const plan = text.match(/문항 이미지 (\d+) → 올릴 것 (\d+)/);
       uploaded = plan ? `${plan[2]}/${plan[1]}장 교체` : "등록 완료";
     } catch (error) {
