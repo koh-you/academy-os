@@ -598,7 +598,9 @@ ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) >
             // 인쇄 쪽도 전사본이 원천이다 — 스캔 manifest 는 pdf 쪽 + 고정 offset 이라 간지가 빠진 스캔에서는 뒤로 갈수록 어긋난다(쎈 중3-2: 33쪽부터 1~4쪽 차이).
             ...(Number.isInteger(bank.items[id]?.page) ? { printed_page: bank.items[id].page } : {}),
             has_shared_passage: false,
-            review_note: [source.review_note, `latex 조판본(latex-bank/${path.basename(dir)}/items/${id}.tex)`].filter(Boolean).join(" · ")
+            // 조판본 표시는 한 번만. 조판 패키지를 --package 로 그대로 다시 쓰는 책(스캔 패키지가 남아 있지 않은
+            // rpm-cm2 · rpm-m3-2)에서 재조판할 때마다 같은 말이 겹쳐 붙는다.
+            review_note: [String(source.review_note ?? "").replace(/\s*·?\s*latex 조판본\([^)]*\)/g, "").trim(), `latex 조판본(latex-bank/${path.basename(dir)}/items/${id}.tex)`].filter(Boolean).join(" · ")
           });
         }
         if (!args.review) return;
