@@ -10,6 +10,8 @@
 //   node scripts/latex-bank/retypeset-all.mjs --only ssenb-alg  한 권만
 //   node scripts/latex-bank/retypeset-all.mjs                   남은 책 전부(오래 걸린다)
 //   ... --no-upload                                             조판만 하고 등록은 안 한다
+//   ... --upload-only --ids a,b                                 조판은 건너뛰고 **이미 만들어 둔 패키지만** 올린다
+//                                                               (토큰이 만료돼 등록만 실패했을 때 — 조판을 다시 하지 않는다)
 //
 // 토큰: ACADEMY_TEACHER_TOKEN 환경변수. 값은 출력하지 않는다.
 
@@ -49,8 +51,19 @@ async function markDone(bank, note) {
 const map = JSON.parse((await execFileAsync(process.execPath, ["scripts/latex-bank/find-book-packages.mjs", "--json"], { maxBuffer: 16 * 1024 * 1024 })).stdout);
 const byBank = new Map(map.map((row) => [row.bank, row]));
 
+const uploadOnly = args["upload-only"] === true || String(args["upload-only"] ?? "") === "true";
 let todo = (await remainingBanks()).filter((row) => !row.done);
 if (args.only) todo = todo.filter((row) => row.bank === String(args.only));
+if (args.ids) {
+  // --upload-only 는 「조판은 됐고 등록만 실패한 책」만 받아야 한다. 아직 조판 안 한 책을 섞으면
+  // 배지가 그대로인 옛 패키지를 올린 뒤 ✅ 로 적혀 영영 안 고쳐진다.
+  const wanted = new Set(String(args.ids).split(",").map((value) => value.trim()).filter(Boolean));
+  todo = todo.filter((row) => wanted.has(row.bank));
+}
+if (uploadOnly && !args.ids && !args.only) {
+  console.error("--upload-only 는 --ids 또는 --only 로 **조판이 끝난 책**을 지정해야 합니다.");
+  process.exit(2);
+}
 if (args.list) {
   for (const row of todo) {
     const found = byBank.get(row.bank);
@@ -73,8 +86,8 @@ for (const row of todo) {
   // 스캔 패키지가 안 남은 책은 조판 패키지를 원천으로 쓴다(--bank-only 가 문항·단원을 전사본에서 다시 세우므로 자기참조가 안전하다).
   const packageDir = found.packageDir ?? found.exportDir;
   const started = Date.now();
-  console.log(`\n=== ${row.bank} · ${row.title} · ${row.items}문항`);
-  try {
+  console.log(`\n=== ${row.bank} · ${row.title} · ${row.items}문항${uploadOnly ? " (등록만)" : ""}`);
+  if (!uploadOnly) try {
     const build = await execFileAsync(process.execPath, [
       "scripts/latex-bank/build.mjs", "--bank", `latex-bank/${row.bank}`, "--bank-only",
       "--package", packageDir, "--export", found.exportDir
