@@ -460,7 +460,34 @@ async function main() {
       const before = manifest.items.length;
       manifest.items = manifest.items.filter((item) => bankIds.has(item.number_label));
       manifest.items.sort((a, b) => a.number_sort - b.number_sort);
-      console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length})`);
+
+      // 전사본이 문항 목록의 원천이면 **단원도** 전사본이 원천이다. 스캔 manifest 의 단원을 그대로 두면
+      // 스캔에 단원이 없던 책은 단원 0개로 등록돼 교재관리·오답관리에서 구획이 통째로 사라진다
+      // (2026-10-03 실측: RPM 중학 3-1 1,133문항·중학 3-2 673문항이 전사본에 9·7단원이 있는데도 단원 0으로 등록돼 있었다).
+      const unitIndexByLabel = new Map();
+      units.forEach((unit, index) => {
+        for (const group of unit.groups) for (const id of group.items) unitIndexByLabel.set(id, index);
+      });
+      for (const item of manifest.items) {
+        const index = unitIndexByLabel.get(item.number_label);
+        if (index !== undefined) item.unit_index = index;
+      }
+      // 스캔 manifest 가 들고 있던 단원의 부가 정보(chapter 등)는 code 가 같을 때 이어받는다.
+      const scanUnitByCode = new Map((manifest.units ?? []).map((unit) => [String(unit.code ?? ""), unit]));
+      manifest.units = units.map((unit, index) => {
+        const labels = unit.groups.flatMap((group) => group.items);
+        const sorted = manifest.items.filter((item) => item.unit_index === index).map((item) => item.number_label);
+        return {
+          ...(scanUnitByCode.get(unit.code) ?? {}),
+          position: index,
+          code: unit.code,
+          title: unit.title,
+          item_number_from: sorted[0] ?? labels[0] ?? "",
+          item_number_to: sorted[sorted.length - 1] ?? labels[labels.length - 1] ?? "",
+          item_count: sorted.length
+        };
+      });
+      console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length}) · 단원 ${manifest.units.length}개`);
     }
     if (args.review) await mkdir(path.join(dir, "review"), { recursive: true });
     const only = typeof args.only === "string" ? new Set(args.only.split(",").map((s) => s.trim()).filter(Boolean)) : null;
