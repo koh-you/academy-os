@@ -179,6 +179,44 @@ export function groupItemsByUnit(units, items) {
   return groups.map((group) => ({ ...group, items: [...group.items].sort((a, b) => a.numberSort - b.numberSort) }));
 }
 
+/**
+ * 문항 번호표(`numberLabel`)에서 **책에 찍힌 번호**만 뽑는다.
+ *
+ * 스캔 교재의 번호표는 「인쇄쪽-번호」(`8-01`)라 `Number.parseInt` 를 그대로 쓰면 **쪽 번호**(8)가 나온다.
+ * 그러면 한 쪽의 문항이 전부 같은 숫자로 찍혀 어느 문항인지 구별할 수 없다(2026-10-03 사용자 지적).
+ * 번호는 단원 안에서 이어지므로(`8-01 … 8-10 9-11 …`) 뒤쪽만 쓰면 1~N 으로 제대로 나온다.
+ *
+ * 번호표 모양(등록된 34권 실측): `8-01`(쪽-번호) · `0001`(책 전체 연속) ·
+ * `16-e1`(예제) · `12-h1`(핵심문제) · `12-c1`(확인) · `34-u1`(유제).
+ */
+const NUMBER_KINDS = Object.freeze({ e: "예", h: "핵", c: "확", u: "유" });
+
+export function itemDisplayNumber(numberLabel) {
+  const text = String(numberLabel ?? "").trim();
+  if (!text) return "";
+  const tail = text.includes("-") ? text.slice(text.indexOf("-") + 1) : text;
+  const kind = /^([a-z]+)(\d+)$/.exec(tail);
+  if (kind) return `${NUMBER_KINDS[kind[1]] ?? kind[1]}${Number(kind[2])}`;
+  const digits = Number(tail.replace(/\D/g, ""));
+  return Number.isFinite(digits) && digits > 0 ? String(digits) : tail;
+}
+
+/**
+ * 단원 안을 다시 **교재의 구획**(개념·유형·실전 머리)으로 나눈다. 교재는 「개념 01 → 유형 001~009 → 실전」처럼
+ * 구획돼 있고 그 이름이 `typeLabel` 에 그대로 들어 있는데 화면이 쓰지 않아 번호만 줄줄이 보였다(2026-10-03 요청).
+ * 교재 순서를 지키려고 **이웃한 같은 라벨끼리만** 묶는다 — 같은 이름이 떨어져 두 번 나오면 구획도 둘이다.
+ */
+export function groupItemsByTypeSection(items) {
+  const sections = [];
+  for (const item of items) {
+    const label = String(item.typeLabel ?? "").trim();
+    const last = sections[sections.length - 1];
+    if (last && last.label === label) last.items.push(item);
+    else sections.push({ label, items: [item] });
+  }
+  return sections;
+}
+
 /** 한 학생 기준 문항 상태: none · wrong · correct · recovered(1회차 오답 → 뒤 회차 정답). */
 export function studentItemState(attempts, studentId, itemId) {
   const { latest, first } = summarizeAttempts(attempts, new Set([studentId]));
