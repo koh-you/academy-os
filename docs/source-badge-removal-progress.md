@@ -70,6 +70,18 @@
 
 합계 29,511문항.
 
+## 등록만 대기 (조판 끝)
+
+토큰이 만료돼 등록만 실패한 책이다. **조판은 이미 끝났으므로 다시 조판하지 않는다** —
+토큰을 새로 받은 뒤 아래 명령으로 등록만 돌린다.
+
+```bash
+node scripts/latex-bank/retypeset-all.mjs --upload-only --ids \
+  ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1
+```
+
+갱신: 2026-10-03 09:41
+
 ## 재개 방법
 
 ```bash
@@ -92,7 +104,10 @@ ACADEMY_TEACHER_TOKEN="$(tr -d '\r\n' < ~/.academy-token.txt)" \
 
 - 조판은 **10분을 넘을 수 있다.** 배경 실행으로 띄우고 기다린다(메모리: `long-builds-detach`).
 - 이번 변경은 **모든 문항의 이미지를 바꾼다**(배지가 빠지므로). 업로드량이 교재당 전 문항이다.
-- 업로드 토큰은 `~/.academy-token.txt`(90일, 2026-10-03 발급). `401` 이면 `scripts/mint-bank-token.ps1` 로 재발급.
+- 업로드 토큰이 `401` 이면 **만료**다. PowerShell 에서 `.\scripts\mint-bank-token.ps1` 로 90일짜리를
+  다시 받는다(Render → academy-os API → Environment → `OPS_TOKEN_SIGNING_SECRET` 필요).
+  2026-10-03 캠페인 중 7권째에서 실제로 만료됐다 — 파일에 있던 것이 90일 토큰이 아니라 **교사 세션 토큰**이었다.
+- 토큰이 만료돼도 조판은 계속 성공한다. 다시 조판하지 말고 위 「등록만 대기」의 명령으로 등록만 돌린다.
 - 한 권 끝날 때마다 commit 한다. 중간에 끊겨도 다음 세션이 표를 보고 이어간다.
 
 ## 남은 일 (이 작업 밖)
