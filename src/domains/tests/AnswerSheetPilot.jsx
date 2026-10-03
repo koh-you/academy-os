@@ -2,7 +2,7 @@ import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { useEffect, useRef, useState } from "react";
 import { postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { ANSWER_SHEET_VERSION, answerCellBox, createAnswerRows, gradePilotAnswers, readPilotFile } from "./answerSheetPilotModel.js";
-import { downloadBlankAnswerSheet, downloadPilotBlob, imageToPilotPdf, loadPilotPages } from "./answerSheetPilotFiles.js";
+import { downloadBlankAnswerSheet, downloadPilotBlob, loadPilotPages, pilotRecognitionPdf } from "./answerSheetPilotFiles.js";
 import "./answerSheetPilot.css";
 
 const labels = { correct: "정답", incorrect: "오답", blank: "무응답", review: "확인 필요", excluded: "제외" };
@@ -11,6 +11,8 @@ export function AnswerSheetPilot() {
   const [key, setKey] = useState(createAnswerRows);
   const [keyConfirmed, setKeyConfirmed] = useState(false);
   const [keyImage, setKeyImage] = useState("");
+  // 이번 세션에 올린 원본 파일. 판독은 이걸로 보내 재압축을 피한다(실험 파일에는 담지 않는다).
+  const [keySource, setKeySource] = useState(null);
   const [sheets, setSheets] = useState([]);
   const [selected, setSelected] = useState("");
   const [mode, setMode] = useState("key");
@@ -50,7 +52,7 @@ export function AnswerSheetPilot() {
       if (target === "key") {
         if (pages.length !== 1) throw new Error("정답지는 한 쪽짜리 파일로 올려 주세요.");
         if (dirty && !window.confirm("정답지를 바꾸면 기존 정답과 채점 확정을 해제합니다. 계속할까요?")) return;
-        setKeyImage(pages[0].image); setKey(createAnswerRows()); setKeyConfirmed(false); setMode("key");
+        setKeyImage(pages[0].image); setKeySource(pages[0].source ?? null); setKey(createAnswerRows()); setKeyConfirmed(false); setMode("key");
       } else {
         if (sheets.length + pages.length > 30) throw new Error("한 실험에서 답안은 최대 30장입니다.");
         const added = pages.map((page) => ({ ...page, id: crypto.randomUUID(), rows: createAnswerRows() }));
@@ -63,7 +65,7 @@ export function AnswerSheetPilot() {
     if (!image) return;
     if (!window.confirm("선택한 한 쪽을 외부 AI 서비스로 보내 유료 판독합니다. 현재 입력은 판독 초안으로 교체됩니다. 실행할까요?")) return;
     await run(async () => {
-      const pdfBase64 = await imageToPilotPdf(image);
+      const pdfBase64 = await pilotRecognitionPdf(mode === "key" ? { image: keyImage, source: keySource } : sheet);
       const result = await postJsonWithTimeout("/api/answer-sheet-pilot/recognize", { pdfBase64, paidConsent: true }, 120000, "판독 응답을 받지 못했습니다. 비용이 발생했을 수 있습니다. 자동 재시도하지 않습니다.");
       updateRows(() => result.rows);
     });
@@ -83,8 +85,8 @@ export function AnswerSheetPilot() {
       <label>정답지 올리기<input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => { const file = e.target.files[0]; e.target.value = ""; upload(file, "key"); }} /></label>
       <label>학생 답안 올리기<input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => { const file = e.target.files[0]; e.target.value = ""; upload(file, "student"); }} /></label>
       <button type="button" onClick={() => { const id = crypto.randomUUID(); if (sheets.length >= 30) return; setSheets([...sheets, { id, name: `답안 ${sheets.length + 1}`, image: "", rows: createAnswerRows() }]); setSelected(id); setMode("student"); }}>직접 입력으로 실험</button>
-      <button type="button" onClick={() => downloadPilotBlob(new Blob([JSON.stringify({ version: ANSWER_SHEET_VERSION, key, keyConfirmed, allowRational, sheets, keyImage })], { type: "application/json" }), "채점실험.json")}>실험 파일 내려받기</button>
-      <label>실험 파일 다시 열기<input type="file" accept=".json" onChange={(e) => { const file = e.target.files[0]; e.target.value = ""; if (!file) return; run(async () => { if (file.size > 80 * 1024 * 1024) throw new Error("실험 파일은 80MB 이하만 열 수 있습니다."); const raw = JSON.parse(await file.text()); const value = readPilotFile(raw); if (dirty && !window.confirm("현재 실험을 파일 내용으로 바꿀까요?")) return; setKey(value.key); setKeyConfirmed(value.keyConfirmed); setAllowRational(value.allowRational); setSheets(value.sheets); setKeyImage(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(raw.keyImage || "") ? raw.keyImage : ""); setSelected(value.sheets[0]?.id || ""); setMode("key"); }); }} /></label>
+      <button type="button" onClick={() => downloadPilotBlob(new Blob([JSON.stringify({ version: ANSWER_SHEET_VERSION, key, keyConfirmed, allowRational, keyImage, sheets: sheets.map(({ source, ...rest }) => rest) })], { type: "application/json" }), "채점실험.json")}>실험 파일 내려받기</button>
+      <label>실험 파일 다시 열기<input type="file" accept=".json" onChange={(e) => { const file = e.target.files[0]; e.target.value = ""; if (!file) return; run(async () => { if (file.size > 80 * 1024 * 1024) throw new Error("실험 파일은 80MB 이하만 열 수 있습니다."); const raw = JSON.parse(await file.text()); const value = readPilotFile(raw); if (dirty && !window.confirm("현재 실험을 파일 내용으로 바꿀까요?")) return; setKey(value.key); setKeyConfirmed(value.keyConfirmed); setAllowRational(value.allowRational); setSheets(value.sheets); setKeyImage(/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(raw.keyImage || "") ? raw.keyImage : ""); setKeySource(null); setSelected(value.sheets[0]?.id || ""); setMode("key"); }); }} /></label>
     </fieldset>
     <p>스캔 설정 확인은 후속 작업입니다. 우선 PDF·JPG·PNG를 올리세요. 학생 PDF는 최대 10쪽이며 한 쪽을 한 명의 답안으로 취급합니다.</p>
     {error && <p role="alert" className="pilotError">{error}</p>}

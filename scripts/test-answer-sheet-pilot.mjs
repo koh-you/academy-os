@@ -42,6 +42,23 @@ pdf.addPage();
 const twoPages = await pdf.saveAsBase64();
 await assert.rejects(() => recognizeAnswerSheet({ paidConsent: true, pdfBase64: twoPages }, deps), /한 쪽/);
 assert.equal(calls, 1);
+// 판독으로 보내는 쪽은 원본 그대로여야 한다. 예전에는 화면용 1800px JPEG 을 A4 에 **늘려** 넣어서
+// 스캐너 JPEG → 우리 JPEG → 판독기 래스터화로 손실이 세 번 겹치고 사진 비율까지 눌렸다.
+// 여기서는 pdf-lib 가 원본 PDF 한 쪽을 그대로 복사하는지(쪽 수 1 · 원본 크기 유지) 확인한다.
+const sourcePdf = await PDFDocument.create();
+sourcePdf.addPage([300, 500]);
+sourcePdf.addPage([400, 600]);
+const sourceBytes = await sourcePdf.save();
+const extracted = await PDFDocument.create();
+const [onlySecond] = await extracted.copyPages(await PDFDocument.load(sourceBytes), [1]);
+extracted.addPage(onlySecond);
+assert.equal(extracted.getPageCount(), 1, "판독은 한 쪽만 보낸다");
+assert.deepEqual(
+  [Math.round(extracted.getPage(0).getWidth()), Math.round(extracted.getPage(0).getHeight())],
+  [400, 600],
+  "원본 쪽 크기를 A4 로 늘이지 않는다"
+);
+
 let session = null, response;
 let release;
 const registry = createAnswerSheetPilotRouteRegistry({
