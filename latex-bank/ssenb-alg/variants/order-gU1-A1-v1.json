@@ -1,0 +1,152 @@
+{
+ "book": "쎈B 대수",
+ "bank": "latex-bank/ssenb-alg",
+ "variant_level": 1,
+ "contract": {
+  "response_path": "C:\\Users\\PC\\github\\academy-os-wt-collections\\latex-bank\\ssenb-alg\\variants\\response-gU1-A1-v1.json",
+  "response_shape": "{ unit, groups: [{ id, section, items: [변형id…] }], items: { 변형id: {…} } }",
+  "item_shape": {
+   "page": "원본과 같은 값",
+   "variant_of": "원본 id",
+   "variant_level": 1,
+   "tag": "숫자변형",
+   "body": "원문 골조를 그대로 두고 숫자만 바꾼다",
+   "choices": "원본이 객관식이면 같은 개수로 전부 다시 계산",
+   "choices_layout": "원본 그대로",
+   "figure": "figure_rule 에 따라",
+   "answer": "다시 계산한 답(객관식은 ①~⑤ 중 하나)",
+   "answer_source": "계산",
+   "solution": "답이 맞는지 사람이 확인할 수 있는 풀이. 필수 — 없으면 적용이 거부된다",
+   "variation_note": "무엇을 무엇으로 바꿨나(예: AB=4→6, BC=8→12)"
+  },
+  "rules": [
+   "묻는 것과 풀이 방법은 바꾸지 않는다. 바꾸는 것은 숫자(와 그에 따라 달라지는 답)뿐이다.",
+   "답이 정수·간단한 분수로 떨어지게 숫자를 고른다. 원본이 깔끔하게 떨어졌으면 변형도 떨어져야 한다.",
+   "원본과 답이 같은 값이 되게 만들지 않는다 — 답만 베껴 쓰면 변형이 소용없다.",
+   "객관식 오답 보기도 다시 만든다. 원본 보기를 그대로 두면 계산하지 않고도 답이 보인다.",
+   "단원·유형의 범위를 넘는 개념을 끌어오지 않는다(주문서의 section 을 지킨다).",
+   "풀이(solution)에 중간값을 적는다. 답만 적으면 검증이 불가능하다.",
+   "확신이 없으면 만들지 말고 skip 에 id 와 이유를 적는다. 틀린 변형은 없는 변형보다 나쁘다."
+  ],
+  "verify": [
+   "node scripts/latex-bank/check-batch.mjs <응답파일> --bank <책>   (조판 검증)",
+   "node scripts/latex-bank/apply-variants.mjs --bank <책> --response <응답파일> --check   (계약 검증)"
+  ]
+ },
+ "orders": [
+  {
+   "variant_id": "7-01v1",
+   "variant_of": "7-01",
+   "variant_level": 1,
+   "unit": "01 지수",
+   "group_id": "U1-A1",
+   "section": "유형 01 거듭제곱근",
+   "figure_kind": "none",
+   "figure_rule": "그림 없음 — 본문 숫자만 바꾼다.",
+   "original": {
+    "page": 7,
+    "tag": "대표 문제",
+    "body": "다음 중 옳은 것은?",
+    "choices": [
+     "$27$의 세제곱근은 $\\sqrt[3]{27}$뿐이다.",
+     "$64$의 세제곱근 중 실수인 것은 두 개이다.",
+     "$6$의 네제곱근 중 실수인 것은 $-\\sqrt[4]{6}$, $\\sqrt[4]{6}$이다.",
+     "$n$이 홀수일 때, $-5$의 $n$제곱근 중 실수인 것은 없다.",
+     "$n$이 짝수일 때, $-2$의 $n$제곱근 중 실수인 것은 한 개이다."
+    ],
+    "choices_layout": "v"
+   }
+  },
+  {
+   "variant_id": "7-02v1",
+   "variant_of": "7-02",
+   "variant_level": 1,
+   "unit": "01 지수",
+   "group_id": "U1-A1",
+   "section": "유형 01 거듭제곱근",
+   "figure_kind": "none",
+   "figure_rule": "그림 없음 — 본문 숫자만 바꾼다.",
+   "original": {
+    "page": 7,
+    "tag": "",
+    "body": "다음을 계산하시오.\\exprbox{$\\sqrt[3]{(-3)^3}+\\sqrt[4]{(-4)^4}+\\sqrt[5]{(-5)^5}+\\cdots+\\sqrt[12]{(-12)^{12}}$}"
+   }
+  },
+  {
+   "variant_id": "7-03v1",
+   "variant_of": "7-03",
+   "variant_level": 1,
+   "unit": "01 지수",
+   "group_id": "U1-A1",
+   "section": "유형 01 거듭제곱근",
+   "figure_kind": "none",
+   "figure_rule": "그림 없음 — 본문 숫자만 바꾼다.",
+   "original": {
+    "page": 7,
+    "tag": "",
+    "body": "$\\sqrt[3]{9}$의 제곱근 중 음수인 것을 $a$, $81$의 세제곱근 중 실수인 것을 $b$라 할 때, $b-a$의 값은?",
+    "choices": [
+     "$\\sqrt[3]{3}$",
+     "$2\\sqrt[3]{3}$",
+     "$3\\sqrt[3]{3}$",
+     "$4\\sqrt[3]{3}$",
+     "$5\\sqrt[3]{3}$"
+    ],
+    "choices_layout": ""
+   }
+  },
+  {
+   "variant_id": "7-04v1",
+   "variant_of": "7-04",
+   "variant_level": 1,
+   "unit": "01 지수",
+   "group_id": "U1-A1",
+   "section": "유형 01 거듭제곱근",
+   "figure_kind": "none",
+   "figure_rule": "그림 없음 — 본문 숫자만 바꾼다.",
+   "original": {
+    "page": 7,
+    "tag": "서술형",
+    "body": "실수 전체의 집합의 부분집합 $A$, $B$, $C$를\\par\\smallskip\\centerline{$\\begin{aligned}&A=\\{-3,\\,-2,\\,2,\\,3\\},\\\\&B=\\{|a|\\,|\\,a\\in A\\},\\\\&C=\\{x\\,|\\,x=\\sqrt[b]{ab},\\ a\\in A,\\ b\\in B\\}\\end{aligned}$}\\par\\smallskip\\noindent 라 할 때, 집합 $C$의 원소의 개수를 구하시오."
+   }
+  },
+  {
+   "variant_id": "7-05v1",
+   "variant_of": "7-05",
+   "variant_level": 1,
+   "unit": "01 지수",
+   "group_id": "U1-A1",
+   "section": "유형 01 거듭제곱근",
+   "figure_kind": "none",
+   "figure_rule": "그림 없음 — 본문 숫자만 바꾼다.",
+   "original": {
+    "page": 7,
+    "tag": "",
+    "body": "실수 $x$와 $2$ 이상의 자연수 $n$에 대하여 $x$의 $n$제곱근 중에서 실수인 것의 개수를 $f_n(x)$라 할 때,\\par\\smallskip\\centerline{$f_2(5)-f_3(\\sqrt{6})+f_4(-4)-f_5(-\\sqrt{7})$}\\par\\smallskip\\noindent 의 값은?",
+    "choices": [
+     "$-2$",
+     "$-1$",
+     "$0$",
+     "$1$",
+     "$2$"
+    ],
+    "choices_layout": ""
+   }
+  },
+  {
+   "variant_id": "7-06v1",
+   "variant_of": "7-06",
+   "variant_level": 1,
+   "unit": "01 지수",
+   "group_id": "U1-A1",
+   "section": "유형 01 거듭제곱근",
+   "figure_kind": "none",
+   "figure_rule": "그림 없음 — 본문 숫자만 바꾼다.",
+   "original": {
+    "page": 7,
+    "tag": "",
+    "body": "자연수 $n$이 $3\\le n\\le 11$일 때, $-n^2+9n-18$의 $n$제곱근 중에서 음의 실수가 존재하도록 하는 모든 $n$의 값의 합을 구하시오."
+   }
+  }
+ ]
+}
