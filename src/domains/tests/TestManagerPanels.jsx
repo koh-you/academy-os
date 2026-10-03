@@ -22,6 +22,7 @@ export function TestManagerTabs({ activeTab = "attempts", onChange }) {
       >
         시험지 제작
       </button>
+      <button aria-selected={activeTab === "answerPilot"} className={activeTab === "answerPilot" ? "active" : ""} onClick={() => onChange?.("answerPilot")} role="tab" type="button">채점 실험</button>
       <button
         aria-selected={activeTab === "attempts"}
         className={activeTab === "attempts" ? "active" : ""}

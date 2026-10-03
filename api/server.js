@@ -1,4 +1,4 @@
-﻿import http from "node:http";
+import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
@@ -167,6 +167,8 @@ import {
   timingSafeEqualText
 } from "../src/shared/server/sessionRouteGuard.js";
 import { createSystemRouteRegistry } from "../src/shared/server/systemRouteRegistry.js";
+import { createAnswerSheetPilotRouteRegistry } from "../src/shared/server/answerSheetPilotRouteRegistry.js";
+import { recognizeAnswerSheet } from "../src/shared/server/answerSheetRecognition.js";
 import { createAuthLoginRouteRegistry } from "../src/shared/server/authLoginRouteRegistry.js";
 import { createTeacherAccountRouteRegistry } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { createTeacherAccountAdminRouteRegistry } from "../src/shared/server/teacherAccountAdminRouteRegistry.js";
@@ -334,6 +336,8 @@ const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
 const attendanceAlimtalkDedupeWindowMs = 2 * 60 * 1000;
 const recentAttendanceAlimtalkSends = new Map();
 const allowClientRuntimeError = createClientRuntimeErrorRateLimiter();
+const { dispatch: dispatchAnswerSheetPilotRoute } = createAnswerSheetPilotRouteRegistry({ readJsonBody, sendJson, recognize: (payload) => recognizeAnswerSheet(payload, { env: process.env }), getTeacherSession });
+
 const { dispatch: dispatchSystemRoute } = createSystemRouteRegistry({
   allowClientRuntimeError,
   getCoreDataStatus,
@@ -4992,6 +4996,7 @@ const server = http.createServer(async (request, response) => {
     }
   }
 
+  if (await dispatchAnswerSheetPilotRoute({ request, response, requestUrl })) return;
   if (await dispatchSystemRoute({ request, response, requestUrl })) return;
   if (await dispatchAuthLoginRoute({ request, response, requestUrl })) return;
   if (await dispatchPortalReadRoute({ request, response, requestUrl })) return;

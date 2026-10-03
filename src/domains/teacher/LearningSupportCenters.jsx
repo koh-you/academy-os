@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   createTestAttemptId,
   createTestSessionIdForPaper,
@@ -44,6 +44,8 @@ import {
 import { createResourceMaterialDraftId } from "../resources/resourceMaterialPersistence.js";
 import { BookWrongAnswerBoard } from "../problems/BookWrongAnswerBoard.jsx";
 import { isActiveStudent } from "../students/lessonRosterSelectors.js";
+
+const AnswerSheetPilot = lazy(() => import("../tests/AnswerSheetPilot.jsx").then((module) => ({ default: module.AnswerSheetPilot })));
 
 const wrongProblemSaveMessages = {
   dirty: "아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.",
@@ -868,6 +870,8 @@ export function MaterialManager({
         title="시험지관리"
       />
       <TestManagerTabs activeTab={activeTab} onChange={setActiveTab} />
+
+      <div hidden={activeTab !== "answerPilot"}><Suspense fallback={<p>채점 실험을 여는 중입니다.</p>}><AnswerSheetPilot /></Suspense></div>
 
       {activeTab === "attempts" ? (
         <section className="panel materialPanel testAttemptPanel" ref={attemptFormRef}>
