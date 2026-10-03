@@ -59,8 +59,15 @@ const block = [
   ""
 ].join("\n");
 
-const next = text.includes(marker)
-  ? text.replace(new RegExp(`${marker}[\\s\\S]*?(?=\\n## |$)`), `${block}\n`)
-  : text.replace("## 재개 방법", `${block}\n## 재개 방법`);
+// 머리말에 괄호가 있어 그대로 정규식에 넣으면 포획 그룹이 돼 **아무것도 안 바뀐다**
+// (2026-10-03: 「적었습니다」라고 찍고 실제로는 옛 목록이 그대로 남았다). 글자 그대로 찾는다.
+const start = text.indexOf(marker);
+let next;
+if (start >= 0) {
+  const after = text.indexOf("\n## ", start + marker.length);
+  next = text.slice(0, start) + `${block}\n` + (after >= 0 ? text.slice(after + 1) : "");
+} else {
+  next = text.replace("## 재개 방법", `${block}\n## 재개 방법`);
+}
 await writeFile(PROGRESS, next, "utf8");
 console.log(`\n${PROGRESS} 에 적었습니다.`);

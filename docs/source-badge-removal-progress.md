@@ -77,10 +77,10 @@
 
 ```bash
 node scripts/latex-bank/retypeset-all.mjs --upload-only --ids \
-  ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1
+  ssenb-alg,ssen-basic-prob,ssen-basic-cm1,lssen-cm1,lssen-cm2,ssen-m32
 ```
 
-갱신: 2026-10-03 09:41
+갱신: 2026-10-03 10:09
 
 ## 재개 방법
 
