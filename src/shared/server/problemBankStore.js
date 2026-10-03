@@ -259,6 +259,7 @@ export function createProblemBankStore({
       item_number_from: textOf(unit.item_number_from),
       item_number_to: textOf(unit.item_number_to)
     }));
+    const hasVariants = items.some((item) => textOf(item.variant_of));
     const itemRows = items.map((item) => ({
       item_id: textOf(item.item_id),
       book_id: bookId,
@@ -274,10 +275,13 @@ export function createProblemBankStore({
       has_subquestions: Boolean(item.has_subquestions) || Boolean(item.has_shared_passage),
       review_status: ["ai_checked", "flagged", "human_ok"].includes(item.review_status) ? item.review_status : "ai_checked",
       review_note: textOf(item.review_note),
-      // 변형 문항일 때만 넣는다. 늘 넣으면 마이그레이션(20261003_problem_bank_variants.sql)을
-      // 아직 적용하지 않은 환경에서 **보통 교재 등록까지** 「없는 칸」으로 막힌다.
-      ...(textOf(item.variant_of)
-        ? { variant_of: textOf(item.variant_of), variant_level: integerOf(item.variant_level, 1) }
+      // 숫자변형 칸은 **이 교재에 변형이 하나라도 있을 때만, 그리고 그때는 모든 행에** 넣는다.
+      //   - 변형 행에만 넣으면 PostgREST 가 통째로 거절한다("All object keys must match" ·
+      //     한 번에 넣는 행은 키가 모두 같아야 한다). 2026-10-03 운영 등록에서 HTTP 500 으로 실제 발생.
+      //   - 그렇다고 늘 넣으면 마이그레이션(20261003_problem_bank_variants.sql)을 아직 적용하지 않은
+      //     환경에서 변형이 없는 보통 교재 등록까지 「없는 칸」으로 막힌다.
+      ...(hasVariants
+        ? { variant_of: textOf(item.variant_of) || null, variant_level: integerOf(item.variant_level) }
         : {}),
       updated_at: now
     }));
