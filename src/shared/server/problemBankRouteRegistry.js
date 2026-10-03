@@ -16,6 +16,11 @@ export const problemBankRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/problem-bank/attempts" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/attempts" }),
   Object.freeze({ method: "GET", path: "/api/problem-bank/book-audit" }),
+  Object.freeze({ method: "GET", path: "/api/problem-bank/collections" }),
+  Object.freeze({ method: "GET", path: "/api/problem-bank/collection" }),
+  Object.freeze({ method: "POST", path: "/api/problem-bank/collection" }),
+  Object.freeze({ method: "POST", path: "/api/problem-bank/collection-build" }),
+  Object.freeze({ method: "DELETE", path: "/api/problem-bank/collection" }),
   Object.freeze({ method: "GET", path: "/api/portal-problem-bank" }),
   Object.freeze({ method: "POST", path: "/api/portal-problem-bank/item-images" })
 ]);
@@ -37,6 +42,11 @@ export const problemBankRouteSignatures = Object.freeze([
  * @param {(studentId: string) => Promise<*>} deps.listStudentProblemBankSummary
  * @param {(studentId: string, itemIds: string[]) => Promise<*>} deps.resolveStudentProblemBankImages
  * @param {(bookId: string) => Promise<*>} deps.auditProblemBankBookImages
+ * @param {() => Promise<*>} deps.listProblemBankCollections
+ * @param {(collectionId: string) => Promise<*>} deps.getProblemBankCollection
+ * @param {(payload: *) => Promise<*>} deps.saveProblemBankCollection
+ * @param {(collectionId: string, options: *) => Promise<*>} deps.setProblemBankCollectionStatus
+ * @param {(collectionId: string) => Promise<*>} deps.deleteProblemBankCollection
  * @param {(dataUrl: string) => { buffer: *, mimeType: string }} deps.parseDataUrl
  * @param {(request: *, options?: { limitBytes?: number }) => Promise<Record<string, *>>} deps.readJsonBody
  * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
@@ -58,6 +68,11 @@ export function createProblemBankRouteRegistry({
   listStudentProblemBankSummary,
   resolveStudentProblemBankImages,
   auditProblemBankBookImages,
+  listProblemBankCollections,
+  getProblemBankCollection,
+  saveProblemBankCollection,
+  setProblemBankCollectionStatus,
+  deleteProblemBankCollection,
   parseDataUrl,
   readJsonBody,
   sendJson
@@ -158,6 +173,36 @@ export function createProblemBankRouteRegistry({
       if (request.method === "GET" && pathname === "/api/problem-bank/book-audit") {
         const bookId = requestUrl.searchParams.get("bookId") ?? "";
         sendJson(request, response, 200, { ok: true, ...(await auditProblemBankBookImages(bookId)) });
+        return true;
+      }
+      // 자체 교재 초안 — 몇 번이고 고치며 중간저장한다. 저장은 통째로(구획·순서가 함께 움직인다).
+      if (request.method === "GET" && pathname === "/api/problem-bank/collections") {
+        sendJson(request, response, 200, { ok: true, collections: await listProblemBankCollections() });
+        return true;
+      }
+      if (request.method === "GET" && pathname === "/api/problem-bank/collection") {
+        const detail = await getProblemBankCollection(requestUrl.searchParams.get("collectionId") ?? "");
+        sendJson(request, response, 200, { ok: true, ...detail });
+        return true;
+      }
+      if (request.method === "POST" && pathname === "/api/problem-bank/collection") {
+        const payload = await readJsonBody(request, { limitBytes: 2 * 1024 * 1024 });
+        const detail = await saveProblemBankCollection(payload);
+        sendJson(request, response, 200, { ok: true, ...detail });
+        return true;
+      }
+      if (request.method === "POST" && pathname === "/api/problem-bank/collection-build") {
+        const payload = await readJsonBody(request);
+        const detail = await setProblemBankCollectionStatus(payload?.collectionId ?? "", {
+          status: payload?.status,
+          publishedBookId: payload?.publishedBookId
+        });
+        sendJson(request, response, 200, { ok: true, ...detail });
+        return true;
+      }
+      if (request.method === "DELETE" && pathname === "/api/problem-bank/collection") {
+        const result = await deleteProblemBankCollection(requestUrl.searchParams.get("collectionId") ?? "");
+        sendJson(request, response, 200, { ok: true, ...result });
         return true;
       }
       if (request.method === "GET" && pathname === "/api/problem-bank/attempts") {

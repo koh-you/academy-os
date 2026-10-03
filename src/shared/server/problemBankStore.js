@@ -65,6 +65,53 @@ export function createProblemBankStore({
     return Number.isFinite(number) ? Math.trunc(number) : fallback;
   }
 
+  /**
+   * 소수를 살리는 숫자. 정렬값에만 쓴다 — 숫자변형이 `원본 + 0.1` 로 원본 바로 뒤에 서야 하는데
+   * 잘라 버리면 원본과 같은 자리가 된다(2026-10-03: 10-19 와 10-19v1 이 둘 다 1019 였다).
+   */
+  function decimalOf(value, fallback = 0) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+  }
+
+  function fromCollectionRow(row) {
+    return {
+      collectionId: row.collection_id,
+      title: row.title,
+      folderPath: row.folder_path ?? "",
+      subject: row.subject ?? "",
+      grade: row.grade ?? "",
+      status: row.status ?? "draft",
+      printSettings: row.print_settings && typeof row.print_settings === "object" ? row.print_settings : {},
+      publishedBookId: row.published_book_id ?? "",
+      publishedAt: row.published_at ?? null,
+      note: row.note ?? "",
+      updatedAt: row.updated_at ?? null
+    };
+  }
+
+  function fromCollectionSectionRow(row) {
+    return {
+      sectionId: row.section_id,
+      collectionId: row.collection_id,
+      position: row.position ?? 0,
+      title: row.title ?? "",
+      note: row.note ?? ""
+    };
+  }
+
+  function fromCollectionItemRow(row) {
+    return {
+      entryId: row.entry_id,
+      collectionId: row.collection_id,
+      sectionId: row.section_id,
+      position: row.position ?? 0,
+      itemId: row.item_id,
+      includeVariants: Boolean(row.include_variants),
+      note: row.note ?? ""
+    };
+  }
+
   function fromBookRow(row) {
     return {
       bookId: row.book_id,
@@ -102,7 +149,7 @@ export function createProblemBankStore({
       bookId: row.book_id,
       unitId: row.unit_id ?? "",
       numberLabel: row.number_label,
-      numberSort: row.number_sort ?? 0,
+      numberSort: Number(row.number_sort ?? 0),
       printedPage: row.printed_page ?? 0,
       pdfPage: row.pdf_page ?? 0,
       typeLabel: row.type_label ?? "",
@@ -265,7 +312,7 @@ export function createProblemBankStore({
       book_id: bookId,
       unit_id: Number.isInteger(item.unit_index) && unitRows[item.unit_index] ? unitRows[item.unit_index].unit_id : null,
       number_label: textOf(item.number_label),
-      number_sort: integerOf(item.number_sort),
+      number_sort: decimalOf(item.number_sort),
       printed_page: integerOf(item.printed_page),
       pdf_page: integerOf(item.pdf_page),
       type_label: textOf(item.type_label),
@@ -604,6 +651,155 @@ export function createProblemBankStore({
     return { attempts: saved.map(fromAttemptRow), cleared: clears };
   }
 
+  // ── 자체 교재 초안 ───────────────────────────────────────────────────────────
+  // 교재 제작은 한 번에 끝나지 않는다. 초안은 며칠에 걸쳐 고쳐지므로 **문항을 복사하지 않고 참조**한다.
+  // 복사는 「제작」에서 한 번만 일어난다(기획: docs/problem-bank-composed-book-plan.md).
+
+  const collectionStatuses = new Set(["draft", "requested", "published"]);
+
+  function newId(prefix) {
+    const random = globalThis.crypto?.randomUUID?.().replace(/-/g, "").slice(0, 12)
+      ?? Math.random().toString(36).slice(2, 14);
+    return `${prefix}_${random}`;
+  }
+
+  /** 초안 목록. 문항까지 읽지 않는다(목록 화면은 제목·개수만 쓴다). */
+  async function listProblemBankCollections() {
+    requireDatabase();
+    const [collections, items] = await Promise.all([
+      listRows("problem_bank_collections", "select=*&order=updated_at.desc"),
+      listRows("problem_bank_collection_items", "select=collection_id")
+    ]);
+    const counts = new Map();
+    for (const row of items) counts.set(row.collection_id, (counts.get(row.collection_id) ?? 0) + 1);
+    return collections.map((row) => ({ ...fromCollectionRow(row), itemCount: counts.get(row.collection_id) ?? 0 }));
+  }
+
+  /** 초안 하나 — 구획과 문항까지. 문항의 본문은 원본 교재에서 읽으므로 여기서는 참조만 돌려준다. */
+  async function getProblemBankCollection(collectionId) {
+    requireDatabase();
+    const id = textOf(collectionId);
+    if (!id) throw createStatusError("초안 id 가 없습니다.", 400);
+    const rows = await listRows("problem_bank_collections", `select=*&collection_id=eq.${encodeURIComponent(id)}`);
+    if (!rows[0]) throw createStatusError("초안을 찾지 못했습니다.", 404, "not_found");
+    const [sections, entries] = await Promise.all([
+      listRows("problem_bank_collection_sections", `select=*&collection_id=eq.${encodeURIComponent(id)}&order=position.asc`),
+      listRows("problem_bank_collection_items", `select=*&collection_id=eq.${encodeURIComponent(id)}&order=position.asc`)
+    ]);
+    return {
+      collection: fromCollectionRow(rows[0]),
+      sections: sections.map(fromCollectionSectionRow),
+      items: entries.map(fromCollectionItemRow)
+    };
+  }
+
+  /**
+   * 초안을 **통째로** 저장한다(구획·순서를 끌어 옮기는 화면이라 부분 저장은 순서가 어긋난다).
+   * 문항은 `section_id` 가 아니라 **구획의 자리(sectionIndex)** 로 받는다 — 화면이 아직 서버 id 를
+   * 모르는 새 구획도 같은 요청에서 만들어지기 때문이다.
+   */
+  async function saveProblemBankCollection(payload) {
+    requireDatabase();
+    const title = textOf(payload?.title);
+    if (!title) throw createStatusError("교재 이름을 적어 주세요.", 400);
+    const sections = Array.isArray(payload?.sections) ? payload.sections : [];
+    if (sections.length > 100) throw createStatusError("구획은 100개까지 담습니다.", 400);
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    // 상한은 조판 시간과 미리보기 속도에서 온다. 넘으면 막지 말고 화면이 미리 알린다.
+    if (items.length > 300) throw createStatusError("한 권에 300문항까지 담습니다.", 400);
+
+    const collectionId = textOf(payload?.collectionId) || newId("pbc");
+    const now = new Date().toISOString();
+    const existing = (await listRows("problem_bank_collections", `select=collection_id,status,published_book_id,created_at&collection_id=eq.${encodeURIComponent(collectionId)}`))[0];
+
+    await upsertRows("problem_bank_collections", [{
+      collection_id: collectionId,
+      title,
+      folder_path: textOf(payload?.folderPath),
+      subject: textOf(payload?.subject),
+      grade: textOf(payload?.grade),
+      status: collectionStatuses.has(payload?.status) ? payload.status : (existing?.status ?? "draft"),
+      print_settings: payload?.printSettings && typeof payload.printSettings === "object" ? payload.printSettings : {},
+      note: textOf(payload?.note),
+      updated_at: now
+    }], { onConflict: "collection_id" });
+
+    // 구획·문항은 지우고 다시 넣는다. 자리바꿈이 잦아 부분 갱신이 더 위험하다.
+    await deleteRows("problem_bank_collection_items", `collection_id=eq.${encodeURIComponent(collectionId)}`);
+    await deleteRows("problem_bank_collection_sections", `collection_id=eq.${encodeURIComponent(collectionId)}`);
+
+    const sectionIds = sections.map(() => newId("pbs"));
+    if (sections.length) {
+      await upsertRows("problem_bank_collection_sections", sections.map((section, index) => ({
+        section_id: sectionIds[index],
+        collection_id: collectionId,
+        position: index,
+        title: textOf(section?.title, `구획 ${index + 1}`),
+        note: textOf(section?.note)
+      })), { onConflict: "section_id" });
+    }
+
+    const seen = new Set();
+    const itemRows = [];
+    for (const [index, entry] of items.entries()) {
+      const itemId = textOf(entry?.itemId);
+      const sectionIndex = integerOf(entry?.sectionIndex, -1);
+      if (!itemId || !sectionIds[sectionIndex]) continue;
+      // 한 권 안에 같은 문항이 두 번 들어가지 않는다 — 번호만 다른 같은 문제가 두 번 나오면 학생이 먼저 눈치챈다.
+      if (seen.has(itemId)) continue;
+      seen.add(itemId);
+      itemRows.push({
+        entry_id: newId("pbe"),
+        collection_id: collectionId,
+        section_id: sectionIds[sectionIndex],
+        position: index,
+        item_id: itemId,
+        include_variants: Boolean(entry?.includeVariants),
+        note: textOf(entry?.note)
+      });
+    }
+    if (itemRows.length) await upsertRows("problem_bank_collection_items", itemRows, { onConflict: "entry_id" });
+
+    // 저장 뒤 서버를 다시 읽어 돌려준다 — 화면이 낙관적 상태가 아니라 저장 원천을 보게 한다.
+    return getProblemBankCollection(collectionId);
+  }
+
+  /**
+   * 초안의 제작 상태를 바꾼다.
+   *
+   * 조판은 XeLaTeX 이 필요해 서버에서 돌 수 없고, 지금 34권이 등록된 것과 같은 로컬 경로
+   * (build-collection.mjs → upload-package.mjs)로 돈다. 그래서 서버가 하는 일은 **표식**뿐이다 —
+   *   requested  화면에서 「제작 요청」을 눌렀다. 사람이 돌려야 할 일이 있다는 뜻.
+   *   published  등록까지 끝났다. 어느 교재가 됐는지(publishedBookId)를 같이 적는다.
+   * published 로 닫지 않으면 초안이 영원히 「제작 대기」로 남는다.
+   */
+  async function setProblemBankCollectionStatus(collectionId, { status, publishedBookId } = {}) {
+    requireDatabase();
+    const id = textOf(collectionId);
+    if (!id) throw createStatusError("초안 id 가 없습니다.", 400);
+    const next = status === "published" ? "published" : "requested";
+    const rows = await listRows("problem_bank_collections", `select=*&collection_id=eq.${encodeURIComponent(id)}`);
+    if (!rows[0]) throw createStatusError("초안을 찾지 못했습니다.", 404, "not_found");
+    const items = await listRows("problem_bank_collection_items", `select=entry_id&collection_id=eq.${encodeURIComponent(id)}`);
+    if (!items.length) throw createStatusError("담긴 문항이 없어 제작할 수 없습니다.", 400);
+    const now = new Date().toISOString();
+    await upsertRows("problem_bank_collections", [{
+      ...rows[0],
+      status: next,
+      ...(next === "published" ? { published_book_id: textOf(publishedBookId) || rows[0].published_book_id || null, published_at: now } : {}),
+      updated_at: now
+    }], { onConflict: "collection_id" });
+    return getProblemBankCollection(id);
+  }
+
+  async function deleteProblemBankCollection(collectionId) {
+    requireDatabase();
+    const id = textOf(collectionId);
+    if (!id) throw createStatusError("초안 id 가 없습니다.", 400);
+    await deleteRows("problem_bank_collections", `collection_id=eq.${encodeURIComponent(id)}`);
+    return { collectionId: id, deleted: true };
+  }
+
   return {
     listProblemBankBooks,
     getProblemBankBook,
@@ -617,6 +813,11 @@ export function createProblemBankStore({
     saveProblemBankAttempts,
     listStudentProblemBankSummary,
     resolveStudentProblemBankImages,
-    auditProblemBankBookImages
+    auditProblemBankBookImages,
+    listProblemBankCollections,
+    getProblemBankCollection,
+    saveProblemBankCollection,
+    setProblemBankCollectionStatus,
+    deleteProblemBankCollection
   };
 }

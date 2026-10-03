@@ -109,3 +109,31 @@ export function readFileAsDataUrl(file) {
     reader.readAsDataURL(file);
   });
 }
+
+// ── 자체 교재 초안 ───────────────────────────────────────────────────────────
+// 초안은 몇 번이고 고쳐진다. 저장은 **통째 저장**이고, 서버가 저장 결과를 다시 읽어 돌려주므로
+// 화면은 돌려받은 것을 원천으로 삼는다(낙관적 상태를 들고 있지 않는다).
+
+export function fetchProblemBankCollections() {
+  return withWakeRetry(() => getJsonWithTimeout("/api/problem-bank/collections", 45000).then((result) => result.collections ?? []));
+}
+
+export function fetchProblemBankCollection(collectionId) {
+  return getJsonWithTimeout(`/api/problem-bank/collection?collectionId=${encodeURIComponent(collectionId)}`, 45000);
+}
+
+export function saveProblemBankCollection(payload) {
+  return postJson("/api/problem-bank/collection", payload);
+}
+
+/** 제작 요청 — 상태만 바꾼다. 실제 조판·등록은 로컬에서 돈다(서버에 XeLaTeX 이 없다). */
+export function requestProblemBankCollectionBuild(collectionId) {
+  return postJson("/api/problem-bank/collection-build", { collectionId, status: "requested" });
+}
+
+export async function deleteProblemBankCollection(collectionId) {
+  const response = await apiFetch(`/api/problem-bank/collection?collectionId=${encodeURIComponent(collectionId)}`, { method: "DELETE" });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result?.error || `초안 삭제 실패: ${response.status}`);
+  return result;
+}

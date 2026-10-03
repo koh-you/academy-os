@@ -22,6 +22,26 @@ const registry = createProblemBankRouteRegistry({
     calls.push(`portalImages:${studentId}:${itemIds.join(",")}`);
     return itemIds.map((itemId) => ({ itemId, kind: "body", url: `signed://${itemId}` }));
   },
+  listProblemBankCollections: async () => {
+    calls.push("listCollections");
+    return [{ collectionId: "pbc_1", title: "내신대비", itemCount: 14 }];
+  },
+  getProblemBankCollection: async (collectionId) => {
+    calls.push(`getCollection:${collectionId}`);
+    return { collection: { collectionId, title: "내신대비" }, sections: [], items: [] };
+  },
+  saveProblemBankCollection: async (payload) => {
+    calls.push(`saveCollection:${payload?.title}:${(payload?.items ?? []).length}`);
+    return { collection: { collectionId: "pbc_1", title: payload?.title }, sections: [], items: payload?.items ?? [] };
+  },
+  setProblemBankCollectionStatus: async (collectionId, options) => {
+    calls.push(`setStatus:${collectionId}:${options?.status ?? ""}:${options?.publishedBookId ?? ""}`);
+    return { collection: { collectionId, status: options?.status ?? "requested" }, sections: [], items: [] };
+  },
+  deleteProblemBankCollection: async (collectionId) => {
+    calls.push(`deleteCollection:${collectionId}`);
+    return { collectionId, deleted: true };
+  },
   auditProblemBankBookImages: async (bookId) => {
     calls.push(`audit:${bookId}`);
     return { bookId, regionCount: 3, storedCount: 2, missing: [{ itemId: `${bookId}-0002`, kind: "body", storagePath: `${bookId}/items/x.jpg` }], orphanCount: 0 };
@@ -95,6 +115,11 @@ assert.deepEqual(problemBankRouteSignatures.map((signature) => `${signature.meth
   "GET /api/problem-bank/attempts",
   "POST /api/problem-bank/attempts",
   "GET /api/problem-bank/book-audit",
+  "GET /api/problem-bank/collections",
+  "GET /api/problem-bank/collection",
+  "POST /api/problem-bank/collection",
+  "POST /api/problem-bank/collection-build",
+  "DELETE /api/problem-bank/collection",
   "GET /api/portal-problem-bank",
   "POST /api/portal-problem-bank/item-images"
 ]);
@@ -171,5 +196,41 @@ portalSession = null;
 assert.equal(await registry.dispatch(makeRequest("GET", "/api/portal-problem-bank")), true);
 assert.equal(sends.at(-1).statusCode, 401);
 teacherSession = { teacherId: "teacher-1" };
+
+// ── 자체 교재 초안 ───────────────────────────────────────────────────────────
+// 교사 세션으로만 닿고, 저장은 통째 저장(구획·순서가 함께 움직인다).
+teacherSession = { teacherId: "t1" };
+sends.length = 0;
+calls.length = 0;
+
+assert.equal(await registry.dispatch(makeRequest("GET", "/api/problem-bank/collections")), true);
+assert.equal(sends.at(-1).body.collections[0].itemCount, 14);
+
+assert.equal(await registry.dispatch(makeRequest("GET", "/api/problem-bank/collection?collectionId=pbc_1")), true);
+assert.equal(sends.at(-1).body.collection.collectionId, "pbc_1");
+
+rawBody = { title: "내신대비 지수·로그", sections: [{ title: "지수법칙" }], items: [{ itemId: "pbk_1-0001", sectionIndex: 0 }] };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection")), true);
+assert.ok(calls.includes("saveCollection:내신대비 지수·로그:1"));
+assert.equal(sends.at(-1).body.ok, true);
+
+rawBody = { collectionId: "pbc_1", status: "requested" };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection-build")), true);
+assert.ok(calls.includes("setStatus:pbc_1:requested:"));
+assert.equal(sends.at(-1).body.collection.status, "requested");
+
+// 등록까지 끝나면 「제작 완료」로 닫고 어느 교재가 됐는지 적는다. 안 닫으면 영원히 「제작 대기」다.
+rawBody = { collectionId: "pbc_1", status: "published", publishedBookId: "pbk_made01" };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection-build")), true);
+assert.ok(calls.includes("setStatus:pbc_1:published:pbk_made01"));
+
+assert.equal(await registry.dispatch(makeRequest("DELETE", "/api/problem-bank/collection?collectionId=pbc_1")), true);
+assert.ok(calls.includes("deleteCollection:pbc_1"));
+
+// 교사 세션이 없으면 닿지 않는다.
+teacherSession = null;
+sends.length = 0;
+assert.equal(await registry.dispatch(makeRequest("GET", "/api/problem-bank/collections")), true);
+assert.equal(sends.at(-1).statusCode, 401);
 
 console.log("problem bank route registry fixtures passed");

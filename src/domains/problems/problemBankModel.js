@@ -57,6 +57,33 @@ export function buildFolderTree(books) {
   return root;
 }
 
+/**
+ * 교재를 **시중 교재**와 **자체 교재**로 가른다.
+ *
+ * 배지로 표시만 하는 것과 다르다 — 고치는 법이 서로 다르기 때문에 목록부터 가른다.
+ * 시중 교재는 패키지를 통째로 다시 등록해 고치고, 자체 교재는 초안을 고쳐 다시 제작해 고친다.
+ * 교재관리·오답관리·시험지의 교재 고르개가 모두 이 둘로 나뉜다.
+ */
+export function splitBooksBySource(books) {
+  const list = Array.isArray(books) ? books : [];
+  return {
+    market: list.filter((book) => book.sourceKind !== "composed"),
+    composed: list.filter((book) => book.sourceKind === "composed")
+  };
+}
+
+/**
+ * 서버 문항 id(`pbk_7a575d05a2-10-19`)를 교재와 번호표로 가른다.
+ *
+ * 자체 교재 초안은 문항을 id 로만 들고 있다. 그 문항이 어느 교재 몇 번인지 알려면 교재를 다 불러와야
+ * 하는데, id 자체가 그 둘을 품고 있어 쪼개기만 하면 된다 — 교재 목록(books)에 제목이 이미 있으므로
+ * 추가 호출 없이 「쎈B 대수 10-19」를 보여 줄 수 있다.
+ */
+export function splitBankItemId(itemId) {
+  const match = /^(pbk_[0-9a-f]+)-(.+)$/.exec(String(itemId ?? ""));
+  return match ? { bookId: match[1], numberLabel: match[2] } : null;
+}
+
 /** 폴더와 그 하위 폴더에 든 교재 수. 오답관리·교재관리가 같은 수를 보여주려고 공유한다. */
 export function countBooksInFolder(folder) {
   let count = folder.books.length;

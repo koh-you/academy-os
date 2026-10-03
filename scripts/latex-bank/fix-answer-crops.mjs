@@ -9,6 +9,9 @@
 //   node scripts/latex-bank/fix-answer-crops.mjs --bank latex-bank/rpm-cm2 \
 //     --package "C:/Users/PC/Desktop/문제은행-패키지/rpm-공통수학2-라텍스-패키지" --ids 0277,0457
 //   --check 를 주면 바꾸지 않고 무엇을 바꿀지만 보여 준다.
+//   --add 를 주면 패키지에 **없는** 답 항목을 새로 만든다(숫자변형처럼 스캔 답지에 없는 문항).
+//     node scripts/latex-bank/fix-answer-crops.mjs --bank latex-bank/ssenb-alg \
+//       --package <패키지> --ids 10-19v1,10-20v1 --add
 //
 // 바꾼 뒤에는 upload-package.mjs 로 다시 등록해야 서버에 반영된다(md5 가 달라진 파일만 올라간다).
 
@@ -68,14 +71,28 @@ const answersPath = path.join(packageDir, "manifest-answers.json");
 const answers = JSON.parse(await readFile(answersPath, "utf8"));
 const byLabel = new Map((answers.answers ?? []).map((entry) => [entry.number_label, entry]));
 
+const addMissing = args.add === true || String(args.add ?? "") === "true";
 const jobs = [];
 for (const id of ids) {
   const answer = String(bank.items?.[id]?.answer ?? "").trim();
-  const entry = byLabel.get(id);
-  if (!entry) { console.log(`  ${id}: 패키지에 답 항목이 없다 — 건너뜀`); continue; }
+  let entry = byLabel.get(id);
+  if (!entry && !addMissing) { console.log(`  ${id}: 패키지에 답 항목이 없다 — 건너뜀(--add 로 새로 만든다)`); continue; }
   if (!answer) { console.log(`  ${id}: 전사본에 확정 답이 비어 있다 — 건너뜀(사람이 답을 채워야 한다)`); continue; }
+  if (!entry) {
+    // 새 항목. 파일 이름은 기존 규칙(answers/<item_id>.jpg)을 그대로 따른다 — 등록이 이 이름으로 짝을 짓는다.
+    const bookId = String(answers.book_id ?? "");
+    if (!bookId) { console.log(`  ${id}: 패키지에 book_id 가 없어 새 항목을 만들 수 없다`); continue; }
+    // 쪽은 원본에서 물려받는다(변형은 원본과 같은 쪽의 문항이다).
+    const sourceEntry = byLabel.get(String(id).replace(/v\d+$/, ""));
+    entry = { number_label: id, file: `answers/${bookId}-${id}.jpg`, parts: 1, pdf_page: sourceEntry?.pdf_page ?? 0, width: 0, height: 0, md5: "" };
+    answers.answers = answers.answers ?? [];
+    answers.answers.push(entry);
+    byLabel.set(id, entry);
+    console.log(`  ${id}: 새 답 항목 → 전사본 답 ${answer}`);
+  } else {
+    console.log(`  ${id}: ${entry.width}×${entry.height}(조각 ${entry.parts ?? 1}) → 전사본 답 ${answer}`);
+  }
   jobs.push({ id, answer, entry });
-  console.log(`  ${id}: ${entry.width}×${entry.height}(조각 ${entry.parts ?? 1}) → 전사본 답 ${answer}`);
 }
 if (!jobs.length || args.check) {
   console.log(args.check ? "\n--check 라 바꾸지 않았습니다." : "\n바꿀 것이 없습니다.");
@@ -111,7 +128,7 @@ for (const [index, job] of jobs.entries()) {
   job.entry.height = trimmed.height;
   job.entry.parts = 1;
   job.entry.md5 = createHash("md5").update(bytes).digest("hex");
-  job.entry.source = "latex-bank answer (크롭 깨짐 교체)";
+  job.entry.source = "latex-bank answer";
   console.log(`  ${job.id}: ${trimmed.width}×${trimmed.height} 로 교체`);
 }
 await pdf.destroy();
