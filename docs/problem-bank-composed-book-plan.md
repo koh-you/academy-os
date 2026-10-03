@@ -92,6 +92,42 @@
 
 사용자가 git·터미널을 직접 다루지 않으므로 이 단계는 AI 가 수행한다. 지금 34권이 등록된 방식과 똑같다. 100문항 기준 조판 2~4분.
 
+## 제작 설정 — 출처 표기 등은 「제작 전에」 정한다
+
+자체 교재의 **출처는 이미지 안에 박힌다.** 조판할 때 문항 위 오른쪽에 배지로 들어가기 때문이다
+(`renderItemBody` 가 `\dmkichul{...}` 로 넣는다). 그래서 오답지의 출처 토글처럼 인쇄 직전에 켜고 끌 수 없고,
+**제작 설정**으로 미리 정해야 한다. 바꾸려면 다시 제작한다(조판이 다시 돈다).
+
+초안에 설정을 들고 있는다(`problem_bank_collections.print_settings jsonb`).
+
+```
+┌─ 제작 설정 ────────────────────────────────────────────────┐
+│  출처 표기    ○ 안 함                                      │
+│               ○ 교재 이름만            쎈B 대수             │
+│               ● 교재·쪽·번호 (기본)    쎈B 대수 10쪽 19번   │
+│                                                            │
+│  구획 머리줄  ☑ 유형 이름 보이기    유형 05 지수가 정수인…  │
+│  숫자변형     ☑ 있으면 원본 옆에 같이                       │
+│  빠른정답     ☑ 맨 뒤에 모아서                              │
+│  해설         ☐ 넣지 않음                                   │
+│  표지·목차    ☑ 넣기                                        │
+└────────────────────────────────────────────────────────────┘
+```
+
+| 설정 | 기본 | 왜 |
+| --- | --- | --- |
+| **출처 표기** | 교재·쪽·번호 | 안 하면 학생이 원본을 찾아 답을 베낄 수 없다. 하면 교사가 원본을 되짚을 수 있다. **시험·평가용은 끄고 보충 교재는 켜는** 쪽이 보통이라 셋 중 고른다 |
+| 구획 머리줄 유형 이름 | 켬 | 교재의 구획을 그대로 가져왔을 때 이름이 있어야 무슨 유형인지 안다 |
+| 숫자변형 | 켬 | 변형이 있는 문항만 짝으로 선다. 없으면 아무 일도 없다 |
+| 빠른정답 | 켬(맨 뒤) | 학생 자가 채점용 |
+| 해설 | 끔 | 해설까지 넣으면 쪽 수가 두 배가 된다. 교사용으로 따로 뽑는 쪽이 낫다 |
+| 표지·목차 | 켬 | 「교재」 모양을 만드는 것이 자체 교재의 목적이다 |
+
+출처를 끄더라도 **서버에는 원본 연결이 남는다**(`item_id` 가 원본에서 만들어진다). 종이에 안 보일 뿐
+교사 화면에서는 늘 「이 문항은 쎈B 대수 19번」을 볼 수 있다. 출처를 끄는 것과 출처를 잃는 것은 다르다.
+
+인쇄지(미리보기·오답지)의 출처 토글은 지금처럼 따로 남는다 — 그쪽은 화면에서 얹는 글이라 언제든 켜고 끈다.
+
 ## 데이터 모델
 
 새 표 3개 + 기존 CHECK 한 줄.
@@ -101,6 +137,7 @@ problem_bank_collections          -- 자체 교재의 초안
   collection_id text primary key
   tenant_id, title, folder_path, subject, grade
   status text          -- draft | requested | published
+  print_settings jsonb -- 출처 표기·유형 이름·숫자변형·빠른정답·해설·표지 (위 「제작 설정」)
   published_book_id text   -- 제작으로 만들어진 자체 교재(problem_bank_books)
   published_at timestamptz
   note text
@@ -182,7 +219,7 @@ DELETE /api/problem-bank/collection          삭제
 | 단계 | 내용 | 완료 기준 | 크기 |
 | --- | --- | --- | --- |
 | **1** | 시중/자체 분리 · 표 3개 · API 5개 · 「편집 중」 탭 · 담기→구획→중간저장→미리보기 | 초안을 며칠에 걸쳐 고치고 저장했다가 다시 연다 | 중 |
-| **2** | `build-collection.mjs` · 새 번호 조판 · 출처 배지 덮어쓰기 · 업로드 | 제작 요청한 초안이 자체 교재로 등록되고 번호가 1부터 찍힌다 | 중 |
+| **2** | `build-collection.mjs` · 새 번호 조판 · 출처 배지 덮어쓰기/끄기 · 제작 설정 · 업로드 | 제작 요청한 초안이 자체 교재로 등록되고 번호가 1부터 찍힌다. 출처를 끄면 배지가 사라진다 | 중 |
 | **3** | 끌어 옮기기 · 교체 · 다시 제작(기록 유지) · 빼는 문항 기록 경고 | 제작한 교재를 고쳐 다시 제작해도 오답 기록이 남는다 | 중 |
 | **4** | 유형으로 모으기 · 중복 경고 · 목차·쪽번호가 있는 책 모양 PDF | 여러 교재를 유형으로 묶어 한 권이 나온다 | 중 |
 
@@ -211,6 +248,6 @@ DELETE /api/problem-bank/collection          삭제
 - `src/domains/problems/BookWrongAnswerBoard.jsx` — ① 고르기 화면의 원형
 - `src/domains/problems/WrongAnswerPrintSheet.jsx` — 미리보기 경로(행 목록만 주면 된다)
 - `src/domains/problems/problemBankModel.js` — `groupItemsByUnit` · `groupItemsByTypeSection` · `withNumberVariants`
-- `scripts/latex-bank/build.mjs` — 번호는 `\setcounter{dmproblemcount}{bookNumber(id)-1}` 로 조판 시점에 박힌다. 출처 배지는 `renderItemBody` 가 책 제목에서 만든다(문항별 덮어쓰기 필요)
+- `scripts/latex-bank/build.mjs` — 번호는 `\setcounter{dmproblemcount}{bookNumber(id)-1}` 로 조판 시점에 박힌다. 출처 배지도 `renderItemBody` 가 책 제목에서 만들어 이미지 안에 넣는다(문항별 덮어쓰기와 끄기 필요)
 - `scripts/problem-bank/upload-package.mjs` — 제작본 등록 경로
 - `supabase/20260912_problem_bank.sql` — `source_kind` CHECK 수정 대상

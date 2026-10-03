@@ -134,4 +134,51 @@ const resolved = await store.resolveProblemBankItemImages(["pbk_abc123-0001"]);
 assert.deepEqual(resolved.map((region) => region.kind).sort(), ["answer", "body", "solution"]);
 assert.ok(resolved.every((region) => region.url.startsWith("signed://pbk_abc123/")));
 
+// ── 숫자변형 ────────────────────────────────────────────────────────────────
+// PostgREST 는 한 번에 넣는 행의 **키가 모두 같아야** 한다("All object keys must match").
+// 변형 행에만 variant_of 를 넣었더니 운영 등록이 HTTP 500 으로 통째로 거절됐다(2026-10-03).
+const sentItemRows = [];
+const variantStore = createProblemBankStore({
+  isSupabaseConfigured: () => true,
+  listRows: async () => [],
+  upsertRows: async (table, rows) => { if (table === "problem_bank_items") sentItemRows.push(rows); },
+  deleteRows: async () => {},
+  createSignedUrls: async () => [],
+  uploadObject: async () => {},
+  removeObjects: async () => {}
+});
+
+await variantStore.importProblemBankManifest({
+  book: { book_id: "pbk_aa0011", title: "변형 있는 교재" },
+  units: [],
+  items: [
+    { item_id: "pbk_aa0011-0001", number_label: "0001", regions: [] },
+    { item_id: "pbk_aa0011-0001v1", number_label: "0001v1", variant_of: "pbk_aa0011-0001", variant_level: 1, regions: [] },
+    { item_id: "pbk_aa0011-0002", number_label: "0002", regions: [] }
+  ]
+});
+const withVariants = sentItemRows.at(-1);
+assert.equal(withVariants.length, 3);
+const keySets = withVariants.map((row) => Object.keys(row).sort().join(","));
+assert.equal(new Set(keySets).size, 1, "변형이 있으면 모든 행이 같은 키를 가져야 한다(PostgREST 제약)");
+assert.equal(withVariants[0].variant_of, null, "원본 행은 variant_of 가 null");
+assert.equal(withVariants[0].variant_level, 0);
+assert.equal(withVariants[1].variant_of, "pbk_aa0011-0001");
+assert.equal(withVariants[1].variant_level, 1);
+
+// 변형이 하나도 없는 교재는 그 칸을 아예 보내지 않는다 — 마이그레이션 전 환경에서도 등록이 된다.
+await variantStore.importProblemBankManifest({
+  book: { book_id: "pbk_bb0022", title: "변형 없는 교재" },
+  units: [],
+  items: [
+    { item_id: "pbk_bb0022-0001", number_label: "0001", regions: [] },
+    { item_id: "pbk_bb0022-0002", number_label: "0002", regions: [] }
+  ]
+});
+const withoutVariants = sentItemRows.at(-1);
+assert.ok(
+  withoutVariants.every((row) => !("variant_of" in row) && !("variant_level" in row)),
+  "변형이 없으면 숫자변형 칸을 보내지 않는다"
+);
+
 console.log("problem bank store fixtures passed");
