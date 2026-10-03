@@ -764,6 +764,23 @@ export function createProblemBankStore({
     return getProblemBankCollection(collectionId);
   }
 
+  /**
+   * 제작 요청 — **상태만** 바꾼다. 실제 조판은 XeLaTeX 이 필요해 서버에서 돌 수 없고,
+   * 지금 34권이 등록된 것과 같은 로컬 경로(build-collection.mjs → upload-package.mjs)로 돈다.
+   * 그래서 이 표식은 「사람이 돌려야 할 일이 있다」는 뜻이고, 등록이 끝나면 published 로 바뀐다.
+   */
+  async function requestProblemBankCollectionBuild(collectionId) {
+    requireDatabase();
+    const id = textOf(collectionId);
+    if (!id) throw createStatusError("초안 id 가 없습니다.", 400);
+    const rows = await listRows("problem_bank_collections", `select=*&collection_id=eq.${encodeURIComponent(id)}`);
+    if (!rows[0]) throw createStatusError("초안을 찾지 못했습니다.", 404, "not_found");
+    const items = await listRows("problem_bank_collection_items", `select=entry_id&collection_id=eq.${encodeURIComponent(id)}`);
+    if (!items.length) throw createStatusError("담긴 문항이 없어 제작할 수 없습니다.", 400);
+    await upsertRows("problem_bank_collections", [{ ...rows[0], status: "requested", updated_at: new Date().toISOString() }], { onConflict: "collection_id" });
+    return getProblemBankCollection(id);
+  }
+
   async function deleteProblemBankCollection(collectionId) {
     requireDatabase();
     const id = textOf(collectionId);
@@ -789,6 +806,7 @@ export function createProblemBankStore({
     listProblemBankCollections,
     getProblemBankCollection,
     saveProblemBankCollection,
+    requestProblemBankCollectionBuild,
     deleteProblemBankCollection
   };
 }

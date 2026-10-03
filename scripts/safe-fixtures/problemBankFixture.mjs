@@ -292,6 +292,21 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
     sendJson(response, 200, { ok: true, safeFixture: true, ...collectionDetail(next) });
     return true;
   }
+  if (request.method === "POST" && pathname === "/api/problem-bank/collection-build") {
+    const payload = await readJson(request);
+    const entry = collectionStore(state).find((row) => row.collectionId === String(payload.collectionId ?? ""));
+    if (!entry) {
+      sendJson(response, 404, { ok: false, safeFixture: true, error: "초안을 찾지 못했습니다." });
+      return true;
+    }
+    if (!entry.items.length) {
+      sendJson(response, 400, { ok: false, safeFixture: true, error: "담긴 문항이 없어 제작할 수 없습니다." });
+      return true;
+    }
+    entry.status = "requested";
+    sendJson(response, 200, { ok: true, safeFixture: true, ...collectionDetail(entry) });
+    return true;
+  }
   if (request.method === "DELETE" && pathname === "/api/problem-bank/collection") {
     const requested = requestUrl.searchParams.get("collectionId") ?? "";
     const store = collectionStore(state);

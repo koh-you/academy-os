@@ -126,6 +126,11 @@ export function saveProblemBankCollection(payload) {
   return postJson("/api/problem-bank/collection", payload);
 }
 
+/** 제작 요청 — 상태만 바꾼다. 실제 조판·등록은 로컬에서 돈다(서버에 XeLaTeX 이 없다). */
+export function requestProblemBankCollectionBuild(collectionId) {
+  return postJson("/api/problem-bank/collection-build", { collectionId });
+}
+
 export async function deleteProblemBankCollection(collectionId) {
   const response = await apiFetch(`/api/problem-bank/collection?collectionId=${encodeURIComponent(collectionId)}`, { method: "DELETE" });
   const result = await response.json();

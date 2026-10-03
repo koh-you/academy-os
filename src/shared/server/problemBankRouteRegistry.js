@@ -19,6 +19,7 @@ export const problemBankRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/problem-bank/collections" }),
   Object.freeze({ method: "GET", path: "/api/problem-bank/collection" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/collection" }),
+  Object.freeze({ method: "POST", path: "/api/problem-bank/collection-build" }),
   Object.freeze({ method: "DELETE", path: "/api/problem-bank/collection" }),
   Object.freeze({ method: "GET", path: "/api/portal-problem-bank" }),
   Object.freeze({ method: "POST", path: "/api/portal-problem-bank/item-images" })
@@ -44,6 +45,7 @@ export const problemBankRouteSignatures = Object.freeze([
  * @param {() => Promise<*>} deps.listProblemBankCollections
  * @param {(collectionId: string) => Promise<*>} deps.getProblemBankCollection
  * @param {(payload: *) => Promise<*>} deps.saveProblemBankCollection
+ * @param {(collectionId: string) => Promise<*>} deps.requestProblemBankCollectionBuild
  * @param {(collectionId: string) => Promise<*>} deps.deleteProblemBankCollection
  * @param {(dataUrl: string) => { buffer: *, mimeType: string }} deps.parseDataUrl
  * @param {(request: *, options?: { limitBytes?: number }) => Promise<Record<string, *>>} deps.readJsonBody
@@ -69,6 +71,7 @@ export function createProblemBankRouteRegistry({
   listProblemBankCollections,
   getProblemBankCollection,
   saveProblemBankCollection,
+  requestProblemBankCollectionBuild,
   deleteProblemBankCollection,
   parseDataUrl,
   readJsonBody,
@@ -185,6 +188,12 @@ export function createProblemBankRouteRegistry({
       if (request.method === "POST" && pathname === "/api/problem-bank/collection") {
         const payload = await readJsonBody(request, { limitBytes: 2 * 1024 * 1024 });
         const detail = await saveProblemBankCollection(payload);
+        sendJson(request, response, 200, { ok: true, ...detail });
+        return true;
+      }
+      if (request.method === "POST" && pathname === "/api/problem-bank/collection-build") {
+        const payload = await readJsonBody(request);
+        const detail = await requestProblemBankCollectionBuild(payload?.collectionId ?? "");
         sendJson(request, response, 200, { ok: true, ...detail });
         return true;
       }

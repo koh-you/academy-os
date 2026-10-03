@@ -34,6 +34,10 @@ const registry = createProblemBankRouteRegistry({
     calls.push(`saveCollection:${payload?.title}:${(payload?.items ?? []).length}`);
     return { collection: { collectionId: "pbc_1", title: payload?.title }, sections: [], items: payload?.items ?? [] };
   },
+  requestProblemBankCollectionBuild: async (collectionId) => {
+    calls.push(`requestBuild:${collectionId}`);
+    return { collection: { collectionId, status: "requested" }, sections: [], items: [] };
+  },
   deleteProblemBankCollection: async (collectionId) => {
     calls.push(`deleteCollection:${collectionId}`);
     return { collectionId, deleted: true };
@@ -114,6 +118,7 @@ assert.deepEqual(problemBankRouteSignatures.map((signature) => `${signature.meth
   "GET /api/problem-bank/collections",
   "GET /api/problem-bank/collection",
   "POST /api/problem-bank/collection",
+  "POST /api/problem-bank/collection-build",
   "DELETE /api/problem-bank/collection",
   "GET /api/portal-problem-bank",
   "POST /api/portal-problem-bank/item-images"
@@ -208,6 +213,11 @@ rawBody = { title: "내신대비 지수·로그", sections: [{ title: "지수법
 assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection")), true);
 assert.ok(calls.includes("saveCollection:내신대비 지수·로그:1"));
 assert.equal(sends.at(-1).body.ok, true);
+
+rawBody = { collectionId: "pbc_1" };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/collection-build")), true);
+assert.ok(calls.includes("requestBuild:pbc_1"));
+assert.equal(sends.at(-1).body.collection.status, "requested");
 
 assert.equal(await registry.dispatch(makeRequest("DELETE", "/api/problem-bank/collection?collectionId=pbc_1")), true);
 assert.ok(calls.includes("deleteCollection:pbc_1"));

@@ -65,6 +65,23 @@ test("자체 교재: 문항을 담아 구획을 짜고 중간저장한 뒤 다�
   await expect(composer.getByLabel("출처 표기")).toHaveValue("none");
   await expect(composer.locator(".problemBankComposerItems li span").nth(1)).toContainText("0003");
 
+  // 미리보기 — 초안이 「한 권」으로 보인다. 구획이 단원이 되고 번호는 담은 자리 기준으로 1부터다.
+  // 쪽 수와 생김새를 보고 다시 고치는 왕복이 이 화면의 쓸모다.
+  await composer.getByRole("button", { name: "미리보기" }).click();
+  const sheet = page.locator(".problemBankPrintSheet");
+  await expect(sheet).toBeVisible();
+  await expect(sheet.locator(".problemBankPrintItem")).toHaveCount(3);
+  await expect(sheet.getByText("내신대비 삼각비 오답지")).toBeVisible();
+  // 출처 줄에 자체 교재 이름과 구획이 그대로 나온다.
+  await expect(sheet.locator(".problemBankPrintSource").first()).toContainText("1. 새 구획");
+  await page.getByRole("button", { name: "닫기" }).click();
+  await expect(sheet).toHaveCount(0);
+
+  // 제작 요청 — 상태만 「제작 대기」가 된다. 조판·등록은 따로 돌린다(서버에 XeLaTeX 이 없다).
+  await composer.getByRole("button", { name: "제작 요청" }).click();
+  await expect(composer.getByRole("status")).toContainText("제작을 요청했습니다");
+  await expect(composer.locator(".problemBankDraftList li")).toContainText("제작 대기");
+
   await page.screenshot({ path: "test-results/problem-bank-compose.png", fullPage: true });
   expect(pageErrors).toEqual([]);
 });

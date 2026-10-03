@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { prettifyMathLabel } from "../src/domains/problems/mathLabelText.js";
 import {
   buildPrintEntriesFromRows,
+  splitBankItemId,
   splitBooksBySource,
   withNumberVariants,
   distributeExamPoints,
@@ -154,3 +155,12 @@ assert.deepEqual(split.composed.map((book) => book.bookId), ["b"]);
 assert.deepEqual(splitBooksBySource(null), { market: [], composed: [] });
 
 console.log("교재 구분 fixture 통과");
+
+// 문항 id 는 교재와 번호표를 품고 있다 — 자체 교재가 교재를 다 불러오지 않고도 「쎈B 대수 10-19」를 보여 준다.
+assert.deepEqual(splitBankItemId("pbk_7a575d05a2-10-19"), { bookId: "pbk_7a575d05a2", numberLabel: "10-19" });
+assert.deepEqual(splitBankItemId("pbk_7a575d05a2-10-19v1"), { bookId: "pbk_7a575d05a2", numberLabel: "10-19v1" });
+assert.deepEqual(splitBankItemId("pbk_abc123-0001"), { bookId: "pbk_abc123", numberLabel: "0001" });
+assert.equal(splitBankItemId("이상한-id"), null);
+assert.equal(splitBankItemId(null), null);
+
+console.log("문항 id 분해 fixture 통과");

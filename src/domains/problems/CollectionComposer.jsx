@@ -5,6 +5,8 @@ import {
   fetchProblemBankBook,
   fetchProblemBankCollection,
   fetchProblemBankCollections,
+  fetchProblemBankItemImages,
+  requestProblemBankCollectionBuild,
   saveProblemBankCollection
 } from "./problemBankApi.js";
 import {
@@ -25,7 +27,8 @@ import {
   sourceLabelOptions,
   updateSection
 } from "./collectionDraftModel.js";
-import { groupItemsByTypeSection, groupItemsByUnit, itemDisplayNumber, splitBooksBySource } from "./problemBankModel.js";
+import { groupItemsByTypeSection, groupItemsByUnit, itemDisplayNumber, splitBankItemId, splitBooksBySource } from "./problemBankModel.js";
+import { WrongAnswerPrintSheet } from "./WrongAnswerPrintSheet.jsx";
 import { prettifyMathLabel } from "./mathLabelText.js";
 
 /**
@@ -49,6 +52,7 @@ export function CollectionComposer({ books = [] }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [dirty, setDirty] = useState(false);
+  const [previewImages, setPreviewImages] = useState(null);
 
   const reloadCollections = useCallback(async () => {
     try {
@@ -92,6 +96,13 @@ export function CollectionComposer({ books = [] }) {
     [bookDetail, bookItems]
   );
   const numberedSections = useMemo(() => numberedDraftItems(draft), [draft]);
+  // 문항 id 가 교재와 번호표를 품고 있어, 교재를 다 불러오지 않고도 「쎈B 대수 10-19」를 보여 준다.
+  const bookTitleById = useMemo(() => new Map(books.map((book) => [book.bookId, book.title])), [books]);
+  const lookupItem = useCallback((itemId) => {
+    const split = splitBankItemId(itemId);
+    if (!split) return null;
+    return { bookId: split.bookId, bookTitle: bookTitleById.get(split.bookId) ?? "", numberLabel: split.numberLabel };
+  }, [bookTitleById]);
   const itemCount = draftItemCount(draft);
   const saveProblem = draftSaveProblem(draft);
 
@@ -100,12 +111,7 @@ export function CollectionComposer({ books = [] }) {
     setError("");
     try {
       const detail = await fetchProblemBankCollection(collectionId);
-      // 문항의 교재·번호는 목록에 없다. 지금 열어 둔 교재에서 찾고, 없으면 id 만 보여 준다.
-      const lookup = new Map(bookItems.map((item) => [item.itemId, item]));
-      setDraft(draftFromServer(detail, (itemId) => {
-        const known = lookup.get(itemId);
-        return known ? { bookId: known.bookId, bookTitle: bookDetail?.book?.title ?? "", numberLabel: known.numberLabel } : null;
-      }));
+      setDraft(draftFromServer(detail, lookupItem));
       setTargetSection(0);
       setDirty(false);
       setMessage("");
@@ -122,17 +128,34 @@ export function CollectionComposer({ books = [] }) {
     setError("");
     try {
       const result = await saveProblemBankCollection(draftToPayload(draft));
-      const lookup = new Map(bookItems.map((item) => [item.itemId, item]));
       // 저장 뒤 서버가 돌려준 것을 원천으로 삼는다 — 화면이 들고 있던 모양이 아니라.
-      setDraft(draftFromServer(result, (itemId) => {
-        const known = lookup.get(itemId);
-        return known ? { bookId: known.bookId, bookTitle: bookDetail?.book?.title ?? "", numberLabel: known.numberLabel } : null;
-      }));
+      setDraft(draftFromServer(result, lookupItem));
       setDirty(false);
       setMessage(`저장했습니다 · ${new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`);
       await reloadCollections();
     } catch (saveError) {
       setError(saveError?.message || "저장하지 못했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /**
+   * 제작 요청 — 상태만 「제작 대기」로 바꾼다. 조판에 XeLaTeX 이 필요해 서버에서 돌 수 없고,
+   * 지금 34권이 등록된 것과 같은 로컬 경로로 돈다. 그래서 여기서 할 일은 **표식을 남기는 것**이다.
+   */
+  async function requestBuild() {
+    if (!draft.collectionId) { setError("먼저 중간저장을 하세요."); return; }
+    if (dirty) { setError("저장 안 한 변경이 있습니다. 중간저장한 뒤 요청하세요."); return; }
+    setBusy(true);
+    setError("");
+    try {
+      const result = await requestProblemBankCollectionBuild(draft.collectionId);
+      setDraft(draftFromServer(result, lookupItem));
+      await reloadCollections();
+      setMessage("제작을 요청했습니다. 조판과 등록은 따로 돌린 뒤 교재 목록에 올라옵니다.");
+    } catch (requestError) {
+      setError(requestError?.message || "제작을 요청하지 못했습니다.");
     } finally {
       setBusy(false);
     }
@@ -147,6 +170,44 @@ export function CollectionComposer({ books = [] }) {
       setMessage("초안을 지웠습니다.");
     } catch (deleteError) {
       setError(deleteError?.message || "초안을 지우지 못했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /**
+   * 미리보기 — 초안을 그대로 「한 권」 모양으로 바꿔 지금 인쇄지에 넘긴다.
+   * 구획이 단원이 되고 번호는 담은 자리 기준으로 1부터다. 쪽 수와 생김새를 보고 다시 고치는 왕복이
+   * 「몇 번 피드백을 거친다」의 실제 모습이다.
+   */
+  const previewBook = useMemo(() => ({ title: draft.title || "자체 교재" }), [draft.title]);
+  const previewUnits = useMemo(
+    () => draft.sections.map((section, index) => ({ unitId: `draft-s${index}`, title: section.title, position: index })),
+    [draft.sections]
+  );
+  const previewItems = useMemo(() => numberedSections.flatMap((group) => group.items.map((item) => ({
+    itemId: item.itemId,
+    unitId: `draft-s${group.sectionIndex}`,
+    numberLabel: item.numberLabel || item.itemId,
+    numberSort: item.number,
+    typeLabel: "",
+    regions: []
+  }))), [numberedSections]);
+
+  async function openPreview() {
+    if (!previewItems.length) return;
+    setBusy(true);
+    try {
+      const regions = await fetchProblemBankItemImages(previewItems.map((item) => item.itemId));
+      const byItem = new Map();
+      for (const region of regions) {
+        const list = byItem.get(region.itemId) ?? [];
+        list.push(region);
+        byItem.set(region.itemId, list);
+      }
+      setPreviewImages(byItem);
+    } catch (previewError) {
+      setError(previewError?.message || "미리보기를 열지 못했습니다.");
     } finally {
       setBusy(false);
     }
@@ -189,7 +250,7 @@ export function CollectionComposer({ books = [] }) {
               <li className={entry.collectionId === draft.collectionId ? "picked" : ""} key={entry.collectionId}>
                 <button disabled={busy} onClick={() => openCollection(entry.collectionId)} type="button">
                   <strong>{entry.title}</strong>
-                  <small>{entry.itemCount}문항 · {entry.status === "published" ? "제작 완료" : "초안"}</small>
+                  <small>{entry.itemCount}문항 · {entry.status === "published" ? "제작 완료" : entry.status === "requested" ? "제작 대기" : "초안"}</small>
                 </button>
                 <button aria-label={`${entry.title} 지우기`} className="problemBankDraftDelete" disabled={busy} onClick={() => discard(entry.collectionId)} type="button">×</button>
               </li>
@@ -324,11 +385,24 @@ export function CollectionComposer({ books = [] }) {
         <div className="problemBankComposerBar">
           <span className="problemBankSelectionCount">{itemCount}문항 · {draft.sections.length}구획{itemCount > collectionItemLimit ? ` · ${collectionItemLimit}문항을 넘었습니다` : ""}</span>
           {dirty ? <span className="problemBankComposerHint">저장 안 함</span> : null}
+          <button className="softButton" disabled={busy || itemCount === 0} onClick={openPreview} type="button">미리보기</button>
           <button className="primaryButton" disabled={busy || Boolean(saveProblem)} onClick={save} type="button">중간저장</button>
+          <button className="softButton" disabled={busy || !draft.collectionId || dirty || itemCount === 0} onClick={requestBuild} type="button">제작 요청</button>
         </div>
         {error ? <p className="problemBankError">{error}</p> : null}
         {message ? <p className="problemBankStatus" role="status">{message}</p> : null}
       </section>
+
+      {previewImages ? (
+        <WrongAnswerPrintSheet
+          book={previewBook}
+          imagesByItem={previewImages}
+          items={previewItems}
+          selectedItemIds={previewItems.map((item) => item.itemId)}
+          units={previewUnits}
+          onClose={() => setPreviewImages(null)}
+        />
+      ) : null}
     </div>
   );
 }
