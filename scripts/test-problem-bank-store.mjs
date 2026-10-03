@@ -181,6 +181,28 @@ assert.ok(
   "변형이 없으면 숫자변형 칸을 보내지 않는다"
 );
 
+// 정렬값은 소수를 살린다 — 숫자변형이 `원본 + 0.1` 로 원본 바로 뒤에 서야 한다.
+// 잘라 버리면 원본과 같은 자리가 된다(2026-10-03: 10-19 와 10-19v1 이 둘 다 1019 였다).
+const sortRows = [];
+const sortStore = createProblemBankStore({
+  isSupabaseConfigured: () => true,
+  listRows: async () => [],
+  upsertRows: async (table, rows) => { if (table === "problem_bank_items") sortRows.push(rows); },
+  deleteRows: async () => {},
+  createSignedUrls: async () => [],
+  uploadObject: async () => {},
+  removeObjects: async () => {}
+});
+await sortStore.importProblemBankManifest({
+  book: { book_id: "pbk_cc0033", title: "정렬 교재" },
+  units: [],
+  items: [
+    { item_id: "pbk_cc0033-0019", number_label: "10-19", number_sort: 1019, regions: [] },
+    { item_id: "pbk_cc0033-0019v1", number_label: "10-19v1", number_sort: 1019.1, variant_of: "pbk_cc0033-0019", variant_level: 1, regions: [] }
+  ]
+});
+assert.deepEqual(sortRows.at(-1).map((row) => row.number_sort), [1019, 1019.1]);
+
 // ── 자체 교재 초안 ───────────────────────────────────────────────────────────
 // 초안은 몇 번이고 고쳐진다. 그래서 저장은 **통째 저장**이고, 저장 뒤에는 서버를 다시 읽어 돌려준다.
 const draftTables = {

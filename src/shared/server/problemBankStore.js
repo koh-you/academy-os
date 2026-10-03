@@ -65,6 +65,15 @@ export function createProblemBankStore({
     return Number.isFinite(number) ? Math.trunc(number) : fallback;
   }
 
+  /**
+   * 소수를 살리는 숫자. 정렬값에만 쓴다 — 숫자변형이 `원본 + 0.1` 로 원본 바로 뒤에 서야 하는데
+   * 잘라 버리면 원본과 같은 자리가 된다(2026-10-03: 10-19 와 10-19v1 이 둘 다 1019 였다).
+   */
+  function decimalOf(value, fallback = 0) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+  }
+
   function fromCollectionRow(row) {
     return {
       collectionId: row.collection_id,
@@ -140,7 +149,7 @@ export function createProblemBankStore({
       bookId: row.book_id,
       unitId: row.unit_id ?? "",
       numberLabel: row.number_label,
-      numberSort: row.number_sort ?? 0,
+      numberSort: Number(row.number_sort ?? 0),
       printedPage: row.printed_page ?? 0,
       pdfPage: row.pdf_page ?? 0,
       typeLabel: row.type_label ?? "",
@@ -303,7 +312,7 @@ export function createProblemBankStore({
       book_id: bookId,
       unit_id: Number.isInteger(item.unit_index) && unitRows[item.unit_index] ? unitRows[item.unit_index].unit_id : null,
       number_label: textOf(item.number_label),
-      number_sort: integerOf(item.number_sort),
+      number_sort: decimalOf(item.number_sort),
       printed_page: integerOf(item.printed_page),
       pdf_page: integerOf(item.pdf_page),
       type_label: textOf(item.type_label),
