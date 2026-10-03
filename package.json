@@ -139,6 +139,7 @@
     "test:problem-bank-store": "node scripts/test-problem-bank-store.mjs",
     "test:problem-bank-exam-model": "node scripts/test-problem-bank-exam-model.mjs",
     "test:collection-draft-model": "node scripts/test-collection-draft-model.mjs",
+    "test:retypeset-progress-table": "node scripts/test-retypeset-progress-table.mjs",
     "test:problem-bank-folder-rules": "node scripts/test-problem-bank-folder-rules.mjs",
     "test:test-paper-file-route-registry": "node scripts/test-test-paper-file-route-registry.mjs",
     "watermark-test-papers": "node scripts/watermark-test-papers.mjs",

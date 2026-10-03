@@ -26,40 +26,21 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { parseArgs } from "../problem-bank/args.mjs";
+import { markProgressRow, readProgressRows } from "./retypesetProgressTable.mjs";
 
 const execFileAsync = promisify(execFile);
 const args = parseArgs(process.argv.slice(2));
 const PROGRESS = "docs/source-badge-removal-progress.md";
 const UPLOAD_CWD = "C:/Users/PC/github/academy-os-wt-ssenb";
 
-/** 진행표를 읽는다. 표가 상태다. ⬜ 아직 · ⏳ 조판됨(등록만 남음) · ✅ 끝. */
+/** 진행표를 읽는다. 상태 판정은 retypesetProgressTable.mjs 하나에 모아 두고 검사한다. */
 async function remainingBanks() {
-  const text = await readFile(PROGRESS, "utf8");
-  const rows = [];
-  for (const line of text.split("\n")) {
-    const match = line.match(/^\|\s*\d+\s*\|\s*`([^`]+)`\s*\|\s*([^|]+?)\s*\|\s*(\d+)\s*\|\s*(⬜|⏳|✅)/);
-    if (match) {
-      rows.push({
-        bank: match[1],
-        title: match[2],
-        items: Number(match[3]),
-        done: match[4] === "✅",
-        typeset: match[4] === "⏳"
-      });
-    }
-  }
-  return rows;
+  return readProgressRows(await readFile(PROGRESS, "utf8"));
 }
 
 /** 표의 상태 칸을 바꾼다. 다음 실행이 이걸 보고 무엇을 건너뛸지 정한다. */
-async function markState(bank, mark, note) {
-  const text = await readFile(PROGRESS, "utf8");
-  const today = new Date().toISOString().slice(0, 10);
-  const next = text.split("\n").map((line) => {
-    if (!line.match(new RegExp(`^\\|\\s*\\d+\\s*\\|\\s*\`${bank}\``))) return line;
-    return line.replace(/\|\s*(?:⬜|⏳|✅)[^|]*\|\s*$/, `| ${mark} ${today} · ${note} |`);
-  }).join("\n");
-  await writeFile(PROGRESS, next, "utf8");
+async function markState(bank, state, note) {
+  await writeFile(PROGRESS, markProgressRow(await readFile(PROGRESS, "utf8"), bank, state, note), "utf8");
 }
 
 const map = JSON.parse((await execFileAsync(process.execPath, ["scripts/latex-bank/find-book-packages.mjs", "--json"], { maxBuffer: 16 * 1024 * 1024 })).stdout);
@@ -125,7 +106,7 @@ for (const row of todo) {
       for (const line of text.trim().split("\n").slice(-4)) console.log(`  ${line}`);
       if (/실패 [1-9]/.test(text)) {
         console.log(`✗ ${row.bank}: 등록 실패`);
-        if (!skipBuild) await markState(row.bank, "⏳", "조판 끝 · 등록 대기");
+        if (!skipBuild) await markState(row.bank, "typeset", "조판 끝 · 등록 대기");
         continue;
       }
       // 진행 표시는 CR 로 덮어쓰는 중간 값이라 그대로 적으면 「40/420 교체」처럼 사실과 다른 기록이
@@ -135,11 +116,11 @@ for (const row of todo) {
     } catch (error) {
       console.log(`✗ ${row.bank}: 등록 실패 — ${String(error.message).split("\n")[0]}`);
       // 조판은 끝났다. 표에 ⏳ 로 적어 다음 실행이 **조판을 건너뛰고 등록만** 하게 한다.
-      if (!skipBuild) await markState(row.bank, "⏳", "조판 끝 · 등록 대기");
+      if (!skipBuild) await markState(row.bank, "typeset", "조판 끝 · 등록 대기");
       continue;
     }
   }
-  await markState(row.bank, "✅", `${uploaded} · ${minutes}분`);
+  await markState(row.bank, "done", `${uploaded} · ${minutes}분`);
   console.log(`✅ ${row.bank} (${minutes}분 · ${uploaded})`);
 }
 console.log("\n끝. 남은 책은 --list 로 확인하세요.");
