@@ -18,7 +18,9 @@ import {
   computeItemStats,
   countBooksInFolder,
   findFolderNode,
+  groupItemsByTypeSection,
   groupItemsByUnit,
+  itemDisplayNumber,
   listTypeLabels,
   rectWithin,
   studentItemState,
@@ -537,40 +539,51 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                       <button className="problemBankUnitSelect" onClick={() => selectUnitItems(group)} type="button">{isExamMode ? "단원 전체 담기" : "단원 전체 선택"}</button>
                     </div>
                   </header>
-                  <div className="problemBankNumberGrid">
-                    {group.items.filter(matchesTypeFilter).map((item) => {
-                      const band = wrongRateBand(itemStats.get(item.itemId));
-                      const studentState = studentStates.get(item.itemId) ?? "none";
-                      const studentResult = studentResults.get(item.itemId);
-                      const classes = [
-                        "problemBankNumber",
-                        isExamMode ? (examCart.has(item.itemId) ? "exam-picked" : "exam-plain") : selectedStudent ? `mine-${studentState}` : `band-${band.key}`,
-                        (isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)) ? "selected" : "",
-                        previewItemId === item.itemId ? "previewing" : "",
-                        studentResult?.pending ? "pending" : "",
-                        item.reviewStatus === "flagged" ? "flagged" : ""
-                      ].filter(Boolean).join(" ");
-                      const stateLabel = selectedStudent
-                        ? studentStateLegend.find((state) => state.key === studentState)?.label.split(" (")[0] ?? ""
-                        : band.label;
-                      return (
-                        <button
-                          aria-label={`${item.numberLabel}번 · ${stateLabel}`}
-                          aria-pressed={isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)}
-                          className={classes}
-                          key={item.itemId}
-                          onClick={(event) => handleItemClick(item, event)}
-                          title={item.typeLabel || undefined}
-                          type="button"
-                        >
-                          {Number.parseInt(item.numberLabel, 10) || item.numberLabel}
-                          {selectedStudent && studentState !== "none" ? (
-                            <i className="problemBankStudentMark">{studentState === "wrong" ? "✕" : "○"}</i>
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {/* 단원 안을 교재의 구획(개념 01 · 유형 001 … · 실전)으로 한 번 더 나눈다 — 교재를 펴 놓은 것과 같은 순서로 보이게. */}
+                  {groupItemsByTypeSection(group.items.filter(matchesTypeFilter)).map((section, sectionIndex) => (
+                    <div className="problemBankTypeSection" key={`${group.unit.unitId}|${section.label}|${sectionIndex}`}>
+                      {section.label ? (
+                        <h4 className="problemBankTypeSectionHead">
+                          <span>{section.label}</span>
+                          <small>{section.items.length}문항</small>
+                        </h4>
+                      ) : null}
+                      <div className="problemBankNumberGrid">
+                        {section.items.map((item) => {
+                          const band = wrongRateBand(itemStats.get(item.itemId));
+                          const studentState = studentStates.get(item.itemId) ?? "none";
+                          const studentResult = studentResults.get(item.itemId);
+                          const classes = [
+                            "problemBankNumber",
+                            isExamMode ? (examCart.has(item.itemId) ? "exam-picked" : "exam-plain") : selectedStudent ? `mine-${studentState}` : `band-${band.key}`,
+                            (isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)) ? "selected" : "",
+                            previewItemId === item.itemId ? "previewing" : "",
+                            studentResult?.pending ? "pending" : "",
+                            item.reviewStatus === "flagged" ? "flagged" : ""
+                          ].filter(Boolean).join(" ");
+                          const stateLabel = selectedStudent
+                            ? studentStateLegend.find((state) => state.key === studentState)?.label.split(" (")[0] ?? ""
+                            : band.label;
+                          return (
+                            <button
+                              aria-label={`${item.numberLabel}번 · ${stateLabel}`}
+                              aria-pressed={isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)}
+                              className={classes}
+                              key={item.itemId}
+                              onClick={(event) => handleItemClick(item, event)}
+                              title={[item.printedPage ? `${item.printedPage}쪽 ${itemDisplayNumber(item.numberLabel)}번` : null, item.typeLabel].filter(Boolean).join(" · ") || undefined}
+                              type="button"
+                            >
+                              {itemDisplayNumber(item.numberLabel)}
+                              {selectedStudent && studentState !== "none" ? (
+                                <i className="problemBankStudentMark">{studentState === "wrong" ? "✕" : "○"}</i>
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </section>
               );
             })}

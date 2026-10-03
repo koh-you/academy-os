@@ -626,6 +626,7 @@ export function ProblemBankCenter() {
                     {reviewItems.slice(0, 120).map((item) => (
                       <li key={item.itemId}>
                         <strong>{item.numberLabel}번</strong> <small>{item.printedPage}쪽</small>
+                        {item.typeLabel ? <small className="problemBankReviewType">{item.typeLabel}</small> : null}
                         <p className="problemBankReviewNote">{item.reviewNote}</p>
                         {flaggedImages.get(item.itemId) ? <img alt={`${item.numberLabel}번`} src={flaggedImages.get(item.itemId)} /> : null}
                       </li>
