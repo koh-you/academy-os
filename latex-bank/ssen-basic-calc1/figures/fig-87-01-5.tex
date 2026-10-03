@@ -1,0 +1,14 @@
+% 87-01 ⑤(87쪽) — 보기 그래프: $x=-2$ 에서 극대, 원점 오른쪽에서 극소, $x=1$ 에서 다시 극대인 위로 볼록한 사차함수 개형. 그림 자체가 보기라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 -2, O, 1, x, y, y=f(x) 와 점선 두 줄만.
+\begin{tikzpicture}[baseline=(current bounding box.center), x=0.40cm, y=0.40cm, line width=0.5pt]
+  \path (-3.6,-2.2) rectangle (3.45,3.6);
+  \draw[->, >=stealth, line width=0.7pt] (-3.55,0) -- (2.6,0) node[below=1pt, font=\footnotesize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.8) -- (0,2.75) node[left=1pt, font=\footnotesize] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-2,0) -- (-2,1.92);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,0.5);
+  \draw[line width=0.6pt, smooth] plot coordinates {(-3.35,-1.5) (-3.2,-0.75) (-3.05,-0.1) (-2.85,0.6) (-2.6,1.3) (-2.35,1.72) (-2.15,1.88) (-2,1.92) (-1.85,1.88) (-1.6,1.7) (-1.3,1.35) (-1,1.0) (-0.7,0.7) (-0.4,0.45) (-0.1,0.3) (0.2,0.24) (0.4,0.25) (0.6,0.33) (0.8,0.44) (1,0.5) (1.15,0.45) (1.3,0.3) (1.45,0.05) (1.6,-0.35) (1.75,-0.9) (1.85,-1.45)};
+  \node[below=1pt, font=\footnotesize] at (-2,0) {$-2$};
+  \node[below left=1pt and 1pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\footnotesize] at (1,0) {$1$};
+  \node[anchor=west, font=\footnotesize] at (0.28,1.25) {$y=f(x)$};
+\end{tikzpicture}

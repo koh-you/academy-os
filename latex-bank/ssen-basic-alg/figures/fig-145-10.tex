@@ -1,0 +1,17 @@
+% 145-10(145쪽) — 평행사변형 ABCD · AB=5, BC=6, ∠B=60°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 5 · 6 · 60° 만 적는다(넓이는 답이므로 그림에 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.52cm, y=0.52cm]
+  \coordinate (A) at (2.5,4.33);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (6,0);
+  \coordinate (D) at (8.5,4.33);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[densely dotted, line width=0.35pt] (2.3,4.4) to[bend right=18] node[midway, left=-2pt, font=\footnotesize] {$5$} (-0.25,0.05);
+  \draw[densely dotted, line width=0.35pt] (0.05,-0.3) to[bend right=16] node[midway, below=-2.5pt, font=\footnotesize] {$6$} (5.95,-0.3);
+  \draw[line width=0.4pt] ([shift=(0:0.9)]B) arc (0:60:0.9);
+  \node[font=\footnotesize] at ([shift=(28:1.85)]B) {$60^\circ$};
+  \node[above left=-3pt and -3.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[above right=-3pt and -3.5pt, font=\footnotesize] at (D) {$\pt{D}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

@@ -1,0 +1,16 @@
+% 8-02(8쪽) — y=f(x) 의 그래프(x<-2 곡선 · -2<x<0 에서 y=2 인 선분(왼쪽 끝 빈 점) · x>0 직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 빈 점 (-2,2) · 점선 · 라벨 -2, 1, 2, O, x, y, y=f(x). 빈 점·채운 점 구분은 원문 그대로.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.4,0) -- (2.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,5.3) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (-2,0) -- (-2,2);
+  \draw[line width=0.6pt, domain=-4:-2, samples=50, smooth] plot (\x, {2+0.73*(\x+2)*(\x+2)});
+  \draw[line width=0.6pt] (-2,2) -- (0,2);
+  \draw[line width=0.6pt] (0,2) -- (1.75,-1.5);
+  \draw[fill=white, line width=0.5pt] (-2,2) circle (2.2pt);
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[right=1pt, font=\small] at (0,2) {$2$};
+  \node[above right=-1pt and -1pt, font=\small] at (1,0) {$1$};
+  \node[right=1pt, font=\small] at (-4.65,5.15) {$y=f(x)$};
+\end{tikzpicture}

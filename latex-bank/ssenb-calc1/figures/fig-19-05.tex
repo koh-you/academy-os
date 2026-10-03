@@ -1,0 +1,33 @@
+% 19-05(19쪽) — y=f(x) 의 그래프. x<-1 은 기울기 -1 인 직선, -1<x<1 은 y=-1, x>1 은 (1,1)에서 올라가는 곡선.
+% 끊긴 자리의 빈 점·찬 점과 원문의 점선(1·2 눈금 연결)만 옮긴다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.55pt, x=0.6cm, y=0.6cm, every node/.style={font=\footnotesize}]
+  \draw[->, >=stealth, line width=0.7pt] (-3.1,0) -- (2.9,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,2.9) node[left=1pt] {$y$};
+  % 점선
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (2,2) (2,0) -- (2,2);
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1) (1,1) -- (1,-1);
+  % x<-1 : 기울기 -1 인 직선, (-1,-1) 은 빈 점
+  \draw[line width=0.6pt] (-3,1) -- (-1,-1);
+  % -1<x<1 : y=-1
+  \draw[line width=0.6pt] (-1,-1) -- (1,-1);
+  % x>1 : (1,1) 에서 (2,2) 를 지나 올라가는 곡선
+  \draw[line width=0.6pt] plot[domain=1:2.35, samples=40, smooth] (\x, {(\x-1)*(\x-1)+1});
+  % 빈 점
+  \draw[fill=white, line width=0.5pt] (-1,-1) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (0,-1) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,1) circle (2.2pt);
+  % 찬 점
+  \fill (-1,0) circle (2.2pt);
+  \fill (0,1) circle (2.2pt);
+  \fill (1,-1) circle (2.2pt);
+  % 라벨
+  \node[anchor=east, inner sep=2pt, fill=white] at (-0.08,2) {$2$};
+  \node[anchor=east, inner sep=2.5pt] at (-0.14,1) {$1$};
+  \node[below=1pt] at (-2,-0.05) {$-2$};
+  \node[above=2.5pt] at (-1,0.05) {$-1$};
+  \node[below right=-2pt and -3pt] at (0,0) {$\pt{O}$};
+  \node[below=1pt] at (1,-0.05) {$1$};
+  \node[below=1pt] at (2,-0.05) {$2$};
+  \node[anchor=east, inner sep=2pt] at (-0.2,-1.5) {$-1$};
+  \node[anchor=west] at (0.15,2.75) {$y=f(x)$};
+\end{tikzpicture}

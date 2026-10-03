@@ -1,0 +1,21 @@
+% 45-95(45쪽) — 두 원 x^2+(y-3)^2=4, (x-4)^2+(y+2)^2=9 에 동시에 접하는 접선과 두 접점 A, B.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 A · B · O · x · y 와 중심을 가리키는 3 · -2 · 4 만 둔다.
+% 두 접점 사이의 거리(답)는 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.28, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.4,0) -- (9.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.2) -- (0,8.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,3) circle (2);
+  \draw[line width=0.6pt] (4,-2) circle (3);
+  \draw[line width=0.6pt] (-2.2,7.71) -- (8.4,-1.96);
+  \draw[dotted, line width=0.5pt] (0,-2) -- (4,-2);
+  \draw[dotted, ->, >=stealth, line width=0.5pt] (4,-2) -- (4,1.05);
+  \draw[line width=0.4pt] (4.2,1.25) -- (4.8,1.85);
+  \fill (0,3) circle (2.2pt);
+  \fill (4,-2) circle (2.2pt);
+  \node[right=0pt, font=\small] at (4.8,1.85) {$4$};
+  \node[left=1pt, font=\small] at (0,3) {$3$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[above right=-2pt and 0pt, font=\small] at (1.347,4.478) {$\mathrm{A}$};
+  \node[above right=-1pt and 1pt, font=\small] at (6.021,0.217) {$\mathrm{B}$};
+\end{tikzpicture}

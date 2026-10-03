@@ -1,0 +1,11 @@
+% 10-22(10쪽) — 삼각형 ABC 와 변 BC 위의 점 D(BD=2CD), 선분 AD. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D 만 둔다(길이 표시 없음).
+\begin{tikzpicture}[scale=0.8, line width=0.6pt]
+  \coordinate (A) at (0.15,1.75); \coordinate (B) at (-1.5,0); \coordinate (C) at (1.5,0); \coordinate (D) at (0.5,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below=1pt, font=\small] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

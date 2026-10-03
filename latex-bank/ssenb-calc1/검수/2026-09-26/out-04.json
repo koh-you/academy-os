@@ -1,0 +1,5 @@
+{ "range": "43-75~54-59", "checked": 66, "ok": 65,
+  "findings": [
+    { "id": "52-45", "severity": "yellow", "where": "passage", "note": "보기 배치 — 원본은 ㄱ/ㄷ, ㄴ/ㄹ 이 두 열로 정렬되어 있으나 조판본은 \\qquad 로만 띄워 ㄴ 과 ㄹ 의 시작 위치가 어긋난다. 보기 값(ㄱ y=-5x+11, ㄴ y=-3x+9, ㄷ y=x+5, ㄹ y=3x+3, ㅁ y=5x+1)과 선택지는 원본과 일치", "fix": "items['52-45'].body 의 \\bogi 안 \\qquad 를 고정폭 2열(예: \\begin{tabular}{@{}ll@{}} 또는 \\hbox to 0.5\\linewidth)로 바꿔 ㄴ·ㄹ 열을 맞춤" },
+    { "id": "54-59", "severity": "ok", "where": "layout", "note": "크롭에 다음 문항(배지 60 · 쎈 0457)이 함께 잡혔으나 59번만 전사되어 정상. 60번은 p054 에 실려 있고 다음 구간(54-60)이 담당" }
+  ] }

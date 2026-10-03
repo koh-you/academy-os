@@ -1,0 +1,21 @@
+% 122-34(122쪽) — 곡선 y=x^3-6x+k (k>0) 와 x축·y축이 만드는 두 도형 S_1, S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 색칠한 두 도형과 S_1, S_2 지시 화살표 · 라벨 O, x, y, y=x^3-6x+k.
+% 눈금 숫자는 원문에 하나도 없으므로 넣지 않는다(k 가 답이라 수치를 더하면 답이 드러난다).
+\begin{tikzpicture}[x=0.40cm, y=0.145cm, line width=0.5pt]
+  % 색칠한 두 도형(원문)
+  \path[fill=green!22] (0,0) -- (0.7320508,0)
+    -- plot[domain=0.7320508:0, samples=50] (\x, {\x*\x*\x-6*\x+4}) -- cycle;
+  \path[fill=black!18] (0.7320508,0) -- (2,0)
+    -- plot[domain=2:0.7320508, samples=50] (\x, {\x*\x*\x-6*\x+4}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-3.2,0) -- (3.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,11.5) node[left=1pt] {$y$};
+  % 곡선
+  \draw[line width=0.6pt, domain=-2.9:2.72, samples=160, smooth] plot (\x, {\x*\x*\x-6*\x+4});
+  % 영역 지시 화살표(원문)
+  \draw[->, >=stealth, line width=0.35pt] (-0.5,2.3) -- (0.25,1.1);
+  \draw[->, >=stealth, line width=0.35pt] (1.78,-2.6) -- (1.35,-1.1);
+  \node[below left=1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-0.55,2.5) {$S_1$};
+  \node[anchor=north west, font=\small] at (1.75,-2.7) {$S_2$};
+  \node[anchor=west, font=\small] at (0.2,10.2) {$y=x^3-6x+k$};
+\end{tikzpicture}

@@ -1,0 +1,26 @@
+% 68-07(68쪽) — $y=3^x$ 과 $y=\log_3 x$ 의 그래프 · $x$축의 $a$·$b$·$c$·$d$, $y$축의 $e$·$f$ 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그림은 눈금도 비례도 없는 개형이라(그려진 곡선이 실제 $3^x$ 이 아니다)
+% 구조(두 그래프가 직선 $y=x$ 에 대칭 · $e$ 는 지수함수의 $x=a$ 에서의 값, $f$ 는 $x=b$ 에서의 값,
+% $c$ 는 로그함수가 $e$ 가 되는 $x$, $d$ 는 $f$ 가 되는 $x$)만 지키고 배치 비율은 원문을 따랐다.
+% 라벨은 원문에 있는 것만 둔다 — 눈금·값은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.55cm, y=0.55cm]
+  \draw[->, >=stealth, line width=0.7pt] (-1.95,0) -- (5.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.95) -- (0,3.95) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-1.9:1.86, samples=140, smooth] plot (\x, {exp(0.6931*\x)});
+  \draw[domain=0.27:5.6, samples=160, smooth] plot (\x, {1.4427*ln(\x)});
+  \draw[densely dashed, line width=0.4pt] (0,1.4) -- (2.639,1.4);
+  \draw[densely dashed, line width=0.4pt] (0.4855,0) -- (0.4855,1.4);
+  \draw[densely dashed, line width=0.4pt] (2.639,0) -- (2.639,1.4);
+  \draw[densely dashed, line width=0.4pt] (0,2.2) -- (4.5948,2.2);
+  \draw[densely dashed, line width=0.4pt] (1.1375,0) -- (1.1375,2.2);
+  \draw[densely dashed, line width=0.4pt] (4.5948,0) -- (4.5948,2.2);
+  \node[left=1pt, font=\small] at (0,1.4) {$e$};
+  \node[left=1pt, font=\small] at (0,2.2) {$f$};
+  \node[below left=-2.5pt and -1.5pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (0.4855,0) {$a$};
+  \node[below=1pt, font=\small] at (1.1375,0) {$b$};
+  \node[below=1pt, font=\small] at (2.639,0) {$c$};
+  \node[below=1pt, font=\small] at (4.5948,0) {$d$};
+  \node[anchor=west, font=\small] at (1.95,3.55) {$y=3^x$};
+  \node[anchor=west, font=\small] at (3.1,2.75) {$y=\log_3 x$};
+\end{tikzpicture}

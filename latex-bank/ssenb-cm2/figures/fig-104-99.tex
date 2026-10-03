@@ -1,0 +1,14 @@
+% 104-99(104쪽) — 반지름의 길이가 2인 원, 지름 AB 와 원 위의 점 C 로 이루어진 삼각형 ABC.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 A · B · C 와 중심에서 A 로 가는 반지름 2 만 둔다.
+% 점 C 는 원문처럼 임의의 위치에 두고 둘레가 최대가 되는 자리(답)로 그리지 않는다.
+\begin{tikzpicture}[scale=1.15, line width=0.6pt]
+  \coordinate (A) at (0.8,0.6); \coordinate (B) at (-0.8,-0.6); \coordinate (C) at (0.8,-0.6);
+  \draw (0,0) circle (1);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \fill (0,0) circle (1.6pt);
+  \draw[dashed, line width=0.4pt] (0,0) -- (A);
+  \node[font=\small] at (0.27,0.46) {$2$};
+  \node[above right=-3pt and -2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-3pt and -2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below right=-3pt and -2pt, font=\small] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

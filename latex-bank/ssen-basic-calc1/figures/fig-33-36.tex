@@ -1,0 +1,18 @@
+% 33-36(33쪽) — 36번 그림 · y=f(x) 의 그래프(원점 대칭 쌍곡선 · x축·y축이 점근선 · (1,1), (-1,-1) 안내 점선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 -1, 1 · y축 옆 1, -1 · 점선 네 줄 · 라벨 y=f(x), O, x, y (점 표시는 원문에 없다).
+\begin{tikzpicture}[x=0.42cm, y=0.42cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.7,0) -- (3.7,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.7) -- (0,3.8) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+  \draw[densely dashed, line width=0.4pt] (1,1) -- (1,0);
+  \draw[densely dashed, line width=0.4pt] (0,-1) -- (-1,-1);
+  \draw[densely dashed, line width=0.4pt] (-1,-1) -- (-1,0);
+  \draw[line width=0.6pt, domain=0.30:3.35, samples=120, smooth] plot (\x, {1/\x});
+  \draw[line width=0.6pt, domain=-3.35:-0.30, samples=120, smooth] plot (\x, {1/\x});
+  \node[font=\small, inner sep=2.5pt, above left] at (-1,0) {$-1$};
+  \node[font=\small, inner sep=2.5pt, below] at (1,0) {$1$};
+  \node[font=\small, inner sep=1.5pt, below left] at (0,0) {$\pt{O}$};
+  \node[font=\small, inner sep=2pt, left] at (0,1) {$1$};
+  \node[font=\small, inner sep=2pt, anchor=west] at (0.15,-1.15) {$-1$};
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.7,2.6) {$y=f(x)$};
+\end{tikzpicture}

@@ -40,7 +40,8 @@ const KNOWN_LOCKED = [
   /^POST \/api\/ai\//,
   /^POST \/api\/notifications\/slack-/,
   /^POST \/api\/exam-analysis/,
-  /^POST \/api\/admin\//
+  /^POST \/api\/admin\//,
+  /^POST \/api\/answer-sheet-pilot\/recognize$/
 ];
 
 // 원장 전용 화면이 App.jsx 안에서 부르는 경로(협력 교사 메뉴에서 닿지 않는다).

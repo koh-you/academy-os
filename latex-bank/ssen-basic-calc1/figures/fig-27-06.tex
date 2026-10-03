@@ -1,0 +1,36 @@
+% 27-06(27쪽) — $y=f(x)$ 와 $y=g(x)$ 의 그래프 둘(원문처럼 나란히 · 빈 점(○)과 채운 점(●)). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 1, 2 · y 값 1, -1 · 안내 점선 · 라벨 y=f(x), y=g(x), O, x, y.
+\begin{tikzpicture}[x=0.56cm, y=0.50cm, line width=0.6pt]
+  \begin{scope}
+    \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (3.35,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-2.15) -- (0,1.9) node[left=1pt] {$y$};
+    \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+    \draw[densely dashed, line width=0.4pt] (1,1) -- (1,0);
+    \draw (-1.05,-2.05) -- (1,0) -- (3.05,-2.05);
+    \fill (1,1) circle (2.2pt);
+    \draw[fill=white] (1,0) circle (2.2pt);
+    \node[left=1pt, font=\small] at (0,1) {$1$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below=1pt, font=\small] at (1,0) {$1$};
+    \node[anchor=west, font=\small] at (0.1,-1.15) {$-1$};
+    \node[anchor=west, font=\small] at (0.55,-1.88) {$y=f(x)$};
+  \end{scope}
+  \begin{scope}[shift={(6.4,0)}]
+    \draw[->, >=stealth, line width=0.7pt] (-1.6,0) -- (3.6,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.95) -- (0,1.9) node[left=1pt] {$y$};
+    \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+    \draw[densely dashed, line width=0.4pt] (0,-1) -- (1,-1);
+    \draw[densely dashed, line width=0.4pt] (1,1) -- (1,-1);
+    \draw (-1.4,1.4) -- (1,-1);
+    \draw (1,1) -- (3.2,-1.2);
+    \draw[fill=white] (1,1) circle (2.2pt);
+    \draw[fill=white] (1,-1) circle (2.2pt);
+    \fill (1,0) circle (2.2pt);
+    \node[left=1pt, font=\small] at (0,1) {$1$};
+    \node[left=1pt, font=\small] at (0,-1) {$-1$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below right=-1pt and -3pt, font=\small] at (1,0) {$1$};
+    \node[below=1pt, font=\small] at (2,0) {$2$};
+    \node[anchor=west, font=\small] at (1.15,1.45) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

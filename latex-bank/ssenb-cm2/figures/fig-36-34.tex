@@ -1,0 +1,23 @@
+% 36-34(36쪽) — 원 x^2+y^2=4 위를 움직이는 점 P 와 두 점 A(0, 8) · B(6, 0)으로 이루어진 평행사변형 APBQ.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 대각선 AB 도 원문처럼 긋는다.
+% 라벨은 원문 그대로 y·A·Q·B·P·O·x 와 눈금 8·2·-2·-2·2·6 만 둔다. 중점 M 과 PQ 의 최댓값·최솟값(답)은 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.36, line width=0.5pt]
+  \coordinate (A) at (0,8); \coordinate (B) at (6,0);
+  \coordinate (P) at (0.85,-1.81); \coordinate (Q) at (5.15,9.81);
+  \draw[->, >=stealth, line width=0.7pt] (-3.4,0) -- (8.2,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,11.4) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) circle (2);
+  \draw[line width=0.6pt] (A) -- (Q) -- (B) -- (P) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B);
+  \node[above right=-2pt and -1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[above=1pt, font=\small] at (Q) {$\mathrm{Q}$};
+  \node[above right=-2pt and -1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below right=0pt and -2pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[below left=0pt and -3pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,8) {$8$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+  \node[above left=-1pt and -3pt, font=\small] at (-2,0) {$-2$};
+  \node[above right=-1pt and -3pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (6,0) {$6$};
+\end{tikzpicture}

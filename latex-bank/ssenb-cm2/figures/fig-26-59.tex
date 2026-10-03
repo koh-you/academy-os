@@ -1,0 +1,18 @@
+% 26-59(26쪽) — 좌표평면 위 마름모 ABCD(A(1, 6) · C(n, 0))와 두 점 B, D 를 지나는 직선 l. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·l·6·1·n·O·x·y 와 점 A 의 좌표 안내 파선만. ab 의 값(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.5pt]
+  \coordinate (A) at (1,6); \coordinate (B) at (3.5,1.44); \coordinate (C) at (8.5,0); \coordinate (D) at (6,4.56);
+  \draw[->, >=stealth, line width=0.7pt] (-1.4,0) -- (10.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.0) -- (0,7.6) node[left=-1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (A) -- (0,6);
+  \draw[line width=0.6pt] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[line width=0.6pt] (1.55,-1.1) -- (7.2,6.0) node[above right=-3pt and -2pt, font=\small] {$l$};
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[above right=-2pt and -1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[above left=-2pt and -1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[left=1pt, font=\small] at (0,6) {$6$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (C) {$n$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

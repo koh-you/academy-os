@@ -1,0 +1,27 @@
+% 118-63(118쪽) — x≥0 에서 정의된 두 함수 y=f(x)(아래로 볼록)·y=g(x)(위로 볼록)의 그래프와 직선 y=x,
+% x축 위의 2·5·8·10 과 x축·y축에 평행한 점선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 2·5·8·10·O·x·y·y=f(x)·y=g(x)·y=x 뿐이고 a, b(답)는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.26, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.6,0) -- (17.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.6) -- (0,16.6) node[left=-1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (2,0) -- (2,5);
+  \draw[densely dotted, line width=0.4pt] (5,0) -- (5,8);
+  \draw[densely dotted, line width=0.4pt] (8,0) -- (8,5);
+  \draw[densely dotted, line width=0.4pt] (10,0) -- (10,8);
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (5,2);
+  \draw[densely dotted, line width=0.4pt] (0,5) -- (8,5);
+  \draw[densely dotted, line width=0.4pt] (0,8) -- (10,8);
+  \draw[line width=0.6pt] (-2.2,-2.2) -- (14.6,14.6);
+  \draw[line width=0.6pt, smooth, tension=0.7] plot coordinates
+    {(0,0) (1,0.25) (2,0.6) (3,1.0) (5,2) (6.5,3.3) (8,5) (9,6.4) (10,8) (11,9.6) (12,11.3) (13,13) (13.9,14.9)};
+  \draw[line width=0.6pt, smooth, tension=0.7] plot coordinates
+    {(0,0) (0.25,1) (0.6,2) (1.0,3) (2,5) (3.3,6.5) (5,8) (6.4,9) (8,10) (9.6,11) (11.3,12) (13,13) (14.9,13.9)};
+  \node[font=\small] at (7.6,12.4) {$y=g(x)$};
+  \node[font=\small] at (14.8,15.7) {$y=x$};
+  \node[font=\small] at (15.4,11.9) {$y=f(x)$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+  \node[below=1pt, font=\small] at (8,0) {$8$};
+  \node[below=1pt, font=\small] at (10.4,0) {$10$};
+  \node[above left=-2pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

@@ -1,0 +1,15 @@
+% 147-13(147쪽) — 원점을 출발한 점 P 의 시각 t 에서의 속도 v(t) 의 그래프(세로축 k 에서 내려와 t=2 에서 0, t=3 에서 -1, 다시 올라 t=5 에서 0). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 꺾은선 · 안내 점선 두 줄 · 라벨 v(t), t, O, k, -1(세로축), 2, 5(가로축 아래), 3(가로축 위). k 는 원문처럼 문자로만 두어 답이 그림에서 읽히지 않게 한다.
+\begin{tikzpicture}[x=0.38cm, y=0.38cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (6.1,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.5) -- (0,2.8) node[left=1pt, font=\small] {$v(t)$};
+  \draw[densely dashed, line width=0.4pt] (0,-1) -- (3,-1);
+  \draw[densely dashed, line width=0.4pt] (3,-1) -- (3,0);
+  \draw (0,2) -- (3,-1) -- (5.9,0.45);
+  \node[left=1pt, font=\small] at (0,2) {$k$};
+  \node[left=1pt, font=\small] at (0,-1) {$-1$};
+  \node[below left=-2pt and -2.5pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[above=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+\end{tikzpicture}

@@ -1,0 +1,28 @@
+% 14-06(14쪽) — y=f(x) 의 그래프(x=-1 과 x=1 에서 끊기는 세 조각). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 빈 점(○)·채운 점(●)·점선과 눈금 2, 1, -1, -2, -1, 1, 2 만 옮긴다.
+\begin{tikzpicture}[x=0.56cm, y=0.56cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (3.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,2.9) node[left=1pt] {$y$};
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (1,2);
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+  \draw[densely dashed, line width=0.4pt] (1,2) -- (1,0);
+  \draw[densely dashed, line width=0.4pt] (-1,-1) -- (0,-1);
+  \draw[densely dashed, line width=0.4pt] (-1,-2) -- (0,-2);
+  \draw[densely dashed, line width=0.4pt] (-1,0) -- (-1,-2);
+  \draw[line width=0.6pt, smooth] plot coordinates {(-1.95,-3.1) (-1.65,-2.62) (-1.35,-2.26) (-1,-2)};
+  \draw[line width=0.6pt, smooth] plot coordinates {(-1,-1) (-0.55,0) (-0.1,0.85) (0.35,1.25) (0.7,1.2) (1,1)};
+  \draw[line width=0.6pt] (1,2) -- (3.15,-2.3);
+  \fill (-1,-2) circle (2.2pt);
+  \draw[fill=white] (-1,-1) circle (2.2pt);
+  \fill (1,1) circle (2.2pt);
+  \draw[fill=white] (1,2) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[right=1pt, font=\small] at (0,-1) {$-1$};
+  \node[right=1pt, font=\small] at (0,-2) {$-2$};
+  \node[font=\small] at (-1.5,0.42) {$-1$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below left=-1pt and -4pt, font=\small] at (2,0) {$2$};
+  \node[anchor=west, font=\small] at (0.35,2.6) {$y=f(x)$};
+\end{tikzpicture}

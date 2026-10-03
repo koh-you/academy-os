@@ -1,0 +1,15 @@
+% 86-38(인쇄 86쪽) — 개념 25 지시문의 확률밀도함수 y=f(x) 그래프: (-1,0)에서 (1,1)까지의 선분(y절편 1/2 을 화살표로 가리킴).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 것만(1, 1/2, -1, O, 1, x, y, y=f(x)) · 답(확률)은 그림에 넣지 않는다.
+\begin{tikzpicture}[x=1.05cm, y=1.15cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.75,0) -- (1.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.45) -- (0,1.5) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0,1) -- (1,1) -- (1,0);
+  \draw (-1,0) -- (1,1);
+  \node[anchor=south east, inner sep=1pt, font=\small] at (-0.04,1.0) {$1$};
+  \node[anchor=east, inner sep=1pt, font=\small] (half) at (-0.78,0.5) {$\dfrac{1}{2}$};
+  \draw[->, >=stealth, line width=0.35pt] (half.east) to[bend left=28] (-0.05,0.5);
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (0.18,1.28) {$y=f(x)$};
+\end{tikzpicture}

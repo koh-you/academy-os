@@ -1,0 +1,14 @@
+% 67-50(67쪽) — 도함수 y=f'(x) 의 그래프. x축과 a, c 에서 만나고 x=b 에서 x축에 접한다(최고차항 양수).
+% 원문에 있는 것만: 곡선 · 라벨 y=f'(x), a, O, b, c, x, y. 눈금·좌표는 원문에 없으므로 넣지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.52cm, y=0.42cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.30,0) -- (2.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.00) -- (0,2.70) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-1.95:2.50, samples=170, smooth]
+    plot (\x, {0.35*((\x)+1.7)*((\x)-0.6)*((\x)-0.6)*((\x)-2.1)});
+  \node[below=1pt, font=\small] at (-1.70,0) {$a$};
+  \node[below right=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (0.60,0) {$b$};
+  \node[above=1pt, font=\small] at (2.10,0) {$c$};
+  \node[anchor=west, font=\small] at (0.85,2.35) {$y=f'(x)$};
+\end{tikzpicture}

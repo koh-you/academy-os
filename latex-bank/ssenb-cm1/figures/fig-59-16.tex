@@ -1,0 +1,16 @@
+% 59-16(59쪽) — x^2 의 계수가 1 인 y=f(x) 의 그래프가 x축과 (α,0), (β,0) 에서 만나고 직선 y=g(x) 와 (α,0), (γ,f(γ)) 에서 만나는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y=f(x), y=g(x), α, O, β, γ 와 γ 에서 교점까지의 점선)만. 수치는 원문 그림에 없으므로 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.4,0) -- (3.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.2) -- (0,4.4) node[left] {$y$};
+  \node[below right=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % 포물선 y=(x+3)(x-2) · 직선 y=-x-3 — 두 그래프는 (α,0) 과 (γ,f(γ)) 에서 만난다
+  \draw[line width=0.6pt, domain=-3.6:2.75, samples=70, smooth] plot (\x, {(\x+3)*(\x-2)});
+  \draw[line width=0.6pt] (-4.1,1.1) -- (2.7,-5.7);
+  \draw[dotted, line width=0.5pt] (1,0) -- (1,-4);
+  \node[below left=1pt and -4pt, font=\small] at (-3,0) {$\alpha$};
+  \node[below right=1pt and -4pt, font=\small] at (2,0) {$\beta$};
+  \node[above left=0pt and -4pt, font=\small] at (1,0) {$\gamma$};
+  \node[right, font=\small] at (2.7,3.6) {$y=f(x)$};
+  \node[right, font=\small] at (2.75,-5.75) {$y=g(x)$};
+\end{tikzpicture}

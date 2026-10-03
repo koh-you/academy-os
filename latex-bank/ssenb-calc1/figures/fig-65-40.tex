@@ -1,0 +1,13 @@
+% 65-40(65쪽) — 도함수 y=f'(x) 의 그래프(아래로 볼록한 포물선 · x축과 -3, 1 에서 만난다).
+% 원문에 있는 것만: 곡선 · 라벨 y=f'(x), -3, O, 1, x, y. 꼭짓점 값 등 원문에 없는 눈금은 넣지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.62cm, y=0.46cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.15,0) -- (2.35,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.70) -- (0,3.05) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-3.85:1.85, samples=120, smooth]
+    plot (\x, {0.55*((\x)+3)*((\x)-1)});
+  \node[below=1pt, font=\small] at (-3,0) {$-3$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[anchor=east, font=\small] at (-1.85,2.60) {$y=f'(x)$};
+\end{tikzpicture}

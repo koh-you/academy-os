@@ -1,0 +1,12 @@
+% 147-39(147쪽) — 유리함수 y=-b/(x+a)-c 의 그래프(수치 없음): 세로 점근선은 y축 오른쪽, 가로 점근선은 x축 위.
+% 왼쪽 가지는 왼쪽 위에서 내려와 x축을 지나 아래로, 오른쪽 가지는 위에서 내려와 가로 점근선에 가까워진다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 O·x·y 만. 무리함수 그래프의 개형(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[xscale=0.36, yscale=0.28, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.2,0) -- (5.0,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.0) -- (0,5.6) node[left=-1pt, font=\small] {$y$};
+  \draw[dashed, line width=0.5pt] (-3.0,1) -- (4.8,1);
+  \draw[dotted, line width=0.6pt] (1.3,-3.8) -- (1.3,5.4);
+  \draw[line width=0.6pt, smooth, samples=90, domain=-2.9:0.82] plot (\x, {1+1.8/(\x-1.3)});
+  \draw[line width=0.6pt, smooth, samples=90, domain=1.72:4.7] plot (\x, {1+1.8/(\x-1.3)});
+  \node[below right=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

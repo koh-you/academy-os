@@ -1,0 +1,13 @@
+% 146-36(146쪽) — 무리함수 y=√(ax+b)+c 의 그래프: 점 (-5, -6)에서 시작해 오른쪽 위로 증가하며 y축을 -6보다 위(-1)에서 지난다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 -5·-1·-6·O·x·y 만. a+b+c 의 값(답)은 그림에 적지 않는다.
+\begin{tikzpicture}[xscale=0.40, yscale=0.30, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-7.4,0) -- (4.8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-8.0) -- (0,2.2) node[left=-1pt, font=\small] {$y$};
+  \draw[dotted, line width=0.6pt] (-5,0) -- (-5,-6) -- (0,-6);
+  \draw[line width=0.6pt, smooth, samples=80, domain=-5:3.8] plot (\x, {sqrt(5*\x+25)-6});
+  \draw[->, >=stealth, line width=0.4pt] (1.5,-2.1) -- (0.25,-1.15);
+  \node[above left=-2pt and -2pt, font=\small] at (-5,0) {$-5$};
+  \node[above right=-2pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[right=0pt, font=\small] at (1.5,-2.3) {$-1$};
+  \node[right=2pt, font=\small] at (0,-6) {$-6$};
+\end{tikzpicture}

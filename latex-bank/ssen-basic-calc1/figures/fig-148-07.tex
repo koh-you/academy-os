@@ -1,0 +1,19 @@
+% 148-07(148쪽) — 곡선 $y=-x^2+4$ 와 세 직선 $x=0$, $x=3$, $y=k$ 로 둘러싸인 두 도형에 색칠. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 직선 $x=3$·$y=k$ · 색칠한 두 도형 · 라벨 O, 3, 4, k, x, y, $y=k$, $x=3$, $y=-x^2+4$.
+% $y=k$ 는 답($k$ 의 값)이 그림에서 읽히지 않도록 원문과 같은 자리(꼭짓점 4 와 $x$축 사이 위쪽)에 두었고 눈금값은 적지 않았다.
+\begin{tikzpicture}[x=0.21cm, y=0.25cm, line width=0.6pt]
+  \fill[black!12] plot[domain=0:1.51658, samples=41, smooth] (\x,{4-(\x)*(\x)}) -- (0,1.7) -- cycle;
+  \fill[black!12] plot[domain=1.51658:3, samples=41, smooth] (\x,{4-(\x)*(\x)}) -- (3,1.7) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-4.2,0) -- (7.3,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.6) -- (0,5.0) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.5pt] (-2.6,1.7) -- (7.0,1.7);
+  \draw[line width=0.5pt] (3,-5.4) -- (3,4.6);
+  \draw[domain=-3.05:3.05, samples=121, smooth] plot (\x,{4-(\x)*(\x)});
+  \node[anchor=south west, font=\small] at (3.7,1.85) {$y=k$};
+  \node[above=0pt, font=\small] at (3,4.6) {$x=3$};
+  \node[above left=-3pt and -2pt, font=\small] at (0,4) {$4$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,1.7) {$k$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=-1pt and -3pt, font=\small] at (3,0) {$3$};
+  \node[anchor=north, font=\small] at (-0.3,-5.6) {$y=-x^2+4$};
+\end{tikzpicture}

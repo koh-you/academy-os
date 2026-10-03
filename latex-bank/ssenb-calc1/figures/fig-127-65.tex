@@ -1,0 +1,21 @@
+% 127-65(127쪽) — 점 P 의 시각 t 에서의 속도 v(t) 그래프(꺾은선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 꺾은선 (0,4a)-(1,0)-(2,-a)-(3,0)-(4,4a)-(5,0) · 안내 파선(v=4a · v=-a) ·
+% 안내 점선(t=2, t=4) · 눈금 1 2 3 4 5 · 라벨 O, t, v(t), 4a, -a.
+% 원문도 4a 를 a 의 네 배 높이로 그리지 않았으므로(개략도) 그 비율을 그대로 옮긴다. 다른 눈금·값은 원문에 없다.
+\begin{tikzpicture}[x=0.50cm, y=0.37cm, line width=0.5pt]
+  \draw[densely dashed, line width=0.35pt] (0,2.8) -- (4,2.8);
+  \draw[densely dashed, line width=0.35pt] (0,-1) -- (2,-1);
+  \draw[densely dotted, line width=0.35pt] (2,0) -- (2,-1);
+  \draw[densely dotted, line width=0.35pt] (4,0) -- (4,2.8);
+  \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (6.15,0) node[below=1pt, font=\footnotesize] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.3) -- (0,3.75) node[left=1pt, font=\footnotesize] {$v(t)$};
+  \draw[line width=0.6pt] (0,2.8) -- (1,0) -- (2,-1) -- (3,0) -- (4,2.8) -- (5,0);
+  \node[left=2pt, font=\footnotesize] at (0,2.8) {$4a$};
+  \node[left=2pt, font=\footnotesize] at (0,-1) {$-a$};
+  \node[above left=-1pt and -2pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[below=2pt, font=\footnotesize] at (1,0) {$1$};
+  \node[above=2pt, font=\footnotesize] at (2,0) {$2$};
+  \node[below=2pt, font=\footnotesize] at (3,0) {$3$};
+  \node[below=2pt, font=\footnotesize] at (4,0) {$4$};
+  \node[below=2pt, font=\footnotesize] at (5,0) {$5$};
+\end{tikzpicture}

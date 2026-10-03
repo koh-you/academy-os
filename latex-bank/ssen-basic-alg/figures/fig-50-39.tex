@@ -1,0 +1,19 @@
+% 50-39(50쪽) — $y=\left(\dfrac{1}{2}\right)^{x}$ 의 그래프 · $x=-1$ 에서의 높이 $a$ 와 $y=64$ 일 때의 $x=b$ 안내 점선, $y$절편 $1$.
+% 원문 그림이 비례가 아닌 개념도(실제 $64$ 에 견주면 $x=-1$ 의 높이는 훨씬 낮다)라 원문 배치의 비율을 그대로 옮겼다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 $64$·$b$·$-1$·$a$·$1$·$y=\left(\dfrac{1}{2}\right)^{x}$ 만 · 눈금은 만들지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.23cm, y=0.70cm]
+  \draw[->, >=stealth, line width=0.7pt] (-7.6,0) -- (5.2,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,4.3) node[left=1pt] {$y$};
+  \draw[domain=-6.35:4.2, samples=110, smooth] plot (\x, {3*exp(-0.3438*(\x+6))});
+  \draw[densely dotted, line width=0.4pt] (0,3) -- (-6,3) -- (-6,0);
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,0.54);
+  \draw[->, >=stealth, line width=0.35pt] (0.85,0.80) -- (-0.92,0.56);
+  \node[anchor=west, font=\small] at (0.95,0.86) {$a$};
+  \draw[->, >=stealth, line width=0.35pt] (2.5,0.40) -- (0.14,0.375);
+  \node[anchor=west, font=\small] at (2.6,0.40) {$1$};
+  \node[right=1pt, font=\small] at (0,3) {$64$};
+  \node[below=1pt, font=\small] at (-6,0) {$b$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-1.6,3.85) {$y=\left(\frac{1}{2}\right)^{x}$};
+\end{tikzpicture}

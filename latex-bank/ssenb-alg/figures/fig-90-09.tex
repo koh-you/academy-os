@@ -1,0 +1,22 @@
+% 90-09(90쪽) — 반지름의 길이가 $4$ 인 원에 내접하는 삼각형 ABC(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만 — 세 점 이름, 반지름 $4$, $60^\circ$, $45^\circ$. $\seg{AB}$(답)의 길이는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (-1.391,-0.373);
+  \coordinate (B) at (1.391,-0.373);
+  \coordinate (C) at (-0.373,1.391);
+  \coordinate (O) at (0,0);
+  \draw (O) circle (1.440);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.45pt] (C) -- (O);
+  \fill (O) circle (1.8pt);
+  % $60^\circ$ = $\angle\pt{A}$
+  \draw[line width=0.4pt] (-0.991,-0.373) arc (0:60:0.40);
+  \node[font=\scriptsize] at (-0.84,-0.06) {$60^\circ$};
+  % $45^\circ$ = $\angle\pt{B}$
+  \draw[line width=0.4pt] (1.108,-0.090) arc (135:180:0.40);
+  \node[font=\scriptsize] at (0.79,-0.12) {$45^\circ$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.36,0.68) {$4$};
+  \node[font=\small, anchor=east] at (-1.46,-0.38) {$\pt{A}$};
+  \node[font=\small, anchor=west] at (1.46,-0.38) {$\pt{B}$};
+  \node[font=\small, anchor=south] at (-0.373,1.46) {$\pt{C}$};
+\end{tikzpicture}

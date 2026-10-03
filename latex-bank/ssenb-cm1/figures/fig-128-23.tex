@@ -1,0 +1,11 @@
+% 128-23(128쪽) — 이차함수 y=f(x) 의 그래프(아래로 볼록, x축과 x=-1, x=4 에서 만남). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·-1·4·y=f(x). 원문처럼 세로를 눌러 그렸고, 그래프의 x절편 말고 다른 수치는 넣지 않았다.
+\begin{tikzpicture}[xscale=0.36, yscale=0.22, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.2,0) -- (6.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.6) -- (0,7.6) node[left=1pt, font=\small] {$y$};
+  \node[below right=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.05:5.05, samples=90] plot (\x, {(\x+1)*(\x-4)});
+  \node[below, font=\small, inner sep=2pt] at (-1.35,0) {$-1$};
+  \node[below, font=\small, inner sep=2pt] at (3.6,0) {$4$};
+  \node[above left, font=\small, inner sep=2pt] at (5.05,6.35) {$y=f(x)$};
+\end{tikzpicture}

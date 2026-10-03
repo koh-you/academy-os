@@ -1,0 +1,28 @@
+% 21-11(21쪽) — y=f(x) 의 그래프. x<-1 은 y=2, -1<x<1 은 원점에 닿는 곡선, x>1 은 (1,2)에서 기울기 -2 로 내려가는 직선이고 f(-1)=1.
+% 원문의 빈 점·찬 점과 점선(-1·1 세로선, 1·2 가로선)만 옮긴다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.55pt, x=0.62cm, y=0.62cm, every node/.style={font=\footnotesize}]
+  \draw[->, >=stealth, line width=0.7pt] (-3.1,0) -- (3.0,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,2.9) node[left=1pt] {$y$};
+  % 점선
+  \draw[densely dashed, line width=0.4pt] (-1,0) -- (-1,2) (1,0) -- (1,2);
+  \draw[densely dashed, line width=0.4pt] (-1,2) -- (1,2) (-1,1) -- (1,1);
+  % x<-1 : y=2
+  \draw[line width=0.6pt] (-2.9,2) -- (-1,2);
+  % -1<x<1 : 원점에 닿는 곡선
+  \draw[line width=0.6pt] (-1,2) .. controls (-0.55,0.75) and (-0.3,0) .. (0,0) .. controls (0.35,0) and (0.7,0.45) .. (1,1);
+  % x>1 : 기울기 -2
+  \draw[line width=0.6pt] (1,2) -- (2.65,-1.3);
+  % 빈 점·찬 점
+  \draw[fill=white, line width=0.5pt] (-1,2) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,1) circle (2.2pt);
+  \fill (-1,1) circle (2.2pt);
+  \fill (1,2) circle (2.2pt);
+  % 라벨
+  \node[anchor=east, inner sep=2.5pt, fill=white] at (-0.1,2) {$2$};
+  \node[anchor=east, inner sep=2.5pt, fill=white] at (-0.1,1) {$1$};
+  \node[below=1pt] at (-1,-0.05) {$-1$};
+  \node[below right=-2pt and -3pt] at (0,0) {$\pt{O}$};
+  \node[below=1pt] at (1,-0.05) {$1$};
+  \node[below=1pt] at (2,-0.05) {$2$};
+  \node[anchor=west] at (1.25,2.6) {$y=f(x)$};
+\end{tikzpicture}

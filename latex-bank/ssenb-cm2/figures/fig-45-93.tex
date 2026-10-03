@@ -1,0 +1,24 @@
+% 45-93(45쪽) — 점 P(2, 1)에서 원 x^2+y^2=1 에 그은 두 접선과 접점 A(0, 1), B, 색칠한 삼각형 ABP.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 A · B · P · O · x · y 와 눈금 1 · -1 · 2 만 둔다.
+% 접선의 방정식·거리·넓이(답)는 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.68, line width=0.5pt]
+  \coordinate (A) at (0,1); \coordinate (B) at (0.8,-0.6); \coordinate (P) at (2,1);
+  \draw[->, >=stealth, line width=0.7pt] (-1.8,0) -- (2.8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.3) -- (0,1.9) node[left=-1pt, font=\small] {$y$};
+  \fill[orange!30] (A) -- (P) -- (B) -- cycle;
+  \draw[line width=0.6pt] (0,0) circle (1);
+  \draw[line width=0.6pt] (-1.7,1) -- (2.6,1);
+  \draw[line width=0.6pt] (-0.25,-2.0) -- (2.45,1.6);
+  \draw[line width=0.6pt] (A) -- (B);
+  \draw[dotted, line width=0.5pt] (P) -- (2,0);
+  \fill (P) circle (2.2pt);
+  \node[above right=-2pt and -1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below right=-2pt and -1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[above left=-2pt and -1pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,-1) {$-1$};
+  \node[below left=-1pt, font=\small] at (-1,0) {$-1$};
+  \node[above left=-3pt and -2pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 145-12(145쪽) — 평행사변형 ABCD · AB=5, BC=4√2, ∠A=135°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 5 · 4√2 · 135° 만 적는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.48cm, y=0.48cm]
+  \coordinate (A) at (3.536,3.536);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (5.657,0);
+  \coordinate (D) at (9.193,3.536);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[densely dotted, line width=0.35pt] (3.35,3.62) to[bend right=18] node[midway, left=-2pt, font=\footnotesize] {$5$} (-0.3,0.06);
+  \draw[densely dotted, line width=0.35pt] (0.05,-0.35) to[bend right=16] node[midway, below=-2.5pt, font=\footnotesize] {$4\sqrt{2}$} (5.6,-0.35);
+  \draw[line width=0.4pt] ([shift=(225:1.0)]A) arc (225:360:1.0);
+  \node[font=\footnotesize] at ([shift=(295:1.85)]A) {$135^\circ$};
+  \node[above=-2.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[above right=-3pt and -3.5pt, font=\footnotesize] at (D) {$\pt{D}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

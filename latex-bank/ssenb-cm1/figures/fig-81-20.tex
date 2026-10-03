@@ -1,0 +1,13 @@
+% 81-20(81쪽) — 연립부등식의 해를 나타낸 수직선: -4 에서 ○ 로 시작해 오른쪽으로 가는 화살표, -1 에서 ● 로 시작해 오른쪽으로 가는 화살표, -1 오른쪽의 공통부분 색칠. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(-4, -1, x)만. 구하는 a+b 는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt, baseline=(current bounding box.center)]
+  \fill[violet!22] (0,0) rectangle (1.5,0.62);
+  \draw[<->, >=stealth, line width=0.7pt] (-2.9,0) -- (1.6,0);
+  \node[below=1pt, font=\small] at (1.4,0) {$x$};
+  \draw[->, >=stealth] (-1.8,0) -- (-1.8,0.62) -- (1.5,0.62);
+  \draw[->, >=stealth] (0,0) -- (0,1.2) -- (1.5,1.2);
+  \fill[white] (-1.8,0) circle (2.2pt); \draw (-1.8,0) circle (2.2pt);
+  \fill (0,0) circle (2.2pt);
+  \node[below=2pt, font=\small] at (-1.8,0) {$-4$};
+  \node[below=2pt, font=\small] at (0,0) {$-1$};
+\end{tikzpicture}

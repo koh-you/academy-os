@@ -1,0 +1,9 @@
+% 15-53(15쪽) — 원에 내접한 직사각형과 지름(대각선) 19. 스캔 그림을 TikZ 로 다시 그림(원·직사각형·대각선·중심점만 · 변의 길이는 원문에 없음).
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[black!8] (-0.88,-2.02) rectangle (0.88,2.02);
+  \draw (0,0) circle (2.2);
+  \draw (-0.88,-2.02) rectangle (0.88,2.02);
+  \draw (-0.88,-2.02) -- (0.88,2.02);
+  \fill (0,0) circle (2.2pt);
+  \node[left=2pt] at (0,0) {$19$};
+\end{tikzpicture}

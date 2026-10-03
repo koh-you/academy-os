@@ -1,0 +1,18 @@
+% 14-47(14쪽) — 한 변의 길이가 6인 정사각형 ABCD 와 두 대각선의 교점 M. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·M·6 만(무게중심 G, G' 은 원문 그림에 없다). 원문처럼 꼭짓점 점은 찍지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \coordinate (A) at (0,6);
+  \coordinate (D) at (6,6);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (6,0);
+  \draw (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=13] (B);
+  \node[left=1pt, font=\small] at (-0.55,3) {$6$};
+  \node[above left=-2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[above right=-2pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[below left=-2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below right=-2pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[right=2pt, font=\small] at (3,3) {$\mathrm{M}$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 67-49 ③(67쪽) — 보기 그래프: x=-1 에서 접선이 수평이고 x=1 에서 극대인 사차함수의 개형.
+% 그림 자체가 보기라 TikZ 로 다시 그림. 라벨은 원문 그대로 -1 · O · 1 · x · y 만.
+\begin{tikzpicture}[x=0.50cm, y=0.50cm, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.45,-1.45) rectangle (2.55,2.15);
+  \draw[->, >=stealth, line width=0.7pt] (-2.25,0) -- (2.25,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.25) -- (0,2.00) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-1,0) -- (-1,0.333);
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,1.667);
+  \draw[line width=0.6pt, domain=-1.90:1.90, samples=130, smooth]
+    plot (\x, {-(0.25*(\x)^4 + (\x)^3/3 - 0.5*(\x)^2 - (\x)) + 0.75});
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+\end{tikzpicture}

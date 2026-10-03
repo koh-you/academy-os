@@ -1,0 +1,20 @@
+% 143-20(143쪽) — 세 지점 A, B, C 를 지나는 원 모양의 잔디밭과 삼각형 ABC · ∠A=75°, ∠B=45°, AB=50√3 m.
+% 스캔 삽화(연두색 잔디밭 바탕·분수대 그림)는 화질이 낮아 TikZ 로 다시 그렸다 — 원(잔디밭)은 문제의 조건이라 남기고 분수대 그림은 뺐다.
+% 라벨은 원문에 있는 A·B·C·75°·45°·50√3 m 만 두고 잔디밭의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[scale=1.15, line width=0.5pt, >=stealth]
+  \coordinate (A) at (100:1);
+  \coordinate (B) at (220:1);
+  \coordinate (C) at (10:1);
+  \fill[yellow!35] (0,0) circle (1);
+  \draw[line width=0.4pt, yellow!60!black] (0,0) circle (1);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ([shift=(250:0.24)]A) arc (250:325:0.24);
+  \draw[line width=0.4pt] ([shift=(25:0.26)]B) arc (25:70:0.26);
+  \node[font=\footnotesize] at ([shift=(288:0.4)]A) {$75^\circ$};
+  \node[font=\footnotesize] at ([shift=(48:0.44)]B) {$45^\circ$};
+  \node[above=0pt, font=\small] at (A) {$\pt{A}$};
+  \node[below=0pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-3pt and -2pt, font=\small] at (C) {$\pt{C}$};
+  \draw[densely dashed, line width=0.3pt, <->] (-0.400,1.077) -- (-0.992,-0.550);
+  \node[left=2pt, font=\footnotesize] at (-0.700,0.225) {$50\sqrt{3}\,\mathrm{m}$};
+\end{tikzpicture}

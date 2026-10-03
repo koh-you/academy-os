@@ -1,0 +1,20 @@
+% 86-66(86쪽) — 수직선 위를 움직이는 점 P의 위치 x(t) 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선(t=0 에서 x>0 — 원점에서 출발하지 않는다 · t=a 에서 극대 · t=b 에서 t축을 지남 · t=c 에서 극소 · t=d, t=e 에서 t축을 지남)
+% · a·c 의 세로 파선 · 라벨 x(t), O, a, b, c, d, e, t. 눈금·수치는 원문에 없으므로 넣지 않는다.
+% 2026-10-02 전수 검수: 첫 좌표가 (0,0) 이었으나 원본 400dpi 재크롭에서 곡선이 세로축의 양의 값(극댓값의 약 0.6)에서 시작한다.
+% 「두 번째로 원점을 지나는 순간」의 해석이 달라지는 자리라 고쳤다.
+\begin{tikzpicture}[x=0.52cm, y=0.52cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (7.1,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.35) -- (0,2.65) node[left=1pt, font=\small] {$x(t)$};
+  \draw[densely dashed, line width=0.4pt] (1.0,0) -- (1.0,1.85) (2.9,0) -- (2.9,-1.6);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (0,1.10) (0.35,1.52) (0.70,1.76) (1.00,1.85) (1.40,1.65) (1.80,1.05) (2.20,0)
+    (2.55,-1.10) (2.90,-1.60) (3.25,-1.45) (3.70,-0.85) (4.20,0)
+    (4.70,0.85) (5.15,1.15) (5.55,0.95) (6.00,0) (6.45,-1.35) };
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.00,0) {$a$};
+  \node[above=1pt, font=\small] at (2.20,0) {$b$};
+  \node[above=1pt, font=\small] at (2.90,0) {$c$};
+  \node[below=1pt, font=\small] at (4.20,0) {$d$};
+  \node[above=1pt, font=\small] at (6.00,0) {$e$};
+\end{tikzpicture}

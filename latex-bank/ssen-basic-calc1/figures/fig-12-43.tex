@@ -1,0 +1,18 @@
+% 12-43(12쪽) — 43번 풀이 힌트의 그림 · y=|x|/x 의 그래프(x>0 에서 y=1, x<0 에서 y=-1 · 원점에서 끊긴 빈 점 · 다가가는 방향 화살표 네 개). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 빈 점 (0,1), (0,-1) · 라벨 1, -1, y=f(x), O, x, y · 접근 화살표. 눈금은 만들지 않는다.
+\begin{tikzpicture}[x=0.72cm, y=0.72cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.15,0) -- (2.3,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.75) -- (0,1.95) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,1) -- (2.18,1);
+  \draw[line width=0.6pt] (-2.14,-1) -- (0,-1);
+  \draw[fill=white, line width=0.5pt] (0,1) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (0,-1) circle (2.2pt);
+  \draw[->, >=stealth, line width=0.4pt] (0.54,0.81) -- (0.14,0.81);
+  \draw[->, >=stealth, line width=0.4pt] (-0.71,-0.77) -- (-0.25,-0.77);
+  \draw[->, >=stealth, line width=0.4pt] (-0.71,0.18) -- (-0.25,0.18);
+  \draw[->, >=stealth, line width=0.4pt] (0.57,0.18) -- (0.14,0.18);
+  \node[font=\small, inner sep=2.5pt, left] at (0,1) {$1$};
+  \node[font=\small, inner sep=2.5pt, right] at (0,-1) {$-1$};
+  \node[font=\small, inner sep=2.5pt, below left] at (0,0) {$\pt{O}$};
+  \node[font=\small, inner sep=1pt] at (1.32,1.5) {$y=f(x)$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 48-17(48쪽) — $y=\log_3 x$ 의 그래프 위의 점 A 와 $x$축 위의 두 점 B, C 로 만든 정사각형 ABCD(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문에 있는 것만 — 곡선 이름 $y=\log_3 x$, 꼭짓점 A·B·C·D, 원점 O. $p$, $q$(답)는 그림에서 읽히지 않게 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.42cm, y=0.54cm, >=stealth]
+  \draw[->, line width=0.7pt] (-1.8,0) -- (11.0,0) node[below=1pt] {$x$};
+  \draw[->, line width=0.7pt] (0,-2.1) -- (0,2.7) node[left=1pt] {$y$};
+  \draw[domain=0.125:10.6, samples=140, smooth] plot (\x, {ln(\x)/ln(3)});
+  \draw (6.0,0) -- (6.0,1.6309) -- (8.0,1.6309) -- (8.0,0) -- cycle;
+  \node[font=\small, anchor=south east] at (6.10,1.72) {$\pt{A}$};
+  \node[font=\small, anchor=west] at (8.10,1.46) {$\pt{D}$};
+  \node[font=\small, anchor=north] at (6.0,-0.10) {$\pt{B}$};
+  \node[font=\small, anchor=north] at (8.0,-0.10) {$\pt{C}$};
+  \node[font=\small, anchor=north east] at (-0.06,-0.06) {$\pt{O}$};
+  \node[font=\small, anchor=south east] at (4.90,1.84) {$y=\log_3 x$};
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% 121-30(121쪽) — 곡선 y=9-x^2 (x>=0) 과 y축 · 두 직선 y=k, x=3 이 만드는 두 도형. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: y축 눈금 9 · x축 눈금 3 · 색칠한 두 도형 · 라벨 O, x, y, y=k, x=3, y=9-x^2.
+% y=k 자리에는 원문처럼 눈금 숫자를 넣지 않는다(k 가 답이라 수치를 더하면 답이 드러난다).
+\begin{tikzpicture}[x=0.48cm, y=0.16cm, line width=0.5pt]
+  % 색칠한 두 도형(원문)
+  \path[fill=violet!18]
+    (0,6) -- plot[domain=0:1.7320508, samples=60] (\x, {9-\x*\x}) -- (1.7320508,6) -- cycle;
+  \path[fill=violet!18]
+    plot[domain=1.7320508:3, samples=60] (\x, {9-\x*\x}) -- (3,6) -- (1.7320508,6) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (4.6,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,11.2) node[left=1pt] {$y$};
+  % 두 직선(원문)
+  \draw[line width=0.6pt] (-0.5,6) -- (4.0,6);
+  \draw[line width=0.6pt] (3,-1.3) -- (3,10.2);
+  % 곡선
+  \draw[line width=0.6pt, domain=0:3.2, samples=120, smooth] plot (\x, {9-\x*\x});
+  \node[below left=1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[left=2pt, font=\small] at (0,9) {$9$};
+  \node[below left=2pt and 2pt, font=\small] at (3,0) {$3$};
+  \node[anchor=west, font=\small] at (4.0,6) {$y=k$};
+  \node[anchor=south west, font=\small] at (3.05,10.0) {$x=3$};
+  \node[anchor=north west, font=\small] at (3.25,-1.2) {$y=9-x^2$};
+\end{tikzpicture}

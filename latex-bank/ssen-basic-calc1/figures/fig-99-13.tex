@@ -1,0 +1,19 @@
+% 99-13(99쪽) — 13~17번 공통 그림 · 원점을 출발한 점 P 의 시각 t 에서의 위치 x(t) 의 그래프(t=a 에서 최소 -2, t=b·d 에서 0, t=c 에서 최대 3). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 안내 점선 네 줄 · 라벨 x(t), t, O, a, b, c, d, 3, -2. 원문에 없는 눈금값은 적지 않는다.
+\begin{tikzpicture}[x=0.36cm, y=0.33cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (7.0,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,4.2) node[left=1pt, font=\small] {$x(t)$};
+  \draw[densely dotted, line width=0.4pt] (0,3) -- (4.65,3);
+  \draw[densely dotted, line width=0.4pt] (4.65,3) -- (4.65,0);
+  \draw[densely dotted, line width=0.4pt] (0,-2) -- (1.6,-2);
+  \draw[densely dotted, line width=0.4pt] (1.6,-2) -- (1.6,0);
+  \draw[domain=0:3.2, samples=90, smooth] plot (\x, {-2*sin(180*(\x)/3.2)});
+  \draw[domain=3.2:6.1, samples=90, smooth] plot (\x, {3*sin(180*((\x)-3.2)/2.9)});
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (1.6,0) {$a$};
+  \node[below=1pt, font=\small] at (3.2,0) {$b$};
+  \node[below=1pt, font=\small] at (4.65,0) {$c$};
+  \node[below=1pt, font=\small] at (6.1,0) {$d$};
+  \node[left=1pt, font=\small] at (0,3) {$3$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+\end{tikzpicture}

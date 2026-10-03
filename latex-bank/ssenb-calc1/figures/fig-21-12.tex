@@ -1,0 +1,26 @@
+% 21-12(21쪽) — 구간 [-2,2] 에서 정의된 y=f(x) 의 그래프. -2<=x<0 은 (-2,1)에서 원점으로 내려오는 직선(원점은 빈 점),
+% f(0)=1, 0<x<=2 는 (0,-1)(빈 점)에서 (2,-2)로 내려가는 직선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.55pt, x=0.6cm, y=0.6cm, every node/.style={font=\footnotesize}]
+  \draw[->, >=stealth, line width=0.7pt] (-3.0,0) -- (3.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.9) -- (0,1.9) node[left=1pt] {$y$};
+  % 점선
+  \draw[densely dashed, line width=0.4pt] (-2,0) -- (-2,1) (-2,1) -- (0,1);
+  \draw[densely dashed, line width=0.4pt] (2,0) -- (2,-2) (0,-2) -- (2,-2);
+  % 두 조각
+  \draw[line width=0.6pt] (-2,1) -- (0,0);
+  \draw[line width=0.6pt] (0,-1) -- (2,-2);
+  % 빈 점·찬 점
+  \draw[fill=white, line width=0.5pt] (0,0) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (0,-1) circle (2.2pt);
+  \fill (-2,1) circle (2.2pt);
+  \fill (0,1) circle (2.2pt);
+  \fill (2,-2) circle (2.2pt);
+  % 라벨
+  \node[anchor=west, inner sep=2.5pt] at (0.14,1) {$1$};
+  \node[anchor=east, inner sep=2.5pt] at (-0.14,-1) {$-1$};
+  \node[anchor=east, inner sep=2.5pt, fill=white] at (-0.1,-2) {$-2$};
+  \node[below=1pt] at (-2,-0.05) {$-2$};
+  \node[below right=-2pt and -1pt] at (0,0) {$\pt{O}$};
+  \node[above=2pt] at (2,0.05) {$2$};
+  \node[anchor=east] at (-0.45,1.6) {$y=f(x)$};
+\end{tikzpicture}

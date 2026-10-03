@@ -1,0 +1,22 @@
+% 17-67(17쪽) — 반지름 2 인 원 O 와, 원 위의 점 A 를 중심으로 하는 반지름 r 인 원이 만나는 점 P, Q 및 지름 AB 와 만나는 점 R(사각형 AQRP 색칠). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 A, B, O, P, Q, R · 치수 점선 r(A→R)과 2(O→B) · 색칠한 사각형 AQRP. r 은 원문 그림의 비율 그대로이고 답이 되는 값은 적지 않는다.
+\begin{tikzpicture}[x=0.72cm, y=0.72cm, line width=0.5pt]
+  \fill[green!20] (0,0) -- (0.6006,1.4289) -- (1.55,0) -- (0.6006,-1.4289) -- cycle;
+  \draw[line width=0.6pt] (0,0) circle (1.55);
+  \draw[line width=0.6pt] (2,0) circle (2);
+  \draw[line width=0.5pt] (0,0) -- (4,0);
+  \draw[line width=0.5pt] (0,0) -- (0.6006,1.4289) -- (1.55,0) -- (0.6006,-1.4289) -- cycle;
+  \draw[densely dashed, line width=0.4pt] (0,0) .. controls (0.5,0.42) and (1.05,0.42) .. (1.55,0);
+  \draw[densely dashed, line width=0.4pt] (2,0) .. controls (2.6,0.52) and (3.4,0.52) .. (4,0);
+  \fill (0,0) circle (2.2pt);
+  \fill (1.55,0) circle (2.2pt);
+  \fill (2,0) circle (2.2pt);
+  \node[left=2pt, font=\small] at (0,0) {$\pt{A}$};
+  \node[above right=-2pt and -1pt, font=\small] at (1.55,0) {$\pt{R}$};
+  \node[below=2pt, font=\small] at (2,0) {$\pt{O}$};
+  \node[right=2pt, font=\small] at (4,0) {$\pt{B}$};
+  \node[above=1pt, font=\small] at (0.6006,1.4289) {$\pt{P}$};
+  \node[below=1pt, font=\small] at (0.6006,-1.4289) {$\pt{Q}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.84,0.33) {$r$};
+  \node[font=\small, fill=white, inner sep=1pt] at (2.86,0.43) {$2$};
+\end{tikzpicture}

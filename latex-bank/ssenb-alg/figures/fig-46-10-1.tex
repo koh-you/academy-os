@@ -1,0 +1,10 @@
+% 46-10 ①(46쪽) — 보기 그림: 감소하는 로그함수 곡선 · $x$절편이 $1$ 보다 오른쪽($x=1$ 에서 양수).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 $\pt{O}$ · $1$ · $x$ · $y$ 만.
+\begin{tikzpicture}[line width=0.5pt, x=0.50cm, y=0.30cm, >=stealth, baseline=(current bounding box.center)]
+  \draw[->, line width=0.6pt] (-0.9,0) -- (5.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.6pt] (0,-3.2) -- (0,3.3) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.3pt] (1,0) -- (1,1);
+  \draw[domain=0.36:4.8, samples=110, smooth] plot (\x, {1-ln(\x)/0.693147});
+  \node[below=0pt, font=\small] at (1,-0.06) {$1$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

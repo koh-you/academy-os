@@ -1,0 +1,15 @@
+% 84-16(84쪽) — 직선 $y=f(x)$와 이차함수 $y=g(x)$의 그래프 · 두 그래프는 $y$축 위($x=0$)와 $x=6$ 에서 만나고 $x=6$ 에 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 개형(포물선은 위로 볼록하지 않고 꼭짓점이 $x$축 아래 · 왼쪽 근은 원점 오른쪽 · 오른쪽 근은 $6$ 왼쪽 ·
+% 포물선의 오른쪽 가지가 두 라벨 사이로 빠져나간다)의 비율을 쪽 이미지에서 재어 그대로 맞췄다($x$축과 $y$축의 눈금 비율은 원문처럼 다르다).
+% 라벨은 원문에 있는 것($y=g(x)$ · $y=f(x)$ · O · $6$ · $x$ · $y$)만 둔다 — 부등식의 해는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.22cm, y=0.0938cm]
+  \draw[->, >=stealth, line width=0.7pt] (-2.95,0) -- (8.4,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,19.2) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-2.26:6.66, samples=160, smooth] plot (\x, {(\x-1.05)*(\x-3.35)});
+  \draw[domain=-2.85:7.35] plot (\x, {1.6*\x+3.5175});
+  \draw[densely dotted, line width=0.4pt] (6,13.1175) -- (6,0);
+  \node[below=1pt, font=\small] at (6,0) {$6$};
+  \node[below left=-2.5pt and -1.5pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\footnotesize] at (6.35,17.2) {$y=g(x)$};
+  \node[anchor=west, font=\footnotesize] at (6.9,17.2) {$y=f(x)$};
+\end{tikzpicture}

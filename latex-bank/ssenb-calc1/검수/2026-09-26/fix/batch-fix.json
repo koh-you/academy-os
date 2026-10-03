@@ -1,0 +1,133 @@
+{
+ "unit": "99 검수 반영 확인",
+ "groups": [
+  {
+   "id": "FIX",
+   "section": "2026-09-26 검수 반영",
+   "items": [
+    "13-43",
+    "20-07",
+    "40-60",
+    "42-69",
+    "52-45",
+    "67-37",
+    "106-22",
+    "117-06",
+    "120-20",
+    "122-32"
+   ]
+  }
+ ],
+ "items": {
+  "13-43": {
+   "page": 13,
+   "level": "중",
+   "tag": "서술형",
+   "ssen_ref": "0086",
+   "body": "\\par\\smallskip\\centerline{$\\displaystyle\\lim_{x\\to-4}\\dfrac{\\sqrt{x+5}-1}{x+4}=p$, $\\displaystyle\\lim_{x\\to\\infty}(\\sqrt{x^2+3x-2}-\\sqrt{x^2-x+2})=q$}\\par\\smallskip\\noindent 라 할 때, $2p+q$의 값을 구하시오.",
+   "answer": "",
+   "answer_source": ""
+  },
+  "20-07": {
+   "page": 20,
+   "level": "중",
+   "tag": "서술형",
+   "ssen_ref": "0178",
+   "figure": "tikz:fig-20-07",
+   "body": "함수 $y=f(x)$의 그래프가 오른쪽 그림과 같다. 구간 $[-3,\\,2]$에서 다음 조건을 모두 만족시키는 실수 $a$, $b$에 대하여 $a-b$의 값을 구하시오.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\displaystyle\\lim_{x\\to a+} f(x)=\\lim_{x\\to a-} f(x)$\\par\\smallskip ㈏ $f(x)$는 $x=a$에서 불연속이다.\\par\\smallskip ㈐ $f(b)=a$\\end{minipage}}",
+   "answer": "",
+   "answer_source": ""
+  },
+  "40-60": {
+   "page": 40,
+   "level": "중",
+   "ssen_ref": "0333",
+   "body": "함수 $f(x)=ax^3+bx^2+3cx+d$가 다음 조건을 모두 만족시킬 때, 상수 $a$, $b$, $c$, $d$에 대하여 $a+b+c+d$의 값을 구하시오.\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\displaystyle\\lim_{x\\to\\infty}\\dfrac{f(x)}{x^2+3x+1}=2$\\\\[2mm] ㈏ $\\displaystyle\\lim_{x\\to-1}\\dfrac{f(x)+15}{x+1}=17$\\end{minipage}}",
+   "answer": "",
+   "answer_source": ""
+  },
+  "42-69": {
+   "page": 42,
+   "level": "상",
+   "tag": "서술형",
+   "ssen_ref": "0342",
+   "body": "함수 $f(x)=x^3+ax^2+bx+c$가 다음 조건을 모두 만족시킬 때, $f(2)$의 값을 구하시오.\\cond{$a$, $b$, $c$는 상수이다.}\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\displaystyle\\lim_{x\\to 1}\\dfrac{f(x)}{x-1}=9$\\\\[2mm] ㈏ 함수 $y=f(x)$의 그래프 위의 점에서의 접선의 기울기는 $x=4$인 점에서 최소이다.\\end{minipage}}",
+   "answer": "",
+   "answer_source": ""
+  },
+  "52-45": {
+   "page": 52,
+   "level": "중",
+   "ssen_ref": "0442",
+   "body": "점~$(1,\\,6)$에서 곡선 $y=-x^2+3x$에 그은 접선의 방정식인 것만을 보기에서 있는 대로 고른 것은?\\bogi{\\makebox[0.48\\linewidth][l]{ㄱ. $y=-5x+11$}\\makebox[0.48\\linewidth][l]{ㄴ. $y=-3x+9$}\\\\ \\makebox[0.48\\linewidth][l]{ㄷ. $y=x+5$}\\makebox[0.48\\linewidth][l]{ㄹ. $y=3x+3$}\\\\ \\makebox[0.48\\linewidth][l]{ㅁ. $y=5x+1$}}",
+   "choices": [
+    "ㄱ, ㄷ",
+    "ㄱ, ㄹ",
+    "ㄴ, ㄹ",
+    "ㄴ, ㅁ",
+    "ㄷ, ㅁ"
+   ],
+   "answer": "",
+   "answer_source": ""
+  },
+  "67-37": {
+   "page": 67,
+   "level": "중",
+   "ssen_ref": "0568",
+   "figure": "tikz:fig-67-37",
+   "body": "함수 $f(x)=ax^3+bx^2+cx-3$에 대하여 $y=f(x)$의 그래프가 오른쪽 그림과 같을 때, 다음 중 음수인 것은? \\cond{$a$, $b$, $c$는 상수이고, $|\\alpha|>|\\beta|$이다.}",
+   "choices": [
+    "$a+b$",
+    "$b-c$",
+    "$ab$",
+    "$abc$",
+    "$a-bc$"
+   ],
+   "answer": "",
+   "answer_source": ""
+  },
+  "106-22": {
+   "page": 106,
+   "level": "상",
+   "tag": "서술형",
+   "ssen_ref": "0890",
+   "body": "모든 실수에서 연속인 함수 $f(x)$가 다음 조건을 모두 만족시킬 때, $\\displaystyle\\int_{18}^{20}f(x)\\,dx$의 값을 구하시오.\\exprbox{\\begin{minipage}{\\linewidth}\\raggedright ㈎ $\\displaystyle\\int_{0}^{2}f(x)\\,dx=0$\\\\ ㈏ $\\displaystyle\\int_{n}^{n+6}f(x)\\,dx=\\int_{n}^{n+1}2x\\,dx$ \\mbox{\\cond{$n=0$, $1$, $2$, $\\cdots$}}\\end{minipage}}",
+   "answer": "",
+   "answer_source": ""
+  },
+  "117-06": {
+   "page": 117,
+   "level": "상",
+   "ssen_ref": "0988",
+   "figure": "tikz:fig-117-06",
+   "body": "함수 $f(x)=x^2-5x+4$에 대하여 오른쪽 그림과 같이 곡선 $y=f(x)$와 $x$축 및 $y$축으로 둘러싸인 도형의 넓이를 $S_1$, 곡선 $y=f(x)$와 $x$축으로 둘러싸인 도형의 넓이를 $S_2$, 곡선 $y=f(x)$와 $x$축 및 직선 $x=k\\ (k>4)$로 둘러싸인 도형의 넓이를 $S_3$이라 하자. $S_1$, $S_2$, $S_3$이 이 순서대로 등차수열을 이룰 때, $S_1+S_3$의 값은?",
+   "choices": [
+    "$6$",
+    "$7$",
+    "$8$",
+    "$9$",
+    "$10$"
+   ],
+   "answer": "",
+   "answer_source": ""
+  },
+  "120-20": {
+   "page": 120,
+   "level": "중",
+   "ssen_ref": "1002",
+   "figure": "tikz:fig-120-20",
+   "body": "오른쪽 그림과 같이 두 사차함수 $y=f(x)$와 $y=g(x)$의 그래프로 둘러싸인 세 도형 $A$, $B$, $C$의 넓이가 각각 $4$, $6$, $11$일 때, 정적분 $\\displaystyle\\int_{-7}^{5}\\{f(x)-g(x)\\}\\,dx$의 값을 구하시오.",
+   "answer": "",
+   "answer_source": ""
+  },
+  "122-32": {
+   "page": 122,
+   "level": "중",
+   "ssen_ref": "1014",
+   "figure": "tikz:fig-122-32",
+   "body": "오른쪽 그림과 같이 두 곡선 $y=x(x-a)(x-1)$, $y=-x(x-b)(x-1)$로 둘러싸인 두 도형의 넓이가 서로 같을 때, 상수 $a$, $b$에 대하여 $a+b$의 값을 구하시오. \\cond{$0<a<1$, $0<b<1$}",
+   "answer": "",
+   "answer_source": ""
+  }
+ }
+}

@@ -1,0 +1,20 @@
+% 145-16(145쪽) — 사각형 ABCD · 두 대각선 AC=4√3, BD=5 가 이루는 각 60°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 5 · 4√3 · 60° 만 적는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.50cm, y=0.50cm]
+  \coordinate (A) at (-3.227,1.863);
+  \coordinate (B) at (-4.143,-2.392);
+  \coordinate (C) at (4.573,-2.640);
+  \coordinate (D) at (1.599,0.923);
+  \coordinate (P) at (0,0);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw[densely dotted, line width=0.35pt] (-4.28,-2.24) to[bend left=13] node[pos=0.32, above left=-4pt and -4pt, font=\footnotesize] {$5$} (1.5,1.08);
+  \draw[densely dotted, line width=0.35pt] (-3.13,1.7) to[bend right=13] node[pos=0.48, below left=-4pt and -4.5pt, font=\footnotesize] {$4\sqrt{3}$} (4.49,-2.79);
+  \draw[line width=0.4pt] ([shift=(-30:0.7)]P) arc (-30:30:0.7);
+  \node[font=\footnotesize] at ([shift=(0:1.35)]P) {$60^\circ$};
+  \node[above left=-3pt and -3.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[above right=-3pt and -3.5pt, font=\footnotesize] at (D) {$\pt{D}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

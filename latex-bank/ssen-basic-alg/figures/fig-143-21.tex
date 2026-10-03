@@ -1,0 +1,18 @@
+% 143-21(143쪽) — 호수 가장자리의 두 나무 A, B 와 측량 지점 C · AC=BC=200 m, ∠C=120°.
+% 스캔 삽화(호수 물결·나무 그림)는 화질이 낮아 TikZ 로 다시 그렸다 — 호수는 A, B 를 잇는 선 위쪽의 연한 영역으로만 남겼다.
+% 라벨은 원문에 있는 A·B·C·200 m·120° 만 두고 두 나무 사이의 거리(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.78, line width=0.5pt]
+  \coordinate (A) at (-2,0);
+  \coordinate (B) at (2,0);
+  \coordinate (C) at (0,-1.155);
+  \fill[cyan!18] (A) .. controls (-1.9,1.45) and (1.9,1.45) .. (B) -- cycle;
+  \draw[line width=0.4pt, cyan!55!black] (A) .. controls (-1.9,1.45) and (1.9,1.45) .. (B);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ([shift=(30:0.42)]C) arc (30:150:0.42);
+  \node[font=\footnotesize] at ([shift=(90:0.66)]C) {$120^\circ$};
+  \node[above left=-3pt and -2pt, font=\small] at (A) {$\pt{A}$};
+  \node[above right=-3pt and -2pt, font=\small] at (B) {$\pt{B}$};
+  \node[below=0pt, font=\small] at (C) {$\pt{C}$};
+  \node[left=3pt, font=\footnotesize] at (-1,-0.578) {$200\,\mathrm{m}$};
+  \node[right=3pt, font=\footnotesize] at (1,-0.578) {$200\,\mathrm{m}$};
+\end{tikzpicture}

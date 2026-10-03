@@ -1,0 +1,44 @@
+% 21-13(21쪽) — 0<=x<=4 에서 정의된 두 함수 y=f(x)(왼쪽)·y=g(x)(오른쪽) 의 그래프.
+% f 는 (0,0)-(1,1)-(3,1)-(4,2) 를 잇는 꺾은선, g 는 (0,1)-(1,0)-(2,1) 뒤 (2,2)(빈 점)에서 (4,0) 으로 내려간다.
+% 원문의 빈 점·찬 점과 눈금 점선만 옮긴다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.55pt, x=0.56cm, y=0.56cm, every node/.style={font=\footnotesize}]
+  % 왼쪽 — y=f(x)
+  \begin{scope}
+    \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (5.1,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,3.2) node[left=1pt] {$y$};
+    \draw[densely dashed, line width=0.4pt] (0,1) -- (3,1) (0,2) -- (4,2);
+    \draw[densely dashed, line width=0.4pt] (1,0) -- (1,1) (2,0) -- (2,1) (3,0) -- (3,1) (4,0) -- (4,2);
+    \draw[line width=0.6pt] (0,0) -- (1,1) -- (3,1) -- (4,2);
+    \fill (0,0) circle (2.2pt);
+    \fill (4,2) circle (2.2pt);
+    \node[anchor=east, inner sep=2.5pt] at (-0.14,1) {$1$};
+    \node[anchor=east, inner sep=2.5pt] at (-0.14,2) {$2$};
+    \node[below left=0pt and -2pt] at (0,0) {$\pt{O}$};
+    \node[below=1pt] at (1,-0.05) {$1$};
+    \node[below=1pt] at (2,-0.05) {$2$};
+    \node[below=1pt] at (3,-0.05) {$3$};
+    \node[below=1pt] at (4,-0.05) {$4$};
+    \node[anchor=west] at (1.75,2.8) {$y=f(x)$};
+  \end{scope}
+  % 오른쪽 — y=g(x)
+  \begin{scope}[xshift=5.2cm]
+    \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (5.1,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,3.2) node[left=1pt] {$y$};
+    \draw[densely dashed, line width=0.4pt] (0,1) -- (2,1) (0,2) -- (2,2);
+    \draw[densely dashed, line width=0.4pt] (2,0) -- (2,2) (3,0) -- (3,1);
+    \draw[line width=0.6pt] (0,1) -- (1,0) -- (2,1);
+    \draw[line width=0.6pt] (2,2) -- (4,0);
+    \draw[fill=white, line width=0.5pt] (2,2) circle (2.2pt);
+    \fill (0,1) circle (2.2pt);
+    \fill (2,1) circle (2.2pt);
+    \fill (4,0) circle (2.2pt);
+    \node[anchor=east, inner sep=2.5pt] at (-0.14,1) {$1$};
+    \node[anchor=east, inner sep=2.5pt] at (-0.14,2) {$2$};
+    \node[below left=0pt and -2pt] at (0,0) {$\pt{O}$};
+    \node[below=1pt] at (1,-0.05) {$1$};
+    \node[below=1pt] at (2,-0.05) {$2$};
+    \node[below=1pt] at (3,-0.05) {$3$};
+    \node[below=1pt] at (4,-0.05) {$4$};
+    \node[anchor=west] at (1.75,2.8) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% 129-63(129쪽) — 발문의 「가로줄의 개수와 세로줄의 개수가 같은 정사각형 모양의 표」. 스캔 표라 tabular 로 다시 조판.
+% 칸 값은 원문 그대로다 — 1~5행의 곱셈표, 1행 6열 $\cdots$, 6행 1열 $\vdots$ · 6열 $\ddots$, 7행 $a$·$b$, 8행 $c$·$225$.
+% 원문에 없는 값을 채우지 않고 빈칸은 비워 두어, 답 $b-a+c$ 가 표에서 읽히지 않게 한다.
+{\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.35}%
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\makebox[5mm]{$1$} & \makebox[5mm]{$2$} & \makebox[5mm]{$3$} & \makebox[5mm]{$4$} & \makebox[5mm]{$5$} & \makebox[5mm]{$\cdots$} & \makebox[5mm]{} & \makebox[5mm]{} \\
+\hline
+$2$ & $4$ & $6$ & $8$ & $10$ & & & \\
+\hline
+$3$ & $6$ & $9$ & $12$ & $15$ & & & \\
+\hline
+$4$ & $8$ & $12$ & $16$ & $20$ & & & \\
+\hline
+$5$ & $10$ & $15$ & $20$ & $25$ & & & \\
+\hline
+$\vdots$ & & & & & $\ddots$ & & \\
+\hline
+ & & & & & & $a$ & $b$ \\
+\hline
+ & & & & & & $c$ & $225$ \\
+\hline
+\end{tabular}}

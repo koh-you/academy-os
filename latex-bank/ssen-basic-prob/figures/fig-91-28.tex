@@ -1,0 +1,15 @@
+% 91-28(인쇄 91쪽) — 0≤x≤2 에서 정의된 확률밀도함수 y=f(x) 의 그래프: (0,0)에서 (1/2,4/7)까지 오르고 (2,4/7)까지 수평(안내 파선).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 것만(4/7, O, 1/2, 2, x, y, y=f(x)) · 답(a의 값)은 그림에 넣지 않는다.
+\begin{tikzpicture}[x=1.05cm, y=1.3cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.35,0) -- (2.55,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.38) -- (0,1.32) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0,1) -- (0.5,1);
+  \draw[densely dotted, line width=0.4pt] (0.5,0) -- (0.5,1);
+  \draw[densely dotted, line width=0.4pt] (2,0) -- (2,1);
+  \draw (0,0) -- (0.5,1) -- (2,1);
+  \node[left=2pt, font=\small] at (0,1) {$\dfrac{4}{7}$};
+  \node[below=1pt, font=\small] at (0.5,0) {$\dfrac{1}{2}$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (0.85,1.18) {$y=f(x)$};
+\end{tikzpicture}

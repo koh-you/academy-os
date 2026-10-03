@@ -1,0 +1,26 @@
+% 119-16(119쪽) — 곡선 y=(1/4)x^2 (x>=0) · x축 · 직선 x=2 로 둘러싸인 S_1 과, 그 곡선 · 직선 x=2 · 직선 y=k^2 로 둘러싸인 S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 O, x, y, k^2, 2, x=2, y=k^2, y=(1/4)x^2, S_1, S_2. 눈금은 x축의 2 뿐이고 y축에는 k^2 라벨만 있다.
+% 직선 y=k^2 의 높이는 원문 그림의 어림 비율만 따른 것이다 — 눈금이 없으므로 k 값을 그림에서 잴 수 없다.
+\begin{tikzpicture}[x=0.46cm, y=0.50cm, line width=0.5pt]
+  % S_1 — 곡선 아래 · x축 위 · 직선 x=2 왼쪽
+  \fill[red!14] (0,0) -- plot[domain=0:2, samples=50, smooth] (\x, {(\x)*(\x)/4}) -- (2,0) -- cycle;
+  % S_2 — 곡선 위 · 직선 x=2 오른쪽 · 직선 y=k^2 아래
+  \fill[blue!14] (2,1) -- (2,2.25) -- (3,2.25) -- plot[domain=3:2, samples=50, smooth] (\x, {(\x)*(\x)/4}) -- cycle;
+  % 축
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (4.2,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,3.3) node[left=1pt] {$y$};
+  % 두 직선
+  \draw[line width=0.5pt] (-1.35,2.25) -- (3.75,2.25);
+  \draw[line width=0.5pt] (2,-0.8) -- (2,2.95);
+  % 곡선
+  \draw[line width=0.6pt, domain=0:3.35, samples=120, smooth] plot (\x, {(\x)*(\x)/4});
+  % 라벨(원문 자리 그대로)
+  \node[below left=0pt and 1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=2pt, font=\small] at (1.72,0) {$2$};
+  \node[below=1pt, font=\small] at (2.25,-0.8) {$x=2$};
+  \node[below=1pt, font=\small] at (-0.62,2.25) {$k^2$};
+  \node[anchor=north west, font=\small] at (3.3,2.2) {$y=k^2$};
+  \node[anchor=west, font=\small] at (2.95,3.25) {$y=\dfrac{1}{4}x^2$};
+  \node[font=\small] at (1.45,0.28) {$S_1$};
+  \node[font=\small] at (2.32,1.8) {$S_2$};
+\end{tikzpicture}

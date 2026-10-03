@@ -1,0 +1,16 @@
+% 96-50(96쪽) — 가로 30 cm · 세로 60 cm 인 직사각형(가는 실선)과, 가로를 x cm 늘이고 세로를 x cm 줄여 만든 직사각형(분홍 칠).
+% 스캔 삽화라 TikZ 로 다시 그림. 라벨은 원문 그대로(30 cm · 60 cm · x cm 둘)이고 비율은 원문처럼 대략만 — 답(x 의 최댓값)이 눈금으로 읽히지 않게 둔다.
+\begin{tikzpicture}[line width=0.6pt]
+  \def\W{1.75}\def\E{1.5}\def\H{3.5}\def\S{1.55}
+  \fill[red!22] (0,\S) rectangle ({\W+\E},\H);
+  \draw (0,\S) rectangle ({\W+\E},\H);
+  \draw (0,0) rectangle (\W,\H);
+  \draw[densely dotted, line width=0.4pt] (0,\H) .. controls ({\W*0.25},{\H+0.3}) and ({\W*0.75},{\H+0.3}) .. (\W,\H);
+  \node[above, font=\small, inner sep=1pt] at ({\W/2},{\H+0.2}) {$30\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (0,\H) .. controls (-0.34,{\H*0.72}) and (-0.34,{\H*0.28}) .. (0,0);
+  \node[left, font=\small, inner sep=1pt] at (-0.32,{\H/2}) {$60\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (\W,\H) .. controls ({\W+\E*0.25},{\H-0.3}) and ({\W+\E*0.75},{\H-0.3}) .. ({\W+\E},\H);
+  \node[below, font=\small, inner sep=1pt] at ({\W+\E/2},{\H-0.26}) {$x\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (0.06,\S) .. controls (0.44,{\S*0.72}) and (0.44,{\S*0.28}) .. (0.06,0);
+  \node[right, font=\small, inner sep=1pt] at (0.42,{\S*0.55}) {$x\,\mathrm{cm}$};
+\end{tikzpicture}

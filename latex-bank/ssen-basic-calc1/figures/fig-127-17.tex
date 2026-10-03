@@ -1,0 +1,13 @@
+% 127-17(127쪽) — $y=f(x)$ 의 그래프(원점을 지나는 기울기 1 의 직선이 $x=1$ 까지, $x\ge 1$ 에서는 $y=1$ 로 일정). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 꺾인 그래프 · 꺾인점에서 축으로 가는 점선 둘 · 눈금 1(가로), 1(세로) · 라벨 O, x, y, y=f(x). 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[x=0.72cm, y=0.62cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (3.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.5) -- (0,2.3) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+  \draw[densely dotted, line width=0.4pt] (1,1) -- (1,0);
+  \draw (-1.25,-1.25) -- (1,1) -- (2.85,1);
+  \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[above=1pt, font=\small] at (2.0,1) {$y=f(x)$};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 26-13(26쪽) — 세 점 O(0, 0), A(a, 0), B(0, 4) 를 꼭짓점으로 하는 삼각형 OAB 와 그 내접원(반지름 r). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 4, a · 라벨 B, A, O, r, x, y 와 내접원 중심의 점·반지름 선분. 다른 수치는 없다.
+\begin{tikzpicture}[x=0.55cm, y=0.55cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (4.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.5) -- (0,5.0) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  % 삼각형 OAB (두 변은 좌표축 위에 있다)
+  \draw[line width=0.6pt] (0,4) -- (3,0);
+  \draw[line width=0.6pt] (0,0) -- (0,4);
+  \draw[line width=0.6pt] (0,0) -- (3,0);
+  % 내접원과 반지름
+  \draw[line width=0.6pt] (1,1) circle (1);
+  \fill (1,1) circle (2pt);
+  \draw[line width=0.4pt] (1,1) -- (1.8,1.6);
+  \node[anchor=north west, font=\small, inner sep=1pt] at (1.42,1.42) {$r$};
+  \node[anchor=east, font=\small, inner sep=2pt] at (-0.02,4) {$4$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (0.06,4.02) {$\pt{B}$};
+  \node[below=1pt, font=\small] at (3,0) {$a$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (3.05,0.05) {$\pt{A}$};
+\end{tikzpicture}

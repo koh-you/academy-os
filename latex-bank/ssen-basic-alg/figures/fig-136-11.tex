@@ -1,0 +1,26 @@
+% 136-11(136쪽) — 원 $x^2+y^2=1$ 의 둘레를 10등분 하는 점 $\pt{P_1}\sim\pt{P_{10}}$ 과 $\angle\pt{P_1OP_2}=\theta$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문에 있는 라벨(P_1~P_10 · O · 1 · -1 · θ · x · y)만 둔다.
+\begin{tikzpicture}[line width=0.55pt, x=1.15cm, y=1.15cm, >=stealth]
+  \draw[->, line width=0.65pt] (-1.5,0) -- (1.66,0) node[below=1pt, font=\footnotesize] {$x$};
+  \draw[->, line width=0.65pt] (0,-1.5) -- (0,1.62) node[left=1pt, font=\footnotesize] {$y$};
+  \draw (0,0) circle (1);
+  \draw[line width=0.45pt] (0,0) -- (36:1);
+  \draw[->, line width=0.3pt] (2:0.34) arc (2:34:0.34);
+  \node[font=\footnotesize] at (19:0.52) {$\theta$};
+  \foreach \a in {0,36,...,324} \fill (\a:1) circle (0.036);
+  \node[anchor=east, font=\footnotesize] at (-0.04,0.98) {$1$};
+  \node[anchor=east, font=\footnotesize] at (-0.04,-0.95) {$-1$};
+  \node[below left=-3pt and -3.5pt, font=\footnotesize] at (-1,0) {$-1$};
+  \node[below right=-3pt and -3.5pt, font=\footnotesize] at (1,0) {$1$};
+  \node[below left=-2.5pt and -1.5pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[above right=-3.5pt and -3pt, font=\footnotesize] at (0:1) {$\pt{P_1}$};
+  \node[above right=-3pt and -3.5pt, font=\footnotesize] at (36:1) {$\pt{P_2}$};
+  \node[above right=-2.5pt and -3.5pt, font=\footnotesize] at (72:1) {$\pt{P_3}$};
+  \node[above left=-2.5pt and -3.5pt, font=\footnotesize] at (108:1) {$\pt{P_4}$};
+  \node[above left=-3pt and -3.5pt, font=\footnotesize] at (144:1) {$\pt{P_5}$};
+  \node[above left=-3.5pt and -3pt, font=\footnotesize] at (180:1) {$\pt{P_6}$};
+  \node[below left=-3.5pt and -3pt, font=\footnotesize] at (216:1) {$\pt{P_7}$};
+  \node[below left=-3pt and -3.5pt, font=\footnotesize] at (252:1) {$\pt{P_8}$};
+  \node[below right=-3pt and -3.5pt, font=\footnotesize] at (288:1) {$\pt{P_9}$};
+  \node[below right=-3.5pt and -3pt, font=\footnotesize] at (324:1) {$\pt{P_{10}}$};
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% 142-14(142쪽) — 삼각형 ABC 와 $\angle\pt{A}$ 의 이등분선 AD(D 는 변 BC 위) · $\seg{AB}=6$, $\seg{AC}=12$, $\seg{AD}=4\sqrt{3}$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 A 를 왼쪽 위, B 를 그 아래, C 를 오른쪽 아래, D 를 B 와 C 사이에 두었다.
+% 각의 이등분선 표시(작은 점 둘)는 원문 그대로 두고, 라벨은 A·B·C·D·$6$·$12$·$4\sqrt{3}$ 만 둔다 — $\seg{BD}$ 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.3, >=stealth]
+  \coordinate (B) at (0,0);
+  \coordinate (A) at (0,6);
+  \coordinate (C) at (10.392,0);
+  \coordinate (D) at (3.464,0);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.55pt] (A) -- (D);
+  \node[circle, fill, inner sep=0.45pt] at ([shift=(285:1.7)]A) {};
+  \node[circle, fill, inner sep=0.45pt] at ([shift=(315:1.7)]A) {};
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(200:0.45)]A) to[bend right=20]
+    node[midway, left=-1.5pt, font=\footnotesize] {$6$} ([shift=(160:0.45)]B);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-20:0.45)]A) to[bend left=16]
+    node[midway, above right=-3.5pt and -2pt, font=\footnotesize] {$12$} ([shift=(120:0.45)]C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-50:0.45)]A) to[bend left=20]
+    node[midway, below right=-4pt and -3pt, font=\footnotesize] {$4\sqrt{3}$} ([shift=(110:0.45)]D);
+  \node[above=0pt, font=\small] at (A) {$\pt{A}$};
+  \node[below left=-3.5pt and -3pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-3pt and -3pt, font=\small] at (C) {$\pt{C}$};
+  \node[below=1pt, font=\small] at (D) {$\pt{D}$};
+\end{tikzpicture}

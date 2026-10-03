@@ -1,0 +1,15 @@
+% 118-64 ④(118쪽) — 보기 그림: −1≤x≤0 에서 아래로 볼록한 감소 곡선 (−1,1)-(0,0), 0≤x≤1 에서 선분 (0,0)-(1,−1).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 −1·1·O·x·y 와 점선 보조선만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, baseline=(current bounding box.center)]
+  \draw[->, >=stealth, line width=0.7pt] (-1.75,0) -- (1.95,0) node[below left=-1pt, font=\footnotesize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.65) -- (0,1.75) node[left=-1pt, font=\footnotesize] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,1) -- (0,1);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,-1) -- (0,-1);
+  \draw[line width=0.6pt, smooth, samples=40, domain=-1:0] plot (\x, {\x*\x});
+  \draw[line width=0.6pt] (0,0) -- (1,-1);
+  \node[below=0pt, font=\footnotesize] at (-1,0) {$-1$};
+  \node[above=0pt, font=\footnotesize] at (1,0) {$1$};
+  \node[right=1pt, font=\footnotesize] at (0,1) {$1$};
+  \node[left=1pt, font=\footnotesize] at (0,-1) {$-1$};
+  \node[below right=-1pt and 0pt, font=\footnotesize] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

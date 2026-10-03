@@ -1,0 +1,10 @@
+% 81-10(81쪽) — 삼차함수 $f(x)$ 의 도함수 $y=f'(x)$ 의 그래프(위로 볼록한 포물선 · 원점과 $x=4$ 에서 $x$축과 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 포물선 · 눈금 4 · 라벨 O, x, y, y=f'(x). 원문에 없는 함숫값·꼭짓점 좌표는 적지 않는다.
+\begin{tikzpicture}[x=0.36cm, y=0.36cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (6.0,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.95) -- (0,3.45) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-0.85:4.85, samples=90, smooth] plot (\x, {0.63*(\x)*(4-(\x))});
+  \node[below right=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below left=-2pt and -3pt, font=\small] at (4,0) {$4$};
+  \node[anchor=south, font=\small] at (3.2,2.85) {$y=f'(x)$};
+\end{tikzpicture}

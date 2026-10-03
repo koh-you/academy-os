@@ -1,0 +1,19 @@
+% 64-20(64쪽) — 와이퍼가 각 θ 만큼 회전하며 닦은 부채꼴 모양 유리창(와이퍼 60 cm · 고무판 50 cm · 호 AB = 48π cm).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그림에 있는 표시(A · B · θ · 48π cm · 50 cm · 60 cm)만 둔다.
+% 닦은 넓이(답)는 그림에서 읽히지 않게 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.55pt, >=stealth]
+  \filldraw[fill=blue!12] (0,0) -- (162:6) arc (162:18:6) -- cycle;
+  % 호 AB 의 길이 표시
+  \draw[densely dotted, line width=0.35pt, <->] (161:6.5) arc (161:19:6.5);
+  \node[above=0pt, font=\footnotesize] at (90:6.5) {$48\pi\,\mathrm{cm}$};
+  % 회전축에서 점 A 까지 뻗은 와이퍼
+  \draw[line width=1.6pt, gray!55] (0,0) -- (162:6);
+  % 고무판의 길이와 와이퍼의 길이
+  \draw[densely dotted, line width=0.35pt, <->] ($(162:1)+(72:0.5)$) -- node[midway, above=-1pt, font=\footnotesize] {$50\,\mathrm{cm}$} ($(162:6)+(72:0.5)$);
+  \draw[densely dotted, line width=0.35pt, <->] ($(0,0)+(252:0.55)$) -- node[midway, below=-1pt, font=\footnotesize] {$60\,\mathrm{cm}$} ($(162:6)+(252:0.55)$);
+  % 중심각
+  \draw[line width=0.35pt] (18:1.1) arc (18:162:1.1);
+  \node[font=\footnotesize] at (90:0.62) {$\theta$};
+  \node[left=1pt, font=\footnotesize] at (162:6) {$\pt{A}$};
+  \node[right=1pt, font=\footnotesize] at (18:6) {$\pt{B}$};
+\end{tikzpicture}

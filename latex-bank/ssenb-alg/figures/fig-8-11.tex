@@ -1,0 +1,28 @@
+% 8-11(8쪽) — 정육면체 ABCD-EFGH 와 그 안에 그어진 삼각형 AFC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 보이는 모서리는 실선, 숨은 모서리(DH·HG·HE)는 점선. 라벨은 원문의 꼭짓점 이름만 쓰고 길이·넓이는 적지 않는다.
+\begin{tikzpicture}[scale=0.75, line width=0.6pt]
+  \coordinate (A) at (0,2.4);
+  \coordinate (B) at (2.4,2.4);
+  \coordinate (E) at (0,0);
+  \coordinate (F) at (2.4,0);
+  \coordinate (D) at (1.05,3.4);
+  \coordinate (C) at (3.45,3.4);
+  \coordinate (H) at (1.05,1.0);
+  \coordinate (G) at (3.45,1.0);
+  \fill[black!6] (A) -- (B) -- (F) -- (E) -- cycle;
+  \fill[black!9] (A) -- (D) -- (C) -- (B) -- cycle;
+  \fill[black!12] (B) -- (C) -- (G) -- (F) -- cycle;
+  \draw[dashed, line width=0.45pt] (H) -- (D) (H) -- (G) (H) -- (E);
+  \draw (A) -- (B) -- (F) -- (E) -- cycle;
+  \draw (A) -- (D) -- (C) -- (B);
+  \draw (C) -- (G) -- (F);
+  \draw (A) -- (C) -- (F) -- cycle;
+  \node[above left=-3pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[above right=-3pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[left=2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below right=-2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[left=2pt, font=\small] at (H) {$\mathrm{H}$};
+  \node[right=2pt, font=\small] at (G) {$\mathrm{G}$};
+  \node[below left=-3pt, font=\small] at (E) {$\mathrm{E}$};
+  \node[below right=-3pt, font=\small] at (F) {$\mathrm{F}$};
+\end{tikzpicture}

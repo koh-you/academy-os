@@ -1,0 +1,13 @@
+% 8-01(8쪽) — y=f(x) 의 그래프(원점을 지나 아래로 내려갔다가 (2,1) 을 지나 올라가는 곡선 · 안내 점선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 2 · y축 1 · 점선 두 줄 · 라벨 y=f(x), O, x, y.
+\begin{tikzpicture}[x=0.95cm, y=0.72cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.15,0) -- (3.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.5) -- (0,3.3) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (0,1) -- (2,1);
+  \draw[densely dotted, line width=0.4pt] (2,1) -- (2,0);
+  \draw[line width=0.6pt, domain=-0.8:2.45, samples=70, smooth] plot (\x, {1.4*\x*\x-2.3*\x});
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[left=1pt, font=\small] at (2.1,2.85) {$y=f(x)$};
+\end{tikzpicture}

@@ -1,0 +1,13 @@
+% 86-45(인쇄 86쪽) — 개념 25 지시문의 확률밀도함수 y=f(x) 그래프: (0,k)에서 (2,k)까지 수평, 다시 (4,0)까지 내려가는 꺾은선(x=2 안내 파선).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 것만(k, O, 2, 4, x, y, y=f(x)) · 답(k의 값)은 그림에 넣지 않는다.
+\begin{tikzpicture}[x=0.45cm, y=1.15cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (5.4,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.45) -- (0,1.35) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (2,0) -- (2,1);
+  \draw (0,1) -- (2,1) -- (4,0);
+  \node[left=2pt, font=\small] at (0,1) {$k$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (0.3,1.22) {$y=f(x)$};
+\end{tikzpicture}

@@ -66,7 +66,7 @@
 - 빠른 일반 검증은 `npm run check:fast`를 사용한다. 전체 production은 진짜 고위험 branch의 원격 exact-head에서 한 번 실행하고, 저·중위험과 동일 SHA main에서는 반복하지 않는다.
 - 새 UI 핵심 경로는 운영 계정 대신 `npm run dev:safe` 가상 환경에서 자동 브라우저 검사를 먼저 만든다.
 - 테스트를 파일 위치나 정확한 내부 개수에 과도하게 결합하지 않는다. 사용자 동작과 저장 계약을 검증한다.
-- 작업 완료 시 `docs/STATUS.md`, `docs/current-worklog.md`, `docs/next-session/DAILY_HANDOFF.md`를 짧게 갱신한다.
+- 작업 완료 시 `docs/STATUS.md`와 `docs/current-worklog.md`를 짧게 갱신한다.
 - AI가 검증할 수 없는 실제 화면·운영 원천이 남을 때만 사람 확인 절차를 제시한다. 문서 변경이나 완전 자동검증 작업에 형식적인 7단계 gate를 강요하지 않는다.
 
 ## Git·폴더 소유권

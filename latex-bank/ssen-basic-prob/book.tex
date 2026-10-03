@@ -1,0 +1,2467 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{../sty/dm-editorial}
+\usepackage{fontspec}
+\usepackage{multicol}
+% 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
+\newcommand{\pt}[1]{\mathrm{#1}}
+\newcommand{\seg}[1]{\overline{\mathrm{#1}}}
+\newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
+\newcommand{\vecAB}[1]{\overrightarrow{\mathrm{#1}}}
+% 조건 상자. 본문에서는 수식을 안 끊지만(\binoppenalty) 이 상자는 폭이 고정이라 긴 식이 테두리 밖으로 삐져나간다
+% (검수 지적 쎈B 대수 126-41·126-43·21-17 — 「(2n-1)·1」 끝이 상자 밖에 찍힌다). 상자 안에서만 연산자·관계 뒤 줄바꿈을 허용한다.
+% 들어가는 식은 그대로 한 줄로 두고, 넘칠 때만 TeX 가 끊는다(원문도 그 자리에서 두 줄로 간다).
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.96\linewidth}\centering\binoppenalty=700 \relpenalty=500 \vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
+\newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
+\newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
+% 보기 상자도 같다. ㄱ·ㄴ·ㄷ 줄은 \\ 로 나누므로 \parskip 이 먹지 않아, 분수가 든 줄이 다음 줄과 맞닿는다
+% (검수 지적 쎈B 대수 62-08·78-40·79-46 · 미적분1 11-24·27-46). 줄 겹침 여유를 본문보다 넉넉히 주고, 긴 줄은 상자 안에서 끊는다.
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.96\linewidth}\binoppenalty=700 \relpenalty=500 \lineskiplimit=3pt \lineskip=4pt \vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
+\newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
+\newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{4mm}}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\binoppenalty=10000 \relpenalty=10000
+% 수식 안 글루는 늘이지 않는다. 낱장 폭(110mm)에서 긴 수식이 한 덩어리로 묶이면 남은 늘임이 \medmuskip·\thickmuskip 으로
+% 들어가 「y  =  2x^2  -  3x」 처럼 연산자 둘레가 벌어진다(검수 지적 쎈B 공통수학1 95-42·95-44·130-35·136-67·26-68 등).
+% 늘임은 낱말 사이로만 보낸다.
+\thinmuskip=3mu \medmuskip=4mu \thickmuskip=5mu
+\newlength{\dmfigw}
+% 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
+% 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
+\emergencystretch=2em
+% 한글 음절 사이 늘임을 끈다. 좁은 낱장 폭(110mm)에 끊을 수 없는 긴 수식이 들어가면 kotex 가 남은 늘임을 음절 사이로
+% 보내 「함 수 … 에 대 하 여」처럼 낱말이 무너진다(검수 지적 쎈B 미적분1 8-06·10-20·40-56·55-68 · 대수 51-36·54-64·90-11 등).
+% 늘임은 낱말 사이로만 가게 하고, 그래도 모자라 줄이 넘치는 자리는 위 \emergencystretch 가 받는다.
+% xetexko 는 음절마다 줄바꿈 자리를 두고 그 glue 에 plus.08em 을 주는데(xetexko.sty \XeKo@stretchshrink),
+% 한 줄에 음절이 20개면 1.6em 까지 벌어진다. 늘임만 0 으로 두고 줄임(minus.04em)은 남겨 과밀 줄은 여전히 붙일 수 있게 한다.
+\xetexkostretchshrink{plus0em minus.04em}
+% 본문 속 \dfrac 처럼 키 큰 수식이 든 줄은 기본 \lineskip(1pt)으로는 위아래 줄과 맞닿는다
+% (검수 지적 쎈B 미적분1 76-11·77-14·79-26·55-70·41-64 · 대수 62-08·36-34 등 — 분모가 아랫줄 글자 위에 올라탄다).
+% 줄 사이가 2pt 보다 좁아지는 자리에서만 3pt 를 확보한다. 보통 줄은 \baselineskip 그대로라 쪽 배치가 바뀌지 않는다.
+\lineskiplimit=2pt \lineskip=3pt
+\newcommand{\nob}[1]{\mbox{#1}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\newcommand{\cond}[1]{\mbox{(단,}\nobreakspace#1)}
+% 본문 끝의 「(단, …)」(build 가 \cond 를 \dmcondfill{조건}{배점 상자} 로 바꾼 것): 같은 줄에 들어가면 그 줄 오른쪽 끝, 안 들어가면 다음 줄 오른쪽 끝에 두고
+% 앞 줄은 fill 로 채워 어간이 벌어지지 않게 한다(TeXbook 의 증명 끝 기호 배치 · 검수 지적 개념원리 미적분Ⅱ 185-e19·106-e1 ⑴). 조건이 줄 폭(-2em)보다 넓으면
+% (그림 옆 0.58 폭의 긴 조건) 예전처럼 「(단,」 만 앞 낱말에 붙이고 안쪽에서 줄을 바꾼다.
+\newlength{\dmcondw}
+\newcommand{\dmcondfill}[2]{%
+  \settowidth{\dmcondw}{\mbox{(단,~#1)#2}}%
+  \ifdim\dmcondw<\dimexpr\linewidth-2em\relax
+    \unskip\nobreak\hfill\penalty0\hskip1.5em\hbox{}\nobreak\hfill\mbox{(단,~#1)#2}%
+  \else
+    \cond{#1}#2%
+  \fi}
+% 짧은 5지선다 한 줄 배치(원본이 보기 5개를 한 줄에 둔 것 · 검수 지적). \dmchoicesi 는 한 줄 5칸(칸 사이 fill · choices_layout "i" 강제).
+% \dmchoicesauto{지주}{①}…{⑤} 는 build 가 시각 길이로 고른 후보를 TeX 이 실제 폭으로 재서, 칸 사이 최소 1.5em 으로 낱장 본문 폭(110mm 낱장 여백 6mm·번호 9mm
+% 를 뺀 89mm · 현재 줄 폭이 더 좁으면 그 폭) 안에 들어가면 한 줄, 아니면 choices32(3+2 · 분수 지주 포함)로 되돌린다. 번호 기호는 sty 환경과 같은 \small.
+\newlength{\dmchoicesw}\newlength{\dmchoiceslim}
+\newcommand{\dmchoicesi}[5]{\par\medskip\noindent\mbox{\small ①\ #1}\hfill\mbox{\small ②\ #2}\hfill\mbox{\small ③\ #3}\hfill\mbox{\small ④\ #4}\hfill\mbox{\small ⑤\ #5}\par\medskip}
+\newcommand{\dmchoicesauto}[6]{%
+  \settowidth{\dmchoicesw}{\mbox{\small ①\ #2}\hskip1.5em\mbox{\small ②\ #3}\hskip1.5em\mbox{\small ③\ #4}\hskip1.5em\mbox{\small ④\ #5}\hskip1.5em\mbox{\small ⑤\ #6}}%
+  \setlength{\dmchoiceslim}{\linewidth}\ifdim\dmchoiceslim>89mm \setlength{\dmchoiceslim}{89mm}\fi
+  \ifdim\dmchoicesw<\dmchoiceslim \dmchoicesi{#2}{#3}{#4}{#5}{#6}\else\begin{choices32}{#1#2}{#1#3}{#1#4}{#1#5}{#1#6}\end{choices32}\fi}
+\raggedbottom
+
+\begin{document}
+\renewcommand{\dmchapunit}{01 여러 가지 순열}
+\dmchapter{01}{여러 가지 순열}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 01 중복순열}
+\dmpassage{다음을 기호를 사용하여 ${}_n\Pi_r$ 꼴로 나타내시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{8-01}{\input{items/8-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{8-02}{\input{items/8-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{8-03}{\input{items/8-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{8-04}{\input{items/8-04}}\vspace{8mm}
+\dmpassage{다음 값을 구하시오.}
+\setcounter{dmproblemcount}{4}\dmpnum{8-05}{\input{items/8-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{8-06}{\input{items/8-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{8-07}{\input{items/8-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{8-08}{\input{items/8-08}}\vspace{8mm}
+\dmpassage{다음을 만족시키는 자연수 $n$ 또는 $r$의 값을 구하시오.}
+\setcounter{dmproblemcount}{8}\dmpnum{8-09}{\input{items/8-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{8-10}{\input{items/8-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{8-11}{\input{items/8-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{8-12}{\input{items/8-12}}\vspace{8mm}
+\dmpassage{다음을 구하시오.}
+\setcounter{dmproblemcount}{12}\dmpnum{9-13}{\input{items/9-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{9-14}{\input{items/9-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{9-15}{\input{items/9-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{9-16}{\input{items/9-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{9-17}{\input{items/9-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{9-18}{\input{items/9-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{9-19}{\input{items/9-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{9-20}{\input{items/9-20}}\vspace{8mm}
+\dmpassage{다음 두 집합 $X$, $Y$에 대하여 $X$에서 $Y$로의 함수의 개수를 구하시오.}
+\setcounter{dmproblemcount}{20}\dmpnum{9-21}{\input{items/9-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{9-22}{\input{items/9-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{9-23}{\input{items/9-23}}\vspace{8mm}
+\dmsection{유형 001 중복순열의 수의 계산}
+\setcounter{dmproblemcount}{0}\dmpnum{10-01}{\input{items/10-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{10-02}{\input{items/10-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{10-03}{\input{items/10-03}}\vspace{8mm}
+\dmsection{유형 002 중복순열의 수}
+\setcounter{dmproblemcount}{3}\dmpnum{10-04}{\input{items/10-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{10-05}{\input{items/10-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{10-06}{\input{items/10-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{10-07}{\input{items/10-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{10-08}{\input{items/10-08}}\vspace{8mm}
+\dmsection{유형 003 신호의 개수}
+\setcounter{dmproblemcount}{8}\dmpnum{11-09}{\input{items/11-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{11-10}{\input{items/11-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{11-11}{\input{items/11-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{11-12}{\input{items/11-12}}\vspace{8mm}
+\dmsection{유형 004 중복순열의 수; 자연수의 개수}
+\setcounter{dmproblemcount}{12}\dmpnum{11-13}{\input{items/11-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{11-14}{\input{items/11-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{11-15}{\input{items/11-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{12-16}{\input{items/12-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{12-17}{\input{items/12-17}}\vspace{8mm}
+\dmsection{유형 005 중복순열의 수; 함수의 개수}
+\setcounter{dmproblemcount}{17}\dmpnum{12-18}{\input{items/12-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{12-19}{\input{items/12-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{12-20}{\input{items/12-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{12-21}{\input{items/12-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{12-22}{\input{items/12-22}}\vspace{8mm}
+\dmsection{개념 02 같은 것이 있는 순열}
+\dmpassage{다음 숫자를 일렬로 나열하는 경우의 수를 구하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{13-01}{\input{items/13-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{13-02}{\input{items/13-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{13-03}{\input{items/13-03}}\vspace{8mm}
+\dmpassage{다음 문자를 일렬로 나열하는 경우의 수를 구하시오.}
+\setcounter{dmproblemcount}{3}\dmpnum{13-04}{\input{items/13-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{13-05}{\input{items/13-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{13-06}{\input{items/13-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{13-07}{\input{items/13-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{13-08}{\input{items/13-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{13-09}{\input{items/13-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{13-10}{\input{items/13-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{13-11}{\input{items/13-11}}\vspace{8mm}
+\dmsection{개념 03 최단 거리로 가는 경우의 수}
+\dmpassage{다음 그림과 같은 도로망이 있다. $\pt{A}$에서 $\pt{B}$까지 최단 거리로 가는 경우의 수를 구하시오.}
+\setcounter{dmproblemcount}{11}\dmpnum{14-12}{\input{items/14-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{14-13}{\input{items/14-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{14-14}{\input{items/14-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{14-15}{\input{items/14-15}}\vspace{8mm}
+\dmpassage{다음 그림과 같은 도로망이 있다. $\pt{A}$에서 $\pt{P}$를 거쳐 $\pt{B}$까지 최단 거리로 가는 경우의 수를 구하시오.}
+\setcounter{dmproblemcount}{15}\dmpnum{14-16}{\input{items/14-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{14-17}{\input{items/14-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{14-18}{\input{items/14-18}}\vspace{8mm}
+\dmsection{유형 006 같은 것이 있는 순열의 수; 문자를 나열하는 경우의 수}
+\setcounter{dmproblemcount}{0}\dmpnum{15-01}{\input{items/15-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{15-02}{\input{items/15-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{15-03}{\input{items/15-03}}\vspace{8mm}
+\dmsection{유형 007 같은 것이 있는 순열의 수; 자연수의 개수}
+\setcounter{dmproblemcount}{3}\dmpnum{15-04}{\input{items/15-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{15-05}{\input{items/15-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{15-06}{\input{items/15-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{15-07}{\input{items/15-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{16-08}{\input{items/16-08}}\vspace{8mm}
+\dmsection{유형 008 순서가 정해진 경우의 수}
+\setcounter{dmproblemcount}{8}\dmpnum{16-09}{\input{items/16-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{16-10}{\input{items/16-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{16-11}{\input{items/16-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{16-12}{\input{items/16-12}}\vspace{8mm}
+\dmsection{유형 009 최단 거리로 가는 경우의 수}
+\setcounter{dmproblemcount}{12}\dmpnum{16-13}{\input{items/16-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{17-14}{\input{items/17-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{17-15}{\input{items/17-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{17-16}{\input{items/17-16}}\vspace{8mm}
+\dmsection{유형 010 최단 거리로 가는 경우의 수; 중간 지점을 잡아야 하는 경우}
+\setcounter{dmproblemcount}{16}\dmpnum{17-17}{\input{items/17-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{17-18}{\input{items/17-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{17-19}{\input{items/17-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{17-20}{\input{items/17-20}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\setcounter{dmproblemcount}{0}\dmpnum{18-01}{\input{items/18-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{18-02}{\input{items/18-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{18-03}{\input{items/18-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{18-04}{\input{items/18-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{18-05}{\input{items/18-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{18-06}{\input{items/18-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{18-07}{\input{items/18-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{19-08}{\input{items/19-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{19-09}{\input{items/19-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{19-10}{\input{items/19-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{19-11}{\input{items/19-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{19-12}{\input{items/19-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{19-13}{\input{items/19-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{19-14}{\input{items/19-14}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{02 중복조합과 이항정리}
+\dmchapter{02}{중복조합과 이항정리}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 04 중복조합}
+\dmpassage{다음을 기호를 사용하여 ${}_n\mathrm{H}_r$ 꼴로 나타내시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{20-01}{\input{items/20-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{20-02}{\input{items/20-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{20-03}{\input{items/20-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{20-04}{\input{items/20-04}}\vspace{8mm}
+\dmpassage{다음 값을 구하시오.}
+\setcounter{dmproblemcount}{4}\dmpnum{20-05}{\input{items/20-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{20-06}{\input{items/20-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{20-07}{\input{items/20-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{20-08}{\input{items/20-08}}\vspace{8mm}
+\dmpassage{다음을 만족시키는 자연수 $n$ 또는 $r$의 값을 구하시오.}
+\setcounter{dmproblemcount}{8}\dmpnum{21-09}{\input{items/21-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{21-10}{\input{items/21-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{21-11}{\input{items/21-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{21-12}{\input{items/21-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{21-13}{\input{items/21-13}}\vspace{8mm}
+\dmpassage{다음을 구하시오.}
+\setcounter{dmproblemcount}{13}\dmpnum{21-14}{\input{items/21-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{21-15}{\input{items/21-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{21-16}{\input{items/21-16}}\vspace{8mm}
+\dmpassage{같은 종류의 음료수 5개를 3명의 학생에게 나누어 주려고 한다. 다음을 구하시오.}
+\setcounter{dmproblemcount}{16}\dmpnum{21-17}{\input{items/21-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{21-18}{\input{items/21-18}}\vspace{8mm}
+\dmpassage{같은 종류의 펜 7자루를 서로 다른 4개의 필통에 넣으려고 한다. 다음을 구하시오.}
+\setcounter{dmproblemcount}{18}\dmpnum{21-19}{\input{items/21-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{21-20}{\input{items/21-20}}\vspace{8mm}
+\dmsection{개념 05 순열, 중복순열, 조합, 중복조합의 비교}
+\dmpassage{5개의 숫자 1, 2, 3, 4, 5에 대하여 다음을 구하시오.}
+\setcounter{dmproblemcount}{20}\dmpnum{22-21}{\input{items/22-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{22-22}{\input{items/22-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{22-23}{\input{items/22-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{22-24}{\input{items/22-24}}\vspace{8mm}
+\dmpassage{두 집합 $X=\{1{,}\mkern3mu\mathopen{}2\}$, $Y=\{1{,}\mkern3mu\mathopen{}2{,}\mkern3mu\mathopen{}3\}$에 대하여 $a\in X$, $b\in X$일 때, 다음을 만족시키는 함수 $f:X\longrightarrow Y$의 개수를 구하시오.}
+\setcounter{dmproblemcount}{24}\dmpnum{22-25}{\input{items/22-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{22-26}{\input{items/22-26}}\vspace{8mm}
+\dmpassage{두 집합 $X=\{5{,}\mkern3mu\mathopen{}6{,}\mkern3mu\mathopen{}7\}$, $Y=\{1{,}\mkern3mu\mathopen{}2{,}\mkern3mu\mathopen{}3{,}\mkern3mu\mathopen{}4\}$에 대하여 $a\in X$, $b\in X$일 때, 다음을 만족시키는 함수 $f:X\longrightarrow Y$의 개수를 구하시오.}
+\setcounter{dmproblemcount}{26}\dmpnum{22-27}{\input{items/22-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{22-28}{\input{items/22-28}}\vspace{8mm}
+\dmsection{개념 06 방정식의 해의 개수}
+\dmpassage{다음 방정식의 음이 아닌 정수인 해의 개수를 구하시오.}
+\setcounter{dmproblemcount}{28}\dmpnum{23-29}{\input{items/23-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{23-30}{\input{items/23-30}}\vspace{8mm}
+\setcounter{dmproblemcount}{30}\dmpnum{23-31}{\input{items/23-31}}\vspace{8mm}
+\setcounter{dmproblemcount}{31}\dmpnum{23-32}{\input{items/23-32}}\vspace{8mm}
+\dmpassage{다음 방정식의 양의 정수인 해의 개수를 구하시오.}
+\setcounter{dmproblemcount}{32}\dmpnum{23-33}{\input{items/23-33}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{23-34}{\input{items/23-34}}\vspace{8mm}
+\setcounter{dmproblemcount}{34}\dmpnum{23-35}{\input{items/23-35}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{23-36}{\input{items/23-36}}\vspace{8mm}
+\dmsection{유형 011 중복조합의 수의 계산}
+\setcounter{dmproblemcount}{0}\dmpnum{24-01}{\input{items/24-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{24-02}{\input{items/24-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{24-03}{\input{items/24-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{24-04}{\input{items/24-04}}\vspace{8mm}
+\dmsection{유형 012 중복조합의 수}
+\setcounter{dmproblemcount}{4}\dmpnum{24-05}{\input{items/24-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{24-06}{\input{items/24-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{24-07}{\input{items/24-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{25-08}{\input{items/25-08}}\vspace{8mm}
+\dmsection{유형 013 중복조합의 수; ‘적어도’의 조건이 있는 경우}
+\setcounter{dmproblemcount}{8}\dmpnum{25-09}{\input{items/25-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{25-10}{\input{items/25-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{25-11}{\input{items/25-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{25-12}{\input{items/25-12}}\vspace{8mm}
+\dmsection{유형 014 전개식의 항의 개수}
+\setcounter{dmproblemcount}{12}\dmpnum{25-13}{\input{items/25-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{26-14}{\input{items/26-14}}\vspace{8mm}
+\dmsection{유형 015 방정식의 해의 개수}
+\setcounter{dmproblemcount}{14}\dmpnum{26-15}{\input{items/26-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{26-16}{\input{items/26-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{26-17}{\input{items/26-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{26-18}{\input{items/26-18}}\vspace{8mm}
+\dmsection{유형 016 대소 관계가 정해진 순서쌍의 개수}
+\setcounter{dmproblemcount}{18}\dmpnum{26-19}{\input{items/26-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{27-20}{\input{items/27-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{27-21}{\input{items/27-21}}\vspace{8mm}
+\dmsection{유형 017 함수의 개수}
+\setcounter{dmproblemcount}{21}\dmpnum{27-22}{\input{items/27-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{27-23}{\input{items/27-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{27-24}{\input{items/27-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{27-25}{\input{items/27-25}}\vspace{8mm}
+\dmsection{개념 07 이항정리}
+\dmpassage{이항정리를 이용하여 다음 식을 전개하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{28-01}{\input{items/28-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{28-02}{\input{items/28-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{28-03}{\input{items/28-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{28-04}{\input{items/28-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{28-05}{\input{items/28-05}}\vspace{8mm}
+\dmpassage{다음을 구하시오.}
+\setcounter{dmproblemcount}{5}\dmpnum{28-06}{\input{items/28-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{28-07}{\input{items/28-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{28-08}{\input{items/28-08}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{28-09}{\input{items/28-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{28-10}{\input{items/28-10}}\vspace{8mm}
+\dmsection{개념 08 이항계수의 성질}
+\dmpassage{다음 식의 값을 구하시오.}
+\setcounter{dmproblemcount}{10}\dmpnum{29-11}{\input{items/29-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{29-12}{\input{items/29-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{29-13}{\input{items/29-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{29-14}{\input{items/29-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{29-15}{\input{items/29-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{29-16}{\input{items/29-16}}\vspace{8mm}
+\dmpassage{다음을 만족시키는 자연수 $n$의 값을 구하시오.}
+\setcounter{dmproblemcount}{16}\dmpnum{29-17}{\input{items/29-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{29-18}{\input{items/29-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{29-19}{\input{items/29-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{29-20}{\input{items/29-20}}\vspace{8mm}
+\dmsection{개념 09 파스칼의 삼각형}
+\setcounter{dmproblemcount}{20}\dmpnum{30-21}{\input{items/30-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{30-22}{\input{items/30-22}}\vspace{8mm}
+\dmpassage{파스칼의 삼각형을 이용하여 다음 식을 전개하시오.}
+\setcounter{dmproblemcount}{22}\dmpnum{30-23}{\input{items/30-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{30-24}{\input{items/30-24}}\vspace{8mm}
+\dmpassage{다음을 ${}_n\mathrm{C}_r$ 꼴로 나타내시오.}
+\setcounter{dmproblemcount}{24}\dmpnum{30-25}{\input{items/30-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{30-26}{\input{items/30-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{30-27}{\input{items/30-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{30-28}{\input{items/30-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{30-29}{\input{items/30-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{30-30}{\input{items/30-30}}\vspace{8mm}
+\dmsection{유형 018 $(a+b)^n$의 전개식}
+\setcounter{dmproblemcount}{0}\dmpnum{31-01}{\input{items/31-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{31-02}{\input{items/31-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{31-03}{\input{items/31-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{31-04}{\input{items/31-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{31-05}{\input{items/31-05}}\vspace{8mm}
+\dmsection{유형 019 이항계수의 활용}
+\setcounter{dmproblemcount}{5}\dmpnum{31-06}{\input{items/31-06}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{31-07}{\input{items/31-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{32-08}{\input{items/32-08}}\vspace{8mm}
+\dmsection{유형 020 이항계수의 성질}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{32-09}{\input{items/32-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{32-10}{\input{items/32-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{32-11}{\input{items/32-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{32-12}{\input{items/32-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{32-13}{\input{items/32-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{32-14}{\input{items/32-14}}\vspace{8mm}
+\dmsection{유형 021 이항계수의 합}
+\setcounter{dmproblemcount}{14}\dmpnum{33-15}{\input{items/33-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{33-16}{\input{items/33-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{33-17}{\input{items/33-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{33-18}{\input{items/33-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{33-19}{\input{items/33-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{33-20}{\input{items/33-20}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\setcounter{dmproblemcount}{0}\dmpnum{34-01}{\input{items/34-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{34-02}{\input{items/34-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{34-03}{\input{items/34-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{34-04}{\input{items/34-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{34-05}{\input{items/34-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{34-06}{\input{items/34-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{34-07}{\input{items/34-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{35-08}{\input{items/35-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{35-09}{\input{items/35-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{35-10}{\input{items/35-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{35-11}{\input{items/35-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{35-12}{\input{items/35-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{35-13}{\input{items/35-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{35-14}{\input{items/35-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{35-15}{\input{items/35-15}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{03 확률의 뜻과 활용}
+\dmchapter{03}{확률의 뜻과 활용}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 10 시행과 사건}
+\dmpassage{한 개의 주사위를 던지는 시행에서 다음을 구하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{38-01}{\input{items/38-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{38-02}{\input{items/38-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{38-03}{\input{items/38-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{38-04}{\input{items/38-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{38-05}{\input{items/38-05}}\vspace{8mm}
+\dmpassage{서로 다른 두 개의 동전을 동시에 던지는 시행에서 동전의 앞면을 $\mathrm{H}$, 뒷면을 $\mathrm{T}$라 할 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{5}\dmpnum{38-06}{\input{items/38-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{38-07}{\input{items/38-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{38-08}{\input{items/38-08}}\vspace{8mm}
+\dmpassage{3개의 숫자 1, 3, 4에서 서로 다른 2개를 뽑아 두 자리 자연수를 만드는 시행에서 다음을 구하시오.}
+\setcounter{dmproblemcount}{8}\dmpnum{38-09}{\input{items/38-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{38-10}{\input{items/38-10}}\vspace{8mm}
+\dmsection{개념 11 합사건, 곱사건, 배반사건, 여사건}
+\dmpassage{한 개의 주사위를 던지는 시행에서 짝수의 눈이 나오는 사건을 $A$, 6의 약수의 눈이 나오는 사건을 $B$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{10}\dmpnum{39-11}{\input{items/39-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{39-12}{\input{items/39-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{39-13}{\input{items/39-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{39-14}{\input{items/39-14}}\vspace{8mm}
+\dmpassage{1부터 10까지의 자연수가 각각 하나씩 적힌 10장의 카드 중 임의로 한 장의 카드를 뽑는 시행에서 홀수가 적힌 카드를 뽑는 사건을 $A$, 3의 배수가 적힌 카드를 뽑는 사건을 $B$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{14}\dmpnum{39-15}{\input{items/39-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{39-16}{\input{items/39-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{39-17}{\input{items/39-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{39-18}{\input{items/39-18}}\vspace{8mm}
+\dmpassage{1부터 12까지의 자연수가 각각 하나씩 적힌 12장의 카드 중 임의로 한 장의 카드를 뽑는 시행에서 다음 두 사건 $A$와 $B$가 서로 배반사건이면 ‘○’를, 배반사건이 아니면 ‘×’를 ( ) 안에 써넣으시오.}
+\setcounter{dmproblemcount}{18}\dmpnum{39-19}{\input{items/39-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{39-20}{\input{items/39-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{39-21}{\input{items/39-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{39-22}{\input{items/39-22}}\vspace{8mm}
+\dmsection{유형 022 합사건, 곱사건, 여사건}
+\setcounter{dmproblemcount}{0}\dmpnum{40-01}{\input{items/40-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{40-02}{\input{items/40-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{40-03}{\input{items/40-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{40-04}{\input{items/40-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{40-05}{\input{items/40-05}}\vspace{8mm}
+\dmsection{유형 023 배반사건}
+\setcounter{dmproblemcount}{5}\dmpnum{40-06}{\input{items/40-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{41-07}{\input{items/41-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{41-08}{\input{items/41-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{41-09}{\input{items/41-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{41-10}{\input{items/41-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{41-11}{\input{items/41-11}}\vspace{8mm}
+\dmsection{개념 12 수학적 확률}
+\setcounter{dmproblemcount}{0}\dmpnum{42-01}{\input{items/42-01}}\vspace{8mm}
+\dmpassage{노란 공 3개, 검은 공 5개가 들어 있는 주머니에서 임의로 한 개의 공을 꺼낼 때, 노란 공을 꺼내는 사건을 $A$, 검은 공을 꺼내는 사건을 $B$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{1}\dmpnum{42-02}{\input{items/42-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{42-03}{\input{items/42-03}}\vspace{8mm}
+\dmpassage{서로 다른 두 개의 동전을 동시에 던질 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{3}\dmpnum{42-04}{\input{items/42-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{42-05}{\input{items/42-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{42-06}{\input{items/42-06}}\vspace{8mm}
+\dmpassage{서로 다른 두 개의 주사위를 동시에 던질 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{6}\dmpnum{42-07}{\input{items/42-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{42-08}{\input{items/42-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{43-09}{\input{items/43-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{43-10}{\input{items/43-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{43-11}{\input{items/43-11}}\vspace{8mm}
+\dmpassage{5명의 학생 $\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$, $\pt{E}$가 일렬로 설 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{11}\dmpnum{43-12}{\input{items/43-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{43-13}{\input{items/43-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{43-14}{\input{items/43-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{43-15}{\input{items/43-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{43-16}{\input{items/43-16}}\vspace{8mm}
+\dmpassage{흰 공 4개, 파란 공 2개가 들어 있는 주머니에서 임의로 2개의 공을 동시에 꺼낼 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{16}\dmpnum{43-17}{\input{items/43-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{43-18}{\input{items/43-18}}\vspace{8mm}
+\dmsection{개념 13 통계적 확률}
+\dmpassage{다음에 답하시오.}
+\setcounter{dmproblemcount}{18}\dmpnum{44-19}{\input{items/44-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{44-20}{\input{items/44-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{44-21}{\input{items/44-21}}\vspace{8mm}
+\dmpassage{아래는 어느 지역의 휴대폰 사용자 400명을 대상으로 이용하는 통신사를 조사하여 나타낸 표이다. 이 사용자 중에서 임의로 한 명을 택할 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-44-22}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{21}\dmpnum{44-22}{\input{items/44-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{44-23}{\input{items/44-23}}\vspace{8mm}
+\dmpassage{아래는 어느 학교의 학생 500명의 혈액형을 조사하여 나타낸 표이다. 이 학교 학생 중에서 임의로 한 명을 택할 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-44-24}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{23}\dmpnum{44-24}{\input{items/44-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{44-25}{\input{items/44-25}}\vspace{8mm}
+\dmsection{개념 14 확률의 기본 성질}
+\dmpassage{한 개의 주사위를 던질 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{25}\dmpnum{45-26}{\input{items/45-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{45-27}{\input{items/45-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{45-28}{\input{items/45-28}}\vspace{8mm}
+\dmpassage{흰 구슬 2개, 검은 구슬 3개가 들어 있는 주머니에서 임의로 한 개의 구슬을 꺼낼 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{28}\dmpnum{45-29}{\input{items/45-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{45-30}{\input{items/45-30}}\vspace{8mm}
+\setcounter{dmproblemcount}{30}\dmpnum{45-31}{\input{items/45-31}}\vspace{8mm}
+\dmpassage{$1$부터 $7$까지의 자연수가 각각 하나씩 적힌 7개의 공이 들어 있는 상자에서 임의로 한 개의 공을 꺼낼 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{31}\dmpnum{45-32}{\input{items/45-32}}\vspace{8mm}
+\setcounter{dmproblemcount}{32}\dmpnum{45-33}{\input{items/45-33}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{45-34}{\input{items/45-34}}\vspace{8mm}
+\dmpassage{$1$부터 $10$까지의 자연수가 각각 하나씩 적힌 10장의 카드 중에서 임의로 한 장의 카드를 뽑을 때, 짝수가 적힌 카드를 뽑는 사건을 $A$, 홀수가 적힌 카드를 뽑는 사건을 $B$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{34}\dmpnum{45-35}{\input{items/45-35}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{45-36}{\input{items/45-36}}\vspace{8mm}
+\setcounter{dmproblemcount}{36}\dmpnum{45-37}{\input{items/45-37}}\vspace{8mm}
+\dmsection{유형 024 수학적 확률}
+\setcounter{dmproblemcount}{0}\dmpnum{46-01}{\input{items/46-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{46-02}{\input{items/46-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{46-03}{\input{items/46-03}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{3}\dmpnum{46-04}{\input{items/46-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{46-05}{\input{items/46-05}}\vspace{8mm}
+\dmsection{유형 025 순열을 이용하는 확률}
+\setcounter{dmproblemcount}{5}\dmpnum{46-06}{\input{items/46-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{47-07}{\input{items/47-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{47-08}{\input{items/47-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{47-09}{\input{items/47-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{47-10}{\input{items/47-10}}\vspace{8mm}
+\dmsection{유형 026 중복순열을 이용하는 확률}
+\setcounter{dmproblemcount}{10}\dmpnum{47-11}{\input{items/47-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{47-12}{\input{items/47-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{48-13}{\input{items/48-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{48-14}{\input{items/48-14}}\vspace{8mm}
+\dmsection{유형 027 같은 것이 있는 순열을 이용하는 확률}
+\setcounter{dmproblemcount}{14}\dmpnum{48-15}{\input{items/48-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{48-16}{\input{items/48-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{48-17}{\input{items/48-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{48-18}{\input{items/48-18}}\vspace{8mm}
+\dmsection{유형 028 조합을 이용하는 확률}
+\setcounter{dmproblemcount}{18}\dmpnum{49-19}{\input{items/49-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{49-20}{\input{items/49-20}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{20}\dmpnum{49-21}{\input{items/49-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{49-22}{\input{items/49-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{49-23}{\input{items/49-23}}\vspace{8mm}
+\dmsection{유형 029 통계적 확률}
+\setcounter{dmproblemcount}{23}\dmpnum{49-24}{\input{items/49-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{50-25}{\input{items/50-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{50-26}{\input{items/50-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{50-27}{\input{items/50-27}}\vspace{8mm}
+\dmsection{유형 030 확률의 기본 성질}
+\setcounter{dmproblemcount}{27}\dmpnum{50-28}{\input{items/50-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{50-29}{\input{items/50-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{50-30}{\input{items/50-30}}\vspace{8mm}
+\dmsection{개념 15 확률의 덧셈정리}
+\dmpassage{두 사건 $A$, $B$가 다음을 만족시킬 때, $\mathrm{P}(A\cup B)$를 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{51-01}{\input{items/51-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{51-02}{\input{items/51-02}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$에 대하여 다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{51-03}{\input{items/51-03}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{3}\dmpnum{51-04}{\input{items/51-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{51-05}{\input{items/51-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{51-06}{\input{items/51-06}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$가 서로 배반사건이고 다음을 만족시킬 때, $\mathrm{P}(A\cup B)$를 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{51-07}{\input{items/51-07}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{51-08}{\input{items/51-08}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$가 서로 배반사건일 때, 다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{51-09}{\input{items/51-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{51-10}{\input{items/51-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{52-11}{\input{items/52-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{52-12}{\input{items/52-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{52-13}{\input{items/52-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{52-14}{\input{items/52-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{52-15}{\input{items/52-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{52-16}{\input{items/52-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{52-17}{\input{items/52-17}}\vspace{8mm}
+\dmsection{개념 16 여사건의 확률}
+\dmpassage{두 사건 $A$, $B$에 대하여 다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{17}\dmpnum{53-18}{\input{items/53-18}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{18}\dmpnum{53-19}{\input{items/53-19}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{19}\dmpnum{53-20}{\input{items/53-20}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{20}\dmpnum{53-21}{\input{items/53-21}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{21}\dmpnum{53-22}{\input{items/53-22}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{22}\dmpnum{53-23}{\input{items/53-23}}\vspace{8mm}
+\dmpassage{다음을 구하시오.}
+\setcounter{dmproblemcount}{23}\dmpnum{53-24}{\input{items/53-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{53-25}{\input{items/53-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{53-26}{\input{items/53-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{53-27}{\input{items/53-27}}\vspace{8mm}
+\dmsection{유형 031 확률의 계산}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{54-01}{\input{items/54-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{54-02}{\input{items/54-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{54-03}{\input{items/54-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{54-04}{\input{items/54-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{54-05}{\input{items/54-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{54-06}{\input{items/54-06}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{54-07}{\input{items/54-07}}\vspace{8mm}
+\dmsection{유형 032 확률의 덧셈정리; 배반사건이 아닌 경우}
+\setcounter{dmproblemcount}{7}\dmpnum{55-08}{\input{items/55-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{55-09}{\input{items/55-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{55-10}{\input{items/55-10}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{10}\dmpnum{55-11}{\input{items/55-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{55-12}{\input{items/55-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{55-13}{\input{items/55-13}}\vspace{8mm}
+\dmsection{유형 033 확률의 덧셈정리; 배반사건인 경우}
+\setcounter{dmproblemcount}{13}\dmpnum{56-14}{\input{items/56-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{56-15}{\input{items/56-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{56-16}{\input{items/56-16}}\vspace{8mm}
+\dmsection{유형 034 여사건의 확률; ‘$\sim$가 아닌’의 조건이 있는 경우}
+\setcounter{dmproblemcount}{16}\dmpnum{56-17}{\input{items/56-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{56-18}{\input{items/56-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{56-19}{\input{items/56-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{56-20}{\input{items/56-20}}\vspace{8mm}
+\dmsection{유형 035 여사건의 확률; ‘적어도’의 조건이 있는 경우}
+\setcounter{dmproblemcount}{20}\dmpnum{57-21}{\input{items/57-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{57-22}{\input{items/57-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{57-23}{\input{items/57-23}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{23}\dmpnum{57-24}{\input{items/57-24}}\vspace{8mm}
+\dmsection{유형 036 여사건의 확률; ‘이상’, ‘이하’의 조건이 있는 경우}
+\setcounter{dmproblemcount}{24}\dmpnum{57-25}{\input{items/57-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{57-26}{\input{items/57-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{57-27}{\input{items/57-27}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\setcounter{dmproblemcount}{0}\dmpnum{58-01}{\input{items/58-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{58-02}{\input{items/58-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{58-03}{\input{items/58-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{58-04}{\input{items/58-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{58-05}{\input{items/58-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{58-06}{\input{items/58-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{59-07}{\input{items/59-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{59-08}{\input{items/59-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{59-09}{\input{items/59-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{59-10}{\input{items/59-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{59-11}{\input{items/59-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{59-12}{\input{items/59-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{60-13}{\input{items/60-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{60-14}{\input{items/60-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{60-15}{\input{items/60-15}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{15}\dmpnum{60-16}{\input{items/60-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{60-17}{\input{items/60-17}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{17}\dmpnum{60-18}{\input{items/60-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{60-19}{\input{items/60-19}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{04 조건부확률}
+\dmchapter{04}{조건부확률}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 17 조건부확률}
+\dmpassage{두 사건 $A$, $B$에 대하여\par\smallskip\centerline{$\mathrm{P}(A)=\dfrac{2}{3}$, $\mathrm{P}(B)=\dfrac{1}{2}$, $\mathrm{P}(A\cap B)=\dfrac{1}{4}$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{62-01}{\input{items/62-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{62-02}{\input{items/62-02}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$에 대하여\par\smallskip\centerline{$\mathrm{P}(A)=0.6$, $\mathrm{P}(B)=0.5$, $\mathrm{P}(A\cap B)=0.2$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{2}\dmpnum{62-03}{\input{items/62-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{62-04}{\input{items/62-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{62-05}{\input{items/62-05}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$에 대하여 다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{62-06}{\input{items/62-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{62-07}{\input{items/62-07}}\vspace{8mm}
+\dmpassage{표본공간 $S$의 두 사건 $A$, $B$가 서로 배반사건일 때, 다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{63-08}{\input{items/63-08}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{63-09}{\input{items/63-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{63-10}{\input{items/63-10}}\vspace{8mm}
+\dmpassage{한 개의 주사위를 던지는 시행에서 나온 눈의 수가 2의 배수인 사건을 $A$, 3의 배수인 사건을 $B$라 할 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{10}\dmpnum{63-11}{\input{items/63-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{63-12}{\input{items/63-12}}\vspace{8mm}
+\dmpassage{1부터 10까지의 자연수가 각각 하나씩 적힌 10장의 카드 중 임의로 한 장의 카드를 택하는 시행에서 택한 카드에 적힌 수가 홀수인 사건을 $A$, 소수인 사건을 $B$라 할 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{12}\dmpnum{63-13}{\input{items/63-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{63-14}{\input{items/63-14}}\vspace{8mm}
+\dmpassage{한 개의 주사위를 던지는 시행에서 다음을 구하시오.}
+\setcounter{dmproblemcount}{14}\dmpnum{63-15}{\input{items/63-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{63-16}{\input{items/63-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{63-17}{\input{items/63-17}}\vspace{8mm}
+\dmpassage{다음을 구하시오.}
+\setcounter{dmproblemcount}{17}\dmpnum{63-18}{\input{items/63-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{63-19}{\input{items/63-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{63-20}{\input{items/63-20}}\vspace{8mm}
+\dmsection{개념 18 확률의 곱셈정리}
+\dmpassage{두 사건 $A$, $B$에 대하여\par\smallskip\centerline{$\mathrm{P}(A)=\dfrac{3}{4}$, $\mathrm{P}(B)=\dfrac{1}{2}$, $\mathrm{P}(B\mid A)=\dfrac{2}{5}$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{20}\dmpnum{64-21}{\input{items/64-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{64-22}{\input{items/64-22}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$에 대하여 다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{22}\dmpnum{64-23}{\input{items/64-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{64-24}{\input{items/64-24}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{24}\dmpnum{64-25}{\input{items/64-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{64-26}{\input{items/64-26}}\vspace{8mm}
+\dmpassage{2개의 당첨 제비를 포함하여 7개의 제비가 들어 있는 상자에서 임의로 제비를 한 개씩 두 번 꺼낼 때, 다음을 구하시오. \cond{꺼낸 제비는 다시 넣지 않는다.}}
+\setcounter{dmproblemcount}{26}\dmpnum{64-27}{\input{items/64-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{64-28}{\input{items/64-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{64-29}{\input{items/64-29}}\vspace{8mm}
+\dmsection{개념 19 $\mathrm{P}(B)=\mathrm{P}(A\cap B)+\mathrm{P}(\comp{A}\cap B)$를 이용한 확률}
+\setcounter{dmproblemcount}{29}\dmpnum{65-30}{\input{items/65-30}}\vspace{8mm}
+\setcounter{dmproblemcount}{30}\dmpnum{65-31}{\input{items/65-31}}\vspace{8mm}
+\dmpassage{다음에 답하시오.}
+\setcounter{dmproblemcount}{31}\dmpnum{66-32}{\input{items/66-32}}\vspace{8mm}
+\setcounter{dmproblemcount}{32}\dmpnum{66-33}{\input{items/66-33}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{66-34}{\input{items/66-34}}\vspace{8mm}
+\setcounter{dmproblemcount}{34}\dmpnum{66-35}{\input{items/66-35}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{66-36}{\input{items/66-36}}\vspace{8mm}
+\setcounter{dmproblemcount}{36}\dmpnum{66-37}{\input{items/66-37}}\vspace{8mm}
+\dmsection{유형 037 조건부확률의 계산}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{67-01}{\input{items/67-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{67-02}{\input{items/67-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{67-03}{\input{items/67-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{67-04}{\input{items/67-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{67-05}{\input{items/67-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{67-06}{\input{items/67-06}}\vspace{8mm}
+\dmsection{유형 038 조건부확률}
+\setcounter{dmproblemcount}{6}\dmpnum{68-07}{\input{items/68-07}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{68-08}{\input{items/68-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{68-09}{\input{items/68-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{68-10}{\input{items/68-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{68-11}{\input{items/68-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{68-12}{\input{items/68-12}}\vspace{8mm}
+\dmsection{유형 039 표를 이용한 조건부확률}
+\setcounter{dmproblemcount}{12}\dmpnum{69-13}{\input{items/69-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{69-14}{\input{items/69-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{69-15}{\input{items/69-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{69-16}{\input{items/69-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{69-17}{\input{items/69-17}}\vspace{8mm}
+\dmsection{유형 040 확률의 곱셈정리}
+\setcounter{dmproblemcount}{17}\dmpnum{70-18}{\input{items/70-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{70-19}{\input{items/70-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{70-20}{\input{items/70-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{70-21}{\input{items/70-21}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{21}\dmpnum{70-22}{\input{items/70-22}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{22}\dmpnum{70-23}{\input{items/70-23}}\vspace{8mm}
+\dmsection{유형 041 확률의 곱셈정리; $\mathrm{P}(B)=\mathrm{P}(A\cap B)+\mathrm{P}(\comp{A}\cap B)$}
+\vspace{3mm}\setcounter{dmproblemcount}{23}\dmpnum{71-24}{\input{items/71-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{71-25}{\input{items/71-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{71-26}{\input{items/71-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{71-27}{\input{items/71-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{71-28}{\input{items/71-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{71-29}{\input{items/71-29}}\vspace{8mm}
+\dmsection{개념 20 사건의 독립과 종속}
+\dmpassage{두 사건 $A$, $B$가 서로 독립이고\par\smallskip\centerline{$\mathrm{P}(A)=\dfrac{3}{4}$, $\mathrm{P}(B)=\dfrac{1}{2}$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{72-01}{\input{items/72-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{72-02}{\input{items/72-02}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$가 서로 독립이고\par\smallskip\centerline{$\mathrm{P}(A)=0.35$, $\mathrm{P}(B)=0.6$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{2}\dmpnum{72-03}{\input{items/72-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{72-04}{\input{items/72-04}}\vspace{8mm}
+\dmpassage{검은 공 4개, 흰 공 6개가 들어 있는 주머니에서 임의로 공을 한 개씩 두 번 꺼낼 때, 첫 번째에 흰 공을 꺼내는 사건을 $A$, 두 번째에 흰 공을 꺼내는 사건을 $B$라 하자. 물음에 답하시오.}
+\setcounter{dmproblemcount}{4}\dmpnum{72-05}{\input{items/72-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{72-06}{\input{items/72-06}}\vspace{8mm}
+\dmsection{개념 21 두 사건이 독립일 조건}
+\dmpassage{다음을 만족시키는 두 사건 $A$, $B$가 서로 독립인지 종속인지 말하시오.}
+\setcounter{dmproblemcount}{6}\dmpnum{73-07}{\input{items/73-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{73-08}{\input{items/73-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{73-09}{\input{items/73-09}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$가 서로 독립일 때, 다음 두 사건이 서로 독립임을 보이시오. \cond{$0<\mathrm{P}(A)<1$, $0<\mathrm{P}(B)<1$}}
+\setcounter{dmproblemcount}{9}\dmpnum{73-10}{\input{items/73-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{73-11}{\input{items/73-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{73-12}{\input{items/73-12}}\vspace{8mm}
+\dmpassage{두 사건 $A$, $B$가 서로 독립이고 $\mathrm{P}(A)=0.3$, $\mathrm{P}(B)=0.4$일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{12}\dmpnum{73-13}{\input{items/73-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{73-14}{\input{items/73-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{73-15}{\input{items/73-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{73-16}{\input{items/73-16}}\vspace{8mm}
+\dmpassage{다음을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{16}\dmpnum{73-17}{\input{items/73-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{73-18}{\input{items/73-18}}\vspace{8mm}
+\dmsection{개념 22 독립시행의 확률}
+\dmpassage{한 개의 주사위를 4번 던지는 시행에서 다음을 구하시오.}
+\setcounter{dmproblemcount}{18}\dmpnum{74-19}{\input{items/74-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{74-20}{\input{items/74-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{74-21}{\input{items/74-21}}\vspace{8mm}
+\dmpassage{어느 공장에서 생산된 제품 중 $\mathrm{A}$ 제품은 전체의 $25\mkern3mu \%$라 할 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{21}\dmpnum{74-22}{\input{items/74-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{74-23}{\input{items/74-23}}\vspace{8mm}
+\dmpassage{한 개의 동전을 5번 던질 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{23}\dmpnum{74-24}{\input{items/74-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{74-25}{\input{items/74-25}}\vspace{8mm}
+\dmpassage{어느 양궁 선수가 과녁의 10점 영역을 맞힐 확률은 $\dfrac{4}{5}$라고 한다. 이 선수가 화살을 3번 쏠 때, 다음을 구하시오. \cond{화살을 쏘는 시행은 독립시행이다.}}
+\setcounter{dmproblemcount}{25}\dmpnum{74-26}{\input{items/74-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{74-27}{\input{items/74-27}}\vspace{8mm}
+\dmsection{유형 042 사건의 독립과 종속}
+\setcounter{dmproblemcount}{0}\dmpnum{75-01}{\input{items/75-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{75-02}{\input{items/75-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{75-03}{\input{items/75-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{75-04}{\input{items/75-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{75-05}{\input{items/75-05}}\vspace{8mm}
+\dmsection{유형 043 독립인 사건의 확률의 계산}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{76-06}{\input{items/76-06}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{76-07}{\input{items/76-07}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{76-08}{\input{items/76-08}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{76-09}{\input{items/76-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{76-10}{\input{items/76-10}}\vspace{8mm}
+\dmsection{유형 044 독립인 사건의 확률}
+\vspace{3mm}\setcounter{dmproblemcount}{10}\dmpnum{76-11}{\input{items/76-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{77-12}{\input{items/77-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{77-13}{\input{items/77-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{77-14}{\input{items/77-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{77-15}{\input{items/77-15}}\vspace{8mm}
+\dmsection{유형 045 독립시행의 확률}
+\setcounter{dmproblemcount}{15}\dmpnum{77-16}{\input{items/77-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{77-17}{\input{items/77-17}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{17}\dmpnum{78-18}{\input{items/78-18}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{18}\dmpnum{78-19}{\input{items/78-19}}\vspace{8mm}
+\dmsection{유형 046 독립시행의 확률 ; 확률의 덧셈정리와 여사건의 확률}
+\vspace{3mm}\setcounter{dmproblemcount}{19}\dmpnum{78-20}{\input{items/78-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{78-21}{\input{items/78-21}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{21}\dmpnum{78-22}{\input{items/78-22}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{22}\dmpnum{78-23}{\input{items/78-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{78-24}{\input{items/78-24}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{79-01}{\input{items/79-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{79-02}{\input{items/79-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{79-03}{\input{items/79-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{79-04}{\input{items/79-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{79-05}{\input{items/79-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{79-06}{\input{items/79-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{80-07}{\input{items/80-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{80-08}{\input{items/80-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{80-09}{\input{items/80-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{80-10}{\input{items/80-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{80-11}{\input{items/80-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{80-12}{\input{items/80-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{80-13}{\input{items/80-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{80-14}{\input{items/80-14}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{05 확률변수와 확률분포}
+\dmchapter{05}{확률변수와 확률분포}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 23 확률변수와 확률분포}
+\dmpassage{다음 확률변수 $X$가 가질 수 있는 값을 모두 구하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{82-01}{\input{items/82-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{82-02}{\input{items/82-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{82-03}{\input{items/82-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{82-04}{\input{items/82-04}}\vspace{8mm}
+\dmpassage{다음 확률변수 $X$의 확률분포를 표로 나타내시오.}
+\setcounter{dmproblemcount}{4}\dmpnum{82-05}{\input{items/82-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{82-06}{\input{items/82-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{82-07}{\input{items/82-07}}\vspace{8mm}
+\dmsection{개념 24 이산확률변수와 확률질량함수}
+\vspace{5mm}\setcounter{dmproblemcount}{7}\dmpnum{83-08}{\input{items/83-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{83-09}{\input{items/83-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{83-10}{\input{items/83-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{83-11}{\input{items/83-11}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률질량함수가\par\smallskip\centerline{$\mathrm{P}(X=x)=\begin{cases} \dfrac{1}{8} & (x=1) \\[9pt] \dfrac{1}{4} & (x=2{,}\mkern3mu\mathopen{}4) \\[9pt] \dfrac{3}{8} & (x=3) \end{cases}$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{11}\dmpnum{84-12}{\input{items/84-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{84-13}{\input{items/84-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{84-14}{\input{items/84-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{84-15}{\input{items/84-15}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 아래와 같을 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-84-16}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{15}\dmpnum{84-16}{\input{items/84-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{84-17}{\input{items/84-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{84-18}{\input{items/84-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{84-19}{\input{items/84-19}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 다음과 같을 때, 상수 $a$의 값을 구하시오.}
+\setcounter{dmproblemcount}{19}\dmpnum{84-20}{\input{items/84-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{84-21}{\input{items/84-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{84-22}{\input{items/84-22}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률질량함수가 다음과 같을 때, 상수 $k$의 값을 구하시오.}
+\setcounter{dmproblemcount}{22}\dmpnum{84-23}{\input{items/84-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{84-24}{\input{items/84-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{84-25}{\input{items/84-25}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{25}\dmpnum{84-26}{\input{items/84-26}}\vspace{8mm}
+\dmsection{개념 25 연속확률변수와 확률밀도함수}
+\dmpassage{다음 확률변수 $X$가 연속확률변수이면 ‘연’을, 이산확률변수이면 ‘이’를 ( ) 안에 써넣으시오.}
+\setcounter{dmproblemcount}{26}\dmpnum{85-27}{\input{items/85-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{85-28}{\input{items/85-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{85-29}{\input{items/85-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{85-30}{\input{items/85-30}}\vspace{8mm}
+\setcounter{dmproblemcount}{30}\dmpnum{85-31}{\input{items/85-31}}\vspace{8mm}
+\setcounter{dmproblemcount}{31}\dmpnum{85-32}{\input{items/85-32}}\vspace{8mm}
+\dmpassage{다음 중 $f(x)$가 $0\le X\le 2$에서 모든 실수의 값을 갖는 연속확률변수 $X$의 확률밀도함수가 될 수 있는 것은 ‘○’를, 될 수 없는 것은 ‘×’를 ( ) 안에 써넣으시오.}
+\setcounter{dmproblemcount}{32}\dmpnum{85-33}{\input{items/85-33}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{85-34}{\input{items/85-34}}\vspace{8mm}
+\setcounter{dmproblemcount}{34}\dmpnum{85-35}{\input{items/85-35}}\vspace{8mm}
+\dmpassage{$-1\le X\le 1$에서 모든 실수의 값을 갖는 연속확률변수 $X$의 확률밀도함수 $f(x)$에 대하여 $y=f(x)$의 그래프가 다음 그림과 같을 때, $\mathrm{P}(0\le X\le 1)$을 구하시오.}
+\setcounter{dmproblemcount}{35}\dmpnum{86-36}{\input{items/86-36}}\vspace{8mm}
+\setcounter{dmproblemcount}{36}\dmpnum{86-37}{\input{items/86-37}}\vspace{8mm}
+\setcounter{dmproblemcount}{37}\dmpnum{86-38}{\input{items/86-38}}\vspace{8mm}
+\setcounter{dmproblemcount}{38}\dmpnum{86-39}{\input{items/86-39}}\vspace{8mm}
+\dmpassage{연속확률변수 $X$의 확률밀도함수 $f(x)$가 다음과 같을 때, 주어진 확률을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{39}\dmpnum{86-40}{\input{items/86-40}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{40}\dmpnum{86-41}{\input{items/86-41}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{41}\dmpnum{86-42}{\input{items/86-42}}\vspace{8mm}
+\dmpassage{$0\le X\le 4$에서 모든 실수의 값을 갖는 연속확률변수 $X$의 확률밀도함수 $f(x)$에 대하여 $y=f(x)$의 그래프가 다음 그림과 같을 때, 상수 $k$의 값을 구하시오.}
+\setcounter{dmproblemcount}{42}\dmpnum{86-43}{\input{items/86-43}}\vspace{8mm}
+\setcounter{dmproblemcount}{43}\dmpnum{86-44}{\input{items/86-44}}\vspace{8mm}
+\setcounter{dmproblemcount}{44}\dmpnum{86-45}{\input{items/86-45}}\vspace{8mm}
+\dmpassage{연속확률변수 $X$의 확률밀도함수 $f(x)$가 다음과 같을 때, 상수 $k$의 값을 구하시오.}
+\setcounter{dmproblemcount}{45}\dmpnum{86-46}{\input{items/86-46}}\vspace{8mm}
+\setcounter{dmproblemcount}{46}\dmpnum{86-47}{\input{items/86-47}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{47}\dmpnum{86-48}{\input{items/86-48}}\vspace{8mm}
+\dmsection{유형 047 확률변수}
+\setcounter{dmproblemcount}{0}\dmpnum{87-01}{\input{items/87-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{87-02}{\input{items/87-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{87-03}{\input{items/87-03}}\vspace{8mm}
+\dmsection{유형 048 확률분포}
+\setcounter{dmproblemcount}{3}\dmpnum{87-04}{\input{items/87-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{87-05}{\input{items/87-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{88-06}{\input{items/88-06}}\vspace{8mm}
+\dmsection{유형 049 확률질량함수}
+\setcounter{dmproblemcount}{6}\dmpnum{88-07}{\input{items/88-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{88-08}{\input{items/88-08}}\vspace{8mm}
+\dmsection{유형 050 확률질량함수의 성질; 확률분포가 표로 주어진 경우}
+\setcounter{dmproblemcount}{8}\dmpnum{88-09}{\input{items/88-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{88-10}{\input{items/88-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{88-11}{\input{items/88-11}}\vspace{8mm}
+\dmsection{유형 051 확률질량함수의 성질; 확률질량함수가 주어진 경우}
+\vspace{5mm}\setcounter{dmproblemcount}{11}\dmpnum{89-12}{\input{items/89-12}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{12}\dmpnum{89-13}{\input{items/89-13}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{13}\dmpnum{89-14}{\input{items/89-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{89-15}{\input{items/89-15}}\vspace{8mm}
+\dmsection{유형 052 이산확률변수의 확률 구하기}
+\setcounter{dmproblemcount}{15}\dmpnum{89-16}{\input{items/89-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{89-17}{\input{items/89-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{90-18}{\input{items/90-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{90-19}{\input{items/90-19}}\vspace{8mm}
+\dmsection{유형 053 이산확률변수와 연속확률변수}
+\setcounter{dmproblemcount}{19}\dmpnum{90-20}{\input{items/90-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{90-21}{\input{items/90-21}}\vspace{8mm}
+\dmsection{유형 054 확률밀도함수의 성질}
+\setcounter{dmproblemcount}{21}\dmpnum{90-22}{\input{items/90-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{90-23}{\input{items/90-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{91-24}{\input{items/91-24}}\vspace{8mm}
+\dmsection{유형 055 연속확률변수의 확률 구하기}
+\vspace{3mm}\setcounter{dmproblemcount}{24}\dmpnum{91-25}{\input{items/91-25}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{25}\dmpnum{91-26}{\input{items/91-26}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{26}\dmpnum{91-27}{\input{items/91-27}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{27}\dmpnum{91-28}{\input{items/91-28}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{28}\dmpnum{91-29}{\input{items/91-29}}\vspace{8mm}
+\dmsection{개념 26 이산확률변수의 평균, 분산, 표준편차}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 아래와 같을 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-92-01}}\end{center}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{92-01}{\input{items/92-01}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{1}\dmpnum{92-02}{\input{items/92-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{92-03}{\input{items/92-03}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 아래와 같을 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-92-04}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{3}\dmpnum{92-04}{\input{items/92-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{92-05}{\input{items/92-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{92-06}{\input{items/92-06}}\vspace{8mm}
+\dmpassage{확률변수 $X$에 대하여 다음을 구하시오.}
+\setcounter{dmproblemcount}{6}\dmpnum{92-07}{\input{items/92-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{92-08}{\input{items/92-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{93-09}{\input{items/93-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{93-10}{\input{items/93-10}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률질량함수가\par\smallskip\centerline{$\mathrm{P}(X=x)=\dfrac{x}{10}\quad(x=1{,}\mkern3mu\mathopen{}2{,}\mkern3mu\mathopen{}3{,}\mkern3mu\mathopen{}4)$}\par\smallskip\noindent 일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{10}\dmpnum{93-11}{\input{items/93-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{93-12}{\input{items/93-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{93-13}{\input{items/93-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{93-14}{\input{items/93-14}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 아래와 같을 때, 다음을 구하시오. \cond{$a$는 상수이다.}}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-93-15}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{14}\dmpnum{93-15}{\input{items/93-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{93-16}{\input{items/93-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{93-17}{\input{items/93-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{93-18}{\input{items/93-18}}\vspace{8mm}
+\dmpassage{한 개의 주사위를 두 번 던질 때, 짝수의 눈이 나오는 횟수를 확률변수 $X$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{18}\dmpnum{93-19}{\input{items/93-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{93-20}{\input{items/93-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{93-21}{\input{items/93-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{93-22}{\input{items/93-22}}\vspace{8mm}
+\dmpassage{남학생 4명과 여학생 3명 중에서 임의로 2명의 대표를 뽑을 때, 뽑힌 남학생 수를 확률변수 $X$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{22}\dmpnum{93-23}{\input{items/93-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{93-24}{\input{items/93-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{93-25}{\input{items/93-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{93-26}{\input{items/93-26}}\vspace{8mm}
+\dmsection{개념 27 확률변수 $aX+b$의 평균, 분산, 표준편차}
+\dmpassage{확률변수 $X$에 대하여 $\mathrm{E}(X)=10$, $\mathrm{V}(X)=4$일 때, 다음 확률변수의 평균, 분산, 표준편차를 구하시오.}
+\setcounter{dmproblemcount}{26}\dmpnum{94-27}{\input{items/94-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{94-28}{\input{items/94-28}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{28}\dmpnum{94-29}{\input{items/94-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{94-30}{\input{items/94-30}}\vspace{8mm}
+\dmpassage{확률변수 $X$에 대하여 $\mathrm{E}(X)=9$, $\mathrm{V}(X)=3$일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{30}\dmpnum{94-31}{\input{items/94-31}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{31}\dmpnum{94-32}{\input{items/94-32}}\vspace{8mm}
+\setcounter{dmproblemcount}{32}\dmpnum{94-33}{\input{items/94-33}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 아래와 같을 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-94-34}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{33}\dmpnum{94-34}{\input{items/94-34}}\vspace{8mm}
+\setcounter{dmproblemcount}{34}\dmpnum{94-35}{\input{items/94-35}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{94-36}{\input{items/94-36}}\vspace{8mm}
+\dmpassage{확률변수 $X$의 확률분포를 표로 나타내면 아래와 같을 때, 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-94-37}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{36}\dmpnum{94-37}{\input{items/94-37}}\vspace{8mm}
+\setcounter{dmproblemcount}{37}\dmpnum{94-38}{\input{items/94-38}}\vspace{8mm}
+\setcounter{dmproblemcount}{38}\dmpnum{94-39}{\input{items/94-39}}\vspace{8mm}
+\dmsection{유형 056 이산확률변수의 평균, 분산, 표준편차; 확률분포가 주어진 경우}
+\setcounter{dmproblemcount}{0}\dmpnum{95-01}{\input{items/95-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{95-02}{\input{items/95-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{95-03}{\input{items/95-03}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{3}\dmpnum{95-04}{\input{items/95-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{95-05}{\input{items/95-05}}\vspace{8mm}
+\dmsection{유형 057 이산확률변수의 평균, 분산, 표준편차; 확률분포가 주어지지 않은 경우}
+\setcounter{dmproblemcount}{5}\dmpnum{95-06}{\input{items/95-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{96-07}{\input{items/96-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{96-08}{\input{items/96-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{96-09}{\input{items/96-09}}\vspace{8mm}
+\dmsection{유형 058 기댓값}
+\setcounter{dmproblemcount}{9}\dmpnum{96-10}{\input{items/96-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{96-11}{\input{items/96-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{96-12}{\input{items/96-12}}\vspace{8mm}
+\dmsection{유형 059 확률변수 $aX+b$의 평균, 분산, 표준편차}
+\setcounter{dmproblemcount}{12}\dmpnum{97-13}{\input{items/97-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{97-14}{\input{items/97-14}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{14}\dmpnum{97-15}{\input{items/97-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{97-16}{\input{items/97-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{97-17}{\input{items/97-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{97-18}{\input{items/97-18}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\setcounter{dmproblemcount}{0}\dmpnum{98-01}{\input{items/98-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{98-02}{\input{items/98-02}}\vspace{8mm}
+\vspace{5mm}\setcounter{dmproblemcount}{2}\dmpnum{98-03}{\input{items/98-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{98-04}{\input{items/98-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{98-05}{\input{items/98-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{98-06}{\input{items/98-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{98-07}{\input{items/98-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{99-08}{\input{items/99-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{99-09}{\input{items/99-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{99-10}{\input{items/99-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{99-11}{\input{items/99-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{99-12}{\input{items/99-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{99-13}{\input{items/99-13}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{13}\dmpnum{99-14}{\input{items/99-14}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{14}\dmpnum{99-15}{\input{items/99-15}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{06 이항분포와 정규분포}
+\dmchapter{06}{이항분포와 정규분포}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 28 이항분포}
+\dmpassage{다음 확률변수 $X$가 이항분포를 따를 때, $X$의 확률분포를 $\mathrm{B}(n{,}\mkern3mu\mathopen{}p)$ 꼴로 나타내시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{100-01}{\input{items/100-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{100-02}{\input{items/100-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{100-03}{\input{items/100-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{100-04}{\input{items/100-04}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 다음과 같은 이항분포를 따를 때, $\mathrm{P}(X=2)$를 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{100-05}{\input{items/100-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{100-06}{\input{items/100-06}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{100-07}{\input{items/100-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{100-08}{\input{items/100-08}}\vspace{8mm}
+\dmsection{개념 29 이항분포에서의 평균, 분산, 표준편차}
+\dmpassage{확률변수 $X$가 다음과 같은 이항분포를 따를 때, $\mathrm{E}(X)$, $\mathrm{V}(X)$, $\sigma(X)$를 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{101-09}{\input{items/101-09}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{101-10}{\input{items/101-10}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{10}\dmpnum{101-11}{\input{items/101-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{101-12}{\input{items/101-12}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 이항분포 $\mathrm{B}(32{,}\mkern3mu\mathopen{}p)$를 따르고 $\mathrm{E}(X)=8$일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{12}\dmpnum{101-13}{\input{items/101-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{101-14}{\input{items/101-14}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 이항분포 $\mathrm{B}\left(n{,}\mkern3mu\mathopen{}\dfrac{2}{3}\right)$를 따르고 $\mathrm{V}(X)=20$일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{14}\dmpnum{101-15}{\input{items/101-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{101-16}{\input{items/101-16}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 이항분포 $\mathrm{B}\left(50{,}\mkern3mu\mathopen{}\dfrac{2}{5}\right)$를 따를 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{16}\dmpnum{102-17}{\input{items/102-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{102-18}{\input{items/102-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{102-19}{\input{items/102-19}}\vspace{8mm}
+\dmpassage{발아율이 $60\mkern3mu \%$인 씨앗 100개를 심을 때, 발아하는 씨앗의 개수를 확률변수 $X$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{19}\dmpnum{102-20}{\input{items/102-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{102-21}{\input{items/102-21}}\vspace{8mm}
+\dmpassage{한 번의 타석에서 안타를 칠 확률이 $0.2$인 선수가 네 번의 타석에서 안타를 치는 횟수를 확률변수 $X$라 하자. 다음을 구하시오. \cond{안타를 치는 시행은 독립시행이다.}}
+\setcounter{dmproblemcount}{21}\dmpnum{102-22}{\input{items/102-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{102-23}{\input{items/102-23}}\vspace{8mm}
+\dmpassage{한 개의 동전을 200번 던질 때, 뒷면이 나오는 횟수를 확률변수 $X$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{23}\dmpnum{102-24}{\input{items/102-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{102-25}{\input{items/102-25}}\vspace{8mm}
+\dmpassage{한 개의 주사위를 60번 던질 때, 5의 약수의 눈이 나오는 횟수를 확률변수 $X$라 하자. 다음을 구하시오.}
+\setcounter{dmproblemcount}{25}\dmpnum{102-26}{\input{items/102-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{102-27}{\input{items/102-27}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{27}\dmpnum{102-28}{\input{items/102-28}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{28}\dmpnum{102-29}{\input{items/102-29}}\vspace{8mm}
+\dmsection{유형 060 독립시행과 이항분포}
+\setcounter{dmproblemcount}{0}\dmpnum{103-01}{\input{items/103-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{103-02}{\input{items/103-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{103-03}{\input{items/103-03}}\vspace{8mm}
+\dmsection{유형 061 이항분포와 확률질량함수}
+\vspace{3mm}\setcounter{dmproblemcount}{3}\dmpnum{103-04}{\input{items/103-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{103-05}{\input{items/103-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{103-06}{\input{items/103-06}}\vspace{8mm}
+\dmsection{유형 062 이항분포에서의 확률}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{104-07}{\input{items/104-07}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{104-08}{\input{items/104-08}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{104-09}{\input{items/104-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{104-10}{\input{items/104-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{104-11}{\input{items/104-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{104-12}{\input{items/104-12}}\vspace{8mm}
+\dmsection{유형 063 이항분포에서의 평균, 분산, 표준편차}
+\vspace{3mm}\setcounter{dmproblemcount}{12}\dmpnum{105-13}{\input{items/105-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{105-14}{\input{items/105-14}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{14}\dmpnum{105-15}{\input{items/105-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{105-16}{\input{items/105-16}}\vspace{8mm}
+\dmsection{유형 064 독립시행에서의 평균, 분산, 표준편차}
+\setcounter{dmproblemcount}{16}\dmpnum{105-17}{\input{items/105-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{105-18}{\input{items/105-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{105-19}{\input{items/105-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{106-20}{\input{items/106-20}}\vspace{8mm}
+\dmsection{유형 065 확률변수 $aX+b$의 평균, 분산, 표준편차 ; 확률변수 $X$가 이항분포를 따르는 경우}
+\vspace{3mm}\setcounter{dmproblemcount}{20}\dmpnum{106-21}{\input{items/106-21}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{21}\dmpnum{106-22}{\input{items/106-22}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{22}\dmpnum{106-23}{\input{items/106-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{106-24}{\input{items/106-24}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{24}\dmpnum{106-25}{\input{items/106-25}}\vspace{8mm}
+\dmsection{개념 30 정규분포}
+\dmpassage{확률변수 $X$의 평균과 분산 또는 표준편차가 다음과 같을 때, $X$가 따르는 정규분포를 $\mathrm{N}(m{,}\mkern3mu\mathopen{}\sigma^2)$ 꼴로 나타내시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{107-01}{\input{items/107-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{107-02}{\input{items/107-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{107-03}{\input{items/107-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{107-04}{\input{items/107-04}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 정규분포 $\mathrm{N}(5{,}\mkern3mu\mathopen{}2^2)$을 따를 때, 확률변수 $Y=2X+1$에 대하여 다음을 구하시오.}
+\setcounter{dmproblemcount}{4}\dmpnum{107-05}{\input{items/107-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{107-06}{\input{items/107-06}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 따르는 정규분포와 확률변수 $Y$가 다음과 같을 때, $\mathrm{E}(Y)$, $\sigma(Y)$를 구하시오.}
+\setcounter{dmproblemcount}{6}\dmpnum{107-07}{\input{items/107-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{107-08}{\input{items/107-08}}\vspace{8mm}
+\dmsection{개념 31 정규분포곡선의 성질}
+\dmpassage{오른쪽 그림에서 두 곡선 $\mathrm{A}$, $\mathrm{B}$는 각각 정규분포 $\mathrm{N}(m_{\mathrm{A}}{,}\mkern3mu\mathopen{}{\sigma_{\mathrm{A}}}^2)$, $\mathrm{N}(m_{\mathrm{B}}{,}\mkern3mu\mathopen{}{\sigma_{\mathrm{B}}}^2)$을 따르는 두 확률변수의 정규분포곡선이다. 다음에서 옳은 것에 ○를 하고, 두 수의 대소를 비교하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-108-09}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{8}\dmpnum{108-09}{\input{items/108-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{108-10}{\input{items/108-10}}\vspace{8mm}
+\dmpassage{오른쪽 그림에서 세 곡선 $\mathrm{A}$, $\mathrm{B}$, $\mathrm{C}$는 각각 정규분포 $\mathrm{N}(m_{\mathrm{A}}{,}\mkern3mu\mathopen{}{\sigma_{\mathrm{A}}}^2)$, $\mathrm{N}(m_{\mathrm{B}}{,}\mkern3mu\mathopen{}{\sigma_{\mathrm{B}}}^2)$, $\mathrm{N}(m_{\mathrm{C}}{,}\mkern3mu\mathopen{}{\sigma_{\mathrm{C}}}^2)$을 따르는 세 확률변수의 정규분포곡선이다. 두 곡선 $\mathrm{A}$, $\mathrm{B}$의 모양이 같고, 두 곡선 $\mathrm{B}$, $\mathrm{C}$의 대칭축이 같을 때, 다음 두 수의 대소를 비교하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-108-11}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{10}\dmpnum{108-11}{\input{items/108-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{108-12}{\input{items/108-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{108-13}{\input{items/108-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{108-14}{\input{items/108-14}}\vspace{8mm}
+\dmsection{개념 32 정규분포곡선에서의 확률}
+\dmpassage{확률변수 $X$가 정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}\sigma^2)$을 따르고 다음을 만족시킬 때, $m$의 값을 구하시오.}
+\setcounter{dmproblemcount}{14}\dmpnum{109-15}{\input{items/109-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{109-16}{\input{items/109-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{109-17}{\input{items/109-17}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}\sigma^2)$을 따르고\par\smallskip\centerline{$\mathrm{P}(m\le X\le m+\sigma)=a$, $\mathrm{P}(m\le X\le m+2\sigma)=b$}\par\smallskip\noindent 일 때, 다음을 $a$, $b$를 사용하여 나타내시오.}
+\setcounter{dmproblemcount}{17}\dmpnum{109-18}{\input{items/109-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{109-19}{\input{items/109-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{109-20}{\input{items/109-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{109-21}{\input{items/109-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{109-22}{\input{items/109-22}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}\sigma^2)$을 따르고 $\mathrm{P}(m-\sigma\le X\le m+\sigma)=0.68$일 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{22}\dmpnum{109-23}{\input{items/109-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{109-24}{\input{items/109-24}}\vspace{8mm}
+\dmsection{개념 33 표준정규분포}
+\dmpassage{확률변수 $Z$가 표준정규분포 $\mathrm{N}(0{,}\mkern3mu\mathopen{}1)$을 따를 때, 다음 확률을 $Z$의 정규분포곡선 위에 나타내고, 오른쪽 표준정규분포표를 이용하여 그 값을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-110-25-tbl}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{24}\dmpnum{110-25}{\input{items/110-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{110-26}{\input{items/110-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{110-27}{\input{items/110-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{110-28}{\input{items/110-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{111-29}{\input{items/111-29}}\vspace{8mm}
+\setcounter{dmproblemcount}{29}\dmpnum{111-30}{\input{items/111-30}}\vspace{8mm}
+\dmpassage{확률변수 $Z$가 표준정규분포 $\mathrm{N}(0{,}\mkern3mu\mathopen{}1)$을 따를 때, 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-111-31}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{30}\dmpnum{111-31}{\input{items/111-31}}\vspace{8mm}
+\setcounter{dmproblemcount}{31}\dmpnum{111-32}{\input{items/111-32}}\vspace{8mm}
+\setcounter{dmproblemcount}{32}\dmpnum{111-33}{\input{items/111-33}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{111-34}{\input{items/111-34}}\vspace{8mm}
+\dmpassage{확률변수 $Z$가 표준정규분포 $\mathrm{N}(0{,}\mkern3mu\mathopen{}1)$을 따를 때, 오른쪽 표준정규분포표를 이용하여 상수 $a$의 값을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-111-35}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{34}\dmpnum{111-35}{\input{items/111-35}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{111-36}{\input{items/111-36}}\vspace{8mm}
+\setcounter{dmproblemcount}{36}\dmpnum{111-37}{\input{items/111-37}}\vspace{8mm}
+\setcounter{dmproblemcount}{37}\dmpnum{111-38}{\input{items/111-38}}\vspace{8mm}
+\setcounter{dmproblemcount}{38}\dmpnum{111-39}{\input{items/111-39}}\vspace{8mm}
+\setcounter{dmproblemcount}{39}\dmpnum{111-40}{\input{items/111-40}}\vspace{8mm}
+\dmsection{개념 34 정규분포의 표준화}
+\dmpassage{확률변수 $X$가 다음과 같은 정규분포를 따를 때, $X$를 확률변수 $Z$로 표준화하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{40}\dmpnum{112-41}{\input{items/112-41}}\vspace{8mm}
+\setcounter{dmproblemcount}{41}\dmpnum{112-42}{\input{items/112-42}}\vspace{8mm}
+\setcounter{dmproblemcount}{42}\dmpnum{112-43}{\input{items/112-43}}\vspace{8mm}
+\dmpassage{다음은 확률변수 $X$를 확률변수 $Z$로 표준화하여 $X$의 정규분포곡선에서 색칠한 부분이 나타내는 확률을 $Z$의 정규분포곡선 위에 나타낸 것이다. $a$, $b$의 값을 구하시오.}
+\setcounter{dmproblemcount}{43}\dmpnum{112-44}{\input{items/112-44}}\vspace{8mm}
+\setcounter{dmproblemcount}{44}\dmpnum{112-45}{\input{items/112-45}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 정규분포 $\mathrm{N}(20{,}\mkern3mu\mathopen{}2^2)$을 따를 때, 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-112-46}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{45}\dmpnum{112-46}{\input{items/112-46}}\vspace{8mm}
+\setcounter{dmproblemcount}{46}\dmpnum{112-47}{\input{items/112-47}}\vspace{8mm}
+\setcounter{dmproblemcount}{47}\dmpnum{112-48}{\input{items/112-48}}\vspace{8mm}
+\setcounter{dmproblemcount}{48}\dmpnum{112-49}{\input{items/112-49}}\vspace{8mm}
+\setcounter{dmproblemcount}{49}\dmpnum{112-50}{\input{items/112-50}}\vspace{8mm}
+\dmsection{유형 066 정규분포곡선의 성질}
+\setcounter{dmproblemcount}{0}\dmpnum{113-01}{\input{items/113-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{113-02}{\input{items/113-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{113-03}{\input{items/113-03}}\vspace{8mm}
+\dmsection{유형 067 정규분포곡선의 성질을 이용하여 확률 구하기}
+\setcounter{dmproblemcount}{3}\dmpnum{113-04}{\input{items/113-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{113-05}{\input{items/113-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{114-06}{\input{items/114-06}}\vspace{8mm}
+\dmsection{유형 068 표준정규분포에서의 확률 구하기}
+\setcounter{dmproblemcount}{6}\dmpnum{114-07}{\input{items/114-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{114-08}{\input{items/114-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{114-09}{\input{items/114-09}}\vspace{8mm}
+\dmsection{유형 069 정규분포의 표준화}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{114-10}{\input{items/114-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{114-11}{\input{items/114-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{114-12}{\input{items/114-12}}\vspace{8mm}
+\dmsection{유형 070 표준화하여 확률 구하기}
+\setcounter{dmproblemcount}{12}\dmpnum{115-13}{\input{items/115-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{115-14}{\input{items/115-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{115-15}{\input{items/115-15}}\vspace{8mm}
+\dmsection{유형 071 정규분포의 활용; 확률 구하기}
+\setcounter{dmproblemcount}{15}\dmpnum{115-16}{\input{items/115-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{115-17}{\input{items/115-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{115-18}{\input{items/115-18}}\vspace{8mm}
+\dmsection{유형 072 정규분포의 활용; 도수 구하기}
+\setcounter{dmproblemcount}{18}\dmpnum{116-19}{\input{items/116-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{116-20}{\input{items/116-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{116-21}{\input{items/116-21}}\vspace{8mm}
+\dmsection{유형 073 정규분포의 활용; 최저 점수 구하기}
+\setcounter{dmproblemcount}{21}\dmpnum{116-22}{\input{items/116-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{116-23}{\input{items/116-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{116-24}{\input{items/116-24}}\vspace{8mm}
+\dmsection{개념 35 이항분포와 정규분포의 관계}
+\dmpassage{확률변수 $X$가 다음과 같은 이항분포를 따를 때, $X$는 근사적으로 정규분포를 따른다. $X$가 따르는 정규분포를 $\mathrm{N}(m{,}\mkern3mu\mathopen{}\sigma^2)$ 꼴로 나타내시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{117-01}{\input{items/117-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{117-02}{\input{items/117-02}}\vspace{8mm}
+\dmpassage{확률변수 $X$가 이항분포 $\mathrm{B}\left(72{,}\mkern3mu\mathopen{}\dfrac{2}{3}\right)$를 따를 때, 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-117-03}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{2}\dmpnum{117-03}{\input{items/117-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{117-04}{\input{items/117-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{117-05}{\input{items/117-05}}\vspace{8mm}
+\dmpassage{한 개의 동전을 100번 던질 때, 앞면이 나오는 횟수를 확률변수 $X$라 하자. 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-117-06}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{5}\dmpnum{117-06}{\input{items/117-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{117-07}{\input{items/117-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{117-08}{\input{items/117-08}}\vspace{8mm}
+\dmsection{유형 074 이항분포와 정규분포의 관계}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{118-01}{\input{items/118-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{118-02}{\input{items/118-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{118-03}{\input{items/118-03}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{3}\dmpnum{118-04}{\input{items/118-04}}\vspace{8mm}
+\dmsection{유형 075 이항분포와 정규분포의 관계의 활용}
+\setcounter{dmproblemcount}{4}\dmpnum{118-05}{\input{items/118-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{119-06}{\input{items/119-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{119-07}{\input{items/119-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{119-08}{\input{items/119-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{119-09}{\input{items/119-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{119-10}{\input{items/119-10}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\setcounter{dmproblemcount}{0}\dmpnum{120-01}{\input{items/120-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{120-02}{\input{items/120-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{120-03}{\input{items/120-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{120-04}{\input{items/120-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{120-05}{\input{items/120-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{120-06}{\input{items/120-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{120-07}{\input{items/120-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{120-08}{\input{items/120-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{121-09}{\input{items/121-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{121-10}{\input{items/121-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{121-11}{\input{items/121-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{121-12}{\input{items/121-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{121-13}{\input{items/121-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{121-14}{\input{items/121-14}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{14}\dmpnum{121-15}{\input{items/121-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{121-16}{\input{items/121-16}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{07 통계적 추정}
+\dmchapter{07}{통계적 추정}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 36 모집단과 표본}
+\dmpassage{다음을 조사할 때, 전수조사와 표본조사 중 어느 것이 더 적합한지 말하시오.}
+\setcounter{dmproblemcount}{0}\dmpnum{122-01}{\input{items/122-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{122-02}{\input{items/122-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{122-03}{\input{items/122-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{122-04}{\input{items/122-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{122-05}{\input{items/122-05}}\vspace{8mm}
+\dmpassage{1부터 5까지의 자연수가 각각 하나씩 적힌 5개의 공이 들어 있는 주머니에서 공을 한 개씩 두 번 임의로 꺼내 표본으로 할 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{5}\dmpnum{122-06}{\input{items/122-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{122-07}{\input{items/122-07}}\vspace{8mm}
+\dmpassage{1부터 8까지의 자연수가 각각 하나씩 적힌 8장의 카드가 들어 있는 상자에서 카드를 한 장씩 세 번 임의로 꺼내 표본으로 할 때, 다음을 구하시오.}
+\setcounter{dmproblemcount}{7}\dmpnum{122-08}{\input{items/122-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{122-09}{\input{items/122-09}}\vspace{8mm}
+\dmsection{개념 37 모평균과 표본평균}
+\dmpassage{1, 3, 5, 7이 각각 하나씩 적힌 4개의 구슬이 들어 있는 상자에서 다음과 같은 표본을 임의추출할 때, 표본평균 $\overline{X}$, 표본분산 $S^2$, 표본표준편차 $S$를 구하시오.}
+\setcounter{dmproblemcount}{9}\dmpnum{123-10}{\input{items/123-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{123-11}{\input{items/123-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{123-12}{\input{items/123-12}}\vspace{8mm}
+\dmpassage{2, 4, 6, 8, 10이 각각 하나씩 적힌 5장의 카드 중에서 다음과 같은 표본을 임의추출할 때, 표본평균 $\overline{X}$, 표본분산 $S^2$, 표본표준편차 $S$를 구하시오.}
+\setcounter{dmproblemcount}{12}\dmpnum{123-13}{\input{items/123-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{123-14}{\input{items/123-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{123-15}{\input{items/123-15}}\vspace{8mm}
+\dmsection{개념 38 표본평균의 평균, 분산, 표준편차}
+\setcounter{dmproblemcount}{15}\dmpnum{124-16}{\input{items/124-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{124-17}{\input{items/124-17}}\vspace{8mm}
+\dmpassage{모평균이 $m$, 모표준편차가 $\sigma$인 모집단에서 임의추출한 크기가 $n$인 표본의 표본평균을 $\overline{X}$라 하자. $m$, $\sigma$, $n$이 다음과 같을 때, $\mathrm{E}(\overline{X})$, $\mathrm{V}(\overline{X})$, $\sigma(\overline{X})$를 구하시오.}
+\setcounter{dmproblemcount}{17}\dmpnum{124-18}{\input{items/124-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{124-19}{\input{items/124-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{124-20}{\input{items/124-20}}\vspace{8mm}
+\dmpassage{모집단이 따르는 정규분포와 이 모집단에서 임의추출한 표본의 크기 $n$이 다음과 같을 때, 표본평균 $\overline{X}$에 대하여 $\mathrm{E}(\overline{X})$, $\sigma(\overline{X})$를 구하시오.}
+\setcounter{dmproblemcount}{20}\dmpnum{125-21}{\input{items/125-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{125-22}{\input{items/125-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{125-23}{\input{items/125-23}}\vspace{8mm}
+\dmpassage{모집단의 확률변수 $X$의 확률분포를 표로 나타내면 다음과 같다. 이 모집단에서 크기가 16인 표본을 임의추출할 때, 표본평균 $\overline{X}$에 대하여 $\mathrm{E}(\overline{X})$, $\mathrm{V}(\overline{X})$를 구하시오.}
+\setcounter{dmproblemcount}{23}\dmpnum{125-24}{\input{items/125-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{125-25}{\input{items/125-25}}\vspace{8mm}
+\dmpassage{모집단의 확률변수 $X$의 확률질량함수가 다음과 같다. 이 모집단에서 크기가 4인 표본을 임의추출할 때, 표본평균 $\overline{X}$에 대하여 $\mathrm{E}(\overline{X})$, $\sigma(\overline{X})$를 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{25}\dmpnum{125-26}{\input{items/125-26}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{26}\dmpnum{125-27}{\input{items/125-27}}\vspace{8mm}
+\dmpassage{모집단의 확률변수 $X$의 확률분포를 표로 나타내면 아래와 같다. 이 모집단에서 임의추출한 크기가 9인 표본의 표본평균을 $\overline{X}$라 할 때, 다음을 구하시오. \cond{$a$는 상수이다.}}
+\setcounter{dmproblemcount}{27}\dmpnum{125-28}{\input{items/125-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{125-29}{\input{items/125-29}}\vspace{8mm}
+\dmsection{개념 39 표본평균의 분포}
+\dmpassage{다음 $\square$ 안에 알맞은 수를 써넣으시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{29}\dmpnum{126-30}{\input{items/126-30}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{30}\dmpnum{126-31}{\input{items/126-31}}\vspace{8mm}
+\setcounter{dmproblemcount}{31}\dmpnum{126-32}{\input{items/126-32}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(180{,}\mkern3mu\mathopen{}8^2)$을 따르는 모집단에서 임의추출한 크기가 4인 표본의 표본평균을 $\overline{X}$라 할 때, 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-126-33}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{32}\dmpnum{126-33}{\input{items/126-33}}\vspace{8mm}
+\setcounter{dmproblemcount}{33}\dmpnum{126-34}{\input{items/126-34}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(320{,}\mkern3mu\mathopen{}10^2)$을 따르는 모집단에서 임의추출한 크기가 25인 표본의 표본평균을 $\overline{X}$라 할 때, 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-126-35}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{34}\dmpnum{126-35}{\input{items/126-35}}\vspace{8mm}
+\setcounter{dmproblemcount}{35}\dmpnum{126-36}{\input{items/126-36}}\vspace{8mm}
+\dmsection{유형 076 전수조사와 표본조사}
+\setcounter{dmproblemcount}{0}\dmpnum{127-01}{\input{items/127-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{127-02}{\input{items/127-02}}\vspace{8mm}
+\dmsection{유형 077 표본평균의 평균, 분산, 표준편차; 모평균, 모표준편차가 주어진 경우}
+\setcounter{dmproblemcount}{2}\dmpnum{127-03}{\input{items/127-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{127-04}{\input{items/127-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{127-05}{\input{items/127-05}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{128-06}{\input{items/128-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{128-07}{\input{items/128-07}}\vspace{8mm}
+\dmsection{유형 078 표본평균의 평균, 분산, 표준편차; 모집단의 확률분포가 주어진 경우}
+\setcounter{dmproblemcount}{7}\dmpnum{128-08}{\input{items/128-08}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{128-09}{\input{items/128-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{128-10}{\input{items/128-10}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{10}\dmpnum{128-11}{\input{items/128-11}}\vspace{8mm}
+\dmsection{유형 079 표본평균의 평균, 분산, 표준편차; 모집단이 주어진 경우}
+\setcounter{dmproblemcount}{11}\dmpnum{129-12}{\input{items/129-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{129-13}{\input{items/129-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{129-14}{\input{items/129-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{129-15}{\input{items/129-15}}\vspace{8mm}
+\dmsection{유형 080 표본평균의 분포}
+\setcounter{dmproblemcount}{15}\dmpnum{129-16}{\input{items/129-16}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{16}\dmpnum{129-17}{\input{items/129-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{130-18}{\input{items/130-18}}\vspace{8mm}
+\dmsection{유형 081 표본평균의 확률}
+\setcounter{dmproblemcount}{18}\dmpnum{130-19}{\input{items/130-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{130-20}{\input{items/130-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{130-21}{\input{items/130-21}}\vspace{8mm}
+\setcounter{dmproblemcount}{21}\dmpnum{130-22}{\input{items/130-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{130-23}{\input{items/130-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{131-24}{\input{items/131-24}}\vspace{8mm}
+\dmsection{유형 082 표본평균의 확률; 표본의 크기 구하기}
+\setcounter{dmproblemcount}{24}\dmpnum{131-25}{\input{items/131-25}}\vspace{8mm}
+\setcounter{dmproblemcount}{25}\dmpnum{131-26}{\input{items/131-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{131-27}{\input{items/131-27}}\vspace{8mm}
+\setcounter{dmproblemcount}{27}\dmpnum{131-28}{\input{items/131-28}}\vspace{8mm}
+\dmsection{개념 40 모평균의 추정}
+\setcounter{dmproblemcount}{0}\dmpnum{132-01}{\input{items/132-01}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}10^2)$을 따르는 모집단에서 임의추출한 표본의 크기 $n$, 표본평균 $\overline{X}$의 값 $\overline{x}$가 다음과 같을 때, 모평균 $m$에 대한 신뢰도 $95\mkern3mu \%$의 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$}}
+\setcounter{dmproblemcount}{1}\dmpnum{132-02}{\input{items/132-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{132-03}{\input{items/132-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{132-04}{\input{items/132-04}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}21^2)$을 따르는 모집단에서 임의추출한 표본의 크기 $n$, 표본평균 $\overline{X}$의 값 $\overline{x}$가 다음과 같을 때, 모평균 $m$에 대한 신뢰도 $99\mkern3mu \%$의 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{4}\dmpnum{133-05}{\input{items/133-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{133-06}{\input{items/133-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{133-07}{\input{items/133-07}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}14^2)$을 따르는 모집단에서 크기가 49인 표본을 임의추출하여 구한 표본평균이 90이었다. 신뢰도가 다음과 같을 때, 모평균 $m$에 대한 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{7}\dmpnum{133-08}{\input{items/133-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{133-09}{\input{items/133-09}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}3^2)$을 따르는 모집단에서 크기가 144인 표본을 임의추출하여 구한 표본평균이 64이었다. 신뢰도가 다음과 같을 때, 모평균 $m$에 대한 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{9}\dmpnum{133-10}{\input{items/133-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{133-11}{\input{items/133-11}}\vspace{8mm}
+\dmpassage{정규분포를 따르는 모집단에서 크기가 100인 표본을 임의추출하였더니 표본평균이 40, 표본표준편차가 5이었다. 신뢰도가 다음과 같을 때, 모평균 $m$에 대한 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{11}\dmpnum{133-12}{\input{items/133-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{133-13}{\input{items/133-13}}\vspace{8mm}
+\dmsection{개념 41 모평균에 대한 신뢰구간의 길이}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}20^2)$을 따르는 모집단에서 크기가 100인 표본을 임의추출할 때, 다음과 같은 신뢰도로 추정한 모평균 $m$에 대한 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{13}\dmpnum{134-14}{\input{items/134-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{134-15}{\input{items/134-15}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}27^2)$을 따르는 모집단에서 크기가 81인 표본을 임의추출할 때, 다음과 같은 신뢰도로 추정한 모평균 $m$에 대한 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{15}\dmpnum{134-16}{\input{items/134-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{134-17}{\input{items/134-17}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}10^2)$을 따르는 모집단에서 임의추출한 표본의 크기 $n$이 다음과 같을 때, 모평균 $m$에 대한 신뢰도 $95\mkern3mu \%$의 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$}}
+\setcounter{dmproblemcount}{17}\dmpnum{134-18}{\input{items/134-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{134-19}{\input{items/134-19}}\vspace{8mm}
+\dmpassage{정규분포 $\mathrm{N}(m{,}\mkern3mu\mathopen{}12^2)$을 따르는 모집단에서 임의추출한 표본의 크기 $n$이 다음과 같을 때, 모평균 $m$에 대한 신뢰도 $99\mkern3mu \%$의 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{19}\dmpnum{134-20}{\input{items/134-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{134-21}{\input{items/134-21}}\vspace{8mm}
+\dmsection{유형 083 모평균의 추정; 모표준편차가 주어진 경우}
+\setcounter{dmproblemcount}{0}\dmpnum{135-01}{\input{items/135-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{135-02}{\input{items/135-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{135-03}{\input{items/135-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{135-04}{\input{items/135-04}}\vspace{8mm}
+\dmsection{유형 084 모평균의 추정; 표본표준편차가 주어진 경우}
+\setcounter{dmproblemcount}{4}\dmpnum{135-05}{\input{items/135-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{135-06}{\input{items/135-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{136-07}{\input{items/136-07}}\vspace{8mm}
+\dmsection{유형 085 모평균의 추정; 표본의 크기 구하기}
+\setcounter{dmproblemcount}{7}\dmpnum{136-08}{\input{items/136-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{136-09}{\input{items/136-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{136-10}{\input{items/136-10}}\vspace{8mm}
+\dmsection{유형 086 모평균에 대한 신뢰구간의 길이}
+\setcounter{dmproblemcount}{10}\dmpnum{136-11}{\input{items/136-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{136-12}{\input{items/136-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{137-13}{\input{items/137-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{137-14}{\input{items/137-14}}\vspace{8mm}
+\dmsection{유형 087 모평균에 대한 신뢰구간의 길이; 표본의 크기 구하기}
+\setcounter{dmproblemcount}{14}\dmpnum{137-15}{\input{items/137-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{137-16}{\input{items/137-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{137-17}{\input{items/137-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{137-18}{\input{items/137-18}}\vspace{8mm}
+\dmsection{유형 088 모평균과 표본평균의 차}
+\setcounter{dmproblemcount}{18}\dmpnum{138-19}{\input{items/138-19}}\vspace{8mm}
+\setcounter{dmproblemcount}{19}\dmpnum{138-20}{\input{items/138-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{138-21}{\input{items/138-21}}\vspace{8mm}
+\dmsection{유형 089 모평균에 대한 신뢰구간의 성질}
+\setcounter{dmproblemcount}{21}\dmpnum{138-22}{\input{items/138-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{138-23}{\input{items/138-23}}\vspace{8mm}
+\setcounter{dmproblemcount}{23}\dmpnum{138-24}{\input{items/138-24}}\vspace{8mm}
+\dmsection{개념 42 모비율과 표본비율}
+\setcounter{dmproblemcount}{0}\dmpnum{139-01}{\input{items/139-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{139-02}{\input{items/139-02}}\vspace{8mm}
+\dmpassage{다음에서 표본비율 $\hat{p}$을 구하시오.}
+\setcounter{dmproblemcount}{2}\dmpnum{139-03}{\input{items/139-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{139-04}{\input{items/139-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{139-05}{\input{items/139-05}}\vspace{8mm}
+\dmsection{개념 43 표본비율의 분포}
+\dmpassage{모비율 $p$와 모집단에서 임의추출한 표본의 크기 $n$이 다음과 같을 때, 표본비율 $\hat{p}$에 대하여 $\mathrm{E}(\hat{p})$, $\mathrm{V}(\hat{p})$, $\sigma(\hat{p})$을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{140-06}{\input{items/140-06}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{140-07}{\input{items/140-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{140-08}{\input{items/140-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{140-09}{\input{items/140-09}}\vspace{8mm}
+\dmpassage{모비율이 $0.2$인 모집단에서 임의추출한 크기가 100인 표본의 표본비율을 $\hat{p}$이라 할 때, 오른쪽 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-140-10}}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{9}\dmpnum{140-10}{\input{items/140-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{140-11}{\input{items/140-11}}\vspace{8mm}
+\dmpassage{어느 고등학교의 전체 학생은 1800명이고 그중 안경을 쓴 학생은 1350명이다. 이 학교의 학생 중에서 300명을 임의추출하여 그중 안경을 쓴 학생의 비율을 $\hat{p}$이라 할 때, 위의 표준정규분포표를 이용하여 다음을 구하시오.}
+\begin{center}\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{\input{figures/fig-140-12}}\end{center}\vspace{4mm}
+\vspace{3mm}\setcounter{dmproblemcount}{11}\dmpnum{140-12}{\input{items/140-12}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{12}\dmpnum{140-13}{\input{items/140-13}}\vspace{8mm}
+\dmsection{개념 44 모비율의 추정}
+\dmpassage{모집단에서 임의추출한 표본의 크기 $n$, 표본비율 $\hat{p}$이 다음과 같을 때, 모비율 $p$에 대한 신뢰도 $95\mkern3mu \%$의 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$}}
+\setcounter{dmproblemcount}{13}\dmpnum{141-14}{\input{items/141-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{141-15}{\input{items/141-15}}\vspace{8mm}
+\dmpassage{모집단에서 임의추출한 표본의 크기 $n$, 표본비율 $\hat{p}$이 다음과 같을 때, 모비율 $p$에 대한 신뢰도 $99\mkern3mu \%$의 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{15}\dmpnum{141-16}{\input{items/141-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{141-17}{\input{items/141-17}}\vspace{8mm}
+\dmpassage{모집단에서 크기가 5100인 표본을 임의추출하였더니 표본비율이 $0.85$이었다. 신뢰도가 다음과 같을 때, 모비율 $p$에 대한 신뢰구간을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{17}\dmpnum{141-18}{\input{items/141-18}}\vspace{8mm}
+\setcounter{dmproblemcount}{18}\dmpnum{141-19}{\input{items/141-19}}\vspace{8mm}
+\dmpassage{어느 회사의 구내식당 메뉴에 대한 만족도를 알아보기 위하여 이 회사 직원 100명을 임의추출하여 조사하였더니 80명이 만족한다고 응답하였다. 이 회사 직원 중에서 구내식당 메뉴에 대하여 만족하는 직원의 비율을 $p$라 할 때, 다음을 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{19}\dmpnum{141-20}{\input{items/141-20}}\vspace{8mm}
+\setcounter{dmproblemcount}{20}\dmpnum{141-21}{\input{items/141-21}}\vspace{8mm}
+\dmsection{개념 45 모비율에 대한 신뢰구간의 길이}
+\dmpassage{모집단에서 크기가 96인 표본을 임의추출하였더니 표본비율이 $0.4$이었다. 신뢰도가 다음과 같을 때, 모비율 $p$에 대한 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{21}\dmpnum{142-22}{\input{items/142-22}}\vspace{8mm}
+\setcounter{dmproblemcount}{22}\dmpnum{142-23}{\input{items/142-23}}\vspace{8mm}
+\dmpassage{모집단에서 크기가 100인 표본을 임의추출하였더니 표본비율이 $\dfrac{1}{5}$이었다. 신뢰도가 다음과 같을 때, 모비율 $p$에 대한 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$, $\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{23}\dmpnum{142-24}{\input{items/142-24}}\vspace{8mm}
+\setcounter{dmproblemcount}{24}\dmpnum{142-25}{\input{items/142-25}}\vspace{8mm}
+\dmpassage{모집단에서 크기가 $n$인 표본을 임의추출하였더니 표본비율이 $0.6$이었다. 표본의 크기 $n$이 다음과 같을 때, 모비율 $p$에 대한 신뢰도 $95\mkern3mu \%$의 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 1.96)=0.95$}}
+\setcounter{dmproblemcount}{25}\dmpnum{142-26}{\input{items/142-26}}\vspace{8mm}
+\setcounter{dmproblemcount}{26}\dmpnum{142-27}{\input{items/142-27}}\vspace{8mm}
+\dmpassage{모집단에서 크기가 $n$인 표본을 임의추출하였더니 표본비율이 $0.7$이었다. 표본의 크기 $n$이 다음과 같을 때, 모비율 $p$에 대한 신뢰도 $99\mkern3mu \%$의 신뢰구간의 길이를 구하시오. \cond{$\mathrm{P}(|Z|\le 2.58)=0.99$}}
+\setcounter{dmproblemcount}{27}\dmpnum{142-28}{\input{items/142-28}}\vspace{8mm}
+\setcounter{dmproblemcount}{28}\dmpnum{142-29}{\input{items/142-29}}\vspace{8mm}
+\dmsection{유형 090 표본비율의 평균, 분산, 표준편차}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{143-01}{\input{items/143-01}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{143-02}{\input{items/143-02}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{143-03}{\input{items/143-03}}\vspace{8mm}
+\dmsection{유형 091 표본비율의 분포}
+\setcounter{dmproblemcount}{3}\dmpnum{143-04}{\input{items/143-04}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{143-05}{\input{items/143-05}}\vspace{8mm}
+\dmsection{유형 092 표본비율의 확률}
+\setcounter{dmproblemcount}{5}\dmpnum{143-06}{\input{items/143-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{144-07}{\input{items/144-07}}\vspace{8mm}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{144-08}{\input{items/144-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{144-09}{\input{items/144-09}}\vspace{8mm}
+\dmsection{유형 093 표본비율의 확률; 표본의 크기 구하기}
+\setcounter{dmproblemcount}{9}\dmpnum{144-10}{\input{items/144-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{144-11}{\input{items/144-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{144-12}{\input{items/144-12}}\vspace{8mm}
+\dmsection{유형 094 모비율의 추정}
+\setcounter{dmproblemcount}{12}\dmpnum{145-13}{\input{items/145-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{145-14}{\input{items/145-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{145-15}{\input{items/145-15}}\vspace{8mm}
+\dmsection{유형 095 모비율에 대한 신뢰구간의 길이}
+\setcounter{dmproblemcount}{15}\dmpnum{145-16}{\input{items/145-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{145-17}{\input{items/145-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{145-18}{\input{items/145-18}}\vspace{8mm}
+\dmsection{실전 감각 UP}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{146-01}{\input{items/146-01}}\vspace{8mm}
+\setcounter{dmproblemcount}{1}\dmpnum{146-02}{\input{items/146-02}}\vspace{8mm}
+\setcounter{dmproblemcount}{2}\dmpnum{146-03}{\input{items/146-03}}\vspace{8mm}
+\setcounter{dmproblemcount}{3}\dmpnum{146-04}{\input{items/146-04}}\vspace{8mm}
+\setcounter{dmproblemcount}{4}\dmpnum{146-05}{\input{items/146-05}}\vspace{8mm}
+\setcounter{dmproblemcount}{5}\dmpnum{146-06}{\input{items/146-06}}\vspace{8mm}
+\setcounter{dmproblemcount}{6}\dmpnum{147-07}{\input{items/147-07}}\vspace{8mm}
+\setcounter{dmproblemcount}{7}\dmpnum{147-08}{\input{items/147-08}}\vspace{8mm}
+\setcounter{dmproblemcount}{8}\dmpnum{147-09}{\input{items/147-09}}\vspace{8mm}
+\setcounter{dmproblemcount}{9}\dmpnum{147-10}{\input{items/147-10}}\vspace{8mm}
+\setcounter{dmproblemcount}{10}\dmpnum{147-11}{\input{items/147-11}}\vspace{8mm}
+\setcounter{dmproblemcount}{11}\dmpnum{147-12}{\input{items/147-12}}\vspace{8mm}
+\setcounter{dmproblemcount}{12}\dmpnum{148-13}{\input{items/148-13}}\vspace{8mm}
+\setcounter{dmproblemcount}{13}\dmpnum{148-14}{\input{items/148-14}}\vspace{8mm}
+\setcounter{dmproblemcount}{14}\dmpnum{148-15}{\input{items/148-15}}\vspace{8mm}
+\setcounter{dmproblemcount}{15}\dmpnum{148-16}{\input{items/148-16}}\vspace{8mm}
+\setcounter{dmproblemcount}{16}\dmpnum{148-17}{\input{items/148-17}}\vspace{8mm}
+\setcounter{dmproblemcount}{17}\dmpnum{148-18}{\input{items/148-18}}\vspace{8mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\dmsection{정답}
+\begin{multicols}{2}\small
+\noindent\textbf{01 여러 가지 순열}\par\smallskip
+\noindent\textbf{8-01}\ \par
+\noindent\textbf{8-02}\ \par
+\noindent\textbf{8-03}\ \par
+\noindent\textbf{8-04}\ \par
+\noindent\textbf{8-05}\ \par
+\noindent\textbf{8-06}\ \par
+\noindent\textbf{8-07}\ \par
+\noindent\textbf{8-08}\ \par
+\noindent\textbf{8-09}\ \par
+\noindent\textbf{8-10}\ \par
+\noindent\textbf{8-11}\ \par
+\noindent\textbf{8-12}\ \par
+\noindent\textbf{9-13}\ \par
+\noindent\textbf{9-14}\ \par
+\noindent\textbf{9-15}\ \par
+\noindent\textbf{9-16}\ \par
+\noindent\textbf{9-17}\ \par
+\noindent\textbf{9-18}\ \par
+\noindent\textbf{9-19}\ \par
+\noindent\textbf{9-20}\ \par
+\noindent\textbf{9-21}\ \par
+\noindent\textbf{9-22}\ \par
+\noindent\textbf{9-23}\ \par
+\noindent\textbf{10-01}\ \par
+\noindent\textbf{10-02}\ \par
+\noindent\textbf{10-03}\ \par
+\noindent\textbf{10-04}\ \par
+\noindent\textbf{10-05}\ \par
+\noindent\textbf{10-06}\ \par
+\noindent\textbf{10-07}\ \par
+\noindent\textbf{10-08}\ \par
+\noindent\textbf{11-09}\ \par
+\noindent\textbf{11-10}\ \par
+\noindent\textbf{11-11}\ \par
+\noindent\textbf{11-12}\ \par
+\noindent\textbf{11-13}\ \par
+\noindent\textbf{11-14}\ \par
+\noindent\textbf{11-15}\ \par
+\noindent\textbf{12-16}\ \par
+\noindent\textbf{12-17}\ \par
+\noindent\textbf{12-18}\ \par
+\noindent\textbf{12-19}\ \par
+\noindent\textbf{12-20}\ \par
+\noindent\textbf{12-21}\ \par
+\noindent\textbf{12-22}\ \par
+\noindent\textbf{13-01}\ \par
+\noindent\textbf{13-02}\ \par
+\noindent\textbf{13-03}\ \par
+\noindent\textbf{13-04}\ \par
+\noindent\textbf{13-05}\ \par
+\noindent\textbf{13-06}\ \par
+\noindent\textbf{13-07}\ \par
+\noindent\textbf{13-08}\ \par
+\noindent\textbf{13-09}\ \par
+\noindent\textbf{13-10}\ \par
+\noindent\textbf{13-11}\ \par
+\noindent\textbf{14-12}\ \par
+\noindent\textbf{14-13}\ \par
+\noindent\textbf{14-14}\ \par
+\noindent\textbf{14-15}\ \par
+\noindent\textbf{14-16}\ \par
+\noindent\textbf{14-17}\ \par
+\noindent\textbf{14-18}\ \par
+\noindent\textbf{15-01}\ \par
+\noindent\textbf{15-02}\ \par
+\noindent\textbf{15-03}\ \par
+\noindent\textbf{15-04}\ \par
+\noindent\textbf{15-05}\ \par
+\noindent\textbf{15-06}\ \par
+\noindent\textbf{15-07}\ \par
+\noindent\textbf{16-08}\ \par
+\noindent\textbf{16-09}\ \par
+\noindent\textbf{16-10}\ \par
+\noindent\textbf{16-11}\ \par
+\noindent\textbf{16-12}\ \par
+\noindent\textbf{16-13}\ \par
+\noindent\textbf{17-14}\ \par
+\noindent\textbf{17-15}\ \par
+\noindent\textbf{17-16}\ \par
+\noindent\textbf{17-17}\ \par
+\noindent\textbf{17-18}\ \par
+\noindent\textbf{17-19}\ \par
+\noindent\textbf{17-20}\ \par
+\noindent\textbf{18-01}\ \par
+\noindent\textbf{18-02}\ \par
+\noindent\textbf{18-03}\ \par
+\noindent\textbf{18-04}\ \par
+\noindent\textbf{18-05}\ \par
+\noindent\textbf{18-06}\ \par
+\noindent\textbf{18-07}\ \par
+\noindent\textbf{19-08}\ \par
+\noindent\textbf{19-09}\ \par
+\noindent\textbf{19-10}\ \par
+\noindent\textbf{19-11}\ \par
+\noindent\textbf{19-12}\ \par
+\noindent\textbf{19-13}\ \par
+\noindent\textbf{19-14}\ \par
+\noindent\textbf{02 중복조합과 이항정리}\par\smallskip
+\noindent\textbf{20-01}\ \par
+\noindent\textbf{20-02}\ \par
+\noindent\textbf{20-03}\ \par
+\noindent\textbf{20-04}\ \par
+\noindent\textbf{20-05}\ \par
+\noindent\textbf{20-06}\ \par
+\noindent\textbf{20-07}\ \par
+\noindent\textbf{20-08}\ \par
+\noindent\textbf{21-09}\ \par
+\noindent\textbf{21-10}\ \par
+\noindent\textbf{21-11}\ \par
+\noindent\textbf{21-12}\ \par
+\noindent\textbf{21-13}\ \par
+\noindent\textbf{21-14}\ \par
+\noindent\textbf{21-15}\ \par
+\noindent\textbf{21-16}\ \par
+\noindent\textbf{21-17}\ \par
+\noindent\textbf{21-18}\ \par
+\noindent\textbf{21-19}\ \par
+\noindent\textbf{21-20}\ \par
+\noindent\textbf{22-21}\ \par
+\noindent\textbf{22-22}\ \par
+\noindent\textbf{22-23}\ \par
+\noindent\textbf{22-24}\ \par
+\noindent\textbf{22-25}\ \par
+\noindent\textbf{22-26}\ \par
+\noindent\textbf{22-27}\ \par
+\noindent\textbf{22-28}\ \par
+\noindent\textbf{23-29}\ \par
+\noindent\textbf{23-30}\ \par
+\noindent\textbf{23-31}\ \par
+\noindent\textbf{23-32}\ \par
+\noindent\textbf{23-33}\ \par
+\noindent\textbf{23-34}\ \par
+\noindent\textbf{23-35}\ \par
+\noindent\textbf{23-36}\ \par
+\noindent\textbf{24-01}\ \par
+\noindent\textbf{24-02}\ \par
+\noindent\textbf{24-03}\ \par
+\noindent\textbf{24-04}\ \par
+\noindent\textbf{24-05}\ \par
+\noindent\textbf{24-06}\ \par
+\noindent\textbf{24-07}\ \par
+\noindent\textbf{25-08}\ \par
+\noindent\textbf{25-09}\ \par
+\noindent\textbf{25-10}\ \par
+\noindent\textbf{25-11}\ \par
+\noindent\textbf{25-12}\ \par
+\noindent\textbf{25-13}\ \par
+\noindent\textbf{26-14}\ \par
+\noindent\textbf{26-15}\ \par
+\noindent\textbf{26-16}\ \par
+\noindent\textbf{26-17}\ \par
+\noindent\textbf{26-18}\ \par
+\noindent\textbf{26-19}\ \par
+\noindent\textbf{27-20}\ \par
+\noindent\textbf{27-21}\ \par
+\noindent\textbf{27-22}\ \par
+\noindent\textbf{27-23}\ \par
+\noindent\textbf{27-24}\ \par
+\noindent\textbf{27-25}\ \par
+\noindent\textbf{28-01}\ \par
+\noindent\textbf{28-02}\ \par
+\noindent\textbf{28-03}\ \par
+\noindent\textbf{28-04}\ \par
+\noindent\textbf{28-05}\ \par
+\noindent\textbf{28-06}\ \par
+\noindent\textbf{28-07}\ \par
+\noindent\textbf{28-08}\ \par
+\noindent\textbf{28-09}\ \par
+\noindent\textbf{28-10}\ \par
+\noindent\textbf{29-11}\ \par
+\noindent\textbf{29-12}\ \par
+\noindent\textbf{29-13}\ \par
+\noindent\textbf{29-14}\ \par
+\noindent\textbf{29-15}\ \par
+\noindent\textbf{29-16}\ \par
+\noindent\textbf{29-17}\ \par
+\noindent\textbf{29-18}\ \par
+\noindent\textbf{29-19}\ \par
+\noindent\textbf{29-20}\ \par
+\noindent\textbf{30-21}\ \par
+\noindent\textbf{30-22}\ \par
+\noindent\textbf{30-23}\ \par
+\noindent\textbf{30-24}\ \par
+\noindent\textbf{30-25}\ \par
+\noindent\textbf{30-26}\ \par
+\noindent\textbf{30-27}\ \par
+\noindent\textbf{30-28}\ \par
+\noindent\textbf{30-29}\ \par
+\noindent\textbf{30-30}\ \par
+\noindent\textbf{31-01}\ \par
+\noindent\textbf{31-02}\ \par
+\noindent\textbf{31-03}\ \par
+\noindent\textbf{31-04}\ \par
+\noindent\textbf{31-05}\ \par
+\noindent\textbf{31-06}\ \par
+\noindent\textbf{31-07}\ \par
+\noindent\textbf{32-08}\ \par
+\noindent\textbf{32-09}\ \par
+\noindent\textbf{32-10}\ \par
+\noindent\textbf{32-11}\ \par
+\noindent\textbf{32-12}\ \par
+\noindent\textbf{32-13}\ \par
+\noindent\textbf{32-14}\ \par
+\noindent\textbf{33-15}\ \par
+\noindent\textbf{33-16}\ \par
+\noindent\textbf{33-17}\ \par
+\noindent\textbf{33-18}\ \par
+\noindent\textbf{33-19}\ \par
+\noindent\textbf{33-20}\ \par
+\noindent\textbf{34-01}\ \par
+\noindent\textbf{34-02}\ \par
+\noindent\textbf{34-03}\ \par
+\noindent\textbf{34-04}\ \par
+\noindent\textbf{34-05}\ \par
+\noindent\textbf{34-06}\ \par
+\noindent\textbf{34-07}\ \par
+\noindent\textbf{35-08}\ \par
+\noindent\textbf{35-09}\ \par
+\noindent\textbf{35-10}\ \par
+\noindent\textbf{35-11}\ \par
+\noindent\textbf{35-12}\ \par
+\noindent\textbf{35-13}\ \par
+\noindent\textbf{35-14}\ \par
+\noindent\textbf{35-15}\ \par
+\noindent\textbf{03 확률의 뜻과 활용}\par\smallskip
+\noindent\textbf{38-01}\ \par
+\noindent\textbf{38-02}\ \par
+\noindent\textbf{38-03}\ \par
+\noindent\textbf{38-04}\ \par
+\noindent\textbf{38-05}\ \par
+\noindent\textbf{38-06}\ \par
+\noindent\textbf{38-07}\ \par
+\noindent\textbf{38-08}\ \par
+\noindent\textbf{38-09}\ \par
+\noindent\textbf{38-10}\ \par
+\noindent\textbf{39-11}\ \par
+\noindent\textbf{39-12}\ \par
+\noindent\textbf{39-13}\ \par
+\noindent\textbf{39-14}\ \par
+\noindent\textbf{39-15}\ \par
+\noindent\textbf{39-16}\ \par
+\noindent\textbf{39-17}\ \par
+\noindent\textbf{39-18}\ \par
+\noindent\textbf{39-19}\ \par
+\noindent\textbf{39-20}\ \par
+\noindent\textbf{39-21}\ \par
+\noindent\textbf{39-22}\ \par
+\noindent\textbf{40-01}\ \par
+\noindent\textbf{40-02}\ \par
+\noindent\textbf{40-03}\ \par
+\noindent\textbf{40-04}\ \par
+\noindent\textbf{40-05}\ \par
+\noindent\textbf{40-06}\ \par
+\noindent\textbf{41-07}\ \par
+\noindent\textbf{41-08}\ \par
+\noindent\textbf{41-09}\ \par
+\noindent\textbf{41-10}\ \par
+\noindent\textbf{41-11}\ \par
+\noindent\textbf{42-01}\ \par
+\noindent\textbf{42-02}\ \par
+\noindent\textbf{42-03}\ \par
+\noindent\textbf{42-04}\ \par
+\noindent\textbf{42-05}\ \par
+\noindent\textbf{42-06}\ \par
+\noindent\textbf{42-07}\ \par
+\noindent\textbf{42-08}\ \par
+\noindent\textbf{43-09}\ \par
+\noindent\textbf{43-10}\ \par
+\noindent\textbf{43-11}\ \par
+\noindent\textbf{43-12}\ \par
+\noindent\textbf{43-13}\ \par
+\noindent\textbf{43-14}\ \par
+\noindent\textbf{43-15}\ \par
+\noindent\textbf{43-16}\ \par
+\noindent\textbf{43-17}\ \par
+\noindent\textbf{43-18}\ \par
+\noindent\textbf{44-19}\ \par
+\noindent\textbf{44-20}\ \par
+\noindent\textbf{44-21}\ \par
+\noindent\textbf{44-22}\ \par
+\noindent\textbf{44-23}\ \par
+\noindent\textbf{44-24}\ \par
+\noindent\textbf{44-25}\ \par
+\noindent\textbf{45-26}\ \par
+\noindent\textbf{45-27}\ \par
+\noindent\textbf{45-28}\ \par
+\noindent\textbf{45-29}\ \par
+\noindent\textbf{45-30}\ \par
+\noindent\textbf{45-31}\ \par
+\noindent\textbf{45-32}\ \par
+\noindent\textbf{45-33}\ \par
+\noindent\textbf{45-34}\ \par
+\noindent\textbf{45-35}\ \par
+\noindent\textbf{45-36}\ \par
+\noindent\textbf{45-37}\ \par
+\noindent\textbf{46-01}\ \par
+\noindent\textbf{46-02}\ \par
+\noindent\textbf{46-03}\ \par
+\noindent\textbf{46-04}\ \par
+\noindent\textbf{46-05}\ \par
+\noindent\textbf{46-06}\ \par
+\noindent\textbf{47-07}\ \par
+\noindent\textbf{47-08}\ \par
+\noindent\textbf{47-09}\ \par
+\noindent\textbf{47-10}\ \par
+\noindent\textbf{47-11}\ \par
+\noindent\textbf{47-12}\ \par
+\noindent\textbf{48-13}\ \par
+\noindent\textbf{48-14}\ \par
+\noindent\textbf{48-15}\ \par
+\noindent\textbf{48-16}\ \par
+\noindent\textbf{48-17}\ \par
+\noindent\textbf{48-18}\ \par
+\noindent\textbf{49-19}\ \par
+\noindent\textbf{49-20}\ \par
+\noindent\textbf{49-21}\ \par
+\noindent\textbf{49-22}\ \par
+\noindent\textbf{49-23}\ \par
+\noindent\textbf{49-24}\ \par
+\noindent\textbf{50-25}\ \par
+\noindent\textbf{50-26}\ \par
+\noindent\textbf{50-27}\ \par
+\noindent\textbf{50-28}\ \par
+\noindent\textbf{50-29}\ \par
+\noindent\textbf{50-30}\ \par
+\noindent\textbf{51-01}\ \par
+\noindent\textbf{51-02}\ \par
+\noindent\textbf{51-03}\ \par
+\noindent\textbf{51-04}\ \par
+\noindent\textbf{51-05}\ \par
+\noindent\textbf{51-06}\ \par
+\noindent\textbf{51-07}\ \par
+\noindent\textbf{51-08}\ \par
+\noindent\textbf{51-09}\ \par
+\noindent\textbf{51-10}\ \par
+\noindent\textbf{52-11}\ \par
+\noindent\textbf{52-12}\ \par
+\noindent\textbf{52-13}\ \par
+\noindent\textbf{52-14}\ \par
+\noindent\textbf{52-15}\ \par
+\noindent\textbf{52-16}\ \par
+\noindent\textbf{52-17}\ \par
+\noindent\textbf{53-18}\ \par
+\noindent\textbf{53-19}\ \par
+\noindent\textbf{53-20}\ \par
+\noindent\textbf{53-21}\ \par
+\noindent\textbf{53-22}\ \par
+\noindent\textbf{53-23}\ \par
+\noindent\textbf{53-24}\ \par
+\noindent\textbf{53-25}\ \par
+\noindent\textbf{53-26}\ \par
+\noindent\textbf{53-27}\ \par
+\noindent\textbf{54-01}\ \par
+\noindent\textbf{54-02}\ \par
+\noindent\textbf{54-03}\ \par
+\noindent\textbf{54-04}\ \par
+\noindent\textbf{54-05}\ \par
+\noindent\textbf{54-06}\ \par
+\noindent\textbf{54-07}\ \par
+\noindent\textbf{55-08}\ \par
+\noindent\textbf{55-09}\ \par
+\noindent\textbf{55-10}\ \par
+\noindent\textbf{55-11}\ \par
+\noindent\textbf{55-12}\ \par
+\noindent\textbf{55-13}\ \par
+\noindent\textbf{56-14}\ \par
+\noindent\textbf{56-15}\ \par
+\noindent\textbf{56-16}\ \par
+\noindent\textbf{56-17}\ \par
+\noindent\textbf{56-18}\ \par
+\noindent\textbf{56-19}\ \par
+\noindent\textbf{56-20}\ \par
+\noindent\textbf{57-21}\ \par
+\noindent\textbf{57-22}\ \par
+\noindent\textbf{57-23}\ \par
+\noindent\textbf{57-24}\ \par
+\noindent\textbf{57-25}\ \par
+\noindent\textbf{57-26}\ \par
+\noindent\textbf{57-27}\ \par
+\noindent\textbf{58-01}\ \par
+\noindent\textbf{58-02}\ \par
+\noindent\textbf{58-03}\ \par
+\noindent\textbf{58-04}\ \par
+\noindent\textbf{58-05}\ \par
+\noindent\textbf{58-06}\ \par
+\noindent\textbf{59-07}\ \par
+\noindent\textbf{59-08}\ \par
+\noindent\textbf{59-09}\ \par
+\noindent\textbf{59-10}\ \par
+\noindent\textbf{59-11}\ \par
+\noindent\textbf{59-12}\ \par
+\noindent\textbf{60-13}\ \par
+\noindent\textbf{60-14}\ \par
+\noindent\textbf{60-15}\ \par
+\noindent\textbf{60-16}\ \par
+\noindent\textbf{60-17}\ \par
+\noindent\textbf{60-18}\ \par
+\noindent\textbf{60-19}\ \par
+\noindent\textbf{04 조건부확률}\par\smallskip
+\noindent\textbf{62-01}\ \par
+\noindent\textbf{62-02}\ \par
+\noindent\textbf{62-03}\ \par
+\noindent\textbf{62-04}\ \par
+\noindent\textbf{62-05}\ \par
+\noindent\textbf{62-06}\ \par
+\noindent\textbf{62-07}\ \par
+\noindent\textbf{63-08}\ \par
+\noindent\textbf{63-09}\ \par
+\noindent\textbf{63-10}\ \par
+\noindent\textbf{63-11}\ \par
+\noindent\textbf{63-12}\ \par
+\noindent\textbf{63-13}\ \par
+\noindent\textbf{63-14}\ \par
+\noindent\textbf{63-15}\ \par
+\noindent\textbf{63-16}\ \par
+\noindent\textbf{63-17}\ \par
+\noindent\textbf{63-18}\ \par
+\noindent\textbf{63-19}\ \par
+\noindent\textbf{63-20}\ \par
+\noindent\textbf{64-21}\ \par
+\noindent\textbf{64-22}\ \par
+\noindent\textbf{64-23}\ \par
+\noindent\textbf{64-24}\ \par
+\noindent\textbf{64-25}\ \par
+\noindent\textbf{64-26}\ \par
+\noindent\textbf{64-27}\ \par
+\noindent\textbf{64-28}\ \par
+\noindent\textbf{64-29}\ \par
+\noindent\textbf{65-30}\ \par
+\noindent\textbf{65-31}\ \par
+\noindent\textbf{66-32}\ \par
+\noindent\textbf{66-33}\ \par
+\noindent\textbf{66-34}\ \par
+\noindent\textbf{66-35}\ \par
+\noindent\textbf{66-36}\ \par
+\noindent\textbf{66-37}\ \par
+\noindent\textbf{67-01}\ \par
+\noindent\textbf{67-02}\ \par
+\noindent\textbf{67-03}\ \par
+\noindent\textbf{67-04}\ \par
+\noindent\textbf{67-05}\ \par
+\noindent\textbf{67-06}\ \par
+\noindent\textbf{68-07}\ \par
+\noindent\textbf{68-08}\ \par
+\noindent\textbf{68-09}\ \par
+\noindent\textbf{68-10}\ \par
+\noindent\textbf{68-11}\ \par
+\noindent\textbf{68-12}\ \par
+\noindent\textbf{69-13}\ \par
+\noindent\textbf{69-14}\ \par
+\noindent\textbf{69-15}\ \par
+\noindent\textbf{69-16}\ \par
+\noindent\textbf{69-17}\ \par
+\noindent\textbf{70-18}\ \par
+\noindent\textbf{70-19}\ \par
+\noindent\textbf{70-20}\ \par
+\noindent\textbf{70-21}\ \par
+\noindent\textbf{70-22}\ \par
+\noindent\textbf{70-23}\ \par
+\noindent\textbf{71-24}\ \par
+\noindent\textbf{71-25}\ \par
+\noindent\textbf{71-26}\ \par
+\noindent\textbf{71-27}\ \par
+\noindent\textbf{71-28}\ \par
+\noindent\textbf{71-29}\ \par
+\noindent\textbf{72-01}\ \par
+\noindent\textbf{72-02}\ \par
+\noindent\textbf{72-03}\ \par
+\noindent\textbf{72-04}\ \par
+\noindent\textbf{72-05}\ \par
+\noindent\textbf{72-06}\ \par
+\noindent\textbf{73-07}\ \par
+\noindent\textbf{73-08}\ \par
+\noindent\textbf{73-09}\ \par
+\noindent\textbf{73-10}\ \par
+\noindent\textbf{73-11}\ \par
+\noindent\textbf{73-12}\ \par
+\noindent\textbf{73-13}\ \par
+\noindent\textbf{73-14}\ \par
+\noindent\textbf{73-15}\ \par
+\noindent\textbf{73-16}\ \par
+\noindent\textbf{73-17}\ \par
+\noindent\textbf{73-18}\ \par
+\noindent\textbf{74-19}\ \par
+\noindent\textbf{74-20}\ \par
+\noindent\textbf{74-21}\ \par
+\noindent\textbf{74-22}\ \par
+\noindent\textbf{74-23}\ \par
+\noindent\textbf{74-24}\ \par
+\noindent\textbf{74-25}\ \par
+\noindent\textbf{74-26}\ \par
+\noindent\textbf{74-27}\ \par
+\noindent\textbf{75-01}\ \par
+\noindent\textbf{75-02}\ \par
+\noindent\textbf{75-03}\ \par
+\noindent\textbf{75-04}\ \par
+\noindent\textbf{75-05}\ \par
+\noindent\textbf{76-06}\ \par
+\noindent\textbf{76-07}\ \par
+\noindent\textbf{76-08}\ \par
+\noindent\textbf{76-09}\ \par
+\noindent\textbf{76-10}\ \par
+\noindent\textbf{76-11}\ \par
+\noindent\textbf{77-12}\ \par
+\noindent\textbf{77-13}\ \par
+\noindent\textbf{77-14}\ \par
+\noindent\textbf{77-15}\ \par
+\noindent\textbf{77-16}\ \par
+\noindent\textbf{77-17}\ \par
+\noindent\textbf{78-18}\ \par
+\noindent\textbf{78-19}\ \par
+\noindent\textbf{78-20}\ \par
+\noindent\textbf{78-21}\ \par
+\noindent\textbf{78-22}\ \par
+\noindent\textbf{78-23}\ \par
+\noindent\textbf{78-24}\ \par
+\noindent\textbf{79-01}\ \par
+\noindent\textbf{79-02}\ \par
+\noindent\textbf{79-03}\ \par
+\noindent\textbf{79-04}\ \par
+\noindent\textbf{79-05}\ \par
+\noindent\textbf{79-06}\ \par
+\noindent\textbf{80-07}\ \par
+\noindent\textbf{80-08}\ \par
+\noindent\textbf{80-09}\ \par
+\noindent\textbf{80-10}\ \par
+\noindent\textbf{80-11}\ \par
+\noindent\textbf{80-12}\ \par
+\noindent\textbf{80-13}\ \par
+\noindent\textbf{80-14}\ \par
+\noindent\textbf{05 확률변수와 확률분포}\par\smallskip
+\noindent\textbf{82-01}\ \par
+\noindent\textbf{82-02}\ \par
+\noindent\textbf{82-03}\ \par
+\noindent\textbf{82-04}\ \par
+\noindent\textbf{82-05}\ \par
+\noindent\textbf{82-06}\ \par
+\noindent\textbf{82-07}\ \par
+\noindent\textbf{83-08}\ \par
+\noindent\textbf{83-09}\ \par
+\noindent\textbf{83-10}\ \par
+\noindent\textbf{83-11}\ \par
+\noindent\textbf{84-12}\ \par
+\noindent\textbf{84-13}\ \par
+\noindent\textbf{84-14}\ \par
+\noindent\textbf{84-15}\ \par
+\noindent\textbf{84-16}\ \par
+\noindent\textbf{84-17}\ \par
+\noindent\textbf{84-18}\ \par
+\noindent\textbf{84-19}\ \par
+\noindent\textbf{84-20}\ \par
+\noindent\textbf{84-21}\ \par
+\noindent\textbf{84-22}\ \par
+\noindent\textbf{84-23}\ \par
+\noindent\textbf{84-24}\ \par
+\noindent\textbf{84-25}\ \par
+\noindent\textbf{84-26}\ \par
+\noindent\textbf{85-27}\ \par
+\noindent\textbf{85-28}\ \par
+\noindent\textbf{85-29}\ \par
+\noindent\textbf{85-30}\ \par
+\noindent\textbf{85-31}\ \par
+\noindent\textbf{85-32}\ \par
+\noindent\textbf{85-33}\ \par
+\noindent\textbf{85-34}\ \par
+\noindent\textbf{85-35}\ \par
+\noindent\textbf{86-36}\ \par
+\noindent\textbf{86-37}\ \par
+\noindent\textbf{86-38}\ \par
+\noindent\textbf{86-39}\ \par
+\noindent\textbf{86-40}\ \par
+\noindent\textbf{86-41}\ \par
+\noindent\textbf{86-42}\ \par
+\noindent\textbf{86-43}\ \par
+\noindent\textbf{86-44}\ \par
+\noindent\textbf{86-45}\ \par
+\noindent\textbf{86-46}\ \par
+\noindent\textbf{86-47}\ \par
+\noindent\textbf{86-48}\ \par
+\noindent\textbf{87-01}\ \par
+\noindent\textbf{87-02}\ \par
+\noindent\textbf{87-03}\ \par
+\noindent\textbf{87-04}\ \par
+\noindent\textbf{87-05}\ \par
+\noindent\textbf{88-06}\ \par
+\noindent\textbf{88-07}\ \par
+\noindent\textbf{88-08}\ \par
+\noindent\textbf{88-09}\ \par
+\noindent\textbf{88-10}\ \par
+\noindent\textbf{88-11}\ \par
+\noindent\textbf{89-12}\ \par
+\noindent\textbf{89-13}\ \par
+\noindent\textbf{89-14}\ \par
+\noindent\textbf{89-15}\ \par
+\noindent\textbf{89-16}\ \par
+\noindent\textbf{89-17}\ \par
+\noindent\textbf{90-18}\ \par
+\noindent\textbf{90-19}\ \par
+\noindent\textbf{90-20}\ \par
+\noindent\textbf{90-21}\ \par
+\noindent\textbf{90-22}\ \par
+\noindent\textbf{90-23}\ \par
+\noindent\textbf{91-24}\ \par
+\noindent\textbf{91-25}\ \par
+\noindent\textbf{91-26}\ \par
+\noindent\textbf{91-27}\ \par
+\noindent\textbf{91-28}\ \par
+\noindent\textbf{91-29}\ \par
+\noindent\textbf{92-01}\ \par
+\noindent\textbf{92-02}\ \par
+\noindent\textbf{92-03}\ \par
+\noindent\textbf{92-04}\ \par
+\noindent\textbf{92-05}\ \par
+\noindent\textbf{92-06}\ \par
+\noindent\textbf{92-07}\ \par
+\noindent\textbf{92-08}\ \par
+\noindent\textbf{93-09}\ \par
+\noindent\textbf{93-10}\ \par
+\noindent\textbf{93-11}\ \par
+\noindent\textbf{93-12}\ \par
+\noindent\textbf{93-13}\ \par
+\noindent\textbf{93-14}\ \par
+\noindent\textbf{93-15}\ \par
+\noindent\textbf{93-16}\ \par
+\noindent\textbf{93-17}\ \par
+\noindent\textbf{93-18}\ \par
+\noindent\textbf{93-19}\ \par
+\noindent\textbf{93-20}\ \par
+\noindent\textbf{93-21}\ \par
+\noindent\textbf{93-22}\ \par
+\noindent\textbf{93-23}\ \par
+\noindent\textbf{93-24}\ \par
+\noindent\textbf{93-25}\ \par
+\noindent\textbf{93-26}\ \par
+\noindent\textbf{94-27}\ \par
+\noindent\textbf{94-28}\ \par
+\noindent\textbf{94-29}\ \par
+\noindent\textbf{94-30}\ \par
+\noindent\textbf{94-31}\ \par
+\noindent\textbf{94-32}\ \par
+\noindent\textbf{94-33}\ \par
+\noindent\textbf{94-34}\ \par
+\noindent\textbf{94-35}\ \par
+\noindent\textbf{94-36}\ \par
+\noindent\textbf{94-37}\ \par
+\noindent\textbf{94-38}\ \par
+\noindent\textbf{94-39}\ \par
+\noindent\textbf{95-01}\ \par
+\noindent\textbf{95-02}\ \par
+\noindent\textbf{95-03}\ \par
+\noindent\textbf{95-04}\ \par
+\noindent\textbf{95-05}\ \par
+\noindent\textbf{95-06}\ \par
+\noindent\textbf{96-07}\ \par
+\noindent\textbf{96-08}\ \par
+\noindent\textbf{96-09}\ \par
+\noindent\textbf{96-10}\ \par
+\noindent\textbf{96-11}\ \par
+\noindent\textbf{96-12}\ \par
+\noindent\textbf{97-13}\ \par
+\noindent\textbf{97-14}\ \par
+\noindent\textbf{97-15}\ \par
+\noindent\textbf{97-16}\ \par
+\noindent\textbf{97-17}\ \par
+\noindent\textbf{97-18}\ \par
+\noindent\textbf{98-01}\ \par
+\noindent\textbf{98-02}\ \par
+\noindent\textbf{98-03}\ \par
+\noindent\textbf{98-04}\ \par
+\noindent\textbf{98-05}\ \par
+\noindent\textbf{98-06}\ \par
+\noindent\textbf{98-07}\ \par
+\noindent\textbf{99-08}\ \par
+\noindent\textbf{99-09}\ \par
+\noindent\textbf{99-10}\ \par
+\noindent\textbf{99-11}\ \par
+\noindent\textbf{99-12}\ \par
+\noindent\textbf{99-13}\ \par
+\noindent\textbf{99-14}\ \par
+\noindent\textbf{99-15}\ \par
+\noindent\textbf{06 이항분포와 정규분포}\par\smallskip
+\noindent\textbf{100-01}\ \par
+\noindent\textbf{100-02}\ \par
+\noindent\textbf{100-03}\ \par
+\noindent\textbf{100-04}\ \par
+\noindent\textbf{100-05}\ \par
+\noindent\textbf{100-06}\ \par
+\noindent\textbf{100-07}\ \par
+\noindent\textbf{100-08}\ \par
+\noindent\textbf{101-09}\ \par
+\noindent\textbf{101-10}\ \par
+\noindent\textbf{101-11}\ \par
+\noindent\textbf{101-12}\ \par
+\noindent\textbf{101-13}\ \par
+\noindent\textbf{101-14}\ \par
+\noindent\textbf{101-15}\ \par
+\noindent\textbf{101-16}\ \par
+\noindent\textbf{102-17}\ \par
+\noindent\textbf{102-18}\ \par
+\noindent\textbf{102-19}\ \par
+\noindent\textbf{102-20}\ \par
+\noindent\textbf{102-21}\ \par
+\noindent\textbf{102-22}\ \par
+\noindent\textbf{102-23}\ \par
+\noindent\textbf{102-24}\ \par
+\noindent\textbf{102-25}\ \par
+\noindent\textbf{102-26}\ \par
+\noindent\textbf{102-27}\ \par
+\noindent\textbf{102-28}\ \par
+\noindent\textbf{102-29}\ \par
+\noindent\textbf{103-01}\ \par
+\noindent\textbf{103-02}\ \par
+\noindent\textbf{103-03}\ \par
+\noindent\textbf{103-04}\ \par
+\noindent\textbf{103-05}\ \par
+\noindent\textbf{103-06}\ \par
+\noindent\textbf{104-07}\ \par
+\noindent\textbf{104-08}\ \par
+\noindent\textbf{104-09}\ \par
+\noindent\textbf{104-10}\ \par
+\noindent\textbf{104-11}\ \par
+\noindent\textbf{104-12}\ \par
+\noindent\textbf{105-13}\ \par
+\noindent\textbf{105-14}\ \par
+\noindent\textbf{105-15}\ \par
+\noindent\textbf{105-16}\ \par
+\noindent\textbf{105-17}\ \par
+\noindent\textbf{105-18}\ \par
+\noindent\textbf{105-19}\ \par
+\noindent\textbf{106-20}\ \par
+\noindent\textbf{106-21}\ \par
+\noindent\textbf{106-22}\ \par
+\noindent\textbf{106-23}\ \par
+\noindent\textbf{106-24}\ \par
+\noindent\textbf{106-25}\ \par
+\noindent\textbf{107-01}\ \par
+\noindent\textbf{107-02}\ \par
+\noindent\textbf{107-03}\ \par
+\noindent\textbf{107-04}\ \par
+\noindent\textbf{107-05}\ \par
+\noindent\textbf{107-06}\ \par
+\noindent\textbf{107-07}\ \par
+\noindent\textbf{107-08}\ \par
+\noindent\textbf{108-09}\ \par
+\noindent\textbf{108-10}\ \par
+\noindent\textbf{108-11}\ \par
+\noindent\textbf{108-12}\ \par
+\noindent\textbf{108-13}\ \par
+\noindent\textbf{108-14}\ \par
+\noindent\textbf{109-15}\ \par
+\noindent\textbf{109-16}\ \par
+\noindent\textbf{109-17}\ \par
+\noindent\textbf{109-18}\ \par
+\noindent\textbf{109-19}\ \par
+\noindent\textbf{109-20}\ \par
+\noindent\textbf{109-21}\ \par
+\noindent\textbf{109-22}\ \par
+\noindent\textbf{109-23}\ \par
+\noindent\textbf{109-24}\ \par
+\noindent\textbf{110-25}\ \par
+\noindent\textbf{110-26}\ \par
+\noindent\textbf{110-27}\ \par
+\noindent\textbf{110-28}\ \par
+\noindent\textbf{111-29}\ \par
+\noindent\textbf{111-30}\ \par
+\noindent\textbf{111-31}\ \par
+\noindent\textbf{111-32}\ \par
+\noindent\textbf{111-33}\ \par
+\noindent\textbf{111-34}\ \par
+\noindent\textbf{111-35}\ \par
+\noindent\textbf{111-36}\ \par
+\noindent\textbf{111-37}\ \par
+\noindent\textbf{111-38}\ \par
+\noindent\textbf{111-39}\ \par
+\noindent\textbf{111-40}\ \par
+\noindent\textbf{112-41}\ \par
+\noindent\textbf{112-42}\ \par
+\noindent\textbf{112-43}\ \par
+\noindent\textbf{112-44}\ \par
+\noindent\textbf{112-45}\ \par
+\noindent\textbf{112-46}\ \par
+\noindent\textbf{112-47}\ \par
+\noindent\textbf{112-48}\ \par
+\noindent\textbf{112-49}\ \par
+\noindent\textbf{112-50}\ \par
+\noindent\textbf{113-01}\ \par
+\noindent\textbf{113-02}\ \par
+\noindent\textbf{113-03}\ \par
+\noindent\textbf{113-04}\ \par
+\noindent\textbf{113-05}\ \par
+\noindent\textbf{114-06}\ \par
+\noindent\textbf{114-07}\ \par
+\noindent\textbf{114-08}\ \par
+\noindent\textbf{114-09}\ \par
+\noindent\textbf{114-10}\ \par
+\noindent\textbf{114-11}\ \par
+\noindent\textbf{114-12}\ \par
+\noindent\textbf{115-13}\ \par
+\noindent\textbf{115-14}\ \par
+\noindent\textbf{115-15}\ \par
+\noindent\textbf{115-16}\ \par
+\noindent\textbf{115-17}\ \par
+\noindent\textbf{115-18}\ \par
+\noindent\textbf{116-19}\ \par
+\noindent\textbf{116-20}\ \par
+\noindent\textbf{116-21}\ \par
+\noindent\textbf{116-22}\ \par
+\noindent\textbf{116-23}\ \par
+\noindent\textbf{116-24}\ \par
+\noindent\textbf{117-01}\ \par
+\noindent\textbf{117-02}\ \par
+\noindent\textbf{117-03}\ \par
+\noindent\textbf{117-04}\ \par
+\noindent\textbf{117-05}\ \par
+\noindent\textbf{117-06}\ \par
+\noindent\textbf{117-07}\ \par
+\noindent\textbf{117-08}\ \par
+\noindent\textbf{118-01}\ \par
+\noindent\textbf{118-02}\ \par
+\noindent\textbf{118-03}\ \par
+\noindent\textbf{118-04}\ \par
+\noindent\textbf{118-05}\ \par
+\noindent\textbf{119-06}\ \par
+\noindent\textbf{119-07}\ \par
+\noindent\textbf{119-08}\ \par
+\noindent\textbf{119-09}\ \par
+\noindent\textbf{119-10}\ \par
+\noindent\textbf{120-01}\ \par
+\noindent\textbf{120-02}\ \par
+\noindent\textbf{120-03}\ \par
+\noindent\textbf{120-04}\ \par
+\noindent\textbf{120-05}\ \par
+\noindent\textbf{120-06}\ \par
+\noindent\textbf{120-07}\ \par
+\noindent\textbf{120-08}\ \par
+\noindent\textbf{121-09}\ \par
+\noindent\textbf{121-10}\ \par
+\noindent\textbf{121-11}\ \par
+\noindent\textbf{121-12}\ \par
+\noindent\textbf{121-13}\ \par
+\noindent\textbf{121-14}\ \par
+\noindent\textbf{121-15}\ \par
+\noindent\textbf{121-16}\ \par
+\noindent\textbf{07 통계적 추정}\par\smallskip
+\noindent\textbf{122-01}\ \par
+\noindent\textbf{122-02}\ \par
+\noindent\textbf{122-03}\ \par
+\noindent\textbf{122-04}\ \par
+\noindent\textbf{122-05}\ \par
+\noindent\textbf{122-06}\ \par
+\noindent\textbf{122-07}\ \par
+\noindent\textbf{122-08}\ \par
+\noindent\textbf{122-09}\ \par
+\noindent\textbf{123-10}\ \par
+\noindent\textbf{123-11}\ \par
+\noindent\textbf{123-12}\ \par
+\noindent\textbf{123-13}\ \par
+\noindent\textbf{123-14}\ \par
+\noindent\textbf{123-15}\ \par
+\noindent\textbf{124-16}\ \par
+\noindent\textbf{124-17}\ \par
+\noindent\textbf{124-18}\ \par
+\noindent\textbf{124-19}\ \par
+\noindent\textbf{124-20}\ \par
+\noindent\textbf{125-21}\ \par
+\noindent\textbf{125-22}\ \par
+\noindent\textbf{125-23}\ \par
+\noindent\textbf{125-24}\ \par
+\noindent\textbf{125-25}\ \par
+\noindent\textbf{125-26}\ \par
+\noindent\textbf{125-27}\ \par
+\noindent\textbf{125-28}\ \par
+\noindent\textbf{125-29}\ \par
+\noindent\textbf{126-30}\ \par
+\noindent\textbf{126-31}\ \par
+\noindent\textbf{126-32}\ \par
+\noindent\textbf{126-33}\ \par
+\noindent\textbf{126-34}\ \par
+\noindent\textbf{126-35}\ \par
+\noindent\textbf{126-36}\ \par
+\noindent\textbf{127-01}\ \par
+\noindent\textbf{127-02}\ \par
+\noindent\textbf{127-03}\ \par
+\noindent\textbf{127-04}\ \par
+\noindent\textbf{127-05}\ \par
+\noindent\textbf{128-06}\ \par
+\noindent\textbf{128-07}\ \par
+\noindent\textbf{128-08}\ \par
+\noindent\textbf{128-09}\ \par
+\noindent\textbf{128-10}\ \par
+\noindent\textbf{128-11}\ \par
+\noindent\textbf{129-12}\ \par
+\noindent\textbf{129-13}\ \par
+\noindent\textbf{129-14}\ \par
+\noindent\textbf{129-15}\ \par
+\noindent\textbf{129-16}\ \par
+\noindent\textbf{129-17}\ \par
+\noindent\textbf{130-18}\ \par
+\noindent\textbf{130-19}\ \par
+\noindent\textbf{130-20}\ \par
+\noindent\textbf{130-21}\ \par
+\noindent\textbf{130-22}\ \par
+\noindent\textbf{130-23}\ \par
+\noindent\textbf{131-24}\ \par
+\noindent\textbf{131-25}\ \par
+\noindent\textbf{131-26}\ \par
+\noindent\textbf{131-27}\ \par
+\noindent\textbf{131-28}\ \par
+\noindent\textbf{132-01}\ \par
+\noindent\textbf{132-02}\ \par
+\noindent\textbf{132-03}\ \par
+\noindent\textbf{132-04}\ \par
+\noindent\textbf{133-05}\ \par
+\noindent\textbf{133-06}\ \par
+\noindent\textbf{133-07}\ \par
+\noindent\textbf{133-08}\ \par
+\noindent\textbf{133-09}\ \par
+\noindent\textbf{133-10}\ \par
+\noindent\textbf{133-11}\ \par
+\noindent\textbf{133-12}\ \par
+\noindent\textbf{133-13}\ \par
+\noindent\textbf{134-14}\ \par
+\noindent\textbf{134-15}\ \par
+\noindent\textbf{134-16}\ \par
+\noindent\textbf{134-17}\ \par
+\noindent\textbf{134-18}\ \par
+\noindent\textbf{134-19}\ \par
+\noindent\textbf{134-20}\ \par
+\noindent\textbf{134-21}\ \par
+\noindent\textbf{135-01}\ \par
+\noindent\textbf{135-02}\ \par
+\noindent\textbf{135-03}\ \par
+\noindent\textbf{135-04}\ \par
+\noindent\textbf{135-05}\ \par
+\noindent\textbf{135-06}\ \par
+\noindent\textbf{136-07}\ \par
+\noindent\textbf{136-08}\ \par
+\noindent\textbf{136-09}\ \par
+\noindent\textbf{136-10}\ \par
+\noindent\textbf{136-11}\ \par
+\noindent\textbf{136-12}\ \par
+\noindent\textbf{137-13}\ \par
+\noindent\textbf{137-14}\ \par
+\noindent\textbf{137-15}\ \par
+\noindent\textbf{137-16}\ \par
+\noindent\textbf{137-17}\ \par
+\noindent\textbf{137-18}\ \par
+\noindent\textbf{138-19}\ \par
+\noindent\textbf{138-20}\ \par
+\noindent\textbf{138-21}\ \par
+\noindent\textbf{138-22}\ \par
+\noindent\textbf{138-23}\ \par
+\noindent\textbf{138-24}\ \par
+\noindent\textbf{139-01}\ \par
+\noindent\textbf{139-02}\ \par
+\noindent\textbf{139-03}\ \par
+\noindent\textbf{139-04}\ \par
+\noindent\textbf{139-05}\ \par
+\noindent\textbf{140-06}\ \par
+\noindent\textbf{140-07}\ \par
+\noindent\textbf{140-08}\ \par
+\noindent\textbf{140-09}\ \par
+\noindent\textbf{140-10}\ \par
+\noindent\textbf{140-11}\ \par
+\noindent\textbf{140-12}\ \par
+\noindent\textbf{140-13}\ \par
+\noindent\textbf{141-14}\ \par
+\noindent\textbf{141-15}\ \par
+\noindent\textbf{141-16}\ \par
+\noindent\textbf{141-17}\ \par
+\noindent\textbf{141-18}\ \par
+\noindent\textbf{141-19}\ \par
+\noindent\textbf{141-20}\ \par
+\noindent\textbf{141-21}\ \par
+\noindent\textbf{142-22}\ \par
+\noindent\textbf{142-23}\ \par
+\noindent\textbf{142-24}\ \par
+\noindent\textbf{142-25}\ \par
+\noindent\textbf{142-26}\ \par
+\noindent\textbf{142-27}\ \par
+\noindent\textbf{142-28}\ \par
+\noindent\textbf{142-29}\ \par
+\noindent\textbf{143-01}\ \par
+\noindent\textbf{143-02}\ \par
+\noindent\textbf{143-03}\ \par
+\noindent\textbf{143-04}\ \par
+\noindent\textbf{143-05}\ \par
+\noindent\textbf{143-06}\ \par
+\noindent\textbf{144-07}\ \par
+\noindent\textbf{144-08}\ \par
+\noindent\textbf{144-09}\ \par
+\noindent\textbf{144-10}\ \par
+\noindent\textbf{144-11}\ \par
+\noindent\textbf{144-12}\ \par
+\noindent\textbf{145-13}\ \par
+\noindent\textbf{145-14}\ \par
+\noindent\textbf{145-15}\ \par
+\noindent\textbf{145-16}\ \par
+\noindent\textbf{145-17}\ \par
+\noindent\textbf{145-18}\ \par
+\noindent\textbf{146-01}\ \par
+\noindent\textbf{146-02}\ \par
+\noindent\textbf{146-03}\ \par
+\noindent\textbf{146-04}\ \par
+\noindent\textbf{146-05}\ \par
+\noindent\textbf{146-06}\ \par
+\noindent\textbf{147-07}\ \par
+\noindent\textbf{147-08}\ \par
+\noindent\textbf{147-09}\ \par
+\noindent\textbf{147-10}\ \par
+\noindent\textbf{147-11}\ \par
+\noindent\textbf{147-12}\ \par
+\noindent\textbf{148-13}\ \par
+\noindent\textbf{148-14}\ \par
+\noindent\textbf{148-15}\ \par
+\noindent\textbf{148-16}\ \par
+\noindent\textbf{148-17}\ \par
+\noindent\textbf{148-18}\ \par
+\end{multicols}
+\end{document}

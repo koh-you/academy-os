@@ -1,0 +1,15 @@
+% 148-03(148쪽) — 곡선 $y=|x^2-1|$ 과 $x$축으로 둘러싸인 도형($-1\le x\le 1$ 의 볼록한 부분)에 색칠. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 색칠한 도형 · 라벨 $y=|x^2-1|$, O, $-1$, 1(가로축), 1(꼭짓점), x, y. 원문에 없는 눈금·값은 적지 않는다.
+\begin{tikzpicture}[x=0.52cm, y=0.53cm, line width=0.6pt]
+  \fill[black!12] plot[domain=-1:1, samples=61, smooth] (\x,{1-(\x)*(\x)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-2.35,0) -- (2.45,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.05) -- (0,3.2) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-1.92:-1, samples=41, smooth] plot (\x,{(\x)*(\x)-1});
+  \draw[domain=-1:1, samples=61, smooth] plot (\x,{1-(\x)*(\x)});
+  \draw[domain=1:1.92, samples=41, smooth] plot (\x,{(\x)*(\x)-1});
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below right=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above right=-2pt and -4pt, font=\small] at (0,1) {$1$};
+  \node[anchor=west, font=\small] at (0.14,2.98) {$y=|x^2-1|$};
+\end{tikzpicture}

@@ -1,0 +1,13 @@
+% 70-17(70쪽) — 사차함수 꼴 $y=f(x)$ 의 그래프($x$축 위로 올라와 봉우리 둘(가운데가 극소)을 이루고 다시 $x$축 아래로) · $x=a$, $x=b$ 의 안내 점선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선 · 안내 점선 둘 · 라벨 O, a, b, x, y, y=f(x)(눈금 수치·함수값·c 의 위치는 원문에 없다).
+\begin{tikzpicture}[scale=0.5, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.55,0) -- (5.00,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.80) -- (0,2.95) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (1.00,1.83) -- (1.00,0);
+  \draw[densely dotted, line width=0.4pt] (3.85,0.76) -- (3.85,0);
+  \draw[smooth] plot coordinates {(0.17,-1.60) (0.33,-0.75) (0.48,0.00) (0.63,0.70) (0.80,1.32) (0.98,1.80) (1.12,2.04) (1.27,2.18) (1.45,2.12) (1.65,1.92) (1.85,1.68) (2.05,1.43) (2.22,1.31) (2.42,1.35) (2.62,1.55) (2.82,1.80) (3.07,2.01) (3.30,1.88) (3.55,1.52) (3.75,1.05) (3.90,0.62) (4.10,-0.10) (4.30,-0.90) (4.47,-1.65)};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.00,0) {$a$};
+  \node[below=1pt, font=\small] at (3.85,0) {$b$};
+  \node[font=\small] at (2.45,2.62) {$y=f(x)$};
+\end{tikzpicture}

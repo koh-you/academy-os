@@ -1,0 +1,11 @@
+% 108-25(108쪽) — 원을 지름 두 개(세로·가로)로 4등분한 영역 A, B, C, D. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A(왼쪽 위), B(오른쪽 위), C(왼쪽 아래), D(오른쪽 아래)만 적는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[line width=0.7pt] (0,0) circle (1.8);
+  \draw (0,-1.8) -- (0,1.8);
+  \draw (-1.8,0) -- (1.8,0);
+  \node[font=\small] at (-0.85,0.85) {$\mathrm{A}$};
+  \node[font=\small] at (0.85,0.85) {$\mathrm{B}$};
+  \node[font=\small] at (-0.85,-0.85) {$\mathrm{C}$};
+  \node[font=\small] at (0.85,-0.85) {$\mathrm{D}$};
+\end{tikzpicture}

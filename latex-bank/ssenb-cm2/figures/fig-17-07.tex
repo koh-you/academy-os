@@ -1,0 +1,22 @@
+% 17-07(17쪽) — 좌표평면 위 네 점 A(-3, 4), B(-4, 0), C(3, 0), D(2, 6)을 꼭짓점으로 하는 사각형 ABCD. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·-4·-3·O·2·3·4·6·x·y 와 점선 보조선만. 두 대각선의 교점(답)은 원문처럼 그리지 않는다.
+\begin{tikzpicture}[scale=0.45, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-5.4,0) -- (4.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,7.9) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-3,4) -- (2,6) -- (3,0) -- (-4,0) -- cycle;
+  \draw[dotted, line width=0.6pt] (-3,4) -- (-3,0);
+  \draw[dotted, line width=0.6pt] (-3,4) -- (0,4);
+  \draw[dotted, line width=0.6pt] (2,6) -- (2,0);
+  \draw[dotted, line width=0.6pt] (2,6) -- (0,6);
+  \node[above left=-2pt, font=\small] at (-3,4) {$\mathrm{A}$};
+  \node[above left=-3pt, font=\small] at (-4,0) {$\mathrm{B}$};
+  \node[above right=-3pt, font=\small] at (3,0) {$\mathrm{C}$};
+  \node[above right=-2pt, font=\small] at (2,6) {$\mathrm{D}$};
+  \node[below=1pt, font=\small] at (-4,0) {$-4$};
+  \node[below=1pt, font=\small] at (-3,0) {$-3$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[right=1pt, font=\small] at (0,4) {$4$};
+  \node[left=1pt, font=\small] at (0,6) {$6$};
+\end{tikzpicture}

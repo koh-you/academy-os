@@ -1,0 +1,17 @@
+% 7-03(7쪽) — 원점 O 와 점 B(-7, 3)을 마주 보는 꼭짓점으로 하는 정사각형 OABC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·A·B·C·x·y 와 축 눈금 -7, 3 만 둔다. 넓이(답)는 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.4, line width=0.5pt]
+  \coordinate (O) at (0,0); \coordinate (A) at (-2,5); \coordinate (B) at (-7,3); \coordinate (C) at (-5,-2);
+  \fill[green!14] (O) -- (A) -- (B) -- (C) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-8.8,0) -- (2.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,6.6) node[left=-1pt, font=\small] {$y$};
+  \draw[dotted, line width=0.5pt] (B) -- (0,3);
+  \draw[dotted, line width=0.5pt] (B) -- (-7,0);
+  \draw[line width=0.6pt] (O) -- (A) -- (B) -- (C) -- cycle;
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below right=0pt and -1pt, font=\small] at (O) {$\mathrm{O}$};
+  \node[right=1pt, font=\small] at (0,3) {$3$};
+  \node[below=1pt, font=\small] at (-7,0) {$-7$};
+\end{tikzpicture}

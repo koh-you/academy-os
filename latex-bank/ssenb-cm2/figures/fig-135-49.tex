@@ -1,0 +1,11 @@
+% 135-49(135쪽) — 함수 y=b/(x+a)+c 의 그래프 개형: 수직 점근선은 y축 왼쪽, 수평 점근선은 x축 아래.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문에 눈금·좌표값이 없으므로 라벨은 y·x·O 만 둔다(a, b, c 의 부호는 적지 않는다).
+\begin{tikzpicture}[xscale=0.28, yscale=0.20, line width=0.5pt]
+  \draw[dashed, line width=0.5pt] (-6.3,-2) -- (5.3,-2);
+  \draw[dotted, line width=0.7pt] (-2,-7.4) -- (-2,5.4);
+  \draw[->, >=stealth, line width=0.7pt] (-6.3,0) -- (5.6,0) node[above left=-2pt and -1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.6) -- (0,5.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=80, domain=-1.35:5.3] plot (\x, {5/(\x+2)-2});
+  \draw[line width=0.6pt, smooth, samples=80, domain=-6.3:-2.95] plot (\x, {5/(\x+2)-2});
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

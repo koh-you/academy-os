@@ -1,0 +1,16 @@
+% 149-02(149쪽) — 삼각형 ABC · $\angle\pt{A}=30^\circ$, $\seg{BC}=4$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 A 를 왼쪽 아래, B 를 오른쪽 아래, C 를 B 위쪽에 두었다.
+% 라벨은 원문에 있는 A·B·C·$30^\circ$·$4$ 만 둔다 — $\seg{AC}$ 의 길이의 최댓값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=1.15, >=stealth]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (2.55,0);
+  \coordinate (C) at (1.85,1.15);
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ([shift=(0:0.36)]A) arc (0:32:0.36);
+  \node[font=\footnotesize] at ([shift=(16:0.64)]A) {$30^\circ$};
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(31:0.16)]C) to[bend left=12]
+    node[midway, right=-1.5pt, font=\footnotesize] {$4$} ([shift=(31:0.16)]B);
+  \node[left=1pt, font=\small] at (A) {$\pt{A}$};
+  \node[below right=-3pt and -3pt, font=\small] at (B) {$\pt{B}$};
+  \node[above=0pt, font=\small] at (C) {$\pt{C}$};
+\end{tikzpicture}

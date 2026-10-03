@@ -1,0 +1,14 @@
+% 65-26(65쪽) — 원뿔(꼭짓점 $\pt{A}$ · 밑면의 중심 $\pt{O}$ · 밑면 둘레 위의 점 $\pt{B}$). 스캔 삽화가 흐려 TikZ 로 다시 그림.
+% 라벨은 원문 것만: $\pt{A}$, $\pt{B}$, $\pt{O}$ 와 $\seg{AO}\perp\seg{BO}$ 직각 표시. 길이는 적지 않는다($\cos(\angle\pt{ABO})$ 가 읽히지 않게).
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0,2.5) -- (-1.15,0);
+  \draw (0,2.5) -- (1.15,0);
+  \draw (-1.15,0) arc (180:360:1.15 and 0.37);
+  \draw[densely dashed, line width=0.4pt] (-1.15,0) arc (180:0:1.15 and 0.37);
+  \draw[line width=0.5pt] (0,2.5) -- (0,0);
+  \draw[line width=0.5pt] (-1.15,0) -- (0,0);
+  \draw[line width=0.4pt] (-0.19,0) -- (-0.19,0.19) -- (0,0.19);
+  \node[anchor=south, font=\small] at (0,2.56) {$\pt{A}$};
+  \node[anchor=east, font=\small] at (-1.21,0.02) {$\pt{B}$};
+  \node[anchor=north west, font=\small] at (0.03,0.02) {$\pt{O}$};
+\end{tikzpicture}

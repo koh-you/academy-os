@@ -1,0 +1,11 @@
+% 13-01(13쪽) — 보기 ㄷ 의 그래프(x축·y축을 점근선으로 하는 두 갈래 곡선 · 왼쪽 갈래는 x축 위, 오른쪽 갈래는 x축 아래).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문에 있는 것만: 두 갈래 곡선 · 라벨 O, x, y, y=f(x)(눈금 없음).
+\begin{tikzpicture}[baseline=(current bounding box.north), x=0.38cm, y=0.38cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.75,0) -- (2.65,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.9) -- (0,2.65) node[right=1pt] {$y$};
+  \draw[line width=0.6pt, domain=-2.7:-0.21, samples=80, smooth] plot (\x, {-0.5/\x});
+  \draw[line width=0.6pt, domain=0.21:2.7, samples=80, smooth] plot (\x, {-0.5/\x});
+  \node[above=1pt, font=\small] at (2.25,0) {$x$};
+  \node[below left=-3pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.25,-2.3) {$y=f(x)$};
+\end{tikzpicture}

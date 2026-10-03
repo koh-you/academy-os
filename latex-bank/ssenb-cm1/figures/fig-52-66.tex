@@ -1,0 +1,16 @@
+% 52-66(52쪽) — AB를 지름으로 하는 반원, 호 위의 점 P와 AB에 내린 수선의 발 H. 스캔 그림이 흐려 TikZ 로 다시 그림(라벨은 원문의 A·P·B·H 뿐 · 길이 값은 본문에만 두어 답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (3.2,0);
+  \coordinate (H) at (2.32,0);
+  \coordinate (P) at (2.32,1.43);
+  \draw (A) arc (180:0:1.6);
+  \draw (A) -- (B);
+  \draw (A) -- (P) -- (B);
+  \draw (P) -- (H);
+  \draw ($(H)+(-0.17,0)$) -- ++(0,0.17) -- ++(0.17,0);
+  \node[below left=-1pt] at (A) {$\pt{A}$};
+  \node[above=1pt] at (P) {$\pt{P}$};
+  \node[below right=-1pt] at (B) {$\pt{B}$};
+  \node[below=1pt] at (H) {$\pt{H}$};
+\end{tikzpicture}

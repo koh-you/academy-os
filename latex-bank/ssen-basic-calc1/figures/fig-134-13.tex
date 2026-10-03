@@ -1,0 +1,14 @@
+% 134-13(134쪽) — 이차함수 $y=f(x)$ 의 그래프($x$축과 $x=-2$, $x=0$ 에서 만나고 꼭짓점이 $(-1,\,-1)$ 인 아래로 볼록한 포물선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 꼭짓점에서 $x$축·$y$축으로 가는 안내 점선 두 줄 · 라벨 $-2$, $-1$(축 위), $-1$($y$값), O, x, y, y=f(x). 원문에 없는 눈금·값은 적지 않는다.
+\begin{tikzpicture}[x=0.5cm, y=0.5cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.15,0) -- (1.5,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.75) -- (0,2.6) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-1,-1) -- (-1,0);
+  \draw[densely dashed, line width=0.4pt] (-1,-1) -- (0,-1);
+  \draw[domain=-2.55:0.55, samples=80, smooth] plot (\x, {(\x)*(\x)+2*(\x)});
+  \node[below=1pt, font=\small] at (-2.25,0) {$-2$};
+  \node[above=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[right=2pt, font=\small] at (0,-1) {$-1$};
+  \node[anchor=west, inner sep=1pt, font=\small] at (0.2,2.4) {$y=f(x)$};
+\end{tikzpicture}

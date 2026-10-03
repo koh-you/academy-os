@@ -1,0 +1,22 @@
+% 117-57(117쪽) — 함수 f: X→X 의 대응 그림(X={1,2,3,4} · 1→2, 2→3, 3→4, 4→1). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 X·X·f·원소 1~4 만.
+\begin{tikzpicture}[line width=0.5pt, every node/.style={font=\small}]
+  \draw[line width=0.6pt] (0.00,0.00) ellipse (0.52 and 1.32);
+  \draw[line width=0.6pt] (2.10,0.00) ellipse (0.52 and 1.32);
+  \node at (0.00,1.54) {$X$};
+  \node at (2.10,1.54) {$X$};
+  \draw[->, >=stealth] (0.34,1.54) -- (1.76,1.54);
+  \node at (1.05,1.80) {$f$};
+  \node[inner sep=1.5pt] (x1) at (0.00,0.78) {$1$};
+  \node[inner sep=1.5pt] (x2) at (0.00,0.26) {$2$};
+  \node[inner sep=1.5pt] (x3) at (0.00,-0.26) {$3$};
+  \node[inner sep=1.5pt] (x4) at (0.00,-0.78) {$4$};
+  \node[inner sep=1.5pt] (y1) at (2.10,0.78) {$1$};
+  \node[inner sep=1.5pt] (y2) at (2.10,0.26) {$2$};
+  \node[inner sep=1.5pt] (y3) at (2.10,-0.26) {$3$};
+  \node[inner sep=1.5pt] (y4) at (2.10,-0.78) {$4$};
+  \draw[->, >=stealth] (x1.east) -- (y2.west);
+  \draw[->, >=stealth] (x2.east) -- (y3.west);
+  \draw[->, >=stealth] (x3.east) -- (y4.west);
+  \draw[->, >=stealth] (x4.east) -- (y1.west);
+\end{tikzpicture}

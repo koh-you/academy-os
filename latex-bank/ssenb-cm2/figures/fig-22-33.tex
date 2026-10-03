@@ -1,0 +1,12 @@
+% 22-33(22쪽) — 좌표평면 위 한 변의 길이가 3인 정사각형(꼭짓점 (-3, 5)·(0, 5)·(0, 2)·(-3, 2))과 x축으로 내린 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·5·2·-3·O·x 만 — m 의 최댓값(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.4,0) -- (2.1,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,6.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-3,2) -- (-3,5) -- (0,5) -- (0,2) -- cycle;
+  \draw[dotted, line width=0.6pt] (-3,2) -- (-3,0);
+  \node[right=1pt, font=\small] at (0,5) {$5$};
+  \node[right=1pt, font=\small] at (0,2) {$2$};
+  \node[below=1pt, font=\small] at (-3,0) {$-3$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

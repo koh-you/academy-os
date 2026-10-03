@@ -1,0 +1,25 @@
+% 65-42(65쪽) — 삼차함수 f(x) 의 도함수 y=f'(x)(포물선)와 사차함수 g(x) 의 도함수 y=g'(x)(삼차곡선).
+% 원문에 있는 것만: 두 곡선 · 두 곡선이 만나는 세 점(a, c, e)으로 가는 세로 점선 · 포물선이 x축과 만나는 두 점(b, d)
+% · 라벨 a, b, c, d, e, O, x, y, y=f'(x), y=g'(x). 눈금·좌표는 원문에 없으므로 넣지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.56cm, y=0.50cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.10,0) -- (2.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.75) -- (0,4.45) node[left=1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-3.467,0) -- (-3.467,1.09);
+  \draw[densely dotted, line width=0.4pt] (-1.273,0) -- (-1.273,-1.70);
+  \draw[densely dotted, line width=0.4pt] (1.424,0) -- (1.424,1.47);
+  % y=f'(x) : 포물선(x축과 b, d 에서 만난다)
+  \draw[line width=0.6pt, domain=-3.75:2.25, samples=120, smooth]
+    plot (\x, {0.5*((\x)+2.95)*((\x)-0.75)});
+  % y=g'(x) : 삼차곡선
+  \draw[line width=0.6pt, domain=-3.75:2.40, samples=140, smooth]
+    plot (\x, {-0.3*((\x)+3.25)*((\x)+0.4)*((\x)-2.0)});
+  \node[below=1pt, font=\small] at (-3.467,0) {$a$};
+  \node[above=1pt, font=\small] at (-2.95,0) {$b$};
+  \node[above=1pt, font=\small] at (-1.273,0) {$c$};
+  \node[above left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (0.75,0) {$d$};
+  \node[below=1pt, font=\small] at (1.424,0) {$e$};
+  \node[anchor=west, font=\small] at (0.45,4.05) {$y=f'(x)$};
+  \node[anchor=west, font=\small] at (0.75,-2.30) {$y=g'(x)$};
+\end{tikzpicture}

@@ -1,0 +1,10 @@
+% 9-10(9쪽) — f(x)=1/|x| 의 그래프(y축에 대칭인 두 갈래 곡선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 O, x, y, y=f(x)(눈금은 원문에 없다).
+\begin{tikzpicture}[x=0.52cm, y=0.30cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.9,0) -- (3.9,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,7.6) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt, domain=0.16:3.6, samples=80, smooth] plot (\x, {1/\x});
+  \draw[line width=0.6pt, domain=-3.6:-0.16, samples=80, smooth] plot (\x, {-1/\x});
+  \node[right=1pt, font=\small] at (0.4,6.9) {$y=f(x)$};
+\end{tikzpicture}

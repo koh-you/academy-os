@@ -1,0 +1,13 @@
+% 67-49(67쪽) — 도함수 y=f'(x) 의 그래프. x축과 -1 에서 만나고 x=1 에서 x축에 접한다(최고차항 음수).
+% 원문에 있는 것만: 곡선 · 라벨 y=f'(x), -1, O, 1, x, y. y축 눈금은 원문에 없으므로 넣지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.74cm, y=0.46cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.85,0) -- (2.20,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.25) -- (0,3.40) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-1.50:1.90, samples=130, smooth]
+    plot (\x, {-0.8*((\x)^3 - (\x)^2 - (\x) + 1)});
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (1,0) {$1$};
+  \node[anchor=east, font=\small] at (-0.55,3.05) {$y=f'(x)$};
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% 64-21(64쪽) — 반지름 10, 중심각 3/5 π 인 부채꼴 AOB 와 반지름이 반씩 줄어드는 부채꼴 COD · EOF · GOH.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그림의 표시(10 · 3/5 π · O · A~H)만 둔다.
+% 호의 길이의 합·둘레(답)는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.55pt, >=stealth]
+  \filldraw[fill=blue!15]
+    (144:10) arc (144:36:10) -- (36:1.25) arc (36:-36:1.25) -- (-36:2.5)
+    arc (-36:-144:2.5) -- (216:5) arc (216:144:5) -- cycle;
+  \draw (144:10) -- (-36:2.5);
+  \draw (36:10) -- (216:5);
+  \draw[densely dotted, line width=0.35pt] (144:10) -- ($(0,0)+(54:1.45)$);
+  \node[font=\footnotesize] at ($(144:6.6)+(54:0.95)$) {$10$};
+  \node[font=\footnotesize] at (70:4.4) {$\dfrac{3}{5}\pi$};
+  \draw[line width=0.3pt, gray!70] (-36:1.25) -- (-68:3.5);
+  \node[left=1pt, font=\footnotesize] at (144:10) {$\pt{A}$};
+  \node[right=1pt, font=\footnotesize] at (36:10) {$\pt{B}$};
+  \node[above left=-3pt and -2pt, font=\footnotesize] at (144:5) {$\pt{C}$};
+  \node[below left=-3pt and -2pt, font=\footnotesize] at (216:5) {$\pt{D}$};
+  \node[below=0pt, font=\footnotesize] at (216:2.5) {$\pt{E}$};
+  \node[right=0pt, font=\footnotesize] at (-36:2.5) {$\pt{F}$};
+  \node[below=0pt, font=\footnotesize] at (-68:3.5) {$\pt{G}$};
+  \node[above right=-3pt and -2pt, font=\footnotesize] at (36:1.25) {$\pt{H}$};
+  \node[font=\footnotesize] at (250:0.62) {$\pt{O}$};
+\end{tikzpicture}

@@ -1,0 +1,16 @@
+% 140-17(140쪽) — 곡선 $y=x^2-2x$ 와 직선 $y=x$ 로 둘러싸인 색칠한 부분($x=0$ 에서 $x=3$ 까지). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 포물선 · 직선 · 색칠 · $x=3$ 의 안내 점선 · 지시선 · 라벨 y=x^2-2x, y=x, O, 2, 3, x, y. 원문에 없는 눈금·넓이 값은 적지 않는다.
+\begin{tikzpicture}[x=0.32cm, y=0.26cm, line width=0.6pt]
+  \fill[gray!25] plot[domain=0:3, samples=80, smooth] (\x, {(\x)}) -- plot[domain=3:0, samples=80, smooth] (\x, {(\x)*(\x)-2*(\x)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-2.3,0) -- (4.2,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,6.3) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (3,0) -- (3,3);
+  \draw[domain=-1.65:3.15, samples=100, smooth] plot (\x, {(\x)*(\x)-2*(\x)});
+  \draw (-1.9,-1.9) -- (3.7,3.7);
+  \draw[->, >=stealth, line width=0.4pt] (2.5,4.9) .. controls (3.0,4.5) and (3.0,3.8) .. (2.95,2.95);
+  \node[anchor=west, inner sep=1pt, font=\small] at (1.1,5.6) {$y=x^2-2x$};
+  \node[anchor=west, inner sep=1pt, font=\small] at (3.6,3.75) {$y=x$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

@@ -212,7 +212,17 @@ function renderItemBody(id, rawItem, group, bank) {
   if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${placeTrailingConditions(sub)}`).join("\n"));
   if (item.choices) {
     // 분수(dfrac)·근호 보기는 키가 커 두 줄 배치에서 위아래 행이 맞닿는다 — 보이지 않는 지주(strut)로 행 높이를 벌린다(sty 수정 없이).
-    const strut = item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice)) ? "\\rule[-3ex]{0pt}{8ex}" : "";
+    // 세로 한 줄씩 놓는 choicesv 는 위아래 행이 맞닿지 않으므로 지주를 넣지 않는다 — 넣으면 줄 간격이 두 배로 벌어져
+    // 보기 하나가 한 쪽을 다 먹는다(검수 지적 쎈B 공통수학1 44-15).
+    // 행렬 보기(pmatrix·array)도 키가 커 위아래 괄호가 맞닿는다(검수 지적 쎈B 공통수학1 125-04 2×2 · 125-05 3×3) — 행 수에 맞춰 지주를 키운다.
+    const matrixRows = (choice) => {
+      const body = /\\begin\{(?:(?:p|b|v|B|V)?matrix|array)\}(?:\{[^}]*\})?([\s\S]*?)\\end\{/.exec(choice);
+      return body ? body[1].split("\\\\").length : 0;
+    };
+    const rows = Math.max(0, ...item.choices.map(matrixRows));
+    // 2행이면 기존 분수·근호와 같은 8ex, 한 행 늘 때마다 2.6ex 씩(본문 행간 실측).
+    const strutSize = rows >= 2 ? `\\rule[-${(3 + (rows - 2) * 1.3).toFixed(1)}ex]{0pt}{${(8 + (rows - 2) * 2.6).toFixed(1)}ex}` : "\\rule[-3ex]{0pt}{8ex}";
+    const strut = item.choices_layout !== "v" && (rows >= 2 || item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice))) ? strutSize : "";
     // 수식은 글자 수보다 넓게 찍히므로 수식 길이의 절반을 더해 잰다(라이트쎈 공통수학2 1381 ④ 처럼 한글 24자 + 긴 수식이 잘리던 것).
     const visualLength = (choice) => choice.replace(/\$[^$]*\$/g, (math) => "M".repeat(Math.max(1, Math.round((math.length - 2) / 2)))).length;
     // 배치가 지정되지 않은 짧은 보기 5개(시각 길이 ≤ ONE_LINE_MAX_VISUAL · 줄바꿈·환경·그림 없음)는 원본처럼 한 줄 5칸 후보로 두고, 실제 폭은
@@ -223,7 +233,8 @@ function renderItemBody(id, rawItem, group, bank) {
     if (layout === "i" || layout === "auto") {
       const args = item.choices.map((choice) => `{${choice}}`).join("");
       parts.push(layout === "i" ? `\\dmchoicesi${args}` : `\\dmchoicesauto{${strut}}${args}`);
-    } else if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) > 26)) {
+    // 기준은 26 이상(초과 아님) — 시각 길이가 정확히 26 인 보기가 \mbox 안에서 잘린 사례(쎈B 공통수학1 26-63 ⑤ 의 끝 「a)」)가 있다.
+    } else if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) >= 26)) {
       // 긴 한글 보기(문장형)는 choicesv 의 \mbox 안에서 줄이 안 바뀌어 잘린다 — 문단으로 하나씩 놓는다.
       parts.push(`\\par\\medskip${item.choices.map((choice, index) => `\\par\\noindent\\hangindent=1.4em\\hangafter=1 {\\small ${CIRCLED[index]}}\\ ${choice}`).join("")}\\par\\medskip`);
     } else {
@@ -316,12 +327,17 @@ async function main() {
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
 \\newcommand{\\arc}[1]{\\overset{\\frown}{\\mathrm{#1}}}
 \\newcommand{\\vecAB}[1]{\\overrightarrow{\\mathrm{#1}}}
-\\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\centering\\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
+% 조건 상자. 본문에서는 수식을 안 끊지만(\\binoppenalty) 이 상자는 폭이 고정이라 긴 식이 테두리 밖으로 삐져나간다
+% (검수 지적 쎈B 대수 126-41·126-43·21-17 — 「(2n-1)·1」 끝이 상자 밖에 찍힌다). 상자 안에서만 연산자·관계 뒤 줄바꿈을 허용한다.
+% 들어가는 식은 그대로 한 줄로 두고, 넘칠 때만 TeX 가 끊는다(원문도 그 자리에서 두 줄로 간다).
+\\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.96\\linewidth}\\centering\\binoppenalty=700 \\relpenalty=500 \\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
 % 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\\\)
 \\newcommand{\\comp}[1]{{#1}^{\\mathrm{c}}}
 % 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \\centerline 을 build 가 이것으로 바꾼다).
 \\newcommand{\\dispeq}[1]{\\centerline{\\resizebox{\\ifdim\\width>\\linewidth\\linewidth\\else\\width\\fi}{!}{#1}}}
-\\newcommand{\\bogi}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\vspace{1mm}{\\small\\bfseries 보기}\\par\\smallskip\\setlength{\\parskip}{0.6mm}#1\\vspace{1mm}\\end{minipage}}\\end{center}}
+% 보기 상자도 같다. ㄱ·ㄴ·ㄷ 줄은 \\\\ 로 나누므로 \\parskip 이 먹지 않아, 분수가 든 줄이 다음 줄과 맞닿는다
+% (검수 지적 쎈B 대수 62-08·78-40·79-46 · 미적분1 11-24·27-46). 줄 겹침 여유를 본문보다 넉넉히 주고, 긴 줄은 상자 안에서 끊는다.
+\\newcommand{\\bogi}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.96\\linewidth}\\binoppenalty=700 \\relpenalty=500 \\lineskiplimit=3pt \\lineskip=4pt \\vspace{1mm}{\\small\\bfseries 보기}\\par\\smallskip\\setlength{\\parskip}{0.6mm}#1\\vspace{1mm}\\end{minipage}}\\end{center}}
 \\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
@@ -330,10 +346,24 @@ async function main() {
 \\newcommand{\\dmpassage}[1]{\\par\\needspace{8\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
+% 수식 안 글루는 늘이지 않는다. 낱장 폭(110mm)에서 긴 수식이 한 덩어리로 묶이면 남은 늘임이 \\medmuskip·\\thickmuskip 으로
+% 들어가 「y  =  2x^2  -  3x」 처럼 연산자 둘레가 벌어진다(검수 지적 쎈B 공통수학1 95-42·95-44·130-35·136-67·26-68 등).
+% 늘임은 낱말 사이로만 보낸다.
+\\thinmuskip=3mu \\medmuskip=4mu \\thickmuskip=5mu
 \\newlength{\\dmfigw}
 % 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
 % 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
 \\emergencystretch=2em
+% 한글 음절 사이 늘임을 끈다. 좁은 낱장 폭(110mm)에 끊을 수 없는 긴 수식이 들어가면 kotex 가 남은 늘임을 음절 사이로
+% 보내 「함 수 … 에 대 하 여」처럼 낱말이 무너진다(검수 지적 쎈B 미적분1 8-06·10-20·40-56·55-68 · 대수 51-36·54-64·90-11 등).
+% 늘임은 낱말 사이로만 가게 하고, 그래도 모자라 줄이 넘치는 자리는 위 \\emergencystretch 가 받는다.
+% xetexko 는 음절마다 줄바꿈 자리를 두고 그 glue 에 plus.08em 을 주는데(xetexko.sty \\XeKo@stretchshrink),
+% 한 줄에 음절이 20개면 1.6em 까지 벌어진다. 늘임만 0 으로 두고 줄임(minus.04em)은 남겨 과밀 줄은 여전히 붙일 수 있게 한다.
+\\xetexkostretchshrink{plus0em minus.04em}
+% 본문 속 \\dfrac 처럼 키 큰 수식이 든 줄은 기본 \\lineskip(1pt)으로는 위아래 줄과 맞닿는다
+% (검수 지적 쎈B 미적분1 76-11·77-14·79-26·55-70·41-64 · 대수 62-08·36-34 등 — 분모가 아랫줄 글자 위에 올라탄다).
+% 줄 사이가 2pt 보다 좁아지는 자리에서만 3pt 를 확보한다. 보통 줄은 \\baselineskip 그대로라 쪽 배치가 바뀌지 않는다.
+\\lineskiplimit=2pt \\lineskip=3pt
 \\newcommand{\\nob}[1]{\\mbox{#1}}
 % 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
 % 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
@@ -430,7 +460,34 @@ async function main() {
       const before = manifest.items.length;
       manifest.items = manifest.items.filter((item) => bankIds.has(item.number_label));
       manifest.items.sort((a, b) => a.number_sort - b.number_sort);
-      console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length})`);
+
+      // 전사본이 문항 목록의 원천이면 **단원도** 전사본이 원천이다. 스캔 manifest 의 단원을 그대로 두면
+      // 스캔에 단원이 없던 책은 단원 0개로 등록돼 교재관리·오답관리에서 구획이 통째로 사라진다
+      // (2026-10-03 실측: RPM 중학 3-1 1,133문항·중학 3-2 673문항이 전사본에 9·7단원이 있는데도 단원 0으로 등록돼 있었다).
+      const unitIndexByLabel = new Map();
+      units.forEach((unit, index) => {
+        for (const group of unit.groups) for (const id of group.items) unitIndexByLabel.set(id, index);
+      });
+      for (const item of manifest.items) {
+        const index = unitIndexByLabel.get(item.number_label);
+        if (index !== undefined) item.unit_index = index;
+      }
+      // 스캔 manifest 가 들고 있던 단원의 부가 정보(chapter 등)는 code 가 같을 때 이어받는다.
+      const scanUnitByCode = new Map((manifest.units ?? []).map((unit) => [String(unit.code ?? ""), unit]));
+      manifest.units = units.map((unit, index) => {
+        const labels = unit.groups.flatMap((group) => group.items);
+        const sorted = manifest.items.filter((item) => item.unit_index === index).map((item) => item.number_label);
+        return {
+          ...(scanUnitByCode.get(unit.code) ?? {}),
+          position: index,
+          code: unit.code,
+          title: unit.title,
+          item_number_from: sorted[0] ?? labels[0] ?? "",
+          item_number_to: sorted[sorted.length - 1] ?? labels[labels.length - 1] ?? "",
+          item_count: sorted.length
+        };
+      });
+      console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length}) · 단원 ${manifest.units.length}개`);
     }
     if (args.review) await mkdir(path.join(dir, "review"), { recursive: true });
     const only = typeof args.only === "string" ? new Set(args.only.split(",").map((s) => s.trim()).filter(Boolean)) : null;

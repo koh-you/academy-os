@@ -1,0 +1,17 @@
+% 53-04(53쪽) — $y=\left(\dfrac{1}{3}\right)^{x}$ 의 그래프 · $y=243$ 일 때의 $x=b$ 와 $x=-2$ 에서의 높이 $a$ 안내 점선, $y$절편 $1$.
+% 원문 그림이 비례가 아닌 개념도($243$ 에 견주면 $x=-2$ 의 높이는 훨씬 낮다)라 원문 배치의 비율을 그대로 옮겼다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 $243$·$a$·$1$·$b$·$-2$·$y=\left(\dfrac{1}{3}\right)^{x}$ 만 · 눈금은 만들지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.38cm, y=0.72cm]
+  \draw[->, >=stealth, line width=0.7pt] (-6.1,0) -- (4.6,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.55) -- (0,3.95) node[right=1pt] {$y$};
+  \draw[domain=-5.35:4.2, samples=100, smooth] plot (\x, {0.35*exp(-0.45*\x)});
+  \draw[densely dotted, line width=0.4pt] (0,3.32) -- (-5,3.32) -- (-5,0);
+  \draw[densely dotted, line width=0.4pt] (0,0.861) -- (-2,0.861) -- (-2,0);
+  \node[right=1pt, font=\small] at (0,3.32) {$243$};
+  \node[right=1pt, font=\small] at (0,0.861) {$a$};
+  \node[right=1pt, font=\small] at (0,0.35) {$1$};
+  \node[below=1pt, font=\small] at (-5,0) {$b$};
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-0.55,3.85) {$y=\left(\dfrac{1}{3}\right)^{x}$};
+\end{tikzpicture}

@@ -1,0 +1,30 @@
+% 15-57(15쪽) — 한 변 16 인 정사각형 ABCD, 꼭짓점 C 중심 · 반지름 BC 인 사분원, 호 BD 위의 점 P 와 수선의 발 Q, R, S. 스캔 그림을 TikZ 로 다시 그림(원문 라벨·직각 표시·색칠한 사각형 AQPS 만 · 길이는 16 만 원문에 있다).
+\begin{tikzpicture}[scale=0.2,line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (16,0);
+  \coordinate (D) at (16,16);
+  \coordinate (A) at (0,16);
+  \coordinate (P) at (5.502,12.075);
+  \coordinate (Q) at (0,12.075);
+  \coordinate (R) at (5.502,0);
+  \coordinate (S) at (5.502,16);
+  \fill[black!10] (Q) -- (A) -- (S) -- (P) -- cycle;
+  \draw (B) -- (C) -- (D) -- (A) -- cycle;
+  \draw (B) arc[start angle=180, end angle=90, radius=16];
+  \draw (S) -- (R);
+  \draw (P) -- (Q);
+  \draw (P) -- (C);
+  \draw[line width=0.5pt] (0.8,12.075) -- (0.8,11.275) -- (0,11.275);
+  \draw[line width=0.5pt] (6.302,16) -- (6.302,15.2) -- (5.502,15.2);
+  \draw[line width=0.5pt] (6.302,0) -- (6.302,0.8) -- (5.502,0.8);
+  \fill (P) circle (2.2pt);
+  \node[above left=-1pt] at (A) {$\pt{A}$};
+  \node[above=1pt] at (S) {$\pt{S}$};
+  \node[above right=-1pt] at (D) {$\pt{D}$};
+  \node[left=2pt] at (Q) {$\pt{Q}$};
+  \node[right=3pt] at (P) {$\pt{P}$};
+  \node[below left=-1pt] at (B) {$\pt{B}$};
+  \node[below=1pt] at (R) {$\pt{R}$};
+  \node[below right=-1pt] at (C) {$\pt{C}$};
+  \node[right=2pt] at (16,8) {$16$};
+\end{tikzpicture}

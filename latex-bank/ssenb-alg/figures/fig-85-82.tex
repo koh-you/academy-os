@@ -1,0 +1,18 @@
+% 85-82(85쪽) — 빛이 공기 중에서 물을 통과할 때, 경계면에 수직인 직선과 빛이 이루는 각 $\theta_1$, $\theta_2$(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 빛 · 공기 · 물 · 점 $\pt{M}$ · $\theta_1$ · $\theta_2$. 각의 크기(답)가 읽히지 않게 눈금·각도 값은 적지 않는다.
+\begin{tikzpicture}[scale=1.08, line width=0.5pt]
+  \fill[cyan!14] (-1.26,-1.06) rectangle (0.76,0);
+  \draw[black!75, line width=0.7pt] (-1.26,0) -- (0.76,0);
+  \draw[black!75, line width=0.5pt] (0,1.27) -- (0,-1.30);
+  \draw[red!45!black, line width=0.6pt] (-1.24,1.36) -- (0,0);
+  \draw[red!45!black, line width=0.6pt, ->, >=stealth] (0,0) -- (0.67,-1.22);
+  \draw[black!75, line width=0.4pt] (0.17,0) -- (0.17,0.17) -- (0,0.17);
+  \draw[black!75, line width=0.4pt] (0,0.40) arc (90:132:0.40);
+  \draw[black!75, line width=0.4pt] (0,-0.44) arc (270:299:0.44);
+  \node[font=\small] at (-0.19,0.47) {$\theta_1$};
+  \node[font=\small] at (0.13,-0.56) {$\theta_2$};
+  \node[font=\small] at (-0.25,-0.22) {$\pt{M}$};
+  \node[font=\small] at (-0.85,1.10) {빛};
+  \node[font=\small] at (0.44,1.08) {공기};
+  \node[font=\small] at (0.52,-0.19) {물};
+\end{tikzpicture}

@@ -1,0 +1,30 @@
+% 148-18(148쪽) — 사각형 ABCD 와 두 대각선 · $\seg{AC}=7$, $\seg{DC}=4$, $\angle\pt{BDC}=90^\circ$, $\angle\pt{DBC}=30^\circ$, 두 대각선이 이루는 각 $60^\circ$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 B 를 왼쪽 아래, C 를 오른쪽 아래, A·D 를 그 위에 두고 안쪽을 연하게 칠했다.
+% 라벨은 원문에 있는 A·B·C·D·$7$·$4$·$30^\circ$·$60^\circ$ 와 직각 표시만 둔다 — 사각형의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=1.02, >=stealth]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.85,0);
+  \coordinate (A) at (0.62,1.234);
+  \coordinate (D) at (2.137,1.234);
+  \coordinate (I) at (1.3947,0.8053);
+  \fill[yellow!32] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (C);
+  \draw[line width=0.55pt] (B) -- (D);
+  \draw[line width=0.4pt] ([shift=(0:0.55)]B) arc (0:30:0.55);
+  \node[font=\footnotesize] at ([shift=(15:0.88)]B) {$30^\circ$};
+  \draw[line width=0.4pt] ([shift=(-29:0.3)]I) arc (-29:30:0.3);
+  \node[font=\footnotesize] at ([shift=(0.5:0.58)]I) {$60^\circ$};
+  \coordinate (R1) at ([shift=(210:0.15)]D);
+  \coordinate (R2) at ([shift=(-60:0.15)]D);
+  \coordinate (R3) at ([shift=(-60:0.15)]R1);
+  \draw[line width=0.35pt] (R1) -- (R3) -- (R2);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(30:0.17)]D) to[bend left=12]
+    node[midway, right=-1.5pt, font=\footnotesize] {$4$} ([shift=(30:0.17)]C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-119:0.17)]A) to[bend right=12]
+    node[midway, below=-2.5pt, font=\footnotesize] {$7$} ([shift=(-119:0.17)]C);
+  \node[above left=-3.5pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[below left=-3.5pt and -3pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-3.5pt and -3pt, font=\small] at (C) {$\pt{C}$};
+  \node[above right=-3.5pt and -3pt, font=\small] at (D) {$\pt{D}$};
+\end{tikzpicture}

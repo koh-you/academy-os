@@ -1,0 +1,27 @@
+% 65-56(65쪽) — 한 변의 길이가 20 인 정사각형 ABCD 의 네 변 위의 점 P, Q, R, S 와 사각형 PQRS(연한 파란색 채움). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·P·Q·R·S·20. 네 점의 위치는 원문 그림의 비율만 따랐고 답(넓이의 최솟값)이 읽히지 않게 임의의 값이다.
+\begin{tikzpicture}[scale=0.145, line width=0.5pt]
+  \coordinate (A) at (0,20);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (20,0);
+  \coordinate (D) at (20,20);
+  \coordinate (P) at (0,16);
+  \coordinate (Q) at (8,0);
+  \coordinate (R) at (20,4);
+  \coordinate (S) at (12,20);
+  \fill[cyan!25] (P) -- (Q) -- (R) -- (S) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.6pt] (P) -- (Q) -- (R) -- (S) -- cycle;
+  % 한 변의 길이 20 을 나타내는 원문의 점선 호
+  \draw[densely dotted, line width=0.4pt] (A) .. controls (-2.6,15) and (-2.6,5) .. (B);
+  \node[left, font=\small, inner sep=1pt] at (-1.9,10) {$20$};
+  % 라벨(원문 그대로)
+  \node[above left=-3pt, font=\small, inner sep=1pt] at (A) {$\mathrm{A}$};
+  \node[below left=-3pt, font=\small, inner sep=1pt] at (B) {$\mathrm{B}$};
+  \node[below right=-3pt, font=\small, inner sep=1pt] at (C) {$\mathrm{C}$};
+  \node[above right=-3pt, font=\small, inner sep=1pt] at (D) {$\mathrm{D}$};
+  \node[left, font=\small, inner sep=2pt] at (P) {$\mathrm{P}$};
+  \node[below, font=\small, inner sep=2pt] at (Q) {$\mathrm{Q}$};
+  \node[right, font=\small, inner sep=2pt] at (R) {$\mathrm{R}$};
+  \node[above, font=\small, inner sep=2pt] at (S) {$\mathrm{S}$};
+\end{tikzpicture}

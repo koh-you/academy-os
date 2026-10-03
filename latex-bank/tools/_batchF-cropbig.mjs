@@ -1,0 +1,12 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
+const [src, x0, y0, x1, y1, out, zoomArg] = process.argv.slice(2);
+const img = await loadImage(await readFile(src));
+const scale = img.width / 533.9, zoom = Number(zoomArg) || 2;
+const sx = Math.round(x0 * scale), sy = Math.round(y0 * scale), sw = Math.round((x1 - x0) * scale), sh = Math.round((y1 - y0) * scale);
+const canvas = createCanvas(Math.round((x1 - x0) * zoom * 2), Math.round((y1 - y0) * zoom * 2));
+const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+await writeFile(out, await canvas.encode("png"));
+console.log(out, canvas.width, canvas.height, "src", img.width, img.height);

@@ -1,0 +1,26 @@
+% 87-04(인쇄 87쪽) — 표본공간 S, X의 값, P(X=x) 세 집합의 대응 관계를 나타낸 그림(화살표 대응).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(HH, HT, TH, TT, 0, ㈎, ㈏, ㈐, ㈑) · 빈칸의 값은 그림에 넣지 않는다.
+\begin{tikzpicture}[x=1cm, y=1cm, scale=0.86, line width=0.5pt, font=\small]
+  \draw (0,0) ellipse (0.78 and 1.6);
+  \draw (2.8,0) ellipse (0.78 and 1.6);
+  \draw (5.6,0) ellipse (0.78 and 1.6);
+  \node at (0,1.92) {$S$};
+  \node at (2.8,1.92) {$X$의 값};
+  \node at (5.6,1.92) {$\mathrm{P}(X=x)$};
+  \node (hh) at (-0.16,1.02) {$\mathrm{HH}$};
+  \node (ht) at (-0.16,0.36) {$\mathrm{HT}$};
+  \node (th) at (-0.16,-0.3) {$\mathrm{TH}$};
+  \node (tt) at (-0.16,-0.96) {$\mathrm{TT}$};
+  \node (v0) at (2.66,1.02) {$0$};
+  \node (va) at (2.66,0.06) {㈎};
+  \node (vb) at (2.66,-0.96) {㈏};
+  \node (pc) at (5.5,0.56) {㈐};
+  \node (pd) at (5.5,-0.56) {㈑};
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (hh.east) -- (v0.west);
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (ht.east) -- (va.west);
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (th.east) -- (va.west);
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (tt.east) -- (vb.west);
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (v0.east) -- (pc.west);
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (va.east) -- (pd.west);
+  \draw[->, >=stealth, shorten >=2pt, shorten <=2pt] (vb.east) -- (pc.west);
+\end{tikzpicture}

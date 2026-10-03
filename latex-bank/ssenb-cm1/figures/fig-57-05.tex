@@ -1,0 +1,11 @@
+% 57-05(57쪽) — 아래로 볼록한 이차함수 y=f(x) 의 그래프가 x축과 두 점 A, B 에서 만나는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y=f(x), O, A, B)만. 근·좌표 값은 원문 그림에 없으므로 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.0,0) -- (2.9,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.1) -- (0,4.8) node[left] {$y$};
+  \node[above left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.7:2.35, samples=70, smooth] plot (\x, {0.9*(\x+1.35)*(\x-1)});
+  \node[below, font=\small] at (-1.35,0) {$\mathrm{A}$};
+  \node[below, font=\small] at (1,0) {$\mathrm{B}$};
+  \node[left, font=\small] at (-2.75,4.0) {$y=f(x)$};
+\end{tikzpicture}

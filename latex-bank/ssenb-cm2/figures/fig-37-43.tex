@@ -1,0 +1,20 @@
+% 37-43(37쪽) — 원 x^2+y^2=4 를 선분 PQ 를 접는 선으로 하여 접었더니 점 (1, 0)에서 x축에 접한 그림.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 접힌 호는 원 O 를 직선 PQ 에 대하여 대칭이동한 호(중심 (1, 2)·반지름 2)이고,
+% 점선은 접기 전의 호 PQ 다. 라벨은 원문 그대로 y·P·Q·O·x 와 눈금 2·-2·-2·1·2 만 둔다. 직선 PQ 의 y절편(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.68, line width=0.5pt]
+  \coordinate (P) at (-0.983,1.742); \coordinate (Q) at (1.983,0.258);
+  \fill[yellow!45] (P) arc[start angle=119.45, end angle=367.41, radius=2] -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-3.0,0) -- (3.3,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.0) -- (0,3.0) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (P) arc[start angle=119.45, end angle=367.41, radius=2] -- cycle;
+  \draw[line width=0.6pt] (P) arc[start angle=187.41, end angle=299.45, radius=2];
+  \draw[dashed, line width=0.5pt] (Q) arc[start angle=7.41, end angle=119.45, radius=2];
+  \node[above left=-2pt and -2pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[right=1pt, font=\small] at (Q) {$\mathrm{Q}$};
+  \node[below left=0pt and -3pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below right=1pt and -3pt, font=\small] at (2,0) {$2$};
+\end{tikzpicture}

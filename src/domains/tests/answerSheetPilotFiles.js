@@ -1,3 +1,4 @@
+import { getSessionBrandName } from "../../shared/utils/academyBrand.js";
 import { answerCellBox, ANSWER_SHEET_SIZE } from "./answerSheetPilotModel.js";
 
 // 화면에 띄울 사본의 긴 변. A4 비율 캔버스에 맞춰 담으므로 answerCellBox 의 정규화 좌표가 그대로 들어맞는다.
@@ -78,7 +79,7 @@ export async function downloadBlankAnswerSheet() {
   const c = canvas.getContext("2d");
   c.fillStyle = "white"; c.fillRect(0, 0, canvas.width, canvas.height);
   c.fillStyle = "#17212b";
-  c.font = "bold 42px sans-serif"; c.fillText("으뜸수학 고태영T", 108, 115);
+  c.font = "bold 42px sans-serif"; c.fillText(getSessionBrandName(), 108, 115);
   c.font = "bold 60px sans-serif"; c.fillText("공통 답안지", 108, 200);
   c.font = "28px sans-serif";
   c.fillText("시험명 ________________________   이름 ______________", 108, 285);

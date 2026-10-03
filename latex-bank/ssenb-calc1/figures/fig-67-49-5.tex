@@ -1,0 +1,14 @@
+% 67-49 ⑤(67쪽) — 보기 그래프: x=-1 과 x=1 에서 극대, x=0 에서 극소인 사차함수의 개형.
+% 그림 자체가 보기라 TikZ 로 다시 그림. 라벨은 원문 그대로 -1 · O · 1 · x · y 만.
+\begin{tikzpicture}[x=0.50cm, y=0.50cm, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.45,-1.55) rectangle (2.55,1.55);
+  \draw[->, >=stealth, line width=0.7pt] (-2.20,0) -- (2.20,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,1.40) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-1,0) -- (-1,0.85);
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,0.85);
+  \draw[line width=0.6pt, domain=-1.80:1.80, samples=130, smooth]
+    plot (\x, {-1.6*(0.25*(\x)^4 - 0.5*(\x)^2) + 0.45});
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% 107-18(107쪽) — 107쪽 18번 힌트 옆 그림 · 반지름 1 인 원과 각 $\dfrac{4}{3}\pi$ 를 나타내는 동경 OP, 점 P 에서 x축에 내린 수선의 발 H.
+% 축 라벨은 원문대로 $1$·$-1$ 만, 동경 위 화살표와 각을 나타내는 호(시초선에서 반시계 방향)도 원문 그대로.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 점 P 의 좌표나 삼각함수 값은 적지 않는다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[line width=0.55pt, x=1.05cm, y=1.05cm]
+  \draw[->, >=stealth, line width=0.5pt] (-1.5,0) -- (1.72,0) node[below=1pt, font=\footnotesize] {$x$};
+  \draw[->, >=stealth, line width=0.5pt] (0,-1.42) -- (0,1.45) node[left=1pt, font=\footnotesize] {$y$};
+  \draw (0,0) circle (1);
+  \draw[->, >=stealth] (0,0) -- (-0.75,-1.299);
+  \fill (-0.5,-0.866) circle (2.2pt);
+  \draw[line width=0.5pt] (-0.5,0) -- (-0.5,-0.866);
+  \draw[densely dotted, line width=0.4pt] (-0.5,-0.866) -- (0,-0.866);
+  \draw[line width=0.4pt] (-0.5,-0.15) -- (-0.35,-0.15) -- (-0.35,0);
+  \draw[line width=0.4pt] (0,-0.716) -- (-0.15,-0.716) -- (-0.15,-0.866);
+  \draw[->, >=stealth, line width=0.4pt] (0.3,0) arc[start angle=0, end angle=240, radius=0.3];
+  \node[above left=-3pt and -3pt, font=\footnotesize] at (-0.5,0) {$\pt{H}$};
+  \node[anchor=east, font=\footnotesize] at (-0.58,-0.92) {$\pt{P}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\footnotesize] at (0.16,0.45) {$\dfrac{4}{3}\pi$};
+  \node[anchor=east, font=\footnotesize] at (-0.08,1.14) {$1$};
+  \node[anchor=west, font=\footnotesize] at (0.08,-1.14) {$-1$};
+  \node[below=1pt, font=\footnotesize] at (-1.18,-0.02) {$-1$};
+  \node[below=1pt, font=\footnotesize] at (1.09,-0.02) {$1$};
+\end{tikzpicture}

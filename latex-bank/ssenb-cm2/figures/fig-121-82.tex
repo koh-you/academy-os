@@ -1,0 +1,25 @@
+% 121-82(121쪽) — 두 함수 f : X → X, g : X → X 의 대응 그림(집합 X={-2,-1,0,1,2} 타원 3개·화살표). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 화살표 대응은 원문 그대로: f 는 -2→0, -1→1, 0→-2, 1→2, 2→-1, g 는 -2→-1, -1→-2, 0→2, 1→0, 2→1.
+\begin{tikzpicture}[scale=0.82, line width=0.5pt, >=stealth, every node/.style={font=\small}]
+  \foreach \cx in {0,3,6} {
+    \draw[line width=0.6pt] (\cx,0) ellipse (0.62 and 1.55);
+    \node at (\cx,1.78) {$X$};
+    \node at (\cx,1.00) {$-2$};
+    \node at (\cx,0.50) {$-1$};
+    \node at (\cx,0.00) {$0$};
+    \node at (\cx,-0.50) {$1$};
+    \node at (\cx,-1.00) {$2$};
+  }
+  \draw[->, line width=0.5pt] (0.45,1.78) -- (2.55,1.78) node[midway, above=1pt] {$f$};
+  \draw[->, line width=0.5pt] (3.45,1.78) -- (5.55,1.78) node[midway, above=1pt] {$g$};
+  \draw[->, line width=0.45pt] (0.50,1.00) -- (2.50,0.00);
+  \draw[->, line width=0.45pt] (0.50,0.50) -- (2.50,-0.50);
+  \draw[->, line width=0.45pt] (0.50,0.00) -- (2.50,1.00);
+  \draw[->, line width=0.45pt] (0.50,-0.50) -- (2.50,-1.00);
+  \draw[->, line width=0.45pt] (0.50,-1.00) -- (2.50,0.50);
+  \draw[->, line width=0.45pt] (3.50,1.00) -- (5.50,0.50);
+  \draw[->, line width=0.45pt] (3.50,0.50) -- (5.50,1.00);
+  \draw[->, line width=0.45pt] (3.50,0.00) -- (5.50,-1.00);
+  \draw[->, line width=0.45pt] (3.50,-0.50) -- (5.50,0.00);
+  \draw[->, line width=0.45pt] (3.50,-1.00) -- (5.50,-0.50);
+\end{tikzpicture}

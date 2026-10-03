@@ -1,0 +1,26 @@
+% 79-20(79쪽) — 도함수 $y=f'(x)$ 의 그래프 · 구간 $(\alpha,\ \beta)$ 안에서 $x$축과 $a$, $b$, $c$, $e$ 에서 만나고 $d$ 에서 접한다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선 · $\alpha$, $\beta$ 안내 점선 둘 · 라벨 a b c d e $\alpha$ $\beta$ O x y y=f'(x). 눈금 수치는 원문에 없다.
+% 극대·극소를 이 그래프에서 읽는 문제이므로 답을 가리키는 표시는 넣지 않는다.
+\begin{tikzpicture}[x=0.34cm, y=0.32cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-7.60,0) -- (7.30,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.15) -- (0,3.45) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-6.55,0) -- (-6.55,1.50);
+  \draw[densely dotted, line width=0.4pt] (6.05,0) -- (6.05,1.45);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (-6.80,2.55) (-6.55,1.50) (-6.35,0.62) (-6.20,0.00) (-6.00,-0.68) (-5.60,-1.62)
+    (-5.20,-2.10) (-4.75,-2.20) (-4.30,-2.10) (-3.90,-1.70) (-3.40,-0.95) (-2.90,0.00)
+    (-2.50,0.75) (-2.20,1.15) (-2.00,1.25) (-1.80,1.15) (-1.55,0.80) (-1.25,0.00)
+    (-1.00,-0.60) (-0.60,-1.30) (-0.30,-1.62) (0.00,-1.70) (0.30,-1.62) (0.60,-1.30)
+    (1.00,-0.72) (1.45,-0.22) (1.90,0.00) (2.35,-0.22) (2.80,-0.85) (3.30,-1.65)
+    (3.85,-1.95) (4.40,-1.65) (4.80,-1.15) (5.20,-0.50) (5.50,0.00) (5.80,0.72)
+    (6.05,1.45) (6.25,2.05) };
+  \node[below=1pt, font=\small] at (-6.55,0) {$\alpha$};
+  \node[above right=-1pt and -2pt, font=\small] at (-6.20,0) {$a$};
+  \node[below right=-1pt and -3pt, font=\small] at (-2.90,0) {$b$};
+  \node[below left=-1pt and -3pt, font=\small] at (-1.25,0) {$c$};
+  \node[below left=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (1.90,0) {$d$};
+  \node[above left=-1pt and -2pt, font=\small] at (5.50,0) {$e$};
+  \node[below left=-1pt and -3pt, font=\small] at (6.05,0) {$\beta$};
+  \node[anchor=south, font=\small] at (4.30,2.75) {$y=f'(x)$};
+\end{tikzpicture}

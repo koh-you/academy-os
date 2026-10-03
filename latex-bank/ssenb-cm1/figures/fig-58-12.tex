@@ -1,0 +1,16 @@
+% 58-12(58쪽) — 이차함수 y=ax^2+bx+c 의 그래프와 직선 y=mx+n 이 서로 다른 두 점에서 만나는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y=ax^2+bx+c, y=mx+n, -2, O, 3, 4 와 x=4 의 파선)만. 교점의 y좌표 등 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.6,0) -- (5.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,5.4) node[left] {$y$};
+  \node[below right=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % 포물선 y=0.42(x+2)(x-3) · 직선 y=0.42(x+2) — 두 교점의 x좌표는 원문과 같이 -2, 4
+  \draw[line width=0.6pt, domain=-3.5:4.5, samples=80, smooth] plot (\x, {0.42*(\x+2)*(\x-3)});
+  \draw[line width=0.6pt] (-5.0,-1.26) -- (5.4,3.11);
+  \draw[dashed, line width=0.4pt] (4,0) -- (4,2.52);
+  \node[below left=1pt and -4pt, font=\small] at (-2,0) {$-2$};
+  \node[above left=0pt and -3pt, font=\small] at (3,0) {$3$};
+  \node[below, font=\small] at (4,0) {$4$};
+  \node[left, font=\small] at (-0.3,4.7) {$y=ax^2+bx+c$};
+  \node[font=\small] at (-3.5,-2.1) {$y=mx+n$};
+\end{tikzpicture}

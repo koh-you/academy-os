@@ -47,7 +47,11 @@ for (const spec of String(args.map).split(",").map((value) => value.trim()).filt
     }
   }
   Object.assign(unit.items, batch.items);
-  for (const note of batch.review_needed ?? []) reviews.push({ batch: letter, ...note });
+  // review_needed 는 문자열 줄일 수도 있고 {id, note} 객체일 수도 있다. 문자열을 그대로 펼치면 글자마다 키가 생겨
+  // 메모를 읽을 수 없게 된다(쎈B 미적분1 병합에서 147줄이 전부 글자 단위로 쪼개져 있었다 — 검수 지적).
+  for (const note of batch.review_needed ?? []) {
+    reviews.push(typeof note === "string" ? { batch: letter, note } : { batch: letter, ...note });
+  }
   console.log(`${letter}: ${Object.keys(batch.items).length}문항 · 그룹 ${batch.groups.length}`);
 }
 for (const unit of byUnit.values()) {

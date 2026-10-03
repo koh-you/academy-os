@@ -1,0 +1,29 @@
+% 27-02(27쪽) — $-2\le x\le 2$ 에서 정의된 $y=f(x)$ 의 그래프(사분원 호 + 선분 + 수평선분 · 빈 점(○)과 채운 점(●)). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 -2, -1, 1, 2 · y 값 1, 2 · 안내 점선 · 라벨 y=f(x), O, x, y.
+\begin{tikzpicture}[x=0.66cm, y=0.62cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.6,0) -- (2.85,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,2.9) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-2,0) -- (-2,2);
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,2);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,2);
+  \draw[densely dotted, line width=0.4pt] (2,0) -- (2,1);
+  \draw[densely dotted, line width=0.4pt] (-2,2) -- (1,2);
+  \draw[densely dotted, line width=0.4pt] (-1,1) -- (1,1);
+  \draw (-2,2) arc (90:0:1 and 1);
+  \draw (-1,1) -- (1,2);
+  \draw (1,1) -- (2,1);
+  \fill (-2,2) circle (2.2pt);
+  \fill (-1,2) circle (2.2pt);
+  \fill (1,2) circle (2.2pt);
+  \fill (2,1) circle (2.2pt);
+  \draw[fill=white] (-1,1) circle (2.2pt);
+  \draw[fill=white] (1,1) circle (2.2pt);
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[right=1pt, font=\small] at (0,2) {$2$};
+  \node[below right=-3pt and 1pt, font=\small] at (0,1) {$1$};
+  \node[anchor=west, font=\small] at (1.05,2.55) {$y=f(x)$};
+\end{tikzpicture}

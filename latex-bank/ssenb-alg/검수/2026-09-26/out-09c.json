@@ -1,0 +1,27 @@
+{
+  "range": "124-25~127-48",
+  "checked": 24,
+  "ok": 22,
+  "findings": [
+    {
+      "id": "126-41",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "\\exprbox 내용이 상자 폭(0.9\\linewidth)을 넘겨 마지막 항 $(n-1)\\cdot1$의 끝 `1`이 오른쪽 테두리에 걸쳐 잘림. 수식 내용 자체는 원문과 일치",
+      "fix": "items['126-41'].body 의 \\exprbox 인수 앞에 \\small 을 넣거나 `+\\cdots` 앞에서 `$ $`로 끊어 줄바꿈을 허용"
+    },
+    {
+      "id": "126-43",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "\\exprbox 내용이 상자 폭을 넘쳐 마지막 항 $(2n-1)\\cdot1$의 `1)\\cdot1` 부분이 오른쪽 테두리 바깥으로 삐져나감(테두리가 `2n-`와 `1)` 사이를 관통). 수식 내용 자체는 원문과 일치",
+      "fix": "items['126-43'].body 의 \\exprbox 인수 앞에 \\small 을 넣거나 `+\\cdots` 앞에서 `$ $`로 끊어 줄바꿈을 허용"
+    },
+    {
+      "id": "126-46",
+      "severity": "ok",
+      "where": "layout",
+      "note": "원본 크롭 없음(review 그림 왼쪽 비어 있음) — 쪽 이미지 p126 의 배지 46(쎈 1109)과 대조해 본문·조건 모두 일치"
+    }
+  ]
+}

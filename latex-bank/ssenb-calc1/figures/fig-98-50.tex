@@ -1,0 +1,15 @@
+% 98-50(98쪽) — 도함수 y=f'(x)(위로 볼록한 포물선 · 꼭짓점 (-1/2, 1/2))의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 꼭짓점 안내 파선과 눈금 -1/2 (x축) · 1/2 (y축) · 라벨 O, x, y, y=f'(x). 곡선은 원문처럼 x=-1 과 원점에서 x축을 지난다.
+% 그 밖의 눈금은 원문에 없으므로 넣지 않는다(f(-3)이 답이라 수치를 더하면 답이 드러난다).
+\begin{tikzpicture}[x=1.40cm, y=1.40cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (0.62,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.72) -- (0,0.95) node[left=1pt] {$y$};
+  % 꼭짓점 안내 파선(원문)
+  \draw[dashed, line width=0.35pt] (-0.5,0.5) -- (0,0.5);
+  \draw[dashed, line width=0.35pt] (-0.5,0) -- (-0.5,0.5);
+  \draw[line width=0.6pt, domain=-1.27:0.32, samples=120, smooth] plot (\x, {-2*(\x+0.5)*(\x+0.5)+0.5});
+  \node[below left=1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (-0.5,0) {$-\dfrac{1}{2}$};
+  \node[right=2pt, font=\small] at (0,0.5) {$\dfrac{1}{2}$};
+  \node[anchor=east, font=\small] at (-0.56,0.72) {$y=f'(x)$};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 11-22(11쪽) — 11-22~11-25 공통. y=f(x) 의 그래프(x=-1 에 빈 점 · x=1 에서 좌·우가 갈리는 그래프). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 -2, -1, 1 · y축 눈금 1, -1 · 안내 점선 · 빈 점 (-1,1), (1,-1) · 채운 점 (1,0) · 라벨 y=f(x), O, x, y.
+\begin{tikzpicture}[x=0.60cm, y=0.62cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.1,0) -- (3.25,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,3.2) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,1) -- (0,1);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,-1) -- (0,-1);
+  \draw[line width=0.6pt, domain=-2.45:1, samples=80, smooth] plot (\x, {(\x*\x*\x-4*\x)/3});
+  \draw[line width=0.6pt, domain=1:2.8, samples=60, smooth] plot (\x, {0.75*(\x-1)*(\x-1)});
+  \fill (1,0) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (-1,1) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (1,-1) circle (2pt);
+  \node[font=\small] at (-2.45,0.38) {$-2$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-2pt and -3pt, font=\small] at (1,0) {$1$};
+  \node[right=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,-1) {$-1$};
+  \node[font=\small] at (2.1,2.85) {$y=f(x)$};
+\end{tikzpicture}

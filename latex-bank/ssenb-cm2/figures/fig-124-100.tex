@@ -1,0 +1,10 @@
+% 124-100(124쪽) — 함수 y=f(x) 의 그래프: 꺾은선 (-0.4,1)-(0,0)-(0.4,-1)-(1.65,-1)-(2.05,0)-(2.45,1).
+% 원점 부근을 지나 내려갔다가 평평한 바닥을 거쳐 다시 가파르게 올라가는 모양. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문에 있는 O·x·y·y=f(x) 뿐이고 눈금 수치는 원문에도 없다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.9,0) -- (3.4,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,1.6) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.4,1) -- (0,0) -- (0.4,-1) -- (1.65,-1) -- (2.05,0) -- (2.45,1);
+  \node[font=\small] at (2.6,1.35) {$y=f(x)$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

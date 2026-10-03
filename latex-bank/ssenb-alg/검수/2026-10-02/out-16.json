@@ -1,0 +1,13 @@
+{ "range": "74-22~79-46", "checked": 25, "ok": 23,
+  "findings": [
+    { "id": "78-40", "severity": "yellow", "where": "layout", "note": "보기 상자 ㄷ 줄 「(tan15°+tan75°)²−(tan15°+tan105°)²=−4」가 상자 폭을 넘어 오른쪽 테두리와 겹친다. 내용은 원본과 일치. \\bogi 의 minipage(0.9\\linewidth) 안에서 \\\\ 로만 줄을 나눠 긴 줄이 밖으로 삐져나온 것. 같은 상자에서 ㄴ 줄 분수 분모(6·3·4)가 ㄷ 줄에 바짝 붙는다.", "fix": "items.json 수정 아님 — book.tex 의 \\bogi 를 폭 초과 시 줄바꿈되게(또는 ㄷ 줄만 \\small) 고칠 것" },
+    { "id": "79-46", "severity": "yellow", "where": "layout", "note": "보기 상자 ㄱ 줄 $\\sin\\dfrac{A}{2}$ 의 분모 2 가 바로 아래 ㄴ 줄 $\\cos A$ 의 A 와 겹쳐 찍힌다. 내용은 원본과 일치(ㄱ sin A/2=cos B · ㄴ cos A=−sin2C · ㄷ tan2A=−tan4C).", "fix": "items.json 수정 아님 — \\bogi 줄바꿈에 행간 여유를 주거나 해당 항목만 \\dfrac 를 \\frac 로" },
+    { "id": "75-26", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — 쪽 이미지 p075 로 대조해 본문·그림(a·b·c·d 위치, y=k, 양 끝 점) 일치" },
+    { "id": "76-31", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p076 로 대조해 본문·그림 일치" },
+    { "id": "76-32", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — 쪽 이미지 p076 으로 보기 ㄱㄴㄷ 대조해 일치. 상자 안 ㄷ 줄이 위 줄과 간격이 좁지만 겹치지는 않음" },
+    { "id": "77-33", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p077 재크롭으로 선택지 5개(①~⑤, ④ x=nπ · ⑤ x≠nπ 포함) 전부 대조해 일치" },
+    { "id": "77-36", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — 쪽 이미지 p077 로 대조해 일치" },
+    { "id": "78-42", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — 쪽 이미지 p078 로 대조해 일치" },
+    { "id": "78-43", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p078 로 대조해 일치" },
+    { "id": "79-45", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제) — 쪽 이미지 p079 재크롭으로 본문·그림(2·√5·α·β·O 위치) 대조해 일치" }
+  ] }

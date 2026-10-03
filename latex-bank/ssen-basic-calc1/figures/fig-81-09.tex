@@ -1,0 +1,21 @@
+% 81-09(81쪽) — 도함수 $y=f'(x)$ 의 그래프($x=-1,\ 1,\ 3$ 에서 $x$축을 지나고 $x=5$ 에서 $x$축에 접한다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · $x=-2,\ 2,\ 4,\ 6$ 의 안내 점선 · 눈금 -2, -1, 1, 2, 3, 4, 5, 6 · 라벨 O, x, y, y=f'(x). 원문에 없는 함숫값은 적지 않는다.
+\begin{tikzpicture}[x=0.55cm, y=0.50cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.7,0) -- (6.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.15) -- (0,1.85) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-2,0) -- (-2,-1.45);
+  \draw[densely dashed, line width=0.4pt] (2,0) -- (2,-1.02);
+  \draw[densely dashed, line width=0.4pt] (4,0) -- (4,0.72);
+  \draw[densely dashed, line width=0.4pt] (6,0) -- (6,1.45);
+  \draw plot[smooth, tension=0.7] coordinates {(-2.35,-2.05) (-2,-1.45) (-1.6,-0.78) (-1.3,-0.36) (-1,0) (-0.7,0.56) (-0.4,0.9) (0,1.05) (0.4,0.9) (0.7,0.56) (1,0) (1.3,-0.56) (1.6,-0.92) (2,-1.02) (2.4,-0.86) (2.7,-0.5) (3,0) (3.3,0.37) (3.7,0.65) (4,0.72) (4.3,0.6) (4.6,0.3) (4.85,0.05) (5,0) (5.15,0.05) (5.4,0.3) (5.7,0.72) (6,1.45) (6.35,2.15)};
+  \node[above left=-2pt and -1pt, font=\small] at (-2,0) {$-2$};
+  \node[above left=-2pt and -2pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[above=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+  \node[below=1pt, font=\small] at (6,0) {$6$};
+  \node[anchor=south, font=\small] at (5.35,2.1) {$y=f'(x)$};
+\end{tikzpicture}

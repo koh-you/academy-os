@@ -1,0 +1,8 @@
+% 118-84(118쪽) — 평행한 두 직선 위에 각각 4개의 점. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 점의 개수·배치만 원문 그대로. 라벨은 원문에 없다.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \foreach \y in {0,1.15} {
+    \draw (-0.8,\y) -- (3.8,\y);
+    \foreach \x in {0,1,2,3} { \fill (\x,\y) circle (2.2pt); }
+  }
+\end{tikzpicture}

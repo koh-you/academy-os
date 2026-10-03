@@ -1,0 +1,18 @@
+% 143-22(143쪽) — 항구 A 에서 동쪽으로 3 km 간 지점 C 에서 각 θ 만큼 방향을 바꿔 6 km 를 가 항구 B 에 이르는 항로 · AB=3√7 km.
+% 스캔 삽화(바다 바탕·등대·배 그림)는 화질이 낮아 TikZ 로 기하만 다시 그렸다.
+% 라벨은 원문에 있는 A·B·C·3 km·6 km·3√7 km·θ 만 두고 θ 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.52, line width=0.5pt]
+  \coordinate (A) at (0,0);
+  \coordinate (C) at (3,0);
+  \coordinate (B) at (6,5.196);
+  \draw[densely dotted, line width=0.3pt] (C) -- (5.4,0);
+  \draw (A) -- (C) -- (B) -- cycle;
+  \draw[line width=0.4pt] ([shift=(0:0.78)]C) arc (0:60:0.78);
+  \node[font=\footnotesize] at ([shift=(30:1.15)]C) {$\theta$};
+  \node[below left=-3pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[below right=-3pt and -3pt, font=\small] at (C) {$\pt{C}$};
+  \node[right=1pt, font=\small] at (B) {$\pt{B}$};
+  \node[below=0pt, font=\footnotesize] at (1.5,0) {$3\,\mathrm{km}$};
+  \node[right=2pt, font=\footnotesize] at (4.6,2.5) {$6\,\mathrm{km}$};
+  \node[left=2pt, font=\footnotesize] at (3,2.598) {$3\sqrt{7}\,\mathrm{km}$};
+\end{tikzpicture}

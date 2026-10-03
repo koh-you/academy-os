@@ -1,0 +1,22 @@
+{
+  "range": "81-55~88-06",
+  "checked": 25,
+  "ok": 25,
+  "findings": [
+    { "id": "81-55", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p081 배지 55·쎈 0703 으로 대조해 일치. 원문 2열 보기(ㄱ~ㄹ)를 세로 한 줄씩으로 편 것은 이 책 \\bogi 규약" },
+    { "id": "82-56", "severity": "ok", "where": "layout", "note": "크롭 없음(발문 빠진 크롭) — 쪽 이미지 p082 배지 56·쎈 0704 로 대조해 일치" },
+    { "id": "82-57", "severity": "ok", "where": "choices", "note": "보기 벤 다이어그램 5개를 TikZ 로 재작도 — 원본 8~12배 확대 대조 결과 ①가운데만 ②두 원씩 겹치는 세 자리(가운데 비움) ③A−가운데 + B∩C 꽃잎 ④한 원에만 속하는 세 자리 + 가운데 ⑤세 원 바깥 + 가운데 로 5개 모두 색칠 영역 일치. 2-2-1 배치(choices_layout ii)도 원문과 같음" },
+    { "id": "83-64", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭에 배지 65) — 쪽 이미지로 대조해 일치" },
+    { "id": "83-65", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭에 배지 66) — 쪽 이미지로 대조해 일치" },
+    { "id": "83-66", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지로 대조해 일치" },
+    { "id": "83-67", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지로 대조해 일치" },
+    { "id": "84-68", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭에 배지 72) — 쪽 이미지로 대조해 일치" },
+    { "id": "84-69", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭에 배지 73) — 쪽 이미지로 대조해 일치. 조건 상자 ㈎㈏㈐ 를 (가)(나)(다) 로 옮긴 것은 이 책 규약" },
+    { "id": "84-70", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지로 대조해 일치" },
+    { "id": "84-71", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지로 대조해 일치" },
+    { "id": "84-72", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지로 대조해 일치" },
+    { "id": "84-73", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지로 대조해 일치" },
+    { "id": "88-01", "severity": "ok", "where": "layout", "note": "크롭 없음(크롭 파일명 88-71 이 실제로는 배지 001) — 쪽 이미지 p088 로 대조해 일치" }
+  ],
+  "note": "목록 25개 전부 review/<id>.png 를 열어 확인했다. 크롭이 없거나 어긋난 14개는 output/problem-bank/ssenb-cm2/qa/p081·p082·p083·p084·p088.jpg 로 배지 번호를 다시 찾아 대조했고, 82-57 의 보기 벤 다이어그램은 latex-bank/tools/crop-page.mjs 로 8~12배 확대해 색칠 영역까지 확인했다. 연계번호는 06 집합의 연산 기준값 648(81~84쪽 배지 55~73 → 쎈 0703~0721)·07 명제 기준값 783(88쪽 배지 001~006 → 쎈 0784~0789)로 25개 모두 검산이 맞았다. red·yellow 없음."
+}

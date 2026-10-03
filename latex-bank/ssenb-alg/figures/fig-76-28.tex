@@ -1,0 +1,17 @@
+% 76-28(76쪽) — $y=3\sin\dfrac{\pi}{6}x$ 의 그래프와 내접한 직사각형 ABCD(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 A·B·C·D, $\pt{O}$, 곡선 이름, $\seg{BC}$ 위의 점선 호와 $4$.
+% 직사각형의 둘레(답)가 읽히지 않게 $x$축·$y$축 눈금과 높이 값은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.50cm, y=0.46cm, >=stealth]
+  \draw[->, line width=0.7pt] (-1.6,0) -- (7.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-2.3) -- (0,3.7) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-1.35:7.35, samples=140, smooth] plot (\x, {3*sin(30*\x)});
+  \draw (1,0) -- (1,1.5) -- (5,1.5) -- (5,0);
+  \draw[densely dashed, line width=0.35pt] (1,0) to[bend right=22] (5,0);
+  \node[font=\small, fill=white, inner sep=1pt] at (3,-0.62) {$4$};
+  \node[font=\small, anchor=south east] at (0.95,1.58) {$\pt{A}$};
+  \node[font=\small, anchor=south west] at (5.05,1.58) {$\pt{D}$};
+  \node[font=\small, anchor=north] at (0.15,-0.12) {$\pt{O}$};
+  \node[font=\small, anchor=north] at (1.12,-0.12) {$\pt{B}$};
+  \node[font=\small, anchor=north] at (4.88,-0.12) {$\pt{C}$};
+  \node[font=\small, anchor=south west] at (3.45,2.75) {$y=3\sin\dfrac{\pi}{6}x$};
+\end{tikzpicture}

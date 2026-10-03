@@ -1,0 +1,9 @@
+{ "range": "79-47~83-71", "checked": 25, "ok": 24,
+  "findings": [
+    { "id": "79-48", "severity": "red", "where": "body", "note": "원본은 cos α = 4/5 (양수) — p079 오른쪽 단을 640dpi 로 다시 잘라 확인했다. 조판본은 cos α = -4/5 로 마이너스가 붙어 있다.", "fix": "items['79-48'].body 의 $\\cos\\alpha=-\\dfrac{4}{5}$ 를 $\\cos\\alpha=\\dfrac{4}{5}$ 로" },
+    { "id": "79-49", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지(p079 오른쪽 단 49 | 대표 문제 · 쎈 0721)로 대조해 일치" },
+    { "id": "80-52", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지(p080 왼쪽 단 52 | 대표 문제 · 쎈 0724)로 대조해 일치" },
+    { "id": "80-56", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지(p080 오른쪽 단 56 | 대표 문제 · 쎈 0728)로 대조해 일치" },
+    { "id": "81-61", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지(p081 오른쪽 단 61 | 대표 문제 · 쎈 0733)로 대조해 일치" },
+    { "id": "82-67", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지(p082 오른쪽 단 67 | 대표 문제 · 쎈 0739)로 대조해 일치" }
+  ] }

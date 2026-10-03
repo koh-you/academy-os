@@ -1,0 +1,14 @@
+% 134-48(134쪽) — 함수 y=k/(x+a)+b 의 그래프: 점근선 x=1(점선) · y=-2(파선), x절편 3.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·O·1·3·-2 만 두고 a, b, k 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[xscale=0.32, yscale=0.22, line width=0.5pt]
+  \draw[dashed, line width=0.5pt] (-4.6,-2) -- (6.9,-2);
+  \draw[dotted, line width=0.7pt] (1,-7.4) -- (1,4.9);
+  \draw[->, >=stealth, line width=0.7pt] (-4.6,0) -- (7.2,0) node[below left=-1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.6) -- (0,5.1) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=80, domain=1.62:6.9] plot (\x, {4/(\x-1)-2});
+  \draw[line width=0.6pt, smooth, samples=80, domain=-4.6:0.25] plot (\x, {4/(\x-1)-2});
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below right=-2pt and -1pt, font=\small] at (1,0) {$1$};
+  \node[below=-1pt, font=\small] at (3,0) {$3$};
+  \node[below left=0pt and -1pt, font=\small] at (0,-2) {$-2$};
+\end{tikzpicture}

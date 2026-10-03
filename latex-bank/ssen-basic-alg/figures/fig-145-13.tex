@@ -1,0 +1,17 @@
+% 145-13(145쪽) — 평행사변형 ABCD · AB=6, BC=8, ∠D=150°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 6 · 8 · 150° 만 적는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.33cm, y=0.33cm]
+  \coordinate (A) at (0,3);
+  \coordinate (B) at (5.196,0);
+  \coordinate (C) at (13.196,0);
+  \coordinate (D) at (8,3);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[densely dotted, line width=0.35pt] (-0.35,2.85) to[bend right=18] node[midway, below left=-3.5pt and -3pt, font=\footnotesize] {$6$} (5.0,-0.35);
+  \draw[densely dotted, line width=0.35pt] (5.3,-0.55) to[bend right=14] node[midway, below=-2.5pt, font=\footnotesize] {$8$} (13.1,-0.55);
+  \draw[line width=0.4pt] ([shift=(180:1.2)]D) arc (180:330:1.2);
+  \node[font=\footnotesize] at ([shift=(257:2.1)]D) {$150^\circ$};
+  \node[above left=-3pt and -3.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[above=-2.5pt, font=\footnotesize] at (D) {$\pt{D}$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 10-24(10쪽) — 직선 BC 를 x축, 직선 AB 를 y축으로 잡은 좌표평면 위의 직사각형 ABCD(B=O)와 점 P(x, y), P 에서 네 꼭짓점에 그은 선분.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·b·a·A·D·C·O·(B)·P(x, y) 만.
+% 꼭짓점 D 의 좌표(㈏의 답)는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.72, line width=0.5pt]
+  \coordinate (O) at (0,0); \coordinate (A) at (0,1.7); \coordinate (C) at (2.7,0); \coordinate (D) at (2.7,1.7); \coordinate (P) at (0.62,0.95);
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (3.8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,2.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (O) -- (A) -- (D) -- (C) -- cycle;
+  \draw (P) -- (A) (P) -- (O) (P) -- (C) (P) -- (D);
+  \fill (P) circle (1.8pt);
+  \draw[->, >=stealth, line width=0.4pt] (1.0,2.05) to[bend left=18] (0.68,1.05);
+  \node[anchor=south west, inner sep=1pt, font=\small] at (0.95,2.1) {$\mathrm{P}(x,\,y)$};
+  \node[left=1pt, font=\small] at (A) {$b$};
+  \node[above right=-3pt and 1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[right=1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[above right=-2pt and 1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below=1pt, font=\small] at (2.55,0) {$a$};
+  \node[below left=0pt and -1pt, font=\small] at (O) {$\mathrm{O}$};
+  \node[below right=0pt and 0pt, font=\small] at (O) {$(\mathrm{B})$};
+\end{tikzpicture}

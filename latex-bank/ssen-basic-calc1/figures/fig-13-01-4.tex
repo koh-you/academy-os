@@ -1,0 +1,13 @@
+% 13-01(13쪽) — 보기 ㄹ 의 그래프(원점에서 채운 점으로 끊기고 $(0,\,1)$ 의 빈 점에서 다시 시작하는 두 반직선).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문의 빈 점(○)·채운 점(●) 과 y축 눈금 1 을 그대로 옮긴다.
+\begin{tikzpicture}[baseline=(current bounding box.north), x=0.28cm, y=0.28cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.4,0) -- (3.3,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.75) -- (0,3.75) node[left=1pt] {$y$};
+  \draw (-2.9,-2.4) -- (0,0);
+  \draw (0,1) -- (2.4,3.0);
+  \fill (0,0) circle (2.2pt);
+  \draw[fill=white] (0,1) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[below right=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.5,3.6) {$y=f(x)$};
+\end{tikzpicture}

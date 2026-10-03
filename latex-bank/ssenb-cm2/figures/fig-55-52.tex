@@ -1,0 +1,21 @@
+% 55-52(55쪽) — 두 방정식이 나타내는 도형: f(x, y)=0 은 꼭짓점 (-3,0)·(-1,0)·(-3,-2) 인 삼각형,
+% g(x, y)=0 은 꼭짓점 (0,2)·(2,2)·(2,4) 인 삼각형. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 4·2·−2(y축)·−3·−1·2(x축)·O·x·y 와 두 식 이름·안내 파선만.
+\begin{tikzpicture}[scale=0.36, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.6,0) -- (4.0,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,5.4) node[left] {$y$};
+  \node[below right=-1pt and 1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[dashed, line width=0.4pt] (0,4) -- (2,4);
+  \draw[dashed, line width=0.4pt] (2,2) -- (2,0);
+  \draw[dashed, line width=0.4pt] (-3,-2) -- (0,-2);
+  \draw[line width=0.6pt] (0,2) -- (2,2) -- (2,4) -- cycle;
+  \draw[line width=0.6pt] (-3,0) -- (-1,0) -- (-3,-2) -- cycle;
+  \node[left=1pt, font=\small] at (0,4) {$4$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[right=1pt, font=\small] at (0,-2) {$-2$};
+  \node[above, font=\small] at (-3,0) {$-3$};
+  \node[above, font=\small] at (-1,0) {$-1$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[right=1pt, font=\small] at (2.1,4.7) {$g(x,\,y)=0$};
+  \node[font=\small] at (-2.9,-3.0) {$f(x,\,y)=0$};
+\end{tikzpicture}

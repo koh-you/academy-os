@@ -1,0 +1,25 @@
+% 122-32(122쪽) — 두 곡선 y=x(x-a)(x-1) 과 y=-x(x-b)(x-1) 이 둘러싸는 두 도형. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 위 문자 a, b 와 눈금 1 · 색칠한 두 도형 · 라벨 O, x, y, y=x(x-a)(x-1), y=-x(x-b)(x-1).
+% a, b 는 원문처럼 문자로만 적고 수치 눈금을 넣지 않는다(a+b 가 답이라 값이 그림에서 읽히면 안 된다).
+% 세로는 모양이 보이도록 가로보다 크게 늘여 그린다(원문도 그렇다).
+\begin{tikzpicture}[x=1.85cm, y=6.5cm, line width=0.5pt]
+  % 색칠한 두 도형(원문)
+  \path[fill=black!14]
+    plot[domain=0:0.5, samples=50] (\x, {\x*(\x-0.4)*(\x-1)})
+    -- plot[domain=0.5:0, samples=50] (\x, {-\x*(\x-0.6)*(\x-1)}) -- cycle;
+  \path[fill=black!14]
+    plot[domain=0.5:1, samples=50] (\x, {\x*(\x-0.4)*(\x-1)})
+    -- plot[domain=1:0.5, samples=50] (\x, {-\x*(\x-0.6)*(\x-1)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-0.42,0) -- (1.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.16) -- (0,0.16) node[right=1pt] {$y$};
+  % 두 곡선
+  \draw[line width=0.6pt, domain=-0.2:1.14, samples=140, smooth] plot (\x, {\x*(\x-0.4)*(\x-1)});
+  \draw[line width=0.6pt, domain=-0.2:1.14, samples=140, smooth] plot (\x, {-\x*(\x-0.6)*(\x-1)});
+  % O 는 원점 왼쪽에서 두 곡선이 벌어진 자리에 둔다(원문도 그 자리)
+  \node[font=\small] at (-0.165,-0.028) {$\pt{O}$};
+  \node[above=2pt, font=\small] at (0.4,0) {$a$};
+  \node[above=2pt, font=\small] at (0.6,0) {$b$};
+  \node[below left=0pt and -1pt, font=\small] at (1,0) {$1$};
+  \node[anchor=west, font=\small] at (0.2,0.205) {$y=x(x-a)(x-1)$};
+  \node[anchor=west, font=\small] at (0.08,-0.205) {$y=-x(x-b)(x-1)$};
+\end{tikzpicture}

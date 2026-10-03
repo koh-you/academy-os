@@ -1,0 +1,221 @@
+{
+ "range": "26-68~37-32",
+ "checked": 62,
+ "ok": 58,
+ "findings": [
+  {
+   "id": "26-68",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "26-68",
+   "severity": "yellow",
+   "where": "layout",
+   "note": "첫 줄이 한 줄에 들어가지 않아 한글 자간·수식 연산자 간격이 크게 늘어나 읽기 어색함(내용은 원문과 일치)",
+   "fix": ""
+  },
+  {
+   "id": "27-69",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 어긋남(다른 번호 문항이 들어옴) — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "27-70",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 어긋남(다른 번호 문항이 들어옴) — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "27-70",
+   "severity": "yellow",
+   "where": "layout",
+   "note": "첫 줄이 한 줄에 들어가지 않아 한글 자간·수식 연산자 간격이 크게 늘어나 읽기 어색함(내용은 원문과 일치)",
+   "fix": ""
+  },
+  {
+   "id": "27-71",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 어긋남(다른 번호 문항이 들어옴) — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "27-72",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "27-73",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "27-74",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "27-75",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-76",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 어긋남(다른 번호 문항이 들어옴) — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-77",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-78",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-79",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-80",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-81",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "28-82",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-83",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-83",
+   "severity": "yellow",
+   "where": "layout",
+   "note": "첫 줄이 한 줄에 들어가지 않아 한글 자간·수식 연산자 간격이 크게 늘어나 읽기 어색함(내용은 원문과 일치)",
+   "fix": ""
+  },
+  {
+   "id": "29-84",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-85",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-86",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-87",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-88",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "29-89",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-90",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-91",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-92",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-92",
+   "severity": "yellow",
+   "where": "layout",
+   "note": "첫 줄이 한 줄에 들어가지 않아 한글 자간·수식 연산자 간격이 크게 늘어나 읽기 어색함(내용은 원문과 일치)",
+   "fix": ""
+  },
+  {
+   "id": "30-93",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-94",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-95",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-96",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "30-97",
+   "severity": "ok",
+   "where": "layout",
+   "note": "크롭 비어 있음 — 쪽 이미지로 대조해 일치"
+  },
+  {
+   "id": "36-28",
+   "severity": "ok",
+   "where": "layout",
+   "note": "원문 보기는 ㄱ·ㄴ / ㄷ·ㄹ 2단 배치인데 조판본은 세로 1단 — 항목 내용·순서는 동일(전사 노트의 가이드 규약 선택). 같은 쪽 28-79는 2단을 유지해 책 안에서 배치 규칙이 엇갈림"
+  }
+ ]
+}

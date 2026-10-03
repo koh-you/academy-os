@@ -1,0 +1,27 @@
+% 41-03(41쪽) — x=0 에서 끊어진 두 함수 y=f(x)(왼쪽)·y=g(x)(오른쪽)의 그래프가 나란히 놓인 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 왼쪽 빈 점 (0,0)·채운 점 (0,1) · 오른쪽 빈 점 (0,1)·채운 점 (0,0) · 라벨 1, O, x, y, y=f(x) / -1, 1, O, x, y, y=g(x). 눈금은 만들지 않는다.
+\begin{tikzpicture}[x=0.55cm, y=0.55cm, line width=0.5pt]
+  % 왼쪽 y=f(x)
+  \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (2.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,2.95) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-2.05,2.05) -- (0,0);
+  \draw[line width=0.6pt] (0,1) -- (1.72,2.32);
+  \fill (0,1) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (0,0) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[font=\small, anchor=west] at (0.2,2.7) {$y=f(x)$};
+  % 오른쪽 y=g(x)
+  \begin{scope}[shift={(5.6,0)}]
+    \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (1.9,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,2.95) node[left=1pt, font=\small] {$y$};
+    \draw[line width=0.6pt] (-2.05,-1.05) -- (0,1);
+    \draw[line width=0.6pt] (0,0) -- (1.95,1.95);
+    \fill (0,0) circle (2.2pt);
+    \draw[fill=white, line width=0.5pt] (0,1) circle (2.2pt);
+    \node[right=1pt, font=\small] at (0,1) {$1$};
+    \node[above left=-2pt and -3pt, font=\small] at (-1,0) {$-1$};
+    \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[font=\small, anchor=west] at (0.25,2.6) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

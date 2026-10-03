@@ -1,0 +1,12 @@
+% 36-31 ④(36쪽) — 보기 그래프: x=a 에서 x축에 닿으며 왼쪽은 완만하게, 오른쪽은 가파르게 올라가 뾰족한 점이 생기는 그래프.
+% 보기 자체가 그림이라 TikZ 로 다시 그림. 라벨은 원문 그대로 y=f(x), O, a, x, y 만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.3,-1.6) rectangle (3.1,2.7);
+  \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.85,0) node[below=1pt, font=\scriptsize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.15) -- (0,2.35) node[left=1pt, font=\scriptsize] {$y$};
+  \draw[line width=0.6pt, domain=-1.35:0.6, samples=100, smooth] plot (\x, {0.55*(0.6-\x)*(0.6-\x)});
+  \draw[line width=0.6pt, domain=0.6:2.7, samples=100, smooth] plot (\x, {1.20*sqrt(\x-0.6)});
+  \node[anchor=south east, font=\scriptsize] at (2.80,1.90) {$y=f(x)$};
+  \node[below left=-2pt and -2pt, font=\scriptsize] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\scriptsize] at (0.6,0) {$a$};
+\end{tikzpicture}

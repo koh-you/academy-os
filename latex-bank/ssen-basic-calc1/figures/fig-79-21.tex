@@ -1,0 +1,33 @@
+% 79-21(79쪽) — 도함수 $y=f'(x)$ 의 그래프 · 구간 $(\alpha,\ \beta)$ 안에서 $x$축과 $a$, $c$, $g$ 에서 만나고 $b$, $d$, $e$, $f$ 에서 접선이 수평이다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 곡선 · 안내 점선 여섯($\alpha$, b, d, e, f, $\beta$) · 라벨 a b c d e f g $\alpha$ $\beta$ O x y y=f'(x). 눈금 수치는 원문에 없다.
+% 극대·극소를 이 그래프에서 읽는 문제이므로 답을 가리키는 표시는 넣지 않는다.
+\begin{tikzpicture}[x=0.34cm, y=0.32cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-7.55,0) -- (7.40,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.15) -- (0,3.10) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-6.40,0) -- (-6.40,-1.85);
+  \draw[densely dotted, line width=0.4pt] (-4.10,0) -- (-4.10,1.75);
+  \draw[densely dotted, line width=0.4pt] (-1.20,0) -- (-1.20,-1.90);
+  \draw[densely dotted, line width=0.4pt] (0.90,0) -- (0.90,-0.93);
+  \draw[densely dotted, line width=0.4pt] (3.05,0) -- (3.05,-2.05);
+  \draw[densely dotted, line width=0.4pt] (6.10,0) -- (6.10,1.68);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (-6.80,-2.95) (-6.55,-2.25) (-6.40,-1.85) (-6.20,-1.35) (-5.90,-0.65) (-5.65,0.00)
+    (-5.35,0.62) (-5.00,1.15) (-4.60,1.58) (-4.35,1.71) (-4.10,1.75) (-3.85,1.71)
+    (-3.55,1.52) (-3.20,1.05) (-2.80,0.00) (-2.50,-0.78) (-2.10,-1.45) (-1.80,-1.75)
+    (-1.50,-1.85) (-1.20,-1.90) (-0.90,-1.85) (-0.60,-1.72) (-0.20,-1.42) (0.20,-1.15)
+    (0.50,-1.00) (0.70,-0.94) (0.90,-0.93) (1.10,-0.94) (1.40,-1.05) (1.80,-1.35)
+    (2.20,-1.68) (2.60,-1.94) (2.83,-2.02) (3.05,-2.05) (3.27,-2.02) (3.60,-1.88)
+    (4.00,-1.58) (4.40,-1.15) (4.80,-0.62) (5.20,0.00) (5.60,0.72) (6.10,1.68)
+    (6.45,2.40) };
+  \node[above=0pt, font=\small] at (-6.40,0) {$\alpha$};
+  \node[below right=-1pt and -2pt, font=\small] at (-5.65,0) {$a$};
+  \node[below=1pt, font=\small] at (-4.10,0) {$b$};
+  \node[below=1pt, font=\small] at (-2.80,0) {$c$};
+  \node[above=0pt, font=\small] at (-1.20,0) {$d$};
+  \node[below left=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=0pt, font=\small] at (0.90,0) {$e$};
+  \node[above=0pt, font=\small] at (3.05,0) {$f$};
+  \node[below right=-1pt and -3pt, font=\small] at (5.20,0) {$g$};
+  \node[below=1pt, font=\small] at (6.10,0) {$\beta$};
+  \node[anchor=south, font=\small] at (4.40,2.45) {$y=f'(x)$};
+\end{tikzpicture}

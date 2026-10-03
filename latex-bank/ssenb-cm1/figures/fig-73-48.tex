@@ -1,0 +1,35 @@
+% 73-48(73쪽) — 오각기둥의 전개도(옆면 다섯 칸의 띠 · 위아래에 오각형 밑면). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 다섯 개((x+2) cm 는 띠의 높이 · x cm 는 둘째 칸 · (x+4) cm 는 오각형이 붙은 칸 · (x+3) cm 는 넷째 칸 · x cm 는 다섯째 칸).
+% 구하는 x 의 값은 그림에서 읽히지 않는다(칸 너비는 원문처럼 대략 그린다).
+\begin{tikzpicture}[scale=0.44, line width=0.5pt]
+  \def\la{1.7}\def\lb{3.65}\def\lc{3.2}\def\lh{2.75}\def\xz{-4.16}\def\xe{8.55}
+  \fill[violet!13] (\xz,-\lh) rectangle (\xe,0);
+  \fill[violet!13] (0,0) -- (\lb,0) -- (\lb,\lc) -- (\lb-\la,\lc) -- (0,\la) -- cycle;
+  \fill[violet!13] (0,-\lh) -- (\lb,-\lh) -- (\lb,-\lh-\lc) -- (\lb-\la,-\lh-\lc) -- (0,-\lh-\la) -- cycle;
+  % 바깥 윤곽
+  \draw[line width=0.6pt] (\xz,0) -- (0,0) (\lb,0) -- (\xe,0);
+  \draw[line width=0.6pt] (\xz,-\lh) -- (0,-\lh) (\lb,-\lh) -- (\xe,-\lh);
+  \draw[line width=0.6pt] (\xz,0) -- (\xz,-\lh) (\xe,0) -- (\xe,-\lh);
+  \draw[line width=0.6pt] (0,0) -- (0,\la) -- (\lb-\la,\lc) -- (\lb,\lc) -- (\lb,0);
+  \draw[line width=0.6pt] (0,-\lh) -- (0,-\lh-\la) -- (\lb-\la,-\lh-\lc) -- (\lb,-\lh-\lc) -- (\lb,-\lh);
+  % 접는 선
+  \draw[dashed, line width=0.4pt] (-\la,0) -- (-\la,-\lh) (0,0) -- (0,-\lh) (\lb,0) -- (\lb,-\lh) (\lb+\lc,0) -- (\lb+\lc,-\lh);
+  \draw[dashed, line width=0.4pt] (0,0) -- (\lb,0) (0,-\lh) -- (\lb,-\lh);
+  % 직각 표시(원문의 세 곳)
+  \draw[line width=0.35pt] (0,0.26) -- (0.26,0.26) -- (0.26,0);
+  \draw[line width=0.35pt] (\lb,0.26) -- (\lb-0.26,0.26) -- (\lb-0.26,0);
+  \draw[line width=0.35pt] (\lb,\lc-0.26) -- (\lb-0.26,\lc-0.26) -- (\lb-0.26,\lc);
+  % 치수
+  \draw[densely dotted, line width=0.4pt] (\xz,0) to[bend right=16] (\xz,-\lh);
+  \node[font=\small, left, inner sep=2pt] at (\xz-0.3,-\lh/2) {$(x+2)\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (-\la,0.08) to[bend left=14] (0,0.08);
+  \node[font=\small] at (-\la/2,0.68) {$x\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (0,-0.12) to[bend right=12] (\lb,-0.12);
+  \node[font=\small] at (\lb/2+0.9,-1.25) {$(x+4)\,\mathrm{cm}$};
+  \draw[->, line width=0.35pt] (0.75,-1) -- (0.6,-0.45);
+  \draw[densely dotted, line width=0.4pt] (\lb,0.08) to[bend left=12] (\lb+\lc,0.08);
+  \node[font=\small] at (\lb+\lc/2+0.2,1.75) {$(x+3)\,\mathrm{cm}$};
+  \draw[->, line width=0.35pt] (\lb+\lc/2-0.1,1.4) -- (\lb+\lc/2-0.1,0.7);
+  \draw[densely dotted, line width=0.4pt] (\lb+\lc,0.08) to[bend left=14] (\xe,0.08);
+  \node[font=\small] at (\lb+\lc+\la/2+0.35,0.72) {$x\,\mathrm{cm}$};
+\end{tikzpicture}

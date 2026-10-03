@@ -1,0 +1,12 @@
+% 52-23 ④(52쪽) — 보기 그래프: x=a 에서 x축에 뾰족하게 닿았다가 다시 올라가는 곡선. 그림 자체가 보기라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O · a · x · y · y=f(x) 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-1.9,-1.9) rectangle (3.1,2.9);
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,2.6) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-1.5:0.85, samples=80, smooth] plot (\x, {1.5*sqrt(0.85-\x)});
+  \draw[line width=0.6pt, domain=0.85:2.5, samples=80, smooth] plot (\x, {1.5*sqrt(\x-0.85)});
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (0.85,0) {$a$};
+  \node[anchor=west, font=\small] at (0.95,2.3) {$y=f(x)$};
+\end{tikzpicture}

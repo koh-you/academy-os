@@ -1,0 +1,12 @@
+% 47-12(47쪽) — $y=\log_2 (x+a)+b$ 의 그래프(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문에 있는 것만 — 점근선 자리의 $-1$(세로 점선) · $\pt{O}$ · $x$절편 $3$ · $x$ · $y$.
+% 상수 $a$, $b$ 의 값(답)은 그림에 적지 않는다 — 원문도 점근선과 $x$절편만 보여 준다.
+\begin{tikzpicture}[line width=0.6pt, x=0.42cm, y=0.30cm, >=stealth]
+  \draw[densely dashed, line width=0.35pt] (-1,-4.9) -- (-1,2.0);
+  \draw[->, line width=0.7pt] (-2.2,0) -- (5.8,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-5.1) -- (0,2.3) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-0.84:5.5, samples=150, smooth] plot (\x, {ln(\x+1)/0.693147-2});
+  \node[below=0pt, font=\small] at (-1,-0.06) {$-1$};
+  \node[below right=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=0pt, font=\small] at (3,-0.06) {$3$};
+\end{tikzpicture}

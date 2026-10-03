@@ -1,0 +1,28 @@
+% 52-25(52쪽) — 구간 (0, 5) 언저리의 y=f(x) 그래프(x=0 빈 점 · x=2 뾰족한 점 · x=3 빈 점과 채운 점 · x=4 빈 점과 채운 점 뒤 내려가는 직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 눈금 1, 2, 3, 4, 5 와 라벨 O, x, y, y=f(x), 안내 점선, 빈 점(○)과 채운 점(●).
+% 연속·미분가능 여부와 극한의 존재가 이 그래프에서 읽는 문제이므로 답을 가리키는 표시는 넣지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.95,0) -- (6.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.5) -- (0,3.5) node[left=1pt] {$y$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,1.9);
+  \draw[densely dotted, line width=0.4pt] (3,0) -- (3,2.9);
+  \draw[densely dotted, line width=0.4pt] (4,0) -- (4,2.9);
+  % x<2 : 꼭짓점이 (1, 1.9) 인 아치 (x<0 쪽으로 조금 연장)
+  \draw[line width=0.6pt, domain=-0.26:2, samples=80, smooth] plot (\x, {1.9*\x*(2-\x)});
+  % 2<=x<4 : 올라가는 곡선
+  \draw[line width=0.6pt, domain=2:4, samples=80, smooth] plot (\x, {2.05*sqrt(\x-2)});
+  % x>=4 : 내려가는 직선 (x=5 에서 x축을 지난다)
+  \draw[line width=0.6pt] (4,1.5) -- (5.72,-1.08);
+  \draw[fill=white, line width=0.5pt] (0,0) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (3,2.05) circle (2.2pt);
+  \fill (3,2.9) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (4,2.9) circle (2.2pt);
+  \fill (4,1.5) circle (2.2pt);
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+  \node[anchor=west, font=\small] at (4.55,1.25) {$y=f(x)$};
+\end{tikzpicture}

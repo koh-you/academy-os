@@ -1,0 +1,14 @@
+% 118-65(118쪽) — 0≤x≤2 에서 정의된 y=f(x) 의 그래프(꺾은선 (0,2)-(1,0)-(2,2)).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 2(y축) · 1·2(x축) · O · x · y · y=f(x) 와 점선 보조선만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (3.1,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,2.9) node[left=-1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (2,2);
+  \draw[densely dotted, line width=0.4pt] (2,2) -- (2,0);
+  \draw[line width=0.6pt] (0,2) -- (1,0) -- (2,2);
+  \node[above right=-2pt and 0pt, font=\small] at (1.25,2.05) {$y=f(x)$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

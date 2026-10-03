@@ -1,0 +1,22 @@
+% 148-15(148쪽) — 평행사변형 ABCD 와 대각선 AC · $\seg{AB}=4$, $\seg{AC}=2\sqrt{7}$, $\seg{BC}=6$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 B 를 왼쪽 아래, C 를 오른쪽 아래, A·D 를 그 위에 두고 안쪽을 연하게 칠했다.
+% 라벨은 원문에 있는 A·B·C·D·$4$·$6$·$2\sqrt{7}$ 만 둔다 — 평행사변형의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, scale=0.38, >=stealth]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (6,0);
+  \coordinate (A) at (2,3.464);
+  \coordinate (D) at (8,3.464);
+  \fill[red!12] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.55pt] (A) -- (C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(150:0.34)]B) to[bend left=12]
+    node[midway, left=-1.5pt, font=\footnotesize] {$4$} ([shift=(150:0.34)]A);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(-90:0.34)]B) to[bend right=12]
+    node[midway, below=-2.5pt, font=\footnotesize] {$6$} ([shift=(-90:0.34)]C);
+  \draw[densely dotted, line width=0.35pt, <->] ([shift=(49:0.40)]A) to[bend left=10]
+    node[midway, above=-1.5pt, font=\footnotesize] {$2\sqrt{7}$} ([shift=(49:0.40)]C);
+  \node[above left=-3.5pt and -3pt, font=\small] at (A) {$\pt{A}$};
+  \node[left=1pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-3pt and -3pt, font=\small] at (C) {$\pt{C}$};
+  \node[above right=-3.5pt and -3pt, font=\small] at (D) {$\pt{D}$};
+\end{tikzpicture}

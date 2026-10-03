@@ -1,0 +1,11 @@
+% 103-04(103쪽) — 시초선 OX 와 동경 OP 의 위치 · 두 반직선이 이루는 각 $60^\circ$.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같이 눈금·좌표축 없이 점 O 에서 나가는 두 화살표만 두었다.
+% 라벨은 원문에 있는 O · P · X · $60^\circ$ 만 둔다 — 동경이 나타내는 일반각(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, >=stealth]
+  \coordinate (O) at (0,0);
+  \draw[->, line width=0.55pt] (O) -- (2.4,0) node[right=1pt, font=\small] {$\pt{X}$};
+  \draw[->, line width=0.55pt] (O) -- (60:2.1) node[above=1pt, font=\small] {$\pt{P}$};
+  \draw[line width=0.4pt] (0.4,0) arc (0:60:0.4);
+  \node[font=\small] at (32:0.78) {$60^\circ$};
+  \node[below left=-1.5pt and -1pt, font=\small] at (O) {$\pt{O}$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 66-43(66쪽) — 도함수 y=f'(x) 의 그래프(아래로 볼록한 포물선 · x축과 원점, 2 에서 만난다 · 꼭짓점의 x좌표 1).
+% 원문에 있는 것만: 곡선 · x=1 의 세로 점선 · 라벨 y=f'(x), O, 1, 2, x, y. 다른 눈금은 넣지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.72cm, y=0.52cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.90,0) -- (3.10,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,1.95) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,-0.9);
+  \draw[line width=0.6pt, domain=-0.55:2.60, samples=110, smooth]
+    plot (\x, {0.9*(\x)*((\x)-2)});
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[anchor=west, font=\small] at (1.30,1.70) {$y=f'(x)$};
+\end{tikzpicture}

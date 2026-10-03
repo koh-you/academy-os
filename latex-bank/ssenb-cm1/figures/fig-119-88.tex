@@ -1,0 +1,8 @@
+% 119-88(119쪽) — 반원(호 + 지름) 위의 9개의 점. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 지름 위 5개(양 끝 포함) · 호 위 4개로 원문과 같다. 라벨·이은 선은 원문에 없다.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \draw (-1.6,0) arc (180:0:1.6);
+  \draw (-1.6,0) -- (1.6,0);
+  \foreach \x in {-1.6,-0.8,0,0.8,1.6} { \fill (\x,0) circle (2.2pt); }
+  \foreach \a in {36,72,108,144} { \fill (\a:1.6) circle (2.2pt); }
+\end{tikzpicture}

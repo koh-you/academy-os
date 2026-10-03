@@ -1,0 +1,28 @@
+% 15-51(15쪽) — 삼각형 OAB(O(0,0), A(4,2), B(3,−1)) 와 ∠A 의 외각의 이등분선이 OB 의 연장선과 만나는 점 C. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·A·B·C·x·y 와 축 숫자 2·−1·3·4 만 — C 의 좌표(답)는 적지 않는다.
+% 원문의 외각 이등분 표시(점 두 개)는 같은 자리의 작은 호 두 개로. 정점 2.2pt · 파생점 2pt · 좌표 안내는 파선.
+\begin{tikzpicture}[scale=0.32, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.8,0) -- (13.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.2) -- (0,4.6) node[left] {$y$};
+  \node[above left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \coordinate (A) at (4,2);
+  \coordinate (B) at (3,-1);
+  \coordinate (C) at (10.24,-3.41);
+  \draw[line width=0.6pt] (0,0) -- (A) -- (B) -- cycle;
+  \draw[line width=0.6pt] (A) -- (7.4,3.7);
+  \draw[line width=0.6pt] (A) -- (C);
+  \draw[line width=0.6pt] (B) -- (C);
+  \draw[dashed, line width=0.4pt] (A) -- (0,2) (A) -- (4,0) (B) -- (0,-1);
+  \draw[line width=0.4pt] (3.75,1.24) arc (-108.4:-40.9:0.8);
+  \draw[line width=0.4pt] (4.76,1.35) arc (-40.9:26.6:1.0);
+  \fill (A) circle (2.2pt);
+  \fill (B) circle (2.2pt);
+  \fill (C) circle (2pt);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below, font=\small] at (B) {$\mathrm{B}$};
+  \node[right, font=\small] at (C) {$\mathrm{C}$};
+  \node[left, font=\small] at (0,2) {$2$};
+  \node[left, font=\small] at (0,-1) {$-1$};
+  \node[font=\small] at (2.9,0.65) {$3$};
+  \node[below, font=\small] at (4,0) {$4$};
+\end{tikzpicture}

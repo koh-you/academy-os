@@ -1,0 +1,18 @@
+% 137-65(137쪽) — 함수 y=2/x (x>0) 위의 점 A 에서 x축·y축에 평행하게 그은 직선이 y=k/x 와 만나는 점 B, C 와 색칠한 삼각형 ABC.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·O·A·B·C 와 두 곡선의 식뿐이고, k 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[xscale=0.42, yscale=0.26, line width=0.5pt]
+  \fill[orange!25] (1,2) -- (4,2) -- (1,8) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (6.4,0) node[below left=-1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,9.4) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=80, domain=0.26:6.2] plot (\x, {2/\x});
+  \draw[line width=0.6pt, smooth, samples=80, domain=0.92:6.2] plot (\x, {8/\x});
+  \draw[line width=0.5pt] (1,2) -- (4,2) -- (1,8) -- cycle;
+  \draw[line width=0.4pt] (1.3,2) -- (1.3,2.6) -- (1,2.6);
+  \node[below left=-2pt and -2pt, font=\small] at (1,2) {$\mathrm{A}$};
+  \node[above right=-2pt and -1pt, font=\small] at (4,2) {$\mathrm{B}$};
+  \node[above left=-2pt and -2pt, font=\small] at (1,8) {$\mathrm{C}$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[right=1pt, font=\small] at (1.5,8.6) {$y=\dfrac{k}{x}$};
+  \node[below=1pt, font=\small] at (3.1,-0.45) {$y=\dfrac{2}{x}$};
+  \draw[->, >=stealth, line width=0.4pt] (2.5,-0.45) to[bend left=18] (1.85,1.02);
+\end{tikzpicture}

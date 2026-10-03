@@ -1,0 +1,16 @@
+% 52-23 ②(52쪽) — 보기 그래프: x=a 에서 뛰어 있는 그래프(위 반직선 끝 빈 점 · x축 위 채운 점 · 아래 반직선 끝 빈 점). 그림 자체가 보기라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O · a · x · y · y=f(x) 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-1.9,-1.9) rectangle (3.1,2.9);
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,2.3) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-1.55,1.35) -- (1,1.35);
+  \draw[line width=0.6pt] (1,-1.35) -- (2.5,-1.35);
+  \draw[densely dotted, line width=0.4pt] (1,1.35) -- (1,-1.35);
+  \draw[fill=white, line width=0.5pt] (1,1.35) circle (2.2pt);
+  \fill (1,0) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,-1.35) circle (2.2pt);
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=-1pt and -1pt, font=\small] at (1,0) {$a$};
+  \node[anchor=west, font=\small] at (0.35,2.1) {$y=f(x)$};
+\end{tikzpicture}

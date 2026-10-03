@@ -1,0 +1,31 @@
+% 14-48(14쪽) — 세 점 A(−5,3), B(−2,−1), C(7,8) 의 삼각형 ABC 와 ∠A 의 이등분선이 변 BC 와 만나는 점 D. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·O·x·y 와 축 숫자 −5·3·−2·−1·7·8 만 — D 의 좌표(답)는 적지 않는다.
+% 원문의 ∠A 이등분 표시(점 두 개)는 같은 자리의 작은 호 두 개로. 정점 2.2pt · 파생점 2pt · 좌표 안내는 파선.
+\begin{tikzpicture}[scale=0.33, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-7.2,0) -- (9.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.2) -- (0,10) node[left] {$y$};
+  \node[below right, font=\small] at (0,0) {$\mathrm{O}$};
+  \coordinate (A) at (-5,3);
+  \coordinate (B) at (-2,-1);
+  \coordinate (C) at (7,8);
+  \coordinate (D) at (0.5,1.5);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.6pt] (A) -- (D);
+  \draw[dashed, line width=0.4pt] (A) -- (-5,0) (A) -- (0,3) (B) -- (-2,0) (B) -- (0,-1) (C) -- (7,0) (C) -- (0,8);
+  \draw[line width=0.4pt] (-4.40,2.20) arc (-53.1:-15.3:1.0);
+  \draw[line width=0.4pt] (-3.79,2.67) arc (-15.3:22.6:1.25);
+  \fill (A) circle (2.2pt);
+  \fill (B) circle (2.2pt);
+  \fill (C) circle (2.2pt);
+  \fill (D) circle (2pt);
+  \node[left, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-2pt and -2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right, font=\small] at (C) {$\mathrm{C}$};
+  \node[below right=0pt and 1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[below, font=\small] at (-5,0) {$-5$};
+  \node[right, font=\small] at (0,3) {$3$};
+  \node[font=\small] at (-1.9,0.6) {$-2$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,-1) {$-1$};
+  \node[left, font=\small] at (0,8) {$8$};
+  \node[below, font=\small] at (7,0) {$7$};
+\end{tikzpicture}

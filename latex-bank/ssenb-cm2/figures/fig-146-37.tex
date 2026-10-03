@@ -1,0 +1,11 @@
+% 146-37(146쪽) — 무리함수 y=-√(a(x-b))-c 의 그래프: 왼쪽 아래에서 올라와 x축을 지나 점 (p, q)에서 끝난다(끝점에서 접선이 세로).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 p·q·O·x·y 만. a·b·c 의 부호(답)는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (3.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.8) -- (0,2.4) node[left=-1pt, font=\small] {$y$};
+  \draw[dotted, line width=0.6pt] (0,1.6) -- (2.4,1.6) -- (2.4,0);
+  \draw[line width=0.6pt, smooth, samples=90, domain=-1.6:2.4] plot (\x, {1.6-1.935*sqrt(2.4-\x)});
+  \node[left=1pt, font=\small] at (0,1.6) {$q$};
+  \node[below=1pt, font=\small] at (2.4,0) {$p$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

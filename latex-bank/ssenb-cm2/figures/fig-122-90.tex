@@ -1,0 +1,28 @@
+% 122-90(122쪽) — 증가하는 위로 볼록한 곡선 y=f(x) 와 직선 y=x, x축 위의 a<b<c<d<e 에서 올린 세로 점선과
+% y축에서 직선 y=x 까지 그은 가로 점선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문과 같은 짜임: 세로 점선은 x축에서 곡선까지(f(a)=b, f(b)=c, f(c)=d, f(d)=e 가 읽힌다), 가로 점선은 y축에서 직선 y=x 까지.
+% 라벨은 원문에 있는 a~e · O · x · y · y=x · y=f(x) 뿐이고 눈금 수치는 원문에도 없다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (9.6,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,7.9) node[left=1pt, font=\small] {$y$};
+  % 직선 y=x
+  \draw[line width=0.6pt] (-1.55,-1.55) -- (7.35,7.35) node[above left=-1pt and -2pt, font=\small] {$y=x$};
+  % 곡선 y=f(x)
+  \draw[line width=0.6pt, smooth] plot coordinates
+    {(-0.35,-0.75) (0,0) (0.55,1.05) (1.15,2.0) (2.0,3.05) (3.05,4.1) (4.1,4.9) (4.88,5.47) (5.75,5.95) (7.2,6.5) (8.9,6.9)};
+  \node[right=1pt, font=\small] at (6.0,5.4) {$y=f(x)$};
+  % 가로 점선: y축 -> 직선 y=x
+  \foreach \h in {1.15,2.0,3.05,4.1,4.88} { \draw[densely dotted, line width=0.4pt] (0,\h) -- (\h,\h); }
+  % 세로 점선: x축 -> 곡선
+  \draw[densely dotted, line width=0.4pt] (1.15,0) -- (1.15,2.0);
+  \draw[densely dotted, line width=0.4pt] (2.0,0) -- (2.0,3.05);
+  \draw[densely dotted, line width=0.4pt] (3.05,0) -- (3.05,4.1);
+  \draw[densely dotted, line width=0.4pt] (4.1,0) -- (4.1,4.9);
+  \draw[densely dotted, line width=0.4pt] (4.88,0) -- (4.88,5.47);
+  \node[below=1pt, font=\small] at (1.15,0) {$a$};
+  \node[below=1pt, font=\small] at (2.0,0) {$b$};
+  \node[below=1pt, font=\small] at (3.05,0) {$c$};
+  \node[below=1pt, font=\small] at (4.1,0) {$d$};
+  \node[below=1pt, font=\small] at (4.88,0) {$e$};
+  \node[above left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 17-66(17쪽) — y=2x^2 의 그래프와, 그래프 위의 점 P 와 원점 O 를 지나고 중심 C 가 y축 위에 있는 원. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 라벨 O, x, y, C, P, y=2x^2. 눈금은 원문에 없다(원의 크기는 원문 그림의 비율 그대로이고 답이 되는 값은 적지 않는다).
+\begin{tikzpicture}[x=0.95cm, y=0.95cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.75,0) -- (1.6,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.45) -- (0,2.75) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.6pt] (0,1) circle (1);
+  \draw[line width=0.6pt, domain=-1.1:1.1, samples=120, smooth] plot (\x, {2*\x*\x});
+  \fill (0,1) circle (2.2pt);
+  \fill (0.866,1.5) circle (2.2pt);
+  \node[left=2pt, font=\small] at (0,1) {$\pt{C}$};
+  \node[right=2pt, font=\small] at (0.866,1.5) {$\pt{P}$};
+  \node[right=1pt, font=\small] at (0.95,2.5) {$y=2x^2$};
+\end{tikzpicture}

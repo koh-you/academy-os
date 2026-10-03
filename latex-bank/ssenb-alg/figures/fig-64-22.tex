@@ -1,0 +1,17 @@
+% 64-22(64쪽) — 중심 O, 중심각 π/4 인 부채꼴 AOB. B 에서 선분 OA 에 내린 수선의 발 C, 반지름이 OC 인 원이 선분 OB 와 만나는 점 D.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그림의 표시(O · A · B · C · D · π/4 · 직각 기호)만 둔다.
+% 색칠한 부분의 넓이(답)는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.7, line width=0.55pt, >=stealth]
+  \filldraw[fill=red!15] (180:6) arc (180:135:6) -- (135:4.2426) arc (135:180:4.2426) -- cycle;
+  \draw (0,0) -- (180:6);
+  \draw (0,0) -- (135:6);
+  \draw (135:6) -- (-4.2426,0);
+  \draw[line width=0.35pt] (-3.8926,0) -- (-3.8926,0.35) -- (-4.2426,0.35);
+  \draw[line width=0.35pt] (180:1.6) arc (180:135:1.6);
+  \node[font=\footnotesize] at (157.5:2.6) {$\dfrac{\pi}{4}$};
+  \node[left=1pt, font=\footnotesize] at (180:6) {$\pt{A}$};
+  \node[above=1pt, font=\footnotesize] at (135:6) {$\pt{B}$};
+  \node[below=1pt, font=\footnotesize] at (-4.2426,0) {$\pt{C}$};
+  \node[above right=-3pt and -2pt, font=\footnotesize] at (135:4.2426) {$\pt{D}$};
+  \node[right=1pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

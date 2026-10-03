@@ -1,0 +1,13 @@
+% 52-23 ①(52쪽) — 보기 그래프: x=a 에서 값이 빠진(빈 점) 내려가는 직선. 그림 자체가 보기라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O · a · x · y · y=f(x) 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-1.9,-1.9) rectangle (3.1,2.9);
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,2.6) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-1.2,2.58) -- (2.55,-0.79);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,0.62);
+  \draw[fill=white, line width=0.5pt] (1,0.62) circle (2.2pt);
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$a$};
+  \node[anchor=west, font=\small] at (0.5,1.55) {$y=f(x)$};
+\end{tikzpicture}

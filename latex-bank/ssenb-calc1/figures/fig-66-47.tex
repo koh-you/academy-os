@@ -1,0 +1,26 @@
+% 66-47(66쪽) — 도함수 y=f'(x) 의 그래프. x축과 -3, 1 에서 만나고 x=3 에서 x축에 접한다. x=-1 에서 극소.
+% 원문에 있는 것만: 곡선 · x=-4, -1, 4 의 세로 점선 · -3 라벨에서 교점으로 가는 짧은 지시선
+% · 라벨 -4, -3, -1, O, 1, 3, 4, x, y, y=f'(x). y축 눈금은 원문에 없으므로 넣지 않는다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=0.60cm, y=0.44cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.85,0) -- (4.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.15) -- (0,4.25) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-4,0) -- (-4,3.30);
+  \draw[densely dashed, line width=0.4pt] (-1,0) -- (-1,-2.50);
+  \draw[densely dashed, line width=0.4pt] (4,0) -- (4,3.30);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (-4.00,3.30) (-3.75,2.40) (-3.50,1.50) (-3.25,0.70) (-3.00,0) (-2.70,-0.75)
+    (-2.40,-1.35) (-2.00,-1.95) (-1.60,-2.30) (-1.30,-2.45) (-1.00,-2.50)
+    (-0.70,-2.45) (-0.40,-2.30) (0,-1.95) (0.40,-1.45) (0.70,-0.85) (1.00,0)
+    (1.30,0.55) (1.60,0.90) (1.90,1.10) (2.15,1.15) (2.40,1.00) (2.60,0.70)
+    (2.80,0.28) (3.00,0) (3.20,0.28) (3.40,0.70) (3.65,1.55) (3.85,2.45) (4.00,3.30)};
+  \draw[line width=0.4pt] (-2.72,0.62) -- (-3.00,0.04);
+  \node[below=1pt, font=\small] at (-4,0) {$-4$};
+  \node[anchor=south west, inner sep=1pt, font=\small] at (-2.80,0.60) {$-3$};
+  \node[above=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[anchor=west, font=\small] at (2.35,3.85) {$y=f'(x)$};
+\end{tikzpicture}

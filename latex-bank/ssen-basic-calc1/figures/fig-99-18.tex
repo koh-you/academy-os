@@ -1,0 +1,14 @@
+% 99-18(99쪽) — 18~22번 공통 그림 · 원점을 출발한 점 P 의 시각 t 에서의 속도 v(t) 의 그래프(t=a 에서 극대, t=b·d 에서 0, t=c 에서 극소, d 뒤로 계속 증가). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 곡선 · 안내 점선 두 줄 · 라벨 v(t), t, O, a, b, c, d. 원문에 눈금값이 없으므로 적지 않는다.
+\begin{tikzpicture}[x=0.34cm, y=0.34cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (7.4,0) node[below=1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.2) -- (0,3.6) node[left=1pt, font=\small] {$v(t)$};
+  \draw[densely dotted, line width=0.4pt] (1.6,1.43) -- (1.6,0);
+  \draw[densely dotted, line width=0.4pt] (4.53,0) -- (4.53,-2.23);
+  \draw plot[smooth, tension=0.7] coordinates {(0,0) (0.3,0.42) (0.7,0.9) (1.1,1.25) (1.6,1.43) (2.0,1.33) (2.4,0.85) (2.78,0) (3.2,-0.8) (3.7,-1.6) (4.2,-2.1) (4.53,-2.23) (4.9,-2.15) (5.4,-1.55) (5.8,-0.75) (6.06,0) (6.4,1.1) (6.78,2.85)};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.6,0) {$a$};
+  \node[below=1pt, font=\small] at (2.78,0) {$b$};
+  \node[above=1pt, font=\small] at (4.53,0) {$c$};
+  \node[below=1pt, font=\small] at (6.06,0) {$d$};
+\end{tikzpicture}

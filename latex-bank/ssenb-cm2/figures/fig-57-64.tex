@@ -1,0 +1,24 @@
+% 57-64(57쪽) — 두 점 A(3, 6), B(5, 2)와 y축 위의 점 P, x축 위의 점 Q 를 이은 꺾은선 AP+PQ+QB. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·P·Q·6·2·3·5·O·x·y 와 좌표 안내 파선만 — 최솟값(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.40, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.2,0) -- (7.0,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.2) -- (0,7.6) node[left] {$y$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \coordinate (A) at (3,6);
+  \coordinate (B) at (5,2);
+  \coordinate (P) at (0,4.1);
+  \coordinate (Q) at (2.2,0);
+  \draw[dashed, line width=0.4pt] (0,6) -- (A) (A) -- (3,0);
+  \draw[dashed, line width=0.4pt] (0,2) -- (B) (B) -- (5,0);
+  \draw[line width=0.6pt] (A) -- (P) -- (Q) -- (B);
+  \fill (A) circle (2.2pt);
+  \fill (B) circle (2.2pt);
+  \node[above right=-2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[above right=-2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[left=1pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[below=1pt, font=\small] at (Q) {$\mathrm{Q}$};
+  \node[left=1pt, font=\small] at (0,6) {$6$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+\end{tikzpicture}

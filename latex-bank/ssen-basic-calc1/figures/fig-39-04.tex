@@ -1,0 +1,27 @@
+% 39-04(39쪽) — 나란히 놓인 두 그래프: y=f(x)(x=1 에서 1 에서 2 로 뛰는 계단꼴)와 y=g(x)(x=0, x=1 에서 x축과 만나는 아래로 볼록한 포물선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 왼쪽 빈 점 (1,1)·채운 점 (1,2)·안내 점선 두 줄·눈금 2, 1, 1, 오른쪽 눈금 1, 라벨 O, x, y, y=f(x), y=g(x). 원문의 빈 점(○)·채운 점(●)을 그대로 옮겼다.
+\begin{tikzpicture}[x=0.5cm, y=0.5cm, line width=0.5pt, font=\small]
+  % 왼쪽 — y=f(x)
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (3.0,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,3.3) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt] at (0,0) {$\pt{O}$};
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (1,2);
+  \draw[densely dashed, line width=0.4pt] (1,2) -- (1,0);
+  \draw[line width=0.6pt] (-1.2,1) -- (1,1);
+  \draw[line width=0.6pt] (1,2) -- (2.9,2);
+  \draw[fill=white, line width=0.5pt] (1,1) circle (2.2pt);
+  \fill (1,2) circle (2.2pt);
+  \node[left=1pt] at (0,2) {$2$};
+  \node[below left=-2pt and -2pt] at (0,1) {$1$};
+  \node[below=1pt] at (1,0) {$1$};
+  \node[above] at (2.0,2.2) {$y=f(x)$};
+  % 오른쪽 — y=g(x)
+  \begin{scope}[xshift=3.3cm]
+    \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (3.0,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,3.3) node[left=1pt] {$y$};
+    \draw[line width=0.6pt, domain=-0.93:1.93, samples=90, smooth] plot (\x, {1.6*\x*(\x-1)});
+    \node[below left=-2pt and -3pt] at (0,0) {$\pt{O}$};
+    \node[below right=-2pt and -3pt] at (1,0) {$1$};
+    \node[anchor=west] at (0.95,3.05) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

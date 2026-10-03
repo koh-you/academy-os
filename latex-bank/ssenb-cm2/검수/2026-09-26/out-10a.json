@@ -1,0 +1,32 @@
+{
+  "range": "137-64~142-12",
+  "checked": 25,
+  "ok": 24,
+  "findings": [
+    { "id": "137-64", "severity": "ok", "where": "layout", "note": "크롭 어긋남(왼쪽은 65번) — 쪽 이미지 p137 배지 64·쎈 1181로 대조. 본문과 육각형 APBCQD 그림(B·C·A·D 수선발 직각 표시, P 제1사분면·Q 제3사분면) 일치" },
+    { "id": "137-65", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p137 배지 65·쎈 1182 및 137-64.png 왼쪽 크롭으로 대조해 본문·보기 5개·삼각형 ABC 그림 일치" },
+    { "id": "138-66", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1183 · 정의식 f^1=f, f^{n+1}=f^n∘f 별도 줄 처리까지 일치" },
+    { "id": "138-67", "severity": "ok", "where": "layout", "note": "크롭 어긋남(왼쪽은 69번) — 쪽 이미지 p138 배지 67·쎈 1184로 대조해 본문·보기 일치" },
+    { "id": "138-68", "severity": "ok", "where": "layout", "note": "크롭 어긋남(왼쪽은 71번) — 쪽 이미지 p138 배지 68·쎈 1185로 대조. underbrace n개 표기까지 일치" },
+    { "id": "138-69", "severity": "yellow", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p138 배지 69·쎈 1186로 대조해 본문과 그림(점근선 x=-3·y=-3, x절편 -2 화살표 라벨, y절편 -2, y=f(x) 라벨) 모두 일치. 다만 \\centerline 정의식이 그림을 피해 전체폭 아래로 내려가면서 첫 문장과 정의식 사이에 네 줄가량 빈 공간이 생김", "fix": "items['138-69'].body 의 \\par\\smallskip\\centerline{...} 두 줄을 그림 감싸기 폭 안에서 중앙 정렬되는 형태(\\begin{center} 대신 \\leavevmode\\hbox to\\linewidth 또는 그림 뒤로 이동)로 바꿔 빈칸 축소" },
+    { "id": "138-70", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p138 배지 70·쎈 1187로 대조해 본문·보기 일치" },
+    { "id": "138-71", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p138 배지 71 및 138-68.png 왼쪽 크롭(쎈 1188)으로 대조해 일치" },
+    { "id": "139-72", "severity": "ok", "where": "layout", "note": "크롭 어긋남(왼쪽은 76번) — 쪽 이미지 p139 배지 72·쎈 1189로 대조해 일치" },
+    { "id": "139-73", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p139 배지 73·쎈 1190로 대조해 두 직선 y=x-4, y=-x+2 와 a-b+c-d 까지 일치" },
+    { "id": "139-74", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p139 배지 74·쎈 1191로 대조해 일치" },
+    { "id": "139-75", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p139 배지 75·쎈 1192로 대조해 일치" },
+    { "id": "139-76", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p139 배지 76 및 139-72.png 왼쪽 크롭(쎈 1193)으로 대조해 본문·보기 일치" },
+    { "id": "141-01", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1252 일치" },
+    { "id": "141-02", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1253 일치" },
+    { "id": "141-03", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1254 일치" },
+    { "id": "141-04", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1255 일치" },
+    { "id": "141-05", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1256 일치" },
+    { "id": "141-06", "severity": "ok", "where": "body", "note": "크롭 없음 — 쪽 이미지 p141 배지 06·쎈 1257로 대조. 두 분수 사이 흐린 부호는 5배 확대 확인 결과 빼기(−)로 조판본과 일치, 보기 5개도 일치" },
+    { "id": "142-07", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p142 배지 07·쎈 1258로 대조해 일치" },
+    { "id": "142-08", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1259 일치" },
+    { "id": "142-09", "severity": "ok", "where": "body", "note": "크롭 일치(크롭이 오른쪽에서 잘려 있어 쪽 이미지로 보완) · 쎈 번호는 12배 확대 결과 1260 으로 조판본과 일치 · 연분수 3단 구조와 보기 5개 일치" },
+    { "id": "142-10", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1261 일치" },
+    { "id": "142-11", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p142 배지 11·쎈 1262로 대조해 본문·보기 일치" },
+    { "id": "142-12", "severity": "ok", "where": "body", "note": "크롭 일치 · 쎈 1263 일치" }
+  ]
+}

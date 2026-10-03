@@ -1,0 +1,12 @@
+147-07	qa/p142.jpg
+147-08	qa/p142.jpg
+147-09	qa/p142.jpg
+147-10	qa/p142.jpg
+147-11	qa/p142.jpg
+147-12	qa/p142.jpg
+148-13	qa/p143.jpg
+148-14	qa/p143.jpg
+148-15	qa/p143.jpg
+148-16	qa/p143.jpg
+148-17	qa/p143.jpg
+148-18	qa/p143.jpg

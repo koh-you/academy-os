@@ -1,0 +1,12 @@
+% 90-23(인쇄 90쪽) — -1≤x≤2 에서 정의된 확률밀도함수 y=f(x) 의 그래프: (-1,0)-(0,k)-(2,0) 의 삼각형 꼴 꺾은선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 것만(k, -1, O, 2, x, y, y=f(x)) · 답(k의 값)은 그림에 넣지 않는다.
+\begin{tikzpicture}[x=0.72cm, y=1.15cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.75,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.4) -- (0,1.35) node[left=1pt, font=\small] {$y$};
+  \draw (-1,0) -- (0,1) -- (2,0);
+  \node[left=2pt, font=\small] at (0,1) {$k$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (0.3,0.92) {$y=f(x)$};
+\end{tikzpicture}

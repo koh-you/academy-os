@@ -1,0 +1,21 @@
+% 10-23(10쪽) — 삼각형 ABC 의 무게중심 G 와 변 BC 의 중점 M, 중선 AM. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·G·M 과 주어진 길이 7(AB)·6(BC)·√3(MG) 만. AC 의 길이(답)는 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.85, line width=0.6pt]
+  \coordinate (A) at (1.35,2.2); \coordinate (B) at (-1.6,0); \coordinate (C) at (1.6,0); \coordinate (M) at (0,0); \coordinate (G) at (0.45,0.7333);
+  \draw[dotted, line width=0.5pt] (B) to[bend left=18] (A);
+  \draw[dotted, line width=0.5pt] (B) to[bend right=22] (C);
+  \draw (B) -- (A) -- (C);
+  \draw[line width=0.5pt] (B) -- (C);
+  \draw (A) -- (M);
+  \draw[line width=0.4pt] (-0.86,-0.1) -- (-0.86,0.1) (-0.74,-0.1) -- (-0.74,0.1);
+  \draw[line width=0.4pt] (0.74,-0.1) -- (0.74,0.1) (0.86,-0.1) -- (0.86,0.1);
+  \fill (G) circle (2pt);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[right=1pt, font=\small] at (G) {$\mathrm{G}$};
+  \node[below=1pt, font=\small] at (M) {$\mathrm{M}$};
+  \node[font=\small] at (-0.85,1.35) {$7$};
+  \node[font=\small] at (0,-0.75) {$6$};
+  \node[left=1pt, font=\small] at (0.16,0.42) {$\sqrt{3}$};
+\end{tikzpicture}

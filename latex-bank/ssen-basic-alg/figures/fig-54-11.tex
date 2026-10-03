@@ -1,0 +1,12 @@
+% 54-11(54쪽) — $y=\left(\dfrac{1}{3}\right)^{x-a}+b$ 의 그래프 · 원점을 지나고 점근선 $y=-9$(점선)에 가까워지는 감소 곡선.
+% 원문 그림이 비례가 아닌 개념도라 원문 배치의 비율을 그대로 옮겼다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 $-9$·$y=\left(\dfrac{1}{3}\right)^{x-a}+b$ 만 · 눈금은 만들지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.62cm, y=0.62cm]
+  \draw[->, >=stealth, line width=0.7pt] (-1.62,0) -- (2.95,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.58) -- (0,1.52) node[right=1pt] {$y$};
+  \draw[domain=-0.72:2.6, samples=100, smooth] plot (\x, {-1+exp(-1.1*\x)});
+  \draw[densely dotted, line width=0.4pt] (-1.5,-1) -- (2.85,-1);
+  \node[below left=-1pt and -1pt, font=\small] at (0,-1) {$-9$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-0.3,1.35) {$y=\left(\dfrac{1}{3}\right)^{x-a}+b$};
+\end{tikzpicture}

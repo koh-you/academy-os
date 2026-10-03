@@ -1,0 +1,12 @@
+% 36-31 ⑤(36쪽) — 보기 그래프: 꼭짓점이 x=a 인 위로 볼록한 포물선. 보기 자체가 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y=f(x), O, a, x, y 만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.3,-1.6) rectangle (3.1,2.7);
+  \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.85,0) node[below=1pt, font=\scriptsize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.15) -- (0,2.35) node[left=1pt, font=\scriptsize] {$y$};
+  \draw[line width=0.6pt, domain=-1.1:2.6, samples=120, smooth] plot (\x, {1.30-0.72*(\x-0.75)*(\x-0.75)});
+  \draw[densely dotted, line width=0.4pt] (0.75,0) -- (0.75,1.30);
+  \node[anchor=south, font=\scriptsize] at (1.20,1.50) {$y=f(x)$};
+  \node[below left=-2pt and -2pt, font=\scriptsize] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\scriptsize] at (0.75,0) {$a$};
+\end{tikzpicture}

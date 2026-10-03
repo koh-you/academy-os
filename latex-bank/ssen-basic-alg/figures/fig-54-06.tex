@@ -1,0 +1,21 @@
+% 54-06(54쪽) — 두 함수 $y=2^{x}$, $y=x$ 의 그래프 · $y$축의 $a$ 에서 두 그래프를 번갈아 오르내리는 점선(축에 평행)과 $x$축의 $b$, $c$.
+% 원문 그림이 비례가 아닌 개념도(실제 값이면 $c$ 가 화면 밖으로 나간다)라 원문의 점선 배치·간격 비율을 그대로 옮겼다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 $a$·$b$·$c$·$y=2^{x}$·$y=x$ 만 · 눈금·수치는 만들지 않는다 — 답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[line width=0.6pt, x=0.82cm, y=0.82cm]
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (2.65,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.85) -- (0,2.62) node[left=1pt] {$y$};
+  \draw (-0.78,-0.78) -- (2.28,2.28);
+  \draw[domain=-1.28:1.07, samples=90, smooth] plot (\x, {0.5*exp(1.35*\x)});
+  \draw[densely dotted, line width=0.4pt] (0,0.5) -- (0.5,0.5);
+  \draw[densely dotted, line width=0.4pt] (0.5,0) -- (0.5,0.982);
+  \draw[densely dotted, line width=0.4pt] (0,0.982) -- (0.982,0.982);
+  \draw[densely dotted, line width=0.4pt] (0.982,0) -- (0.982,1.882);
+  \draw[densely dotted, line width=0.4pt] (0,1.882) -- (1.882,1.882);
+  \draw[densely dotted, line width=0.4pt] (1.882,0) -- (1.882,1.882);
+  \node[left=1pt, font=\small] at (0,0.5) {$a$};
+  \node[below=1pt, font=\small] at (0.982,0) {$b$};
+  \node[below=1pt, font=\small] at (1.882,0) {$c$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.42,2.45) {$y=2^{x}$};
+  \node[anchor=west, font=\small] at (1.95,2.45) {$y=x$};
+\end{tikzpicture}

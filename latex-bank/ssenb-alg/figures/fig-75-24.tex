@@ -1,0 +1,17 @@
+% 75-24(75쪽) — $y=f(x)=a\cos b(x-c)+d$ 의 그래프(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: $-2$, $\pt{O}$, $2$, $-1$, $-5$, $y=f(x)$. 원문에 없는 눈금·값은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.34cm, y=0.34cm, >=stealth]
+  \draw[densely dashed, line width=0.35pt] (-4.4,-1) -- (8.5,-1);
+  \draw[densely dashed, line width=0.35pt] (-4.4,-5) -- (8.5,-5);
+  \draw[densely dotted, line width=0.35pt] (-2,0) -- (-2,-5);
+  \draw[densely dotted, line width=0.35pt] (2,0) -- (2,-1);
+  \draw[->, line width=0.7pt] (-4.6,0) -- (8.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-7.6) -- (0,1.5) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-4.2:8.3, samples=200, smooth] plot (\x, {2*cos(45*(\x-2))-3});
+  \node[anchor=south, font=\small] at (-2,0.12) {$-2$};
+  \node[anchor=south, font=\small] at (0.6,0.12) {$\pt{O}$};
+  \node[anchor=south, font=\small] at (2,0.12) {$2$};
+  \node[anchor=north east, font=\small, fill=white, inner sep=1pt] at (-0.15,-0.9) {$-1$};
+  \node[anchor=north east, font=\small, fill=white, inner sep=1pt] at (-0.15,-4.9) {$-5$};
+  \node[font=\small] at (6.6,-2.4) {$y=f(x)$};
+\end{tikzpicture}

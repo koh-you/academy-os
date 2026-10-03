@@ -1,0 +1,12 @@
+% 106-01(106쪽) — 106쪽 왼쪽 지시문(「오른쪽 그림과 같이 ∠B=90°인 직각삼각형 ABC에 대하여…」)의 공통 그림.
+% ∠B=90°인 직각삼각형 ABC · 빗변 AC=5 · 밑변 AB=4(길이 안내 점선 호 위의 라벨). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 없는 BC 의 길이는 적지 않는다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[line width=0.6pt, x=0.52cm, y=0.52cm]
+  \draw (0,0) -- (4,0) -- (4,3) -- cycle;
+  \draw[line width=0.45pt] (3.66,0) -- (3.66,0.34) -- (4,0.34);
+  \draw[densely dotted, line width=0.35pt] (0.1,0.08) to[bend left=20] node[midway, above left=-3.5pt and -4pt, font=\footnotesize] {$5$} (3.9,2.95);
+  \draw[densely dotted, line width=0.35pt] (0.06,-0.12) to[bend right=20] node[midway, below=-2.5pt, font=\footnotesize] {$4$} (3.94,-0.12);
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (0,0) {$\pt{A}$};
+  \node[below right=-2.5pt and -2.5pt, font=\footnotesize] at (4,0) {$\pt{B}$};
+  \node[above right=-3pt and -2.5pt, font=\footnotesize] at (4,3) {$\pt{C}$};
+\end{tikzpicture}

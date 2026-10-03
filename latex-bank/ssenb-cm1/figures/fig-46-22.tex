@@ -1,0 +1,22 @@
+% 46-22(46쪽) — 한 변의 길이가 6 인 정오각형 ABCDE(A 위 · B 왼쪽 위 · C 왼쪽 아래 · D 오른쪽 아래 · E 오른쪽 위)와 대각선 AC·BE 가 만나는 점 P. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문의 A·B·C·D·E·P 와 변 AB 옆 「6」 만. BP 는 답이므로 치수를 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\R{1.55}
+  \coordinate (A) at (90:\R);
+  \coordinate (B) at (162:\R);
+  \coordinate (C) at (234:\R);
+  \coordinate (D) at (306:\R);
+  \coordinate (E) at (18:\R);
+  \coordinate (P) at (-0.348,0.479);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- (E) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C);
+  \draw[line width=0.5pt] (B) -- (E);
+  \node[font=\small, above, inner sep=1.5pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, left, inner sep=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below left, inner sep=1pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, below right, inner sep=1pt] at (D) {$\mathrm{D}$};
+  \node[font=\small, right, inner sep=2pt] at (E) {$\mathrm{E}$};
+  \node[font=\small, below right, inner sep=1pt] at (P) {$\mathrm{P}$};
+  \draw[densely dotted, line width=0.4pt] (A) to[bend right=22] (B);
+  \node[font=\small, inner sep=1pt] at (-0.98,1.28) {$6$};
+\end{tikzpicture}

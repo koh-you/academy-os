@@ -1,0 +1,19 @@
+% 67-50 ②(67쪽) — 보기 그래프: x=a 에서 극소, x=b 에서 접선이 수평, x=c 에서 극대인 개형.
+% 그림 자체가 보기라 TikZ 로 다시 그림. 라벨은 원문 그대로 a · b · c · O · x · y 만.
+\begin{tikzpicture}[x=0.46cm, y=0.46cm, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.35,-1.15) rectangle (3.15,3.00);
+  \draw[->, >=stealth, line width=0.7pt] (-2.10,0) -- (3.00,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,2.85) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-1.0,0) -- (-1.0,-0.42);
+  \draw[densely dashed, line width=0.4pt] (1.0,0) -- (1.0,0.36);
+  \draw[densely dashed, line width=0.4pt] (2.0,0) -- (2.0,1.62);
+  \draw[line width=0.6pt] plot[smooth, tension=0.7] coordinates {
+    (-1.85,2.40) (-1.68,1.65) (-1.52,1.00) (-1.38,0.45) (-1.28,0.10) (-1.15,-0.30)
+    (-1.00,-0.42) (-0.85,-0.30) (-0.68,-0.12) (-0.50,0.00) (-0.25,0.14) (0.05,0.24)
+    (0.40,0.30) (0.70,0.33) (1.00,0.36) (1.25,0.50) (1.45,0.80) (1.70,1.25)
+    (1.90,1.55) (2.00,1.62) (2.15,1.55) (2.35,1.15) (2.55,0.50) (2.70,-0.20)};
+  \node[above=1pt, font=\small] at (-1.0,0) {$a$};
+  \node[below right=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.0,0) {$b$};
+  \node[below=1pt, font=\small] at (2.0,0) {$c$};
+\end{tikzpicture}

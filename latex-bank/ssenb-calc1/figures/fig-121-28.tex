@@ -1,0 +1,21 @@
+% 121-28(121쪽) — 최고차항 계수 3 인 삼차함수 y=f(x) 와 점 (2, f(2)) 에서의 접선 y=g(x). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 2 와 그 자리의 세로 안내 파선 · 곡선과 접선이 둘러싼 색칠 영역 · 라벨 O, x, y, y=f(x), y=g(x).
+% 그 밖의 눈금은 원문에 없으므로 넣지 않는다(넓이가 답이라 수치를 더하면 답이 드러난다).
+% 곡선은 원문 모양대로 x=2 에서 직선과 접하고 그 왼쪽 한 점에서 x축 위에서 다시 만나도록 잡은 삼차함수다(원문에 식이 주어진 그래프가 아니다).
+\begin{tikzpicture}[x=0.45cm, y=0.12cm, line width=0.5pt]
+  % 색칠 영역(원문) — 곡선과 접선 사이
+  \path[fill=orange!20]
+    plot[domain=-1:2, samples=90] (\x, {3*\x*\x*\x-9*\x*\x-3*\x+9})
+    -- plot[domain=2:-1, samples=2] (\x, {-3*\x-3}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.6,0) -- (3.6,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-9.8) -- (0,10.2) node[left=1pt] {$y$};
+  % 접점의 세로 안내 파선(원문)
+  \draw[dashed, line width=0.35pt] (2,0) -- (2,-9);
+  % 곡선과 접선
+  \draw[line width=0.6pt, domain=-1.2:3.2, samples=150, smooth] plot (\x, {3*\x*\x*\x-9*\x*\x-3*\x+9});
+  \draw[line width=0.6pt] (-1.5,1.5) -- (2.75,-11.25);
+  \node[below right=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above left=0pt and 1pt, font=\small] at (2,0) {$2$};
+  \node[anchor=west, font=\small] at (0.6,9.8) {$y=f(x)$};
+  \node[anchor=north west, font=\small] at (-1.55,-9.9) {$y=g(x)$};
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% 122-33(122쪽) — 곡선 y=x^2+k 와 x축 · 직선 x=-1 이 만드는 두 도형 A, B. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 직선 x=-1 · 색칠한 두 도형과 그 안의 문자 A, B · 라벨 O, x, y, y=x^2+k, x=-1.
+% 눈금 숫자는 x=-1 말고는 원문에 없으므로 넣지 않는다(k 가 답이라 수치를 더하면 답이 드러난다).
+% 포물선이 x축과 만나는 자리는 원문 그림이 찍은 자리(x=-1 과 원점 사이의 중간쯤)를 그대로 따랐다.
+\begin{tikzpicture}[x=1.0cm, y=1.25cm, line width=0.5pt]
+  % 색칠한 두 도형(원문)
+  \path[fill=brown!30] (-1,0) -- (-0.55,0)
+    -- plot[domain=-0.55:-1, samples=40] (\x, {\x*\x-0.3025}) -- cycle;
+  \path[fill=cyan!18] (-0.55,0) -- (0.55,0)
+    -- plot[domain=0.55:-0.55, samples=60] (\x, {\x*\x-0.3025}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (1.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,0.72) node[left=1pt] {$y$};
+  % 직선 x=-1(원문)
+  \draw[line width=0.6pt] (-1,-0.42) -- (-1,0.78);
+  % 곡선
+  \draw[line width=0.6pt, domain=-1.08:1.15, samples=140, smooth] plot (\x, {\x*\x-0.3025});
+  \node[above left=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[font=\small] at (-0.83,0.13) {$A$};
+  \node[font=\small] at (0.3,-0.14) {$B$};
+  \node[anchor=north, font=\small] at (-1,-0.45) {$x=-1$};
+  \node[anchor=south east, font=\small] at (1.02,0.95) {$y=x^2+k$};
+\end{tikzpicture}

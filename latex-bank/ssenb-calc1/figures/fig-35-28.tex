@@ -1,0 +1,18 @@
+% 35-28(35쪽) — 증가하고 아래로 볼록한 함수 y=f(x) 의 그래프와 f(a) · f((a+b)/2) · f(b) 를 잇는 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문에 있는 것만 옮긴다: 곡선 · 점선 · 라벨 y=f(x), f(a), f((a+b)/2), f(b), O, a, (a+b)/2, b, x, y.
+\begin{tikzpicture}[x=0.95cm, y=0.95cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (4.35,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.55) -- (0,3.55) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.4pt] (0,0.705) -- (1.50,0.705) -- (1.50,0);
+  \draw[densely dashed, line width=0.4pt] (0,1.397) -- (2.60,1.397) -- (2.60,0);
+  \draw[densely dashed, line width=0.4pt] (0,2.769) -- (3.70,2.769) -- (3.70,0);
+  \draw[line width=0.6pt, domain=-0.60:4.05, samples=120, smooth] plot (\x, {0.28*exp(0.62*\x)});
+  \node[anchor=south, font=\small] at (2.25,3.15) {$y=f(x)$};
+  \node[left=2pt, font=\small] at (0,2.769) {$f(b)$};
+  \node[left=2pt, font=\small] at (0,1.397) {$f\!\left(\dfrac{a+b}{2}\right)$};
+  \node[left=2pt, font=\small] at (0,0.705) {$f(a)$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\small] at (1.50,0) {$a$};
+  \node[below=1pt, font=\small] at (2.60,0) {$\dfrac{a+b}{2}$};
+  \node[below=1pt, font=\small] at (3.70,0) {$b$};
+\end{tikzpicture}

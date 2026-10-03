@@ -1,0 +1,9 @@
+% 13-01(13쪽) — 보기 ㄱ 의 그래프(원점을 지나 오른쪽 아래로 내려가는 직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 직선 하나 · 라벨 O, x, y, y=f(x). 눈금·좌표값은 원문에 없으므로 넣지 않는다.
+\begin{tikzpicture}[baseline=(current bounding box.north), x=0.38cm, y=0.38cm, line width=0.55pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.5,0) -- (2.6,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.5) -- (0,2.4) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw (-1.95,1.95) -- (2.05,-1.85);
+  \node[anchor=west, font=\small] at (0.2,-2.2) {$y=f(x)$};
+\end{tikzpicture}

@@ -1,0 +1,15 @@
+% 125-05(125쪽) — 세 지점 1, 2, 3 사이의 일방통행로를 화살표로 나타낸 그림. 스캔 그림이라 TikZ 로 다시 그림.
+% 원문의 화살표만 그대로 옮겼다: 1→2, 2→1, 1→3, 2→3, 3→2 두 개, 2→2 자기 고리. 라벨은 원문의 지점 번호 1, 2, 3 뿐.
+\begin{tikzpicture}[line width=0.5pt, >=stealth]
+  \tikzset{spot/.style={circle, draw=black!30, fill=yellow!20, inner sep=0pt, minimum size=5.6mm, font=\small}}
+  \node[spot] (n1) at (0,1.25) {1};
+  \node[spot] (n2) at (-1.05,0) {2};
+  \node[spot] (n3) at (1.05,0) {3};
+  \draw[->, line width=0.5pt] (n1) to[bend right=34] (n2);
+  \draw[->, line width=0.5pt] (n2) to[bend right=12] (n1);
+  \draw[->, line width=0.5pt] (n1) to[bend left=12] (n3);
+  \draw[->, line width=0.5pt] (n2) -- (n3);
+  \draw[->, line width=0.5pt] (n3) to[bend right=26] (n2);
+  \draw[->, line width=0.5pt] (n3) to[bend left=26] (n2);
+  \draw[->, line width=0.5pt] (n2) to[out=150, in=210, looseness=11] (n2);
+\end{tikzpicture}

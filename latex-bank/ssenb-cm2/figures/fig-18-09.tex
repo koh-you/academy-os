@@ -1,0 +1,14 @@
+% 18-09(18쪽) — 좌표평면 위 정사각형 ABCD(A(-3, 0), B(0, 2), C(-2, 5), D(-5, 3)). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·-3·2·O·x·y 만. 직선 CD 의 절편(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.45, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-6.3,0) -- (1.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,6.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-3,0) -- (0,2) -- (-2,5) -- (-5,3) -- cycle;
+  \node[above left=-3pt, font=\small] at (-3,0) {$\mathrm{A}$};
+  \node[below left=-3pt, font=\small] at (0,2) {$\mathrm{B}$};
+  \node[above=1pt, font=\small] at (-2,5) {$\mathrm{C}$};
+  \node[left=1pt, font=\small] at (-5,3) {$\mathrm{D}$};
+  \node[below=1pt, font=\small] at (-3,0) {$-3$};
+  \node[right=1pt, font=\small] at (0,2) {$2$};
+  \node[below right=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

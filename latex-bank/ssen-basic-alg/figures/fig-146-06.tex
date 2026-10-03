@@ -1,0 +1,14 @@
+% 146-06(146쪽) — 삼각형 ABC · AB=2, BC=√3+1, CA=√2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 세 변의 길이만 적는다(각의 크기·넓이는 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=1.00cm, y=1.00cm]
+  \coordinate (A) at (1.732,1);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.732,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[densely dotted, line width=0.35pt] (1.68,1.12) to[bend right=18] node[midway, above left=-4pt and -4pt, font=\footnotesize] {$2$} (-0.1,0.06);
+  \draw[densely dotted, line width=0.35pt] (1.8,1.1) to[bend left=18] node[midway, above right=-4pt and -4pt, font=\footnotesize] {$\sqrt{2}$} (2.82,0.06);
+  \draw[densely dotted, line width=0.35pt] (0.03,-0.14) to[bend right=12] node[midway, below=-2.5pt, font=\footnotesize] {$\sqrt{3}+1$} (2.7,-0.14);
+  \node[above=-2.5pt, font=\footnotesize] at (A) {$\pt{A}$};
+  \node[left=-2pt, font=\footnotesize] at (B) {$\pt{B}$};
+  \node[right=-2pt, font=\footnotesize] at (C) {$\pt{C}$};
+\end{tikzpicture}

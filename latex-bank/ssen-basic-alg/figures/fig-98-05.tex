@@ -1,0 +1,10 @@
+% 98-05(98쪽) — 시초선 반직선 OX 와 동경 OP 가 이루는 각 $120^\circ$ 를 표시한 그림.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 O·P·X·$120^\circ$ 만 · 답인 일반각은 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, >=stealth]
+  \coordinate (O) at (0,0);
+  \draw[->] (O) -- (2.3,0) node[right=1pt, font=\small] {$\pt{X}$};
+  \draw[->] (O) -- (120:2.2) node[above=1pt, font=\small] {$\pt{P}$};
+  \draw[->, line width=0.4pt] (0.52,0) arc (0:120:0.52);
+  \node[font=\small] at (67:0.95) {$120^\circ$};
+  \node[below left=-2.5pt and -1.5pt, font=\small] at (O) {$\pt{O}$};
+\end{tikzpicture}

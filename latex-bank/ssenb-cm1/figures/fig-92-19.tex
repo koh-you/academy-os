@@ -1,0 +1,11 @@
+% 92-19(92쪽) — 위로 볼록한 y=f(x) 의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 그대로: x축과 -2, 4 에서 만난다. 라벨은 원문의 -2, 4, O 와 y=f(x) 만 — 꼭짓점 값은 원문에 없으므로 적지 않는다.
+\begin{tikzpicture}[scale=0.36, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.4,0) -- (6.5,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,3.7) node[left] {$y$};
+  \node[below right=-1pt and 1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-3.25:5.25, samples=110, smooth] plot (\x, {-0.3*(\x+2)*(\x-4)});
+  \node[below left=0pt and -5pt, font=\small] at (-2,0) {$-2$};
+  \node[below left=0pt and -4pt, font=\small] at (4,0) {$4$};
+  \node[anchor=north west, font=\small] at (4.0,-2.2) {$y=f(x)$};
+\end{tikzpicture}

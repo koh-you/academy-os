@@ -1,6 +1,6 @@
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { useEffect, useRef, useState } from "react";
-import { postJsonWithTimeout } from "../../shared/utils/apiClient.js";
+import { canCurrentRoleRecognizeAnswerSheet, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { ANSWER_SHEET_VERSION, answerCellBox, createAnswerRows, gradePilotAnswers, readPilotFile } from "./answerSheetPilotModel.js";
 import { downloadBlankAnswerSheet, downloadPilotBlob, loadPilotPages, pilotRecognitionPdf } from "./answerSheetPilotFiles.js";
 import "./answerSheetPilot.css";
@@ -21,6 +21,8 @@ export function AnswerSheetPilot() {
   const [error, setError] = useState("");
   const [focusNo, setFocusNo] = useState(1);
   const working = useRef(false);
+  // 유료 판독은 원장 전용(서버 정책에서 파생). 버튼을 숨기지 않고 잠긴다.
+  const canRecognize = canCurrentRoleRecognizeAnswerSheet();
   const sheet = sheets.find((item) => item.id === selected);
   const image = mode === "key" ? keyImage : sheet?.image;
   const rows = mode === "key" ? key : sheet?.rows;
@@ -96,7 +98,7 @@ export function AnswerSheetPilot() {
       <label>학생 답안 선택<select value={selected} onChange={(e) => { setSelected(e.target.value); setMode("student"); }}><option value="">답안 선택</option>{sheets.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
       {sheet && <button type="button" onClick={() => setMode("student")}>학생 답안 확인</button>}
       <label><input type="checkbox" checked={allowRational} onChange={(e) => { setAllowRational(e.target.checked); changeKey(); }} />분수·소수의 같은 값 허용</label>
-      <button type="button" disabled={!image} onClick={recognize}>선택한 답안 AI 판독 (유료)</button>
+      <button type="button" disabled={!image || !canRecognize} title={canRecognize ? undefined : "원장 계정만 사용합니다."} onClick={recognize}>선택한 답안 AI 판독 (유료)</button>
     </fieldset>
     <p>AI 판독은 초안입니다. 첫 실험에서는 모든 답을 원본과 대조해 확인하세요. 수식의 동치·서술형 부분점수는 자동 판정하지 않습니다.</p>
     {mode === "key" ? <div className="pilotControls"><strong>{keyConfirmed ? "정답 확정됨" : "정답 확인 중"}</strong><button type="button" disabled={busy || !key.some((row) => row.answer.trim())} onClick={() => { if (window.confirm("입력한 정답을 원본과 대조했나요? 빈 정답 칸은 제외하고 이 정답으로 비교합니다.")) { setKeyConfirmed(true); setSheets((current) => current.map((item) => ({ ...item, rows: item.rows.map((row) => ({ ...row, verdict: "" })) }))); } }}>정답 확정</button></div> : sheet && <label>답안 이름<input disabled={busy} value={sheet.name} onChange={(e) => setSheets((current) => current.map((item) => item.id === selected ? { ...item, name: e.target.value.slice(0, 200) } : item))} /></label>}

@@ -1,0 +1,28 @@
+% 11-26(11쪽) — 11-26~11-29 공통. y=f(x) 의 그래프(x<2 에서 y=3 · 2<x<=4 에서 오르는 선분 · x>4 에서 가파른 반직선 · x=2 에서 따로 찍힌 점). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: y축 눈금 1, 2, 3, 5 · x축 눈금 2, 4 · 안내 점선 · 빈 점 (2,3), (2,1), (4,3) · 채운 점 (2,5), (4,2) · 라벨 y=f(x), O, x, y.
+\begin{tikzpicture}[x=0.45cm, y=0.47cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (6.0,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.2) -- (0,6.7) node[left=1pt] {$y$};
+  \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dotted, line width=0.4pt] (0,5) -- (2,5);
+  \draw[densely dotted, line width=0.4pt] (2,5) -- (2,0);
+  \draw[densely dotted, line width=0.4pt] (2,3) -- (4,3);
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (4,2);
+  \draw[densely dotted, line width=0.4pt] (0,1) -- (2,1);
+  \draw[densely dotted, line width=0.4pt] (4,3) -- (4,0);
+  \draw[line width=0.6pt] (-2.1,3) -- (2,3);
+  \draw[line width=0.6pt] (2,1) -- (4,2);
+  \draw[line width=0.6pt] (4,3) -- (5.8,6.0);
+  \fill (2,5) circle (2pt);
+  \fill (4,2) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (2,3) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (2,1) circle (2pt);
+  \draw[fill=white, line width=0.5pt] (4,3) circle (2pt);
+  \node[left=1pt, font=\small] at (0,5) {$5$};
+  \node[left=1pt, font=\small] at (0,3.45) {$3$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[font=\small] at (3.9,5.95) {$y=f(x)$};
+\end{tikzpicture}

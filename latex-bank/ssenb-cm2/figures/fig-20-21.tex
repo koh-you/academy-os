@@ -1,0 +1,26 @@
+% 20-21(20쪽) — 좌표평면 위 세 점 A(3, 3), B(-1, 2), C(4, -3)과 선분 BC 위의 점 D 로 나뉜 삼각형 ABD·ADC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·3·2·-1·O·3·4·-3·x·y 와 점선 보조선만. 점 D 의 좌표와 직선 AD 의 방정식(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.45, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.4,0) -- (5.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.4) -- (0,4.4) node[left=-1pt, font=\small] {$y$};
+  \fill[orange!65] (3,3) -- (-1,2) -- (2,-1) -- cycle;
+  \fill[yellow!35!green!22] (3,3) -- (2,-1) -- (4,-3) -- cycle;
+  \draw[line width=0.6pt] (3,3) -- (-1,2) -- (4,-3) -- cycle;
+  \draw[line width=0.6pt] (3,3) -- (2,-1);
+  \draw[dotted, line width=0.6pt] (0,3) -- (3,3);
+  \draw[dotted, line width=0.6pt] (-1,2) -- (-1,0);
+  \draw[dotted, line width=0.6pt] (0,-3) -- (4,-3);
+  \draw[dotted, line width=0.6pt] (4,0) -- (4,-3);
+  \draw[dotted, line width=0.6pt, green!45!black] (3,3) -- (3,0);
+  \node[above right=-2pt, font=\small] at (3,3) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (-1,2) {$\mathrm{B}$};
+  \node[below right=-2pt, font=\small] at (4,-3) {$\mathrm{C}$};
+  \node[below left=-1pt, font=\small] at (2,-1) {$\mathrm{D}$};
+  \node[left=1pt, font=\small] at (0,3) {$3$};
+  \node[right=1pt, font=\small] at (0,2) {$2$};
+  \node[left=1pt, font=\small] at (0,-3) {$-3$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[above=1pt, font=\small] at (4,0) {$4$};
+\end{tikzpicture}

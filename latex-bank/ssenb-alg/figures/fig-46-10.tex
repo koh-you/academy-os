@@ -1,0 +1,12 @@
+% 46-10(46쪽) — $y=\log_a bx$ 의 그래프(원문 「오른쪽 그림」). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문에 있는 것만 — $1$(점선이 닿는 자리) · $\pt{O}$ · $x$ · $y$ · 곡선 이름 $y=\log_a bx$.
+% 원문 개형(감소하는 곡선 · $x$절편이 $1$ 보다 왼쪽 · $x=1$ 에서 음수)만 옮겼다. 답은 그림에서 읽히지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.92cm, y=0.40cm, >=stealth]
+  \draw[->, line width=0.7pt] (-0.5,0) -- (3.45,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, line width=0.7pt] (0,-2.9) -- (0,3.0) node[left=1pt, font=\small] {$y$};
+  \draw[densely dashed, line width=0.35pt] (1,0) -- (1,-1);
+  \draw[domain=0.09:3.3, samples=120, smooth] plot (\x, {-1-ln(\x)/0.693147});
+  \node[above=0pt, font=\small] at (1,0.06) {$1$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.62,2.45) {$y=\log_a bx$};
+\end{tikzpicture}

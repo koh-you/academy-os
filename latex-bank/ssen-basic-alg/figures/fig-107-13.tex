@@ -1,0 +1,20 @@
+% 107-13(107쪽) — 107쪽 13번 힌트 옆 그림 · 원점 O 를 중심으로 하는 원 위의 점 P$(3,\,4)$ 와 동경 OP 가 나타내는 각 $\theta$.
+% 점 P 에서 두 축에 내린 수선(점선)과 직각 표시, x축 쪽 라벨 3 · y축 쪽 라벨 4. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 라벨(P · 3 · 4 · $\theta$ · O · x · y)만 두고 반지름 길이 5 나 삼각함수 값은 적지 않는다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[line width=0.55pt, x=0.21cm, y=0.21cm]
+  \draw[->, >=stealth, line width=0.5pt] (-7.6,0) -- (9.1,0) node[below=1pt, font=\footnotesize] {$x$};
+  \draw[->, >=stealth, line width=0.5pt] (0,-7.6) -- (0,8.3) node[left=1pt, font=\footnotesize] {$y$};
+  \draw (0,0) circle (5);
+  \draw[->, >=stealth] (0,0) -- (7.2,9.6);
+  \fill (3,4) circle (2.2pt);
+  \draw[densely dotted, line width=0.4pt] (0,4) -- (3,4);
+  \draw[densely dotted, line width=0.4pt] (3,0) -- (3,4);
+  \draw[line width=0.4pt] (0.6,4) -- (0.6,3.4) -- (0,3.4);
+  \draw[line width=0.4pt] (2.4,0) -- (2.4,0.6) -- (3,0.6);
+  \draw[->, >=stealth, line width=0.4pt] (2.1,0) arc[start angle=0, end angle=53.13, radius=2.1];
+  \node[above left=-1.5pt and -2pt, font=\footnotesize] at (3,4) {$\pt{P}$};
+  \node[anchor=east, font=\footnotesize] at (-0.35,4) {$4$};
+  \node[below=0pt, font=\footnotesize] at (3,-0.3) {$3$};
+  \node[below left=-2.5pt and -2.5pt, font=\footnotesize] at (0,0) {$\pt{O}$};
+  \node[font=\footnotesize] at (2.5,1.35) {$\theta$};
+\end{tikzpicture}

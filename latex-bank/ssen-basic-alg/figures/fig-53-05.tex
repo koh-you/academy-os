@@ -1,0 +1,15 @@
+% 53-05(53쪽) — $y=5^{x}$ 의 그래프 · $x=a$ 에서의 높이 $p$, $x=b$ 에서의 높이 $q$ 안내 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 $q$·$p$·$a$·$b$·$y=5^{x}$ 만 · 눈금·수치는 만들지 않는다 — 답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[line width=0.6pt, x=0.72cm, y=0.80cm]
+  \draw[->, >=stealth, line width=0.7pt] (-2.45,0) -- (2.25,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.62) -- (0,3.62) node[left=1pt] {$y$};
+  \draw[domain=-2.3:1.7, samples=100, smooth] plot (\x, {0.1218*exp(1.884*\x)});
+  \draw[densely dotted, line width=0.4pt] (0,1.55) -- (1.35,1.55) -- (1.35,0);
+  \draw[densely dotted, line width=0.4pt] (0,0.55) -- (0.8,0.55) -- (0.8,0);
+  \node[left=1pt, font=\small] at (0,1.55) {$q$};
+  \node[left=1pt, font=\small] at (0,0.55) {$p$};
+  \node[below=1pt, font=\small] at (0.8,0) {$a$};
+  \node[below=1pt, font=\small] at (1.35,0) {$b$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (1.05,3.35) {$y=5^{x}$};
+\end{tikzpicture}

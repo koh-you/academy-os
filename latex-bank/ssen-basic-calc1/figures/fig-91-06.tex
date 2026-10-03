@@ -1,0 +1,11 @@
+% 91-06(91쪽) — $f(x)=2x^3+ax^2+bx+c$ 의 도함수 $y=f'(x)$ 의 그래프($x=-1$, $x=2$ 에서 $x$축과 만나는 아래로 볼록한 포물선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 포물선 · 라벨 $-1$, O, 2, x, y, y=f'(x). 꼭짓점의 좌표·눈금은 원문에 없으므로 적지 않는다.
+\begin{tikzpicture}[x=0.6cm, y=0.6cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2,0) -- (2.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.6) -- (0,2.85) node[left=1pt, font=\small] {$y$};
+  \draw[domain=-1.56:2.56, samples=90, smooth] plot (\x, {(\x+1)*(\x-2)});
+  \node[below left=-1pt and -5pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=-1pt and -4pt, font=\small] at (2,0) {$2$};
+  \node[anchor=west, font=\small] at (0.5,2.35) {$y=f'(x)$};
+\end{tikzpicture}

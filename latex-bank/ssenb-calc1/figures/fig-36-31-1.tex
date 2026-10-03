@@ -1,0 +1,13 @@
+% 36-31 ①(36쪽) — 보기 그래프: 증가하는 직선인데 x=a 에서 빈 점(끊김). 보기 자체가 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y=f(x), O, a, x, y 만(보기 다섯 개를 나란히 두려고 작은 글자로).
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.3,-1.6) rectangle (3.1,2.7);
+  \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.85,0) node[below=1pt, font=\scriptsize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.15) -- (0,2.35) node[left=1pt, font=\scriptsize] {$y$};
+  \draw[line width=0.6pt] (-2.0,-0.385) -- (2.7,2.2);
+  \draw[densely dotted, line width=0.4pt] (0.9,0) -- (0.9,1.215);
+  \draw[fill=white] (0.9,1.215) circle (1.8pt);
+  \node[anchor=south, font=\scriptsize] at (1.35,2.05) {$y=f(x)$};
+  \node[below left=-2pt and -2pt, font=\scriptsize] at (0,0) {$\pt{O}$};
+  \node[below=1pt, font=\scriptsize] at (0.9,0) {$a$};
+\end{tikzpicture}

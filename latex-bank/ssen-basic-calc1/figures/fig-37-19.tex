@@ -1,0 +1,24 @@
+% 37-19(37쪽) — 19번 풀이 힌트의 그림 · $y=x^2+1$ 의 그래프(구간 $[-1,2]$ 만 실선, 밖은 점선 · 양 끝 채운 점 · 빈 네모 다섯 개). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만 옮긴다: 빈 네모(값은 학생이 채운다) · 점선 · 지시선 · 라벨 O, x, y, y=f(x). 답이 그림에서 읽히지 않게 네모는 비워 둔다.
+\begin{tikzpicture}[x=0.42cm, y=0.42cm, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.5,0) -- (3.9,0) node[below=2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,7.7) node[left=1pt, font=\small] {$y$};
+  \node[below right=-2pt and 1pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[densely dashed, line width=0.4pt] (-0.25,5) -- (2,5);
+  \draw[densely dashed, line width=0.4pt] (2,5) -- (2,-0.2);
+  \draw[densely dashed, line width=0.4pt] (-1,2) -- (-1,-0.2);
+  \draw[densely dashed, line width=0.4pt] (-1,2) -- (0.25,2);
+  \draw[dotted, line width=0.9pt] plot[domain=-2.43:-1, samples=40, smooth] (\x, {\x*\x+1});
+  \draw[dotted, line width=0.9pt] plot[domain=2:2.44, samples=20, smooth] (\x, {\x*\x+1});
+  \draw[line width=0.7pt] plot[domain=-1:2, samples=60, smooth] (\x, {\x*\x+1});
+  \fill (-1,2) circle (2.2pt);
+  \fill (2,5) circle (2.2pt);
+  \node[draw, line width=0.4pt, inner sep=0pt, minimum width=0.48cm, minimum height=0.50cm] at (-0.8,5.05) {};
+  \node[draw, line width=0.4pt, inner sep=0pt, minimum width=0.48cm, minimum height=0.50cm] at (2.95,3.0) {};
+  \node[draw, line width=0.4pt, inner sep=0pt, minimum width=0.48cm, minimum height=0.50cm] at (-2.6,0.95) {};
+  \node[draw, line width=0.4pt, inner sep=0pt, minimum width=0.48cm, minimum height=0.50cm] at (-1,-0.78) {};
+  \node[draw, line width=0.4pt, inner sep=0pt, minimum width=0.48cm, minimum height=0.50cm] at (2,-0.78) {};
+  \draw[->, >=stealth, line width=0.3pt] (2.38,3.25) .. controls (1.5,2.55) and (0.9,1.95) .. (0.3,2.05);
+  \draw[line width=0.3pt] (-1.95,0.88) .. controls (-1.4,0.28) and (-0.6,0.28) .. (-0.02,1.0);
+  \node[font=\small] at (2.2,7.45) {$y=f(x)$};
+\end{tikzpicture}

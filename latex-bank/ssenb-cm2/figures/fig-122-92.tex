@@ -1,0 +1,34 @@
+% 122-92(122쪽) — 함수 y=f(x)(가파른 S자)와 그 역함수 y=f^{-1}(x)(완만한 S자)의 그래프. 직선 y=x 는 원문에도 없다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문과 같은 점선 짜임: x=c 에서 올린 세로 점선이 두 곡선을 만나고
+% 그 높이 r · s 로 가로 점선이 y축까지, 원점 부근에는 (a,p)·(b,q) 두 모퉁이 점선이 있다.
+% 라벨은 원문에 있는 p·q·r·s(y축)·a·b·c(x축)·O·x·y·y=f(x)·y=f^{-1}(x) 뿐이고 눈금 수치는 원문에도 없다.
+\begin{tikzpicture}[scale=0.34, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (7.8,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,7.9) node[left=1pt, font=\small] {$y$};
+  % 점선
+  \draw[densely dotted, line width=0.4pt] (0,5.12) -- (4.21,5.12);
+  \draw[densely dotted, line width=0.4pt] (0,3.06) -- (4.21,3.06);
+  \draw[densely dotted, line width=0.4pt] (4.21,0) -- (4.21,5.12);
+  \draw[densely dotted, line width=0.4pt] (0,0.98) -- (0.98,0.98) -- (0.98,0);
+  \draw[densely dotted, line width=0.4pt] (0,1.45) -- (1.45,1.45) -- (1.45,0);
+  % y=f(x) : 가파른 곡선
+  \draw[line width=0.6pt, smooth] plot coordinates
+    {(0.02,-1.55) (0.98,0) (1.45,1.45) (2.5,1.95) (3.3,2.4) (4.21,3.06) (5.12,4.21) (5.7,5.75) (6.05,7.1)};
+  % y=f^{-1}(x) : 완만한 곡선
+  \draw[line width=0.6pt, smooth] plot coordinates
+    {(-1.55,0.02) (0,0.98) (1.45,1.45) (1.95,2.5) (2.4,3.3) (3.06,4.21) (4.21,5.12) (5.75,5.7) (7.1,6.05)};
+  \node[font=\small] at (3.9,7.3) {$y=f(x)$};
+  \node[font=\small] at (7.0,4.3) {$y=f^{-1}(x)$};
+  \draw[->, >=stealth, line width=0.4pt] (6.4,4.8) -- (6.15,5.75);
+  % 축 라벨
+  \node[left=1pt, font=\small] at (0,5.12) {$s$};
+  \node[left=1pt, font=\small] at (0,3.06) {$r$};
+  \node[font=\small] at (0.42,1.95) {$q$};
+  \node[font=\small] at (-1.25,0.98) {$p$};
+  \draw[->, >=stealth, line width=0.4pt] (-0.95,0.98) -- (-0.15,0.98);
+  \node[below=1pt, font=\small] at (1.05,0) {$a$};
+  \node[font=\small] at (2.45,-0.62) {$b$};
+  \draw[->, >=stealth, line width=0.4pt] (2.15,-0.5) -- (1.6,-0.14);
+  \node[below=1pt, font=\small] at (4.21,0) {$c$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

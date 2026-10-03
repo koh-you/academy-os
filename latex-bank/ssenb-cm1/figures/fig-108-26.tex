@@ -1,0 +1,19 @@
+% 108-26(108쪽) — 큰 직사각형 안에 작은 직사각형을 넣고 네 꼭짓점을 이어 만든 6개의 영역 A, B, C, D, E, F. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A~F 만. 가운데 직사각형은 세로선으로 A(왼쪽)·B(오른쪽)로 나뉜다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \def\ox{5.4}\def\oy{3.18}
+  \def\ix{1.52}\def\jx{3.85}\def\iy{0.95}\def\jy{2.20}
+  \draw[line width=0.7pt] (0,0) rectangle (\ox,\oy);
+  \draw (0,\oy) -- (\ix,\jy);
+  \draw (\ox,\oy) -- (\jx,\jy);
+  \draw (0,0) -- (\ix,\iy);
+  \draw (\ox,0) -- (\jx,\iy);
+  \draw (\ix,\iy) rectangle (\jx,\jy);
+  \draw (2.95,\iy) -- (2.95,\jy);
+  \node[font=\small] at (2.70,2.66) {$\mathrm{C}$};
+  \node[font=\small] at (0.74,1.58) {$\mathrm{D}$};
+  \node[font=\small] at (2.70,0.49) {$\mathrm{E}$};
+  \node[font=\small] at (4.62,1.58) {$\mathrm{F}$};
+  \node[font=\small] at (2.23,1.58) {$\mathrm{A}$};
+  \node[font=\small] at (3.40,1.58) {$\mathrm{B}$};
+\end{tikzpicture}

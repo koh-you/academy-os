@@ -1,0 +1,38 @@
+% 9-14(9쪽) — 조각마다 끊긴 함수 y=f(x) 의 그래프(선분 4개 · 닫힌점·열린점). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 눈금 숫자 −2 −1 1 2 (x) · 2 1 −1 (y) · 라벨 O, x, y, y=f(x) · 좌표 안내 파선.
+% 한 칸은 원문처럼 가로·세로 거의 같게 두고(0.70cm), 글자 크기 대 한 칸 비율도 원문에 맞춘다
+%   — 칸을 작게 잡으면 x축 −1 과 y축 −1 라벨이 겹친다. 점 크기: 정점 2.2pt(프로토타입 규약).
+\begin{tikzpicture}[x=0.70cm, y=0.72cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (3.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,3.0) node[left=1pt] {$y$};
+  \node[below=2pt, font=\small] at (-0.25,0) {$\pt{O}$};
+  % 좌표 안내 파선(원문)
+  \draw[dashed, line width=0.35pt] (-2,0) -- (-2,1) -- (-1,1);
+  \draw[dashed, line width=0.35pt] (-1,0) -- (-1,2) -- (2,2);
+  \draw[dashed, line width=0.35pt] (2,0) -- (2,2);
+  \draw[dashed, line width=0.35pt] (0,1) -- (1,1) -- (1,-1) -- (0,-1);
+  % 그래프
+  \draw[line width=0.6pt] (-2,1) -- (-1,2);
+  \draw[line width=0.6pt] (-1,1) -- (0,1);
+  \draw[line width=0.6pt] (0,0) -- (1,-1);
+  \draw[line width=0.6pt] (1,1) -- (2,2);
+  % 닫힌점
+  \fill (-2,1) circle (2.2pt);
+  \fill (-1,1) circle (2.2pt);
+  \fill (0,1) circle (2.2pt);
+  \fill (1,-1) circle (2.2pt);
+  \fill (2,2) circle (2.2pt);
+  % 열린점
+  \draw[fill=white, line width=0.5pt] (-1,2) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (0,0) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,1) circle (2.2pt);
+  % 눈금 라벨(원문 자리 그대로: y 눈금 2·1 은 축 오른쪽, −1 은 축 왼쪽)
+  \node[below right=0pt and 2pt, font=\small] at (0,2) {$2$};
+  \node[below right=0pt and 3pt, font=\small] at (0,1) {$1$};
+  \node[left=2pt, font=\small] at (0,-1) {$-1$};
+  \node[below=2pt, font=\small] at (-2,0) {$-2$};
+  \node[below=2pt, font=\small] at (-1,0) {$-1$};
+  \node[below=2pt, font=\small] at (1.15,0) {$1$};
+  \node[below=2pt, font=\small] at (2,0) {$2$};
+  \node[right=1pt, font=\small] at (0.9,2.6) {$y=f(x)$};
+\end{tikzpicture}

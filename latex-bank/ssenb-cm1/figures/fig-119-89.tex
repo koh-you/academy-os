@@ -1,0 +1,15 @@
+% 119-89(119쪽) — 삼각형 ABC 에 꼭짓점 A 에서 변 BC 위의 세 점으로 그은 선분 3개와, 변 AB·AC 위의 세 점을 차례로 이은 선분 3개.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 A, B, C 만이고 점·길이 표시는 원문에 없다.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \coordinate (A) at (1.7,2.4);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (3.2,0);
+  \draw[line width=0.7pt] (A) -- (B) -- (C) -- cycle;
+  \foreach \x in {0.8,1.6,2.4} { \draw (A) -- (\x,0); }
+  \draw (0.425,0.6) -- (2.825,0.6);
+  \draw (0.85,1.2) -- (2.45,1.2);
+  \draw (1.275,1.8) -- (2.075,1.8);
+  \node[above, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-2pt and -1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right, font=\small] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

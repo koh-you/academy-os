@@ -1,0 +1,10 @@
+% 98-07(98쪽) — 시초선 반직선 OX 에서 동경 OP 까지 음의 방향으로 $-135^\circ$ 회전한 것을 나타낸 그림.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 O·P·X·$-135^\circ$ 만 · 답인 일반각은 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, >=stealth]
+  \coordinate (O) at (0,0);
+  \draw[->] (O) -- (2.4,0) node[right=1pt, font=\small] {$\pt{X}$};
+  \draw[->] (O) -- (-135:2.1) node[below left=-2pt and -2pt, font=\small] {$\pt{P}$};
+  \draw[->, line width=0.4pt] (0:0.42) arc (0:-135:0.42);
+  \node[font=\small] at (-58:0.85) {$-135^\circ$};
+  \node[above left=-2.5pt and -2pt, font=\small] at (O) {$\pt{O}$};
+\end{tikzpicture}

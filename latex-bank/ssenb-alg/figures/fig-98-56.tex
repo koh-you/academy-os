@@ -1,0 +1,26 @@
+% 98-56(98쪽) — 사각형 ABCD($\seg{AB}=2\sqrt{3}$ · $\seg{BC}=4$ · $\seg{CD}=2$ · $B=30^\circ$ · $D=45^\circ$). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 것만: 꼭짓점 A·B·C·D, 길이 $2\sqrt{3}$·4·2, 각 $30^\circ$·$45^\circ$. 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=1cm, y=1cm]
+  \coordinate (A) at (1.98,1.11);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.63,-0.09);
+  \coordinate (D) at (3.60,0.57);
+  \fill[black!6] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  % 길이 표시의 점선 호
+  \draw[densely dashed, line width=0.35pt] (B) to[bend left=14] (A);
+  \draw[densely dashed, line width=0.35pt] (B) to[bend right=14] (C);
+  \draw[densely dashed, line width=0.35pt] (C) to[bend right=14] (D);
+  % 각 표시
+  \draw[line width=0.45pt] (-2:0.55) arc (-2:29.3:0.55);
+  \draw[line width=0.45pt] ($(D)+(161.6:0.50)$) arc (161.6:214.2:0.50);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.74,0.93) {$2\sqrt{3}$};
+  \node[font=\small] at (1.31,-0.44) {$4$};
+  \node[font=\small, fill=white, inner sep=1pt] at (3.35,-0.06) {$2$};
+  \node[font=\small] at (0.80,0.20) {$30^\circ$};
+  \node[font=\small] at (2.85,0.47) {$45^\circ$};
+  \node[font=\small, anchor=south] at (1.96,1.18) {$\pt{A}$};
+  \node[font=\small, anchor=east] at (-0.09,0.00) {$\pt{B}$};
+  \node[font=\small, anchor=north] at (2.63,-0.18) {$\pt{C}$};
+  \node[font=\small, anchor=west] at (3.68,0.59) {$\pt{D}$};
+\end{tikzpicture}

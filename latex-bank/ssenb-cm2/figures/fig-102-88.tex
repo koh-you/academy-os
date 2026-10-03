@@ -1,0 +1,14 @@
+% 102-88(102쪽) — 반지름의 길이가 6인 반원 O 와 거기에 내접하는 직사각형(밑변이 지름 위에 있는 색칠된 직사각형).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 O 와 반지름 6 만 둔다.
+% 직사각형은 원문처럼 임의의 크기로 그리고 넓이가 최대인 모양(답)으로 그리지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \fill[cyan!25] (-4.8,0) rectangle (4.8,3.6);
+  \draw[line width=0.6pt] (6,0) arc (0:180:6);
+  \draw[line width=0.6pt] (-6,0) -- (6,0);
+  \draw[line width=0.6pt] (-4.8,0) rectangle (4.8,3.6);
+  \fill (0,0) circle (4pt);
+  \node[below=3pt, font=\small] at (0,0) {$O$};
+  \draw[dashed, line width=0.4pt] (1.1,-0.9) -- (2.5,-0.9);
+  \draw[dashed, line width=0.4pt] (3.9,-0.9) -- (5.9,-0.9);
+  \node[font=\small] at (3.2,-0.9) {$6$};
+\end{tikzpicture}

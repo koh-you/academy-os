@@ -1,0 +1,16 @@
+{ "range": "20-09~25-33", "checked": 25, "ok": 22,
+  "findings": [
+    { "id": "21-11", "severity": "ok", "where": "layout", "note": "크롭 없음(유형 03 대표) — 쪽 이미지 p027 로 대조해 본문·보기·답지 일치. 그림도 원문대로: x<-1 은 y=2(빈 점 (-1,2)) · f(-1)=1(찬 점) · -1<x<1 은 원점에 닿는 곡선 · (1,1) 빈 점 · (1,2) 찬 점에서 내려가는 직선" },
+    { "id": "21-12", "severity": "ok", "where": "figure", "note": "본문 그림과 보기 ㄱㄴㄷ 그래프를 p027 로 대조해 일치(찬 점 (-2,1)·(0,1)·(2,-2), 빈 점 (0,0)·(0,-1), ㄷ 의 사다리꼴과 -1·1 라벨까지 동일). 전사자가 적어 둔 바깥쪽 직선 기울기 추정(±1)도 원문과 어긋나지 않음" },
+    { "id": "21-13", "severity": "ok", "where": "figure", "note": "두 그래프 모두 꺾이는 점·빈 점·찬 점이 원문과 같음(f 는 (0,0)-(1,1)-(3,1)-(4,2), g 는 (0,1)-(1,0)-(2,1) 찬 점과 (2,2) 빈 점에서 (4,0))" },
+    { "id": "22-15", "severity": "ok", "where": "layout", "note": "크롭 없음(유형 04 대표) — 쪽 이미지 p028 로 대조해 일치" },
+    { "id": "22-18", "severity": "yellow", "where": "body", "note": "원문은 cases 식이 본문과 분리된 가운데 줄인데 조판본은 본문에 inline 으로 붙어, 첫 줄이 「함 수 … 에 대 하 여 함 수」처럼 자간이 크게 벌어진다", "fix": "items['22-18'].body 의 f(x) cases 식을 24-28·24-29 처럼 par smallskip centerline{...} par smallskip noindent 로 감싸 별도 줄로 빼기" },
+    { "id": "22-19", "severity": "yellow", "where": "body", "note": "같은 inline cases 문제 — 원문은 g(x)= 식이 별도 가운데 줄인데 본문에 붙어 첫 줄 자간이 벌어진다", "fix": "items['22-19'].body 의 g(x) cases 식을 par smallskip centerline{...} par smallskip noindent 로 감싸기" },
+    { "id": "23-21", "severity": "ok", "where": "layout", "note": "크롭 없음(유형 05 대표) — 쪽 이미지 p029 로 대조해 일치" },
+    { "id": "23-24", "severity": "ok", "where": "layout", "note": "크롭이 아래 유형 06 상자까지 물고 내려왔으나 24번 본문만 전사됨 — 보기 ㄱㄴㄷ·(단, a≠0)·답지 모두 일치" },
+    { "id": "23-25", "severity": "yellow", "where": "body", "note": "크롭 없음(유형 06 대표)이고 p029 대조 결과 내용은 일치하나, inline cases 탓에 첫 두 줄 자간이 심하게 벌어진다", "fix": "items['23-25'].body 의 g(x) cases 식을 par smallskip centerline{...} par smallskip noindent 로 감싸기" },
+    { "id": "24-28", "severity": "ok", "where": "layout", "note": "크롭의 연계번호가 「쎈019」로 잘려 있으나 쪽 이미지에서 0195 확인. g(x)=x^2+ax+b 의 지수도 2 로 확인" },
+    { "id": "24-29", "severity": "ok", "where": "layout", "note": "크롭 없음(유형 07 대표) — 쪽 이미지 p030 로 대조해 일치. (x-1)f(x)=x^3+ax+b 의 지수 3 확인" },
+    { "id": "25-32", "severity": "ok", "where": "layout", "note": "크롭이 아래 유형 08 상자와 33번까지 물고 내려왔으나 32번 본문만 전사됨 — (x+2)f(x)=x^5+2x^4-x-2+3g(x) 확인" },
+    { "id": "25-33", "severity": "ok", "where": "layout", "note": "크롭 없음(유형 08 대표) — 쪽 이미지 p031 로 대조해 일치. 「옳지 않은」 부정어 밑줄과 세로 5지선다 유지" }
+  ] }
