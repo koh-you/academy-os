@@ -181,4 +181,84 @@ assert.ok(
   "변형이 없으면 숫자변형 칸을 보내지 않는다"
 );
 
+// ── 자체 교재 초안 ───────────────────────────────────────────────────────────
+// 초안은 몇 번이고 고쳐진다. 그래서 저장은 **통째 저장**이고, 저장 뒤에는 서버를 다시 읽어 돌려준다.
+const draftTables = {
+  problem_bank_collections: [],
+  problem_bank_collection_sections: [],
+  problem_bank_collection_items: []
+};
+const draftStore = createProblemBankStore({
+  isSupabaseConfigured: () => true,
+  listRows: async (table, query) => draftTables[table].filter((row) => matches(row, parseQuery(query))),
+  upsertRows: async (table, rows, options) => {
+    for (const row of rows) {
+      const key = options.onConflict;
+      const index = draftTables[table].findIndex((existing) => existing[key] === row[key]);
+      if (index >= 0) draftTables[table][index] = { ...draftTables[table][index], ...row };
+      else draftTables[table].push({ ...row });
+    }
+    return rows;
+  },
+  deleteRows: async (table, query) => {
+    const before = draftTables[table].length;
+    draftTables[table] = draftTables[table].filter((row) => !matches(row, parseQuery(query)));
+    return { deleted: before - draftTables[table].length };
+  },
+  createSignedUrls: async () => [],
+  uploadObject: async () => {},
+  removeObjects: async () => {}
+});
+
+const saved = await draftStore.saveProblemBankCollection({
+  title: "내신대비 지수·로그",
+  folderPath: "고2 / 내신대비",
+  sections: [{ title: "1. 지수법칙" }, { title: "2. 로그의 성질" }],
+  items: [
+    { itemId: "pbk_abc123-0001", sectionIndex: 0, includeVariants: true },
+    { itemId: "pbk_abc123-0002", sectionIndex: 0 },
+    { itemId: "pbk_abc123-0003", sectionIndex: 1 },
+    // 같은 문항을 두 번 담으면 한 번만 들어간다 — 번호만 다른 같은 문제가 두 번 나오면 학생이 먼저 눈치챈다.
+    { itemId: "pbk_abc123-0001", sectionIndex: 1 },
+    // 없는 구획을 가리키는 문항은 버린다(화면이 구획을 지운 뒤 남은 참조).
+    { itemId: "pbk_abc123-0004", sectionIndex: 9 }
+  ]
+});
+assert.equal(saved.sections.length, 2);
+assert.deepEqual(saved.items.map((entry) => entry.itemId), ["pbk_abc123-0001", "pbk_abc123-0002", "pbk_abc123-0003"]);
+assert.equal(saved.items[0].includeVariants, true);
+assert.equal(saved.collection.status, "draft");
+
+// 다시 저장하면 **통째로** 갈린다 — 구획을 지웠는데 옛 문항이 남으면 안 된다.
+const collectionId = saved.collection.collectionId;
+const resaved = await draftStore.saveProblemBankCollection({
+  collectionId,
+  title: "내신대비 지수·로그",
+  sections: [{ title: "1. 지수법칙" }],
+  items: [{ itemId: "pbk_abc123-0002", sectionIndex: 0 }]
+});
+assert.equal(resaved.sections.length, 1, "구획을 지우면 저장 뒤에도 하나다");
+assert.deepEqual(resaved.items.map((entry) => entry.itemId), ["pbk_abc123-0002"], "옛 문항이 남지 않는다");
+assert.equal(draftTables.problem_bank_collection_items.length, 1, "지운 문항 행이 실제로 사라진다");
+
+// 이름이 비면 거절한다. 교재 목록에서 못 찾는 초안이 쌓이는 것을 막는다.
+await assert.rejects(draftStore.saveProblemBankCollection({ title: "   ", sections: [], items: [] }), /교재 이름/);
+// 상한은 조판 시간에서 온다.
+await assert.rejects(
+  draftStore.saveProblemBankCollection({
+    title: "너무 큰 교재",
+    sections: [{ title: "x" }],
+    items: Array.from({ length: 301 }, (_, index) => ({ itemId: `pbk_abc123-${index}`, sectionIndex: 0 }))
+  }),
+  /300문항/
+);
+
+const list = await draftStore.listProblemBankCollections();
+assert.equal(list.length, 1);
+assert.equal(list[0].itemCount, 1, "목록은 문항 수만 센다");
+
+await draftStore.deleteProblemBankCollection(collectionId);
+assert.equal(draftTables.problem_bank_collections.length, 0);
+await assert.rejects(draftStore.getProblemBankCollection(collectionId), /찾지 못했습니다/);
+
 console.log("problem bank store fixtures passed");
