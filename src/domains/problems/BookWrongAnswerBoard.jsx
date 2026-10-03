@@ -566,7 +566,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                             : band.label;
                           return (
                             <button
-                              aria-label={`${itemDisplayNumber(item.numberLabel)}번${item.printedPage ? ` · ${item.printedPage}쪽` : ""} · ${stateLabel}`}
+                              aria-label={`${item.numberLabel}번 · ${stateLabel}`}
                               aria-pressed={isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)}
                               className={classes}
                               key={item.itemId}
