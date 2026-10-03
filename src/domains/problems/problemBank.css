@@ -122,6 +122,70 @@
 .problemBankPill.danger { background: #ffedd5; color: #c2410c; }
 .problemBankUnitSelect { background: transparent; border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 11.5px; padding: 2px 9px; }
 
+/* 단원 바로가기. 단원이 길어 화면 밖으로 밀리는 것을 한 줄로 건너뛴다. 스크롤해도 따라온다. */
+.problemBankUnitJump {
+  align-items: center;
+  background: var(--academy-surface, #fff);
+  border-bottom: 1px solid var(--academy-border, #e2e6ec);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 6px 0 8px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.problemBankUnitChip,
+.problemBankUnitJumpAll {
+  background: var(--academy-surface-muted, #f3f4f6);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+.problemBankUnitJumpAll { background: transparent; border-color: var(--academy-border, #e2e6ec); }
+.problemBankUnitChip small { color: var(--academy-text-muted, #6b7280); margin-left: 5px; }
+.problemBankUnitChip.picked { background: #e0e7ff; border-color: #c7d2fe; }
+.problemBankUnitChip.picked small { color: #4338ca; }
+
+/* 단원 제목 자체가 접기 단추다. */
+.problemBankUnitToggle {
+  align-items: flex-start;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  gap: 6px;
+  padding: 0;
+  text-align: left;
+}
+.problemBankUnitToggle i { color: var(--academy-text-muted, #6b7280); font-size: 11px; font-style: normal; line-height: 1.6; }
+.problemBankUnitToggle strong { display: block; font-size: 14px; }
+.problemBankUnitToggle small { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; }
+
+/* 고르기·풀기를 한 단추에. 네모 기호가 지금 상태(없음 ☐ · 일부 ▣ · 전부 ☑)를 보여 준다. */
+.problemBankPickToggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 11.5px;
+  gap: 5px;
+  padding: 2px 9px;
+}
+.problemBankPickToggle i { font-style: normal; }
+.problemBankPickToggle.pick-some,
+.problemBankPickToggle.pick-all { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
+.problemBankPickToggle:disabled { cursor: default; opacity: 0.5; }
+.problemBankPickToggle.compact { border: 0; font-size: 12.5px; font-weight: 600; padding: 0; }
+.problemBankPickToggle.compact.pick-some,
+.problemBankPickToggle.compact.pick-all { background: transparent; }
+.problemBankTypeSectionName { text-align: left; }
+
 /* 단원 안의 교재 구획(개념 01 · 유형 001 … · 실전). 머리줄은 번호 칸보다 눈에 덜 띄게 둬서
    구획은 읽히되 번호 훑기를 방해하지 않게 한다. */
 .problemBankTypeSection + .problemBankTypeSection { margin-top: 12px; }
@@ -288,6 +352,42 @@
 .problemBankPrintToolbarActions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .problemBankPrintToolbar .softButton { background: #fff; border: 1px solid var(--academy-border, #e2e6ec); }
 
+/* 「무엇을 넣을지」와 「출처를 어디에 둘지」는 설정 사이에 흩어 두지 않고 테두리로 묶는다(2026-10-03). */
+.problemBankPrintOptions {
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 10px;
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 6px 12px 10px;
+}
+.problemBankPrintOptions legend { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; padding: 0 4px; }
+.problemBankPrintOptions label { align-items: center; display: inline-flex; font-size: 13px; gap: 6px; }
+.problemBankPrintOptions label small { color: var(--academy-text-muted, #6b7280); font-size: 11px; }
+.problemBankPrintOptions input:disabled + *,
+.problemBankPrintOptions label:has(input:disabled) { color: var(--academy-text-muted, #9ca3af); }
+
+/* 출처 위치는 고른 것이 한눈에 보이게 칸으로 둔다. */
+.problemBankSourcePlacement label {
+  align-items: flex-start;
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1 1 150px;
+  padding: 7px 10px;
+}
+.problemBankSourcePlacement label.picked { background: #eef2ff; border-color: #c7d2fe; }
+.problemBankSourcePlacement label span { display: flex; flex-direction: column; }
+.problemBankSourcePlacement label small { color: var(--academy-text-muted, #6b7280); }
+
+/* 뒤에 모은 출처 목록. */
+.problemBankPrintSourceList { break-before: page; margin-top: 8mm; }
+.problemBankPrintSourceList ol { columns: 2; font-size: 8.5pt; margin: 0; padding-left: 5mm; }
+.problemBankPrintSourceList li { break-inside: avoid; margin-bottom: 1mm; }
+.problemBankPrintSourceList b { margin-right: 3px; }
+
 /* 종이: A4 세로. 화면에서도 종이 크기로 보여 인쇄와 같게 한다. */
 .problemBankPptxMessage { flex-basis: 100%; font-size: 12px; }
 .problemBankPptxMessage.stage-error { color: #b91c1c; }
@@ -339,7 +439,17 @@
 .problemBankPrintSheet.cols-1 .problemBankPrintColumns { grid-template-columns: minmax(0, 1fr); }
 .problemBankPrintSheet.cols-1 .problemBankPrintColumns > .problemBankPrintItem.col-left { border-right: 0; margin-right: 0; padding-right: 0; }
 .problemBankPrintItem { break-inside: avoid; display: block; margin-bottom: 6mm; min-width: 0; padding-bottom: 2mm; }
-.problemBankPrintSource { color: #000; display: flex; flex-wrap: wrap; font-size: 7.5pt; gap: 8px; justify-content: space-between; }
+/* 출처·유형은 문항 오른쪽 위에 작게. 교재가 그렇게 찍고, 번호 왼쪽과 겹치지 않는다. */
+.problemBankPrintSource {
+  color: #000;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 7.5pt;
+  gap: 2px 8px;
+  justify-content: flex-end;
+  margin-bottom: 0.5mm;
+  text-align: right;
+}
 .problemBankPrintType { color: #000; }
 .problemBankPrintNumber { font-family: "Segoe UI", "Noto Sans KR", sans-serif; font-size: 14pt; font-weight: 700; letter-spacing: 0.02em; margin: 1mm 0 1.5mm; }
 .problemBankPrintItem img { display: block; margin-bottom: 1.5mm; max-width: 100%; }

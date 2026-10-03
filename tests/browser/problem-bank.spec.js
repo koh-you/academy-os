@@ -20,6 +20,11 @@ async function openStudentWrongTab(page) {
   return page.locator(".problemBankBoard");
 }
 
+/** 인쇄 미리보기의 「포함할 항목」 묶음. 「출처 위치」 라디오에도 「해설」로 시작하는 이름이 있어 범위를 좁힌다. */
+function includeOptions(page) {
+  return page.getByRole("group", { name: "포함할 항목" });
+}
+
 test("교재별 오답(반 전체): 학생 선택 없이 반 오답률로 보고, 많이 틀린 문항을 골라 인쇄·PPT 로 연다", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
@@ -144,10 +149,10 @@ test("학생별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조�
   await page.getByLabel("단 구성").selectOption("1");
   await expect(sheet).toHaveClass(/cols-1/);
   // 빠른정답·해설은 등록된 문항(0002·0004 모두 1~10번 안) 수만큼 켜지고, 그룹 문항(0004)도 자기 번호로 나온다.
-  await page.getByLabel(/빠른정답/).check();
+  await includeOptions(page).getByLabel(/^빠른정답/).check();
   await expect(sheet.locator(".problemBankPrintAnswerGrid > div")).toHaveCount(2);
   await expect(sheet.locator(".problemBankPrintAnswerGrid img[alt='0004번 정답']")).toBeVisible();
-  await page.getByLabel(/해설 \(/).check();
+  await includeOptions(page).getByLabel(/^해설/).check();
   await expect(sheet.locator(".problemBankPrintSolutions .problemBankPrintItem")).toHaveCount(2);
   await expect(sheet.locator(".problemBankPrintSolutions img[alt='0002번 해설']")).toBeVisible();
   await sheet.locator(".problemBankPrintAnswers").screenshot({ path: "test-results/problem-bank-print-answers.png" });
@@ -204,10 +209,15 @@ test("시험지 제작: 유형으로 걸러 바구니에 담고 제목·배점·
   await expect(sheet.locator(".problemBankExamPoints input").last()).toHaveValue("12");
   await page.getByLabel("1번 배점").fill("20");
   await expect(sheet.locator(".problemBankExamScore")).toContainText("/ 107");
-  // 출처 표시를 끄면 출처 줄이 사라지고, 순서를 섞어도 문항 수는 같다.
+  // 출처는 기본으로 꺼져 있고(시험지), 켜면 문항마다 오른쪽 위에 붙는다. 순서를 섞어도 문항 수는 같다.
   await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(0);
-  await page.getByLabel("출처 표시").check();
+  await includeOptions(page).getByLabel(/^출처/).check();
   await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(8);
+  // 「뒤에 따로 모으기」를 고르면 문항 옆에서 빠지고 마지막에 번호순 목록으로 모인다 —
+  // 시험 중에 교재 이름이 단서가 되는 것을 피한다.
+  await page.getByLabel(/뒤에 따로 모으기/).check();
+  await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(0);
+  await expect(sheet.locator(".problemBankPrintSourceList li")).toHaveCount(8);
   await page.getByLabel("문항 순서").selectOption("shuffle");
   await expect(sheet.locator(".problemBankPrintItem")).toHaveCount(8);
   await page.getByRole("button", { name: "닫기" }).click();
