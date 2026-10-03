@@ -18,7 +18,7 @@ import {
   wakeProblemBankApi
 } from "./problemBankApi.js";
 import { prettifyMathLabel } from "./mathLabelText.js";
-import { buildFolderTree, countBooksInFolder, findFolderNode } from "./problemBankModel.js";
+import { buildFolderTree, countBooksInFolder, findFolderNode, splitBooksBySource } from "./problemBankModel.js";
 import "./problemBank.css";
 
 const imageBatchSize = 40;
@@ -159,7 +159,13 @@ export function ProblemBankCenter() {
   const folderInputRef = useRef(null);
   const answerFolderInputRef = useRef(null);
 
-  const folderTree = useMemo(() => buildFolderTree(books), [books]);
+  // 시중 교재(출판사 교재를 전사해 등록한 것)와 자체 교재(여기서 뽑아 짠 것)는 **고치는 법이 다르다** —
+  // 시중 교재는 패키지를 통째로 다시 등록해 고치고, 자체 교재는 초안을 고쳐 다시 제작해 고친다.
+  // 그래서 배지로 표시만 하지 않고 목록부터 가른다.
+  const [bookSource, setBookSource] = useState("market");
+  const bookGroups = useMemo(() => splitBooksBySource(books), [books]);
+  const visibleBooks = bookSource === "composed" ? bookGroups.composed : bookGroups.market;
+  const folderTree = useMemo(() => buildFolderTree(visibleBooks), [visibleBooks]);
   const folderNode = useMemo(() => findFolderNode(folderTree, folderPath), [folderTree, folderPath]);
 
   async function reloadBooks() {
@@ -486,8 +492,21 @@ export function ProblemBankCenter() {
 
         <div className="panel problemBankListPanel">
           <h2>등록된 교재</h2>
+          <div className="problemBankSourceTabs" role="group" aria-label="교재 구분">
+            {[["market", "시중 교재", bookGroups.market.length], ["composed", "자체 교재", bookGroups.composed.length]].map(([value, label, count]) => (
+              <button
+                aria-pressed={bookSource === value}
+                className={`problemBankUnitChip${bookSource === value ? " picked" : ""}`}
+                key={value}
+                onClick={() => { setBookSource(value); setFolderPath([]); }}
+                type="button"
+              >
+                {label}<small>{count}</small>
+              </button>
+            ))}
+          </div>
           <nav aria-label="교재 폴더 경로" className="problemBankBreadcrumb">
-            <button onClick={() => setFolderPath([])} type="button">전체 {books.length}</button>
+            <button onClick={() => setFolderPath([])} type="button">전체 {visibleBooks.length}</button>
             {folderPath.map((segment, index) => (
               <button key={`${segment}-${index}`} onClick={() => setFolderPath(folderPath.slice(0, index + 1))} type="button">
                 / {segment}

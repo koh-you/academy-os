@@ -252,6 +252,15 @@ test("교재관리: 교재 상세·검토 목록·누락 검사를 보고 교재
   await bookList.locator(".problemBankBookItem").first().click();
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
   // 교재 상세는 정보 표시(수정 폼 없음), 도구는 한 줄.
+  // 시중 교재와 자체 교재는 고치는 법이 달라 목록부터 갈린다. 가상 교재는 시중 교재 하나뿐이다.
+  const sourceTabs = page.getByRole("group", { name: "교재 구분" });
+  await expect(sourceTabs.getByRole("button", { name: /시중 교재/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(sourceTabs.getByRole("button", { name: /자체 교재/ })).toHaveAttribute("aria-pressed", "false");
+  await sourceTabs.getByRole("button", { name: /자체 교재/ }).click();
+  await expect(page.locator(".problemBankBreadcrumb button").first()).toContainText("전체 0");
+  await sourceTabs.getByRole("button", { name: /시중 교재/ }).click();
+  await expect(page.locator(".problemBankBreadcrumb button").first()).toContainText("전체 1");
+
   // 교재의 수는 교재에 실린 문항만 센다 — 우리가 덧붙인 숫자변형은 따로 적는다.
   await expect(page.locator(".problemBankInfo")).toContainText("20개 · 해설 10개 · 빠른정답 10개 · 숫자변형 1개");
   await expect(page.locator(".problemBankEditForm")).toHaveCount(0);

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { prettifyMathLabel } from "../src/domains/problems/mathLabelText.js";
 import {
   buildPrintEntriesFromRows,
+  splitBooksBySource,
   withNumberVariants,
   distributeExamPoints,
   flattenPrintItems,
@@ -139,3 +140,17 @@ assert.equal(variantEntries[2].sourceLine, "쎈B 대수 · 지수 · 10-19번 �
 assert.equal(variantEntries[3].sourceLine, "쎈B 대수 · 지수 · 10-20번");
 
 console.log("숫자변형 fixture 통과");
+
+// ── 시중 교재 / 자체 교재 ────────────────────────────────────────────────────
+// 배지로 표시만 하는 게 아니라 목록부터 가른다 — 고치는 법이 서로 다르다.
+const split = splitBooksBySource([
+  { bookId: "a", sourceKind: "pdf_scan" },
+  { bookId: "b", sourceKind: "composed" },
+  { bookId: "c", sourceKind: "pdf_text" },
+  { bookId: "d" }
+]);
+assert.deepEqual(split.market.map((book) => book.bookId), ["a", "c", "d"], "sourceKind 가 없으면 시중 교재로 본다");
+assert.deepEqual(split.composed.map((book) => book.bookId), ["b"]);
+assert.deepEqual(splitBooksBySource(null), { market: [], composed: [] });
+
+console.log("교재 구분 fixture 통과");
